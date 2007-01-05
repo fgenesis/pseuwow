@@ -6,7 +6,6 @@
 #include <sstream>
 #include "VarSet.h"
 #include "DefScript.h"
-#include "DefScriptFunctions.h"
 
 struct DefScriptXChgResult {
     std::string str;
