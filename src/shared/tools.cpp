@@ -177,8 +177,7 @@ std::string stringToUpper(std::string s)
 	return s;
 }
 
-template<class T>
-std::string toString(T num){
+std::string toString(uint64 num){
 	std::stringstream ss;
 	ss << num;
 	return ss.str();

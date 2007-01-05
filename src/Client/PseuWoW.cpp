@@ -112,16 +112,6 @@ bool PseuInstance::Init(void) {
 	return true;
 }
 
-void PseuInstance::SetConfDir(std::string path)
-{
-    _confdir=path;
-}
-
-void PseuInstance::SetScpDir(std::string path)
-{
-    _scpdir=path;
-}
-
 void PseuInstance::Run(void)
 {
     if(!_initialized)
