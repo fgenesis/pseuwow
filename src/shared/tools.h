@@ -23,8 +23,7 @@ void printchex(std::string,bool);
 // new functions
 std::string stringToUpper(std::string);
 std::string stringToLower(std::string);
-std::string toString(uint64 num);
-std::string toString(int64 num);
+std::string toString(uint64);
 std::string getDateString(void);
 
 #endif

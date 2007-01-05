@@ -47,7 +47,7 @@
 				OutputFile="$(OutDir)/$(InputName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="./dep/lib/release/"
+				AdditionalLibraryDirectories=""
 				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/Release/PseuWoW.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -108,7 +108,7 @@
 				OutputFile="$(OutDir)/$(InputName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="./deb/lib/"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/PseuWoW.pdb"
 				SubSystem="1"

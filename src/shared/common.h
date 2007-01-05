@@ -14,7 +14,6 @@
 #include <sstream>
 
 #include <SDL/SDL.h>
-//#include "../zthread/ZThread.h"
 #include "zthread/FastMutex.h"
 #include "zthread/LockedQueue.h"
 #include "zthread/Runnable.h"

@@ -53,9 +53,9 @@ class PseuInstance
     RealmSocket *GetRSession(void) { return _rsession; }
     PseuInstanceConf *GetConf(void) { return _conf; }
     DefScriptPackage *GetScripts(void) { return _scp; }
-    void SetConfDir(std::string);
-    void SetScpDir(std::string);
-	void SetSessionKey(BigNumber);
+    void SetConfDir(std::string dir) { _confdir = dir; }
+    void SetScpDir(std::string dir) { _scpdir = dir; }
+    void SetSessionKey(BigNumber key) { _sessionkey = key; }
     BigNumber GetSessionKey(void) { return _sessionkey; }
 
 	
