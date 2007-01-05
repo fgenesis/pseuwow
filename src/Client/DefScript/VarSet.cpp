@@ -87,16 +87,22 @@ bool VarSet::ReadVarsFromFile(std::string fn)
     while(!fh.eof())
     {
         c=fh.get();
-        if(c=='\n')
+        if(c=='\n' || fh.eof())
         {
+            if(line.empty())
+                continue;
+
             vn.clear();
             vv.clear();
             while(line.at(0)==' ' || line.at(0)=='\t')
                 line.erase(0,1);
-            while(line.at(line.length()-1)==' ' || line.at(line.length()-1)=='\t')
-                line.erase(line.length(),1);
+            //while(line.at(line.length()-1)==' ' || line.at(line.length()-1)=='\t')
+            //    line.erase(line.length(),1);
             if(line.empty() || (line.at(0)=='/' && line.at(0)=='/') )
+            {
+                line.clear();
                 continue;
+            }
             if(line.at(0)=='[' && line.at(line.length()-1)==']')
             {
                 prefix=line.substr(1,line.length()-2);
@@ -108,16 +114,19 @@ bool VarSet::ReadVarsFromFile(std::string fn)
                     {
                         upper=true;
                         lower=false;
+                        prefix.clear();
                     }
                     else if(prefix=="#normal")
                     {
                         upper=false;
                         lower=false;
+                        prefix.clear();
                     }
                     else if(prefix=="#lowercase")
                     {
                         lower=true;
                         upper=false;
+                        prefix.clear();
                     }
                     else
                     {
@@ -130,7 +139,7 @@ bool VarSet::ReadVarsFromFile(std::string fn)
                 unsigned int pos=line.find("=");
                 if(pos)
                 {
-                    std::string v=line.substr(0,pos-1);;
+                    std::string v=line.substr(0,pos);;
                     
                     if(upper)
                         v=toUpper(v);
@@ -140,6 +149,7 @@ bool VarSet::ReadVarsFromFile(std::string fn)
                     vn=prefix+v;
                     vv=line.substr(pos+1,line.length()-1);
                     Set(vn,vv);
+                    DEB(printf("DEBUG: Var import [%s] = %s\n",vn.c_str(),vv.c_str()););
                 }
                 // else invalid line, must have '='
             }
