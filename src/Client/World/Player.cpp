@@ -59,7 +59,7 @@ bool PlayerNameCache::SaveToFile(void){
         len=(*i)->_name.length();
         fh.write( (char*)&len,sizeof(uint8) );
         fh.write( (char*)(*i)->_name.c_str(),len );
-        DEB(printf( "PlayerNameCache << " I64FMT " -> %s\n", (*i)->_guid, (*i)->_name.c_str()););
+        DEBUG(printf( "PlayerNameCache << " I64FMT " -> %s\n", (*i)->_guid, (*i)->_name.c_str()););
     }
     fh.close();
 	printf("PlayerNameCache saved successfully.\n");
@@ -100,7 +100,7 @@ bool PlayerNameCache::ReadFromFile(void){
         cacheItem->_name=nameptr;
         AddInfo(cacheItem);
         printf("\rPlayerNameCache [ %u / %u ] items loaded",i+1,size);
-        DEB(printf( " >> " I64FMT " -> %s\n", cacheItem->_guid, nameptr););
+        DEBUG(printf( " >> " I64FMT " -> %s\n", cacheItem->_guid, nameptr););
     }
     printf("\n");
     delete nameptr;

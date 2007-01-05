@@ -149,7 +149,9 @@ bool VarSet::ReadVarsFromFile(std::string fn)
                     vn=prefix+v;
                     vv=line.substr(pos+1,line.length()-1);
                     Set(vn,vv);
-                    DEB(printf("DEBUG: Var import [%s] = %s\n",vn.c_str(),vv.c_str()););
+                    #ifdef _DEBUG
+                        printf("DEBUG: Var import [%s] = %s\n",vn.c_str(),vv.c_str());
+                    #endif
                 }
                 // else invalid line, must have '='
             }
