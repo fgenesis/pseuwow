@@ -127,7 +127,6 @@ void PseuInstance::Run(void)
     if(_rsession->IsValid())  // TODO: need better check for IsValid(), it must check also if it could connect
     {
         _sh.Add(_rsession);
-        _rsession->SendLogonChallenge();
         _sh.Select(1,0);
     }
 
