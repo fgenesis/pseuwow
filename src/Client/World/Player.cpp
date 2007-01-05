@@ -3,11 +3,9 @@
 #include "common.h"
 #include "PseuWoW.h"
 #include "Opcodes.h"
-#include "WorldPacketHandler.h"
 #include "SharedDefines.h"
 #include "Player.h"
 #include "NameTables.h"
-#include "CMSGConstructor.h"
 #include "DefScript/DefScript.h"
 
 bool PlayerNameCache::AddInfo(uint64 guid, std::string name){
