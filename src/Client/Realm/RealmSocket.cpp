@@ -84,7 +84,7 @@ RealmSocket::~RealmSocket()
 
 bool RealmSocket::IsValid(void)
 {
-    return _valid;
+    return _valid && Ready();
 }
 
 void RealmSocket::SetHost(std::string h)
@@ -112,7 +112,7 @@ void RealmSocket::Start(void)
 //    _socket.SetHost(_host);
 //    _socket.SetPort(_port);
 
-    Open(_rhost,_rport);
+    bool result=Open(_rhost,_rport);
     //...
     _valid=true;
 }
@@ -129,7 +129,7 @@ void RealmSocket::_HandleRealmList(void)
 {
     SRealmHeader hd;
     std::string realmAddr;
-    ibuf.Read((char*)&hd, sizeof(SRealmHeader)); // TODO: FIX THIS ITS NOT CORRECT!!!!!
+    ibuf.Read((char*)&hd, sizeof(SRealmHeader));
 	
 	
 	////DEBUG1(printf("Realms in List: %d\n",count););
@@ -179,6 +179,7 @@ void RealmSocket::_HandleRealmList(void)
 
 void RealmSocket::OnRead(void)
 {
+    printf("RealmSocket::OnRead() %u bytes\n",ibuf.GetLength());
     TcpSocket::OnRead();
     if(!ibuf.GetLength())
         return;
@@ -277,6 +278,11 @@ void RealmSocket::OnRead(void)
 
 void RealmSocket::SendLogonChallenge(void)
 {
+    if(!this->Ready())
+    {
+        printf("Error sending AUTH_LOGON_CHALLENGE, port is not ready!\n");
+        return;
+    }
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
     ByteBuffer packet;
     packet << (uint8)AUTH_LOGON_CHALLENGE;
@@ -293,7 +299,7 @@ void RealmSocket::SendLogonChallenge(void)
     packet << (uint8)acc.length(); // length of acc name without \0
     packet.append(acc.c_str(),acc.length()); // append accname, skip \0
 
-    this->SendBuf((char*)packet.contents(),packet.size());
+    SendBuf((char*)packet.contents(),packet.size());
 
 }
 
@@ -469,5 +475,6 @@ void RealmSocket::_HandleLogonProof(void)
 void RealmSocket::OnConnect()
 {
     printf("DEBUG: RealmSocket connected!\n");
+    SendLogonChallenge();
 }
     
