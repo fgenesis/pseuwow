@@ -1,0 +1,10 @@
+
+namespace strparse {
+	
+char *fgetlabel(char*);
+char *fgetvalue(char*);
+char *RemoveComments(char*);
+char *TrimSpacesLeft(char*);
+bool HasEqual(char*);
+	
+}

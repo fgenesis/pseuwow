@@ -1,0 +1,11 @@
+realm login:
+- use the correct IP in CLIENT_LOGON_CHALLENGE, and not 127.0.0.1
+- use correct timezone, maybe settable via conf file later on
+- define the crc_hash as it should be
+
+controller:
+- complete recoding
+
+shared:
+-fix CircularBuffer::IncreaseSize() (its BUGGED and corrupts the data)
+

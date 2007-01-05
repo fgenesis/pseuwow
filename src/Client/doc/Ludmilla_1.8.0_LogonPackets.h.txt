@@ -1,0 +1,193 @@
+//******************************************************************************
+// Here are all packets to and from Logon Server.
+//==============================================================================
+#ifndef _LOGONPACKETS_H
+#define _LOGONPACKETS_H
+//==============================================================================
+#include "../Shared/OurDefs.h"
+#include <openssl/md5.h>
+//==============================================================================
+#pragma pack(push, 1)
+//==============================================================================
+// Challenge:
+struct SClientLogonChallenge
+{
+	uint8	cmd;			// OP code = CMD_AUTH_LOGON_CHALLENGE
+	uint8	error0x02;			// 0x02
+	uint16	size;			// size of the rest of packet, without this part
+	uint8	gamename[4];	// "WoW"
+	uint8	version[2];		// 0x01 08 00 -> (1.8.0)
+	uint16	build;			// 0x7F12 -> 4735
+	uint8	platform[3];	// 68x\0 -> "x86"
+	uint8	os[3];			// niW\0 -> "Win"
+	uint8	localization[4];// BGne -> 'enGB'
+	uint32	timezone_bias;	// 0x78 00 00 00
+	uint8	ip[4];			// client ip: 0x7F 00 00 01
+	uint8	acclen;			// length of account name (without zero-char)
+	uint8	*acc;			// upcased account name (without zero-char)
+};
+struct SClientLogonChallenge_Header // just for usability
+{
+	uint8	cmd;		// OP code = CMD_AUTH_LOGON_CHALLENGE
+	uint8	error;		// 0x02
+	uint16	size;		// size of the rest of packet, without this part
+};
+struct SClientReconnectChallenge // == SClientChallenge
+{
+	uint8	cmd;			// OP code = 02 = CMD_AUTH_RECONNECT_CHALLENGE
+	uint8	error;			// 0x02
+	uint16	size;			// size of the rest of packet, without this part
+	uint8	gamename[4];	// "WoW"
+	uint8	version[2];		// 0x01 08 00 -> (1.8.0)
+	uint16	build;			// 0x7F12 -> 4735
+	uint8	platform[4];	// 68x\0 -> "x86"
+	uint8	os[4];			// niW\0 -> "Win"
+	uint8	country[4];		// BGne -> 'enGB'
+	uint32	timezone_bias;	// 0x78 00 00 00
+	uint8	ip[4];			// client ip: 0x7F 00 00 01
+	uint8	acclen;			// length of account name (without zero-char)
+	uint8	*acc;			// upcased account name (without zero-char)
+};
+struct SServerLogonChallenge_Err
+{
+	uint8	cmd;			// 0x00 -> OPcode = CMD_AUTH_LOGON_CHALLENGE ? CMD_GRUNT_AUTH_CHALLENGE
+	uint8	error;			// one of SServerChallenge_ErrorCodes codes
+};
+struct SServerLogonChallenge_Ok
+	// Variables:
+	// X := SHA1( salt || SHA1(upper(acc:pass)) )
+	// b[20] := random server's secret
+	// K := 3
+	// salt[32] := random
+	// N :=	89 4B 64 5E - 89 E1 53 5B - BD AD 5B 8B - 29 06 50 53
+	//		08 01 B1 8E - BF BF 5E 8F - AB 3C 82 87 - 2A 3E 9B B7
+	// g[1] := 7
+	//
+	// Calculations:
+	// Verifier := g^(~x) mod ~N
+	// B := ~( K*V + g^(~b) mod ~N )
+{
+	uint8	cmd;			// 0x00 -> OPcode = CMD_AUTH_LOGON_CHALLENGE ? CMD_GRUNT_AUTH_CHALLENGE
+	uint8	error;			// 0 -> ok = LOGIN_OK
+	uint8	unk1;			// 0x00
+
+	uint8	B[32];			// calculated by server
+
+	uint8	g_len;			// 0x01
+	uint8	g[1];			// 0x07 (const)
+
+	uint8	N_len;			// 0x20
+	uint8	N[32];			// const
+
+	uint8	salt[32];		// random
+	uint8	unk2[16];		//1: BA 79 D4 8D - BF FC BF AD - 8C B4 EC B3 - 75 C5 96 05
+	//2: 0F EB C2 82 - 28 C2 BC E4 - A6 31 30 C7 - 9F 6D 72 76
+};
+//------------------------------------------------------------------------------
+// Proof:
+struct SClientLogonProof
+{
+	uint8	cmd;			// 0x01 -> OPcode = CMD_AUTH_LOGON_PROOF
+	uint8	A[32];			// calculated by client
+	uint8	M1[20];			//
+	uint8	crc_hash[20];	//
+	uint8	number_of_keys;	// 0x00
+};
+struct SClientReconnectProof // == SClientProof
+{
+	uint8	cmd;			// 0x01 -> OPcode = CMD_AUTH_RECONNECT_PROOF
+	uint8	A[32];			// calculated by client
+	uint8	M1[20];			//
+	uint8	crc_hash[20];	//
+	uint8	number_of_keys;	// 0x00
+};
+struct SServerLogonProof_Err
+	// Variables:
+	// U := SHA1(A || B)
+	//
+	// Calculations:
+	// S := ~(  ( (V^(~U))*(~A) ) ^ (~b) mod ~N  )
+	// hS0 := SHA1 ( S[0] || S[2] || ... || S[20] )
+	// hS1 := SHA1 ( S[1] || S[3] || ... || S[19] )
+	// SS := hS0[0] || hS1[0] || hS0[1] || ... || hS1[10]
+	// M1 := SHA1( (SHA1(N) xor SHA1(G)) || SHA1(upper(acc)) || salt || A || B || SS )
+{
+	uint8	cmd;			// 0x01 -> OPcode = CMD_AUTH_LOGON_PROOF
+	uint8	error;			// 0x04 -> password is incorrect = LOGIN_UNKNOWN_ACCOUNT
+};
+struct SServerLogonProof_Ok
+	// M2 := SHA1(A || M1 || SS)
+{
+	uint8	cmd;			// 0x01 -> OPcode = CMD_AUTH_LOGON_PROOF
+	uint8	error;			// 0x00 -> ok
+	uint8	M2[20];			// calculated by server
+	uint32	unk;			// 0x00 00 00 00
+};
+//------------------------------------------------------------------------------
+// Realm:
+struct SClientRealmList
+{
+	uint8	cmd;			// OP code = CMD_REALM_LIST
+	uint32	unknown;		// 0x00 00 00 00
+};
+struct SServerRealmList // for info only - variable size
+{
+	uint8	cmd;			// OP code = CMD_REALM_LIST
+	uint16	size;			// size of the rest of packet, without this part
+	uint32	unknown;		// 0x00 00 00 00
+	uint8	count;			// quantity of realms
+	struct SRealmInfo
+	{
+		uint32	icon;			// icon near realm
+		uint8	color;			// color of record
+		char	*name;			// Text zero terminated name of Realm
+		char	*addr_port;		// Text zero terminated address of Realm ("ip:port")
+		float	population;		// 1.6 -> population value. lower == lower population and vice versa
+		uint8	chars_here;		// number of characters on this server
+		uint8	timezone;		// timezone
+		uint8	unknown;		//
+	} * realms;
+	uint8	unknown1;		// 0x2A unknown
+	uint8	unknown2;		// 0x00 unknown
+};
+struct SServerRealmList_Header
+{
+	uint8	cmd;			// OP code = CMD_REALM_LIST
+	uint16	size;			// size of the rest of packet, without this part
+};
+//------------------------------------------------------------------------------
+// Xref:
+struct SServerXferInitiate
+{
+	uint8	cmd;					// 0x30 -> OPcode = CMD_XFER_INITIATE
+	uint8	typelen;				// 0x05 -> sizeof(Patch)
+	uint8	typestr[5];				// 'Patch'
+	uint32	size;					// 0x34 C4 0D 00 = 902,196 byte (180->181 enGB)
+	uint32	unk;					// 0x0 always
+    uint8	md5[MD5_DIGEST_LENGTH];	// md5 checksum of file
+};
+struct SServerXferData
+{
+	uint8	cmd;					// 0x31 -> OPcode = CMD_XFER_DATA
+	uint16	blocksize;				// 0xDC 05 -> 1500 (max block)
+	uint8	buf[1500];				// block
+};
+struct SClientXferAccept
+{
+	uint8	cmd;					// 0x32 -> OPcode = CMD_XFER_ACCEPT
+};
+struct SClientXferResume
+{
+	uint8	cmd;					// 0x33 -> OPcode = CMD_XFER_RESUME
+	uint32	start;					// will continue at
+	uint32	unknown;				//
+};
+struct SClientXferCancel
+{
+	uint8	cmd;					// 0x34 -> OPcode = CMD_XFER_CANCEL
+};
+//==============================================================================
+#pragma pack(pop)
+//==============================================================================
+#endif // _LOGONPACKETS_H
+//******************************************************************************

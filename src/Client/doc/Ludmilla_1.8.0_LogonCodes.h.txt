@@ -1,0 +1,61 @@
+//******************************************************************************
+// Here are all codes used in Logon Server.
+//==============================================================================
+#ifndef _LOGONCODES_H
+#define _LOGONCODES_H
+//==============================================================================
+//#include "OurDefs.h"
+//==============================================================================
+// wow's codes:
+enum EClientCommand
+// dumped from wow.exe 1.8.0
+// 0x007F86A8: table of
+// <int32 code, int32 pstr, int32 pproc, int32 0>
+// switch: 005999A7  cmp byte ptr [ecx],dl
+{
+	CMD_AUTH_LOGON_CHALLENGE		= 0x00, // client
+	CMD_AUTH_LOGON_PROOF			= 0x01, // client
+	CMD_AUTH_RECONNECT_CHALLENGE	= 0x02, // client
+	CMD_AUTH_RECONNECT_PROOF		= 0x03, // client
+	CMD_REALM_LIST					= 0x10, // client
+	CMD_XFER_INITIATE				= 0x30, // client? from server
+	CMD_XFER_DATA					= 0x31, // client? from server
+	CMD_XFER_ACCEPT					= 0x32, // not official name, from client
+	CMD_XFER_RESUME					= 0x33, // not official name, from client
+	CMD_XFER_CANCEL					= 0x34, // not official name, from client
+
+	// unknown:
+	CMD_GRUNT_AUTH_CHALLENGE		= 0x00, // server
+	CMD_GRUNT_AUTH_VERIFY			= 0x02,	// server
+	CMD_GRUNT_CONN_PING				= 0x10, // server
+	CMD_GRUNT_CONN_PONG				= 0x11, // server
+	CMD_GRUNT_HELLO					= 0x20, // server
+	CMD_GRUNT_PROVESESSION			= 0x21, // server
+	CMD_GRUNT_KICK					= 0x24, // server
+};
+//------------------------------------------------------------------------------
+enum ELoginErrorCode
+	// dumped from wow.exe 1.8.0
+	// 00591E9D  mov eax,dword ptr [ebp+8]
+	// eax - code, name in stack after exiting from current funk
+{
+	// LOGIN_STATE_FAILED:
+
+	LOGIN_FAILED = 1, // 2, B, C, D // "Unable to connect"
+	LOGIN_BANNED = 3, // "This World of Warcraft account has been closed and is no longer in service -- Please check the registered email address of this account for further information."; -- This is the error message players get when trying to log in with a banned account.
+	LOGIN_UNKNOWN_ACCOUNT = 4, // 5 // "The information you have entered is not valid.  Please check the spelling of the account name and password.  If you need help in retrieving a lost or stolen password and account, see www.worldofwarcraft.com for more information.";
+	LOGIN_ALREADYONLINE = 6, // "This account is already logged into World of Warcraft.  Please check the spelling and try again.";
+	LOGIN_NOTIME = 7, // "You have used up your prepaid time for this account. Please purchase more to continue playing";
+	LOGIN_DBBUSY = 8, // "Could not log in to World of Warcraft at this time.  Please try again later.";
+	LOGIN_BADVERSION = 9, // "Unable to validate game version.  This may be caused by file corruption or the interference of another program.  Please visit www.blizzard.com/support/wow/ for more information and possible solutions to this issue.";
+	LOGIN_PARENTALCONTROL = 0xF, // "17"="LOGIN_PARENTALCONTROL" // "Access to this account has been blocked by parental controls.  Your settings may be changed in your account preferences at http://www.worldofwarcraft.com.";
+
+	// LOGIN_STATE_AUTHENTICATED:
+	LOGIN_OK = 0, // E
+
+	// LOGIN_STATE_DOWNLOADFILE, LOGIN_OK
+	LOGIN_DOWNLOADFILE = 0xA, // not official name
+};
+//==============================================================================
+#endif // _LOGONCODES_H
+//******************************************************************************

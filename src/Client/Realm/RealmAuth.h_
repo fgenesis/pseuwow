@@ -1,0 +1,6 @@
+#ifndef _REALMAUTH_H
+#define _REALMAUTH_H
+
+void ProcessClientLogonProof(char*);
+
+#endif

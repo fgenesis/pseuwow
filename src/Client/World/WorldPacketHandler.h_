@@ -1,0 +1,10 @@
+#ifndef _WORLDPACKETHANDLER_H
+#define _WORLDPACKETHANDLER_H
+
+#include <string>
+#include "Auth/ByteBuffer.h"
+void HandleWorldPacket(ByteBuffer);
+void HandleOpcode(uint16,ByteBuffer&);
+void SendWorldPacket(uint16, ByteBuffer*);
+
+#endif

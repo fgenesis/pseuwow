@@ -1,0 +1,133 @@
+#include <fstream>
+#include "common.h"
+#include "PseuWoW.h"
+#include "DefScript/DefScript.h"
+#include "ConfigReader.h"
+
+bool ConfigReader::ReadConf(std::string fn, VarSet& vs, bool capitalize){
+    std::fstream f;
+    char z;
+    std::string line,label,value;
+
+    f.open(fn.c_str(), std::ios_base::in);
+    if(!f)
+        return false;
+    while(!f.eof()){
+		line.clear();
+        while (true) {
+            f.get(z);
+            if(z=='\n' || f.eof())
+                break;
+            line+=z;
+        }
+		if(line.empty())
+			continue; // line is empty, proceed with next line
+		while( (line.at(0)==' ' || line.at(0)=='\t') )
+			line.erase(0,1);
+		if(line.empty())
+			continue;
+		if(line.at(0)=='/' && line.at(1)=='/') 
+			continue; // line is comment, proceed with next line
+		label=line.substr(0,line.find('=',0));
+        if(capitalize)
+            label=stringToUpper(label);
+		value=line.substr(line.find('=',0)+1,line.length());
+
+        DEBUGMODE(printf("CONF: '%s' = '%s'\n",label.c_str(),value.c_str()););       
+        vs.Set(label,value);
+    }
+    f.close();
+    return true;
+}
+
+void ConfigReader::SetMainConf(VarSet& vs){
+
+    if(vs.Exists("DEBUG")){
+		DEBUG=atoi(vs.Get("DEBUG").c_str());
+		DEBUG1(printf("DEBUG level=%d\n",DEBUG););
+	}
+    if(vs.Exists("REALMLIST")){
+        strcpy(realmlist,vs.Get("REALMLIST").c_str());
+        if(DEBUG>=1)printf("Realmlist set to \"%s\"\n",realmlist);
+	}
+	if(vs.Exists("ACCNAME")){
+		strcpy(accname,vs.Get("ACCNAME").c_str());
+		if(DEBUG>=1)printf("Account Name set to \"%s\"\n",accname);
+	}
+	if(vs.Exists("ACCPASS")){
+		strcpy(accpass,vs.Get("ACCPASS").c_str());
+		if(DEBUG>=1)printf("Account Password set to \"%s\"\n",accpass);
+	}
+	if(vs.Exists("ALLOWCONTROLLER")){
+        std::string opt=vs.Get("ALLOWCONTROLLER");
+		if( opt=="1" || opt=="true" || opt=="on" ){
+			allowcontroller=true;
+		}else{
+			allowcontroller=false;
+		}
+	}
+	if(vs.Exists("EXITONERROR")){
+        std::string opt=vs.Get("EXITONERROR");
+		if( opt=="1" || opt=="true" || opt=="on" ){
+			exitonerror=true;
+		}else{
+		    exitonerror=false;
+	    }
+	}
+	if(vs.Exists("CONTROLLERPORT")){
+        c_port=atoi(vs.Get("CONTROLLERPORT").c_str());
+		if(DEBUG>=1)printf("Controller Port set to %d\n",c_port);
+	}
+	if(vs.Exists("REALMPORT")){
+		rs_port=atoi(vs.Get("REALMPORT").c_str());
+		if(DEBUG>=1)printf("Realm Server Port set to %d\n",rs_port);
+	}
+	if(vs.Exists("CLIENTVERSION")){ // e.g. 1.10.2 -- max number in this case is 255.255.255 -> address a matrix of 3x3
+        std::string opt=vs.Get("CLIENTVERSION")+".";
+        std::string num;
+        uint8 p=0;
+        for(uint8 i=0;i<opt.length();i++){
+            if(!isdigit(opt.at(i))){
+                clientversion[p]=(unsigned char)atoi(num.c_str());
+                num.clear();
+                p++;
+                if(p>2)
+                    break;
+                continue;
+            }
+            num+=opt.at(i);
+        }
+		DEBUG1(printf("Emulating client version %d.%d.%d\n",clientversion[0],clientversion[1],clientversion[2]););
+	}
+	if(vs.Exists("CLIENTBUILD")){
+		clientbuild=atoi(vs.Get("CLIENTBUILD").c_str());
+		if(DEBUG>=1)printf("Client Build set to %d\n",clientbuild);
+	}
+	if(vs.Exists("CLIENTLANG")){
+        char *opt=(char*)vs.Get("CLIENTLANG").c_str();
+		clientlang[0]=opt[0];
+		clientlang[1]=opt[1];
+		clientlang[2]=opt[2];
+		clientlang[3]=opt[3];
+		DEBUG1(printf("Client language set to \"%c%c%c%c\"\n",clientlang[0],clientlang[1],clientlang[2],clientlang[3]););
+	}
+	if(vs.Exists("REALMNAME")){
+        strcpy(realmname,vs.Get("REALMNAME").c_str());
+		if(DEBUG>=1)printf("Realm Name set to \"%s\"\n",realmname);
+	}
+	if(vs.Exists("CHARNAME")){
+		charname=vs.Get("CHARNAME");
+		if(DEBUG>=1)printf("Character Name set to \"%s\"\n",charname.c_str());
+	}
+	if(vs.Exists("IDLESLEEPTIME")){
+		idleSleepTime=atoi(vs.Get("IDLESLEEPTIME").c_str());
+		if(DEBUG>=1)printf("Idle Sleep Time set to \"%u\"\n",idleSleepTime);
+	}
+
+    defScp.RunScriptByName("_setconf",NULL,255);
+
+    // more conf?
+
+}
+
+

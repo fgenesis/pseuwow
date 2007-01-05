@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "ParsingFunctions.h"
+#include "../GarbageStack.h"
+
+char *strparse::fgetlabel(char *line){
+	//printf("Extracting label...");
+	char *ret;
+	int i,len;
+	for(i=0;line[i]!='=';i++);
+	len=i;
+	ret=NewTempString(len);
+	for(i=0;i<len;i++)ret[i]=line[i];
+	ret[len]=0;
+	return ret;
+}
+
+char *strparse::fgetvalue(char *line){
+	int i;
+	char *out;
+	for(i=0;line[i]!='='&&i<strlen(line);i++);
+	out=line+i+1;
+	return out;
+	
+}
+
+char *strparse::RemoveComments(char *txt){
+	char *ptr;
+	ptr=strchr(txt,(char)'/');
+	if(ptr==NULL)return txt;
+	else {
+		ptr[0]=0; // terminate the string a bit earlier if a comment is found. "blah // crap\0" -> "blah \0/ crap\0" -> "blah \0"
+	}
+	return txt;
+}
+
+char *strparse::TrimSpacesLeft(char *txt){
+	int len=strlen(txt);
+	if(len<1)return txt;
+	for(int p=0;p<=len;p++)
+		if(txt[0]==' '||txt[0]=='	')
+			txt++;
+		else
+			return txt;
+}	
+
+bool strparse::HasEqual(char *in){
+	if(strchr(in,(char)'=')==NULL)return false; else return true;
+}
