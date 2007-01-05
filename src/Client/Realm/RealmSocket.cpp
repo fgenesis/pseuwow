@@ -120,7 +120,7 @@ void RealmSocket::Start(void)
 void RealmSocket::Stop(void)
 {
     _valid=false;
-    this->Close();
+    this->SetCloseAndDelete();
     memset(_m2,0,20);
     _key=0;
 }
@@ -180,20 +180,25 @@ void RealmSocket::_HandleRealmList(void)
 void RealmSocket::OnRead(void)
 {
     TcpSocket::OnRead();
+    bool known=false;
     printf("RealmSocket::OnRead() %u bytes\n",ibuf.GetLength());
     if(!ibuf.GetLength())
         return;
     uint8 cmd, i=0;
     ibuf.SoftRead((char*)&cmd, 1);
-    while(table[i].handler!=NULL)
+    for(uint8 i=0;table[i].handler!=NULL;i++)
     {
         if(table[i].cmd==cmd)
         {
             (*this.*table[i].handler)();
+            known=true;
             break;
         }
     }
-    // unk packet
+    if(!known)
+    {
+        printf("RealmSocket: Got unknown packet, cmd=%u\n",cmd);
+    }
 }
 
 /*
