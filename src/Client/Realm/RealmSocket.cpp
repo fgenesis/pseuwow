@@ -84,7 +84,7 @@ RealmSocket::~RealmSocket()
 
 bool RealmSocket::IsValid(void)
 {
-    return _valid && Ready();
+    return _valid;
 }
 
 void RealmSocket::SetHost(std::string h)
