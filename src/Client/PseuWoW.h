@@ -49,14 +49,14 @@ class PseuInstance
 	~PseuInstance();	
 	
 
-	WorldSession *GetWSession(void);
-	RealmSocket *GetRSession(void);
-	PseuInstanceConf *GetConf(void);
-	DefScriptPackage *GetScripts(void);
-	void SetConfDir(std::string);
+    WorldSession *GetWSession(void) { return _wsession; }
+    RealmSocket *GetRSession(void) { return _rsession; }
+    PseuInstanceConf *GetConf(void) { return _conf; }
+    DefScriptPackage *GetScripts(void) { return _scp; }
+    void SetConfDir(std::string);
     void SetScpDir(std::string);
 	void SetSessionKey(BigNumber);
-	BigNumber GetSessionKey(void);
+    BigNumber GetSessionKey(void) { return _sessionkey; }
 
 	
 	

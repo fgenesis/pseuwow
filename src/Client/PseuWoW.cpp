@@ -32,6 +32,20 @@ void PseuInstanceRunnable::run(void)
     delete _i;
 }
 
+PseuInstance::PseuInstance()
+{
+    _ver="PseuWoW Alpha Build 12 dev 2" DEBUG_APPENDIX;
+    _ver_short="A12-dev1" DEBUG_APPENDIX;
+    _wsession=NULL;
+    _rsession=NULL;
+
+
+}
+
+PseuInstance::~PseuInstance()
+{
+}
+
 bool PseuInstance::Init(void) {
 
     if(_confdir.empty())
@@ -144,6 +158,12 @@ void PseuInstance::Update()
 
 }
 
+void PseuInstance::SaveAllCache(void)
+{
+    GetWSession()->plrNameCache.SaveToFile();
+    //...
+}
+
 
 
     /*
@@ -239,16 +259,6 @@ void _SaveAllCache(void){
 }
 */
 
-
-PseuInstance::PseuInstance()
-{
-    _ver="PseuWoW Alpha Build 12 dev 2" DEBUG_APPENDIX;
-    _ver_short="A12-dev1" DEBUG_APPENDIX;
-    _wsession=NULL;
-    _rsession=NULL;
-
-
-}
 
 PseuInstanceConf::PseuInstanceConf()
 {
