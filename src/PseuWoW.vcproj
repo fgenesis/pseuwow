@@ -91,7 +91,7 @@
 				AdditionalIncludeDirectories="./shared/;./Client/;./Client/World/;./Client/Realm/;./dep/include/"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="2"
+				RuntimeLibrary="3"
 				PrecompiledHeaderFile=""
 				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
 				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
