@@ -45,6 +45,10 @@ PseuInstance::PseuInstance()
 
 PseuInstance::~PseuInstance()
 {
+    delete _scp;
+	delete _conf;
+	delete _rsession;
+	delete _wsession;
 }
 
 bool PseuInstance::Init(void) {
@@ -118,13 +122,13 @@ void PseuInstance::Run(void)
     if(!_initialized)
         return;
 
-
+    _rsession->SetDeleteByHandler();
     _rsession->SetHost(GetConf()->realmlist);
     _rsession->SetPort(GetConf()->realmport);
     _rsession->SetInstance(this);
     _rsession->Start();
     
-    if(_rsession->IsValid())  // TODO: need better check for IsValid(), it must check also if it could connect
+    if(_rsession->IsValid())
     {
         _sh.Add(_rsession);
         _sh.Select(1,0);
@@ -265,7 +269,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 	realmport=atoi(v.Get("REALMPORT").c_str());
     clientversion_string=v.Get("CLIENTVERSION");
 	clientbuild=atoi(v.Get("CLIENTBUILD").c_str());
-	clientlang=v.Get("CLIENTLANG");
+	clientlang=v.Get("CLIENTLANGUAGE");
 	realmname=v.Get("REALMNAME");
 	charname=v.Get("CHARNAME");
 	networksleeptime=atoi(v.Get("NETWORKSLEEPTIME").c_str());

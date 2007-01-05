@@ -179,8 +179,8 @@ void RealmSocket::_HandleRealmList(void)
 
 void RealmSocket::OnRead(void)
 {
-    printf("RealmSocket::OnRead() %u bytes\n",ibuf.GetLength());
     TcpSocket::OnRead();
+    printf("RealmSocket::OnRead() %u bytes\n",ibuf.GetLength());
     if(!ibuf.GetLength())
         return;
     uint8 cmd, i=0;
@@ -288,16 +288,20 @@ void RealmSocket::SendLogonChallenge(void)
     packet << (uint8)AUTH_LOGON_CHALLENGE;
     packet << (uint8)2;
     packet << (uint8)(acc.length()+30); // length of the rest of the packet
-    packet << "WOW"; // game name = World Of Warcraft
+    packet << (uint8)0;
+    packet.append("WOW",3); // game name = World Of Warcraft
     packet.append(GetInstance()->GetConf()->clientversion,3); // 1.12.2 etc
-    packet << GetInstance()->GetConf()->clientbuild; // (uint16) 5875
+    packet << (uint8)0;
+    packet << (uint16)(GetInstance()->GetConf()->clientbuild); // (uint16) 5875
     packet << "68x" << "niW"; // "x86" - platform; "Win" - Operating system; both reversed and zero terminated
-    for(uint8 i=2;i>0;i--)
-        packet << (uint8)GetInstance()->GetConf()->clientlang[i]; // "enUS" -> "SUne" : reversed and NOT zero terminated
+    for(uint8 i=0;i<4;i++)
+        packet << (uint8)(GetInstance()->GetConf()->clientlang[3-i]); // "enUS" -> "SUne" : reversed and NOT zero terminated
     packet << (uint32)0x3c; // timezone
     packet << (uint32)GetClientRemoteAddr(); // my IP address
     packet << (uint8)acc.length(); // length of acc name without \0
     packet.append(acc.c_str(),acc.length()); // append accname, skip \0
+
+    packet.hexlike();
 
     SendBuf((char*)packet.contents(),packet.size());
 
@@ -476,5 +480,10 @@ void RealmSocket::OnConnect()
 {
     printf("DEBUG: RealmSocket connected!\n");
     SendLogonChallenge();
+}
+
+void RealmSocket::OnConnectFailed(void)
+{
+    printf("RealmSocket::OnConnectFailed()\n");
 }
     
