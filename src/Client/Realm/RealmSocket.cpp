@@ -104,12 +104,14 @@ void RealmSocket::SetInstance(PseuInstance *pi)
 
 void RealmSocket::Start(void)
 {
-    if(this->_rhost.empty() || _rport==0 || !_valid || _instance==NULL)
+    if(_rhost.empty() || _rport==0 || _instance==NULL)
         return;
 
+// is here any other socket code neded?
 //    _socket.Init()
 //    _socket.SetHost(_host);
 //    _socket.SetPort(_port);
+
     Open(_rhost,_rport);
     //...
     _valid=true;

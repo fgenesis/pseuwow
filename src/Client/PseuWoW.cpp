@@ -121,9 +121,10 @@ void PseuInstance::Run(void)
 
     _rsession->SetHost(GetConf()->realmlist);
     _rsession->SetPort(GetConf()->realmport);
+    _rsession->SetInstance(this);
     _rsession->Start();
     
-    if(_rsession->IsValid())
+    if(_rsession->IsValid())  // TODO: need better check for IsValid(), it must check also if it could connect
     {
         _sh.Add(_rsession);
         _rsession->SendLogonChallenge();
@@ -143,7 +144,7 @@ void PseuInstance::Update()
     if(_sh.GetCount())
         _sh.Select(1,0); // update the realmsocket
     //else
-        // socket invalid
+        // socket invalid?
 
     _wsession->Update();
 

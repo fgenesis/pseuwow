@@ -3,6 +3,11 @@
 #define __DEFSCRIPT_H
 
 #define MAXARGS 99
+#ifdef _DEBUG
+#    define _DEFSC_DEBUG(code) code;
+#else
+#    define _DEFSC_DEBUG(code) /* code */
+#endif
 
 #include <map>
 #include "VarSet.h"

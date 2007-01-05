@@ -3,13 +3,13 @@
 
 
 #ifdef _DEBUG
-    #define DEB(code) code;
+    #define DEBUG(code) code;
     #define DEBUG_APPENDIX " - DEBUG"
     #define CODEDEB(code) fprintf(stderr,"[[ %s ]]\n",#code); code;
 #else 
-    #define DEB(code) ;
+    #define DEBUG(code) /* code */
     #define DEBUG_APPENDIX
-    #define CODEDEB(code) code;
+    #define CODEDEB(code) (code;)
 #endif
 
 #define ASSERT( assertion ) { if( !(assertion) ) { fprintf( stderr, "\n%s:%i ASSERTION FAILED:\n  %s\n", __FILE__, __LINE__, #assertion ); throw "Assertion Failed";
