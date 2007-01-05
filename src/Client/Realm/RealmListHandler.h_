@@ -1,0 +1,6 @@
+#ifndef _REALMLISTHANDLER_H
+#define _REALMLISTHANDLER_H
+
+bool HandleRealmList(ByteBuffer);
+
+#endif

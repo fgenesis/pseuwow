@@ -1,0 +1,257 @@
+<BODY BGCOLOR=BLACK TEXT=WHITE>
+<FONT COLOR=AQUA>
+<b>Notes by Biasha:</b><br>
+Structure (fields, size) and sequence of the packets is valid for 1.8.0<br>
+Algorithm is not checked for 1.8.0 yet<br>
+Original URL: http://www.shockerz.net/wowresource/forum/index.php?showtopic=42<br>
+SRP algorithm: RFC2945<br>
+Information about SRP6: http://srp.stanford.edu/doc.html<br>
+<br>
+<br>
+</FONT>
+
+    [quote=Zam,Feb 11 2005, 09:26 PM]
+<br>[Version 1.03]
+<br>
+<br>Ok, this only covers the first  handshacking packets.  :-)   I haven't had time to disect any other packets.   
+<br>
+<br><b>[size=18]If you are having problems; please verify your math with my math; there is a reason I supply the output to every function.  This will allow you to see if there is typo's or any problem on either side.
+<br>
+<br>Please note that some libraries may have bugs with Big Numbers; hense the reason I used openssl, as it has been used by crypto products for years.   :)
+<br>
+<br>[/size] </b>
+<br><FONT COLOR=yellow>Changes:
+<br>V1.00  - Initial Release
+<br>V1.01  - Removal of the Second phase and adding where I forgot to up that B (Public) is reveresed before it is stored for use later.
+<br>V1.02  - Added Temp variables results to S calc   
+<br>          - Fixed the missing UPPERCASE in M1 calculation (Username)
+<br>          - Fixed colors.  :o
+<br>          - Added some more notes.
+<br>V1.03  - Update Warning, and added a couple more intermediate numbers in the M1 Calcs.
+<br></FONT>
+<br>
+<br> <FONT COLOR=red>I have been informed that only the first 4 packets are needed and then the client should ask for the realm list</FONT>
+<br>
+<br>This is for version 1.1.1.   I do not know if anything changed srp wise in 1.2.1; but I will be confirming and diferences between 111 and 121 once I have some spare time.  <FONT COLOR=red>According to several people; srp has NOT changed between 1.1.1 and 1.2.1</FONT>
+<br>
+<br>Kudo's to those who have shared there knowledge.  Those who have selfishly held onto most or all of their hard work  so as not to advance the community; well just disappear -- you are selfish losers and the community would be better off without you...   
+<br>-------------------------------------------------------------
+<br>
+<br>Packets as shared by sYkez on this topic (http://www.blizzhackers.com/viewtopic.php?t=21457)
+<br>
+<br>Kudo's to Amso for publically sharing his attempts at decoding srp; he actually was the one to inspire me to do this.  
+<br><b><FONT COLOR=red>Notes:</FONT></b>
+<br><b>Reverse</b> means reverse the String.  DO NOT USE strrev --
+<br>Treat this string as an array of numbers.  0 is a valid number; strrev will stop reversing when it incounters an NULL(0) character.   My reverse routine is passed the length that it needs to reverse.   In fact all of these variables are strored in a simple structure {char *data; int len;} and I pass this structure around.
+<br><b>uppercase</b> means upper case all letters in string.
+<br>All values are in hex.
+<br><b> & </b> means concatanate the string valuse.  "HI" & "THERE" = "HITHERE"
+<br><b><FONT COLOR=red>Common Q & A:</FONT></b>
+<br>Yes, Username and Password are Uppercased. 
+<br>Yes, there are reversed string used in certain snippits of code.  Don't ask my why; I don't know why Bliz deviated from the standard -- but it works.  I assume the reason why is endian-ness of the machines.  There server might be a main-frame...
+<br>I am using an UNMODIFIED openssl (latest version) library.
+<br>And I am using the wrapper functions in the t_math.c file that comes from the srp demo page.  They just make the names of the functions much more readable.  :-)
+<br>
+<br>Each Calculation assumes the byte order is in the initial stored state.  So N=894B...
+<br>When I reverse it in a routine N is only reversed for that Routine.  When you get to the next routine, N is again equal to 894B...   Some routines work with a reversed version of the calculation and some don't.    Exception to this rule is B, it is reveresed before it is stored for use in later calculations.
+<br><b>Lets Go at it:</b>
+<br>
+<br> The Client Connects and sends the <b>Client_Challenge</b> packet.  (Pretty self explanitory)
+<br><i><code>
+<br>struct {
+<br>  uint8  opcode;          // 0x00
+<br>  uint8   error;         // 0x02
+<br>  uint16   size;         // 0x0023 (size of the rest of packet)
+<br>  char   gameid[4];        //gameid[4]=0;      // 'WoW'
+<br>  uint8   version1;         // 0x00
+<br>  uint8   version2;         // 0x12 build version(0.12.0)
+<br>  uint8   version3;         // 0x00
+<br>  uint16   build;           // 3988
+<br>  char   platform[4];      // platform[4]=0;      // 'x86'
+<br>  char   os[4];                // os[4]=0;      // 'Win'
+<br>  char   language[4];          // language[4]=0;      // 'enUS'
+<br>  uint32   timezone_bias;   // -419
+<br>  uint32   ip;            // client ip
+<br>  uint8   acclen;         // length of account name
+<br>  char *AccountName;
+<br>} Client_Challenge;
+<br></code></i>
+<br>The Server Generates the Following Packet:
+<br><i><code>
+<br>struct {
+<br>  uint8 opcode;          // 0x00
+<br>  uint8 error;  //no error
+<br>  uint8 ukn1;
+<br>  char B[32];
+<br>  uint8 g_length;    //1
+<br>  char g;
+<br>
+<br>  uint8 n_len; // 32; //N_len
+<br>  char N[32];
+<br>  char salt[32];
+<br>  char unk3[16];
+<br>} Server_Challenge;
+<br></code></i>
+<br>Ok, N is  is hard coded in hex as:
+<br><i><code>894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7</code></i>
+<br>G Length = 1
+<br>G = 7
+<br>K = 3
+<br>salt = randomly generated 32 characters.
+<br>Server also internally generates a random generated "b" 20 characters
+<br>
+<br>We are going to assume some values to make it easier to duplicate:
+<br><i><code>Username = "TEST"
+<br>Password = "TEST"
+<br>salt = 33f140d46cb66e631fdbbbc9f029ad8898e05ee533876118185e56dde843674f
+<br>b = 8692E3A6BA48B5B1004CEF76825127B7EB7D1AEF
+<br></code></i>
+<br>Ok, Now for the calculations:
+<br>
+<br>To Generate x:
+<br><i><code>Temp = "Username" (Supplied in the client challenge) & ":" & "Password" (Supplied to whatever user registration script).
+<br>TempHash = SHA1(uppercase(Temp))
+<br>x = sha1(Salt & TempHash)
+<br>
+<br>Your x should equal: 1b70dd2ad03c1ed140223f8f8741c00ec3a4ce73
+<br></code></i>
+<br>To Generate v (Verifier):
+<br><i><code>N = Reverse(N) // 32 Characters
+<br>x = Reverse(x) // 20 Characters
+<br>v = g ^ x mod (N)
+<br>// Exact call I Use:  BN_mod_exp_mont(v, g, x, N, ctx, NULL);
+<br>Your v Should equal: 996ec7b349d5827043ecd0e6efba3daea5590f944d0184fee1b83ff4f59ecfa8
+<br></code></i>
+<br>
+<br>To Generate B (public B, not private B):
+<br><i><code>  /* B = kv + g^b mod n  */
+<br>b = Reverse(b)
+<br>N = Reverse(N)
+<br>
+<br>Temp1 = K * v
+<br>Temp2 = g ^ b mod (N)
+<br>Temp3 = Temp1 + Temp2
+<br>B = Temp3 mod (N)
+<br>B = Reverse(B)  // Store this one PERMANATLY Reversed!!!
+<br>
+<br>//  code I use is:
+<br>//------------------------------
+<br>  BigIntegerMul(B, k, v, NULL);
+<br>  BigIntegerModExp(k, g, b, N, NULL, NULL);
+<br>  BigIntegerAdd(k, k, B);
+<br>  BigIntegerMod(B, k, N, NULL);
+<br>//------------------------------
+<br>Your B should equal: 645d1f78973073701e12bc98aa38ea99b4bc435c32e8447c73ab077ae4d75964
+<br></code></i>
+<br>
+<br>Stuff B, g, N, and Salt in the packet and send it.
+<br>
+<br>The client will respond with the following:
+<br><i><code>struct  {
+<br>  uint8  opcode;          // 0x01
+<br>  uint8   A[32];
+<br>  uint8   M1[20];
+<br>  uint8   crc_hash[20];
+<br>  uint8   number_of_keys;
+<br>} Client_Proof;
+<br>
+<br>Were going to assume A came over as follows:
+<br>232fb1b88529643d95b8dce78f2750c75b2df37acba873eb31073839eda0738d
+<br>And M1 came over as:
+<br>eeb4adca80f4de02f9a9fe8d000d682e3ddfad6f
+<br></code></i>
+<br>A is generated by the client by its secret (a).  You will never know what the secret (a) is, so you don't need to worry about how to calc A.  (See SRP demo page if you really need to generate an A because you are working on a client program.
+<br>
+<br>M1 however is quite important, this will be used to detect if the user is authenticly loging on.
+<br>
+<br>crc_hash, appears to be unimportant in 1.1.1  (Anybody have any info?)
+<br>number_of_keys = 0
+<br>
+<br>Server will respond with:
+<br><i><code>struct {
+<br>  uint8  opcode;          // 0x01
+<br> uint8 error; // 0;//error
+<br> uint8 M2[20]; //M2
+<br> uint8 ukn1; // 0;
+<br> uint8 ukn2; // 0;
+<br> uint8 ukn3; // 0;
+<br> uint8 ukn4; // 0;
+<br>} Server_Proof;
+<br></code></i>
+<br>To Generate M1 & M2, we need to generate some other values:
+<br>Generate U:
+<br><i><code>U = SHA1(A & B)
+<br>Your U should equal: 2f4969ac9f387fd672236f9491a516777cdde1c1
+<br></code></i>
+<br>
+<br>Generate S: // S=(Av^u) ^ b   (mod N)
+<br><i><code>U = Reverse(U)
+<br>N = Reverse(N)
+<br>A = Reverse(A)
+<br>b = Reverse(b) // Private b
+<br>
+<br>Temp1 = v ^ U mod (n)    // Result: 84DC9E9F96AE7A2D9B05CD264A75EB5671EA02FD067B243848543E2713C8D91
+<br>
+<br>Temp2 = Temp1 * A // Result:  496985FE28C394E7B8FB881105E4CD02F7DF4F378736332BC2F4733ABDEF0903F5BE9084C42B32E3615DF28B069A9D275A8A31DE7FBFD0DA76870B2B285F9D3
+<br>
+<br>S = Temp2 ^ b mod (n) 
+<br>
+<br>Code I use:
+<br>//------------------------------
+<br>  prod = BigIntegerFromInt(0);
+<br>  BigIntegerModExp(prod, v, U, N, NULL, NULL);
+<br>  S = BigIntegerFromInt(0);
+<br>  BigIntegerMul(prod, prod, A, NULL);
+<br>  BigIntegerModExp(S, prod, b, N, NULL, NULL);
+<br>  BigIntegerToBytes(S, Buffer, 20);
+<br>//------------------------------
+<br>
+<br>Your S should equal: 7666dc8a226dd0e3de093dddf6bc2b7929df2936a8cf15a972de4042766380ba
+<br></code></i>
+<br>
+<br>Next we Take S and Split it into Two Hashes.  Even / Odd
+<br><i><code>
+<br>S = reverse(S) // Yup we revsere the prior result.
+<br>Then We take only Odd digits
+<br>So S1 Should equal: 
+<br>ba63..[other hex digits]..8a66
+<br>And S2 Should Equal:
+<br>8076..[other hex digits]..dc76
+<br>
+<br>Then We Hash Each One:
+<br>S1_Hash = SHA(S1) // Should Equal: 02f448b61a6e79d8b714387c0d2f22cc83f2877f
+<br>S2_Hash = SHA(S2) // Should Equal: 61eb916a82b72864ea54dbfd3dc0ce4679c07814
+<br>
+<br>And then we Re-combine them into S_Hash interleaving them togetner.
+<br>SS_Hash = S1_Hash[0] & S2_Hash[0] & S1_Hash[1] & S2_Hash[1]....
+<br>// SS_Hash should equal: 0261f4eb4891b66a1a826eb77928d864b7ea145438db7cfd0d3d2fc022cecc468379f2c087787f14
+<br>
+<br></code></i>
+<br>
+<br>Ok, now lets calculate M1:  You need to Calc M1 to verify it matches the M1 supplied by the client.  This VERIFIES the username, password is correct.
+<br><i><code>
+<br>N_Hash = SHA1(N) // Nothing is Reversed in this routine
+<br>G_Hash = SHA1(G) 
+<br>
+<br>User_Hash = SHA1(uppercase(Username))
+<br>// User Hash = 984816fd329622876e14907634264e6f332e9fb3 
+<br>// XOr them
+<br>for(i=0;i<20;i++) NG_Hash = N_Hash[i] ^ G_Hash[i];
+<br>// NG_Hash = 1C76CF5659F68836A628404C431C1855E84D555B
+<br>
+<br>Temp = NG_Hash & User_Hash & Salt & A & B & SS_Hash
+<br>// As you might Guess Temp is a really long string.  :)
+<br>
+<br>M1 = SHA1(Temp)  // Should = eeb4adca80f4de02f9a9fe8d000d682e3ddfad6f
+<br></code></i>
+<br>To Calculate M2:
+<br><i><code>
+<br>Temp = A & M1 & SS_Hash
+<br>M2 = SHA1(Temp) // Should equal: 3a92ed0b783597be95654d6c66442046f9d389ae
+<br></code></i>
+<br>Now you stuff the server packets M2 with the above M2, and unknowns are all Zero. 
+<br>
+<br>The client should request the realmlist packets at this time.  You are logged IN!!!   :-D
+<br>P.S.   I would also like to see the Header Encryption Documented.  I've seen some people have decoded it but they are being quite selfish with the knowledge, which sets everyone back.  I mean how many development hours does it set everyone back attempting to re-inventing srp6?  It has taken me a huge number of hours to get to this point... :o
+<br>[/quote]
+</BODY>

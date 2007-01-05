@@ -1,0 +1,15 @@
+#ifndef _CONFIGREADER_H
+#define _CONFIGREADER_H
+
+#include "DefScript/DefScript.h"
+
+namespace ConfigReader {
+
+    bool ReadConf(std::string, VarSet&, bool);
+    void SetMainConf(VarSet&);
+    void SetUsersConf(VarSet&);
+
+
+};
+
+#endif

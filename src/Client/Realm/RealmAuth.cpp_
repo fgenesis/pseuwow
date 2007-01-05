@@ -1,0 +1,150 @@
+#include "basics.h"
+#include "PseuWoW.h"
+#include "RealmAuth.h"
+#include "Auth/BigNumber.h"
+#include "Auth/Sha1.h"
+#include "realmfunc.h"
+
+#define BNLEN 32 // length of the hard-coded N blizz uses, has been 32 since the first alpha of WoW
+
+extern BigNumber sessionkey; // defined in WorldPacketHandler.cpp
+
+void ProcessClientLogonProof(char *pkt){
+    BigNumber N,A,B,a,u,x,v,S,salt,unk1,g,k(3); // init BNs, default k to 3
+	char _auth[128];
+	strcpy(_auth,strupr(accname));
+	strcat(_auth,":");
+	strcat(_auth,strupr(accpass));
+	DEBUG3(printf("Authentication String=\"%s\"\n",_auth);)
+	char N_str[BNLEN+1],g_str[2],salt_str[BNLEN+1],unk1_str[16+1],B_str[BNLEN+1]; // +1 for '\0'
+
+	// extract data from packet
+	memcpy(B_str,&pkt[3],32);B_str[32]=0;
+	memcpy(g_str,&pkt[36],1);g_str[1]=0;
+	memcpy(N_str,&pkt[38],32);N_str[32]=0;
+	memcpy(salt_str,&pkt[70],32);salt_str[32]=0;
+	memcpy(unk1_str,&pkt[102],16);unk1_str[16]=0;
+	
+	// debug output	
+	DEBUG3(printchex(B_str,BNLEN,true);)
+	DEBUG3(printchex(g_str,1,true);)
+	DEBUG3(printchex(N_str,BNLEN,true);)
+	DEBUG3(printchex(salt_str,BNLEN,true);)
+	DEBUG3(printchex(unk1_str,16,true);)
+	
+	// convert into BigNumbers
+	B.SetBinary((const uint8*)B_str,BNLEN);
+	g.SetBinary((const uint8*)g_str,1);
+	N.SetBinary((const uint8*)N_str,BNLEN);
+	salt.SetBinary((const uint8*)salt_str,BNLEN);
+	unk1.SetBinary((const uint8*)unk1_str,16);
+
+	// client-side BN calculations:
+	DEBUG3(printf("--> k=%s\n",k.AsHexStr());)
+	a.SetRand(19*8);
+	Sha1Hash userhash,xhash,uhash;
+	std::string _authstr(_auth);
+	userhash.UpdateData(_authstr);
+	userhash.Finalize();
+	xhash.UpdateData(salt.AsByteArray(),salt.GetNumBytes());
+	xhash.UpdateData(userhash.GetDigest(),userhash.GetLength());
+	xhash.Finalize();
+	x.SetBinary(xhash.GetDigest(),xhash.GetLength());
+	DEBUG3(printf("--> x=%s\n",x.AsHexStr());)
+	v=g.ModExp(x,N);
+	DEBUG3(printf("--> v=%s\n",v.AsHexStr());)
+	A=g.ModExp(a,N);
+	DEBUG3(printf("--> A=%s\n",A.AsHexStr());)
+    uhash.UpdateBigNumbers(&A, &B, NULL);
+    uhash.Finalize();
+    u.SetBinary(uhash.GetDigest(), 20);
+	DEBUG3(printf("--> u=%s\n",u.AsHexStr());)
+	S=(B - k*g.ModExp(x,N) ).ModExp((a + u * x),N);
+	DEBUG3(printf("--> S=%s\n",S.AsHexStr());)
+
+	// calc M1 & M2
+	unsigned int i=0;
+					char S1[16+1],S2[16+1]; // 32/2=16 :) +1 for \0
+					// split it into 2 seperate strings, interleaved
+					
+					for(i=0;i<=15;i++){
+						S1[i]=S.AsByteArray()[i*2];
+						S2[i]=S.AsByteArray()[i*2+1];
+					}
+					//printchex(S1);printchex(S2);
+					// hash each one:
+					Sha1Hash S1hash,S2hash;
+					S1hash.UpdateData((const uint8*)S1,16);
+					S1hash.Finalize();
+					S2hash.UpdateData((const uint8*)S2,16);
+					S2hash.Finalize();
+					// Re-combine them
+					char S_hash[40+1]; // 2*Sha1Len+1 for \0
+					for(i=0;i<20;i++){
+						S_hash[i*2]=S1hash.GetDigest()[i];
+						S_hash[i*2+1]=S2hash.GetDigest()[i];
+					}
+					sessionkey.SetBinary((uint8*)S_hash,40); // used later when authing to world
+					//printf("-> S_hash=");printchex(S_hash,40,true);
+					
+					char Ng_hash[20+1];
+					Sha1Hash userhash2,Nhash,ghash;
+					userhash2.UpdateData((const uint8*)strupr(accname),strlen(accname));
+					userhash2.Finalize();
+					//printchex((char*)userhash2.GetDigest(),userhash2.GetLength(),true);
+					Nhash.UpdateBigNumbers(&N,NULL);
+					Nhash.Finalize();
+					ghash.UpdateBigNumbers(&g,NULL);
+					ghash.Finalize();					
+					for(i=0;i<20;i++)Ng_hash[i] = Nhash.GetDigest()[i]^ghash.GetDigest()[i];
+					//printchex(Ng_hash,20,true);
+
+					BigNumber t_acc,t_Ng_hash;
+					t_acc.SetBinary((const uint8*)userhash2.GetDigest(),userhash2.GetLength());
+					t_Ng_hash.SetBinary((const uint8*)Ng_hash,20);
+					
+					
+					Sha1Hash M1hash,M2hash;
+					
+					M1hash.UpdateBigNumbers(&t_Ng_hash,&t_acc,&salt,&A,&B,NULL);
+					M1hash.UpdateData((const uint8*)S_hash,40);
+					M1hash.Finalize();
+					
+					M2hash.UpdateBigNumbers(&A,NULL);
+					M2hash.UpdateData((const uint8*)M1hash.GetDigest(),M1hash.GetLength());
+					M2hash.UpdateData((const uint8*)S_hash,40);
+					M2hash.Finalize();
+
+
+					DEBUG3(
+						printf("--> M1=");printchex((char*)M1hash.GetDigest(),20,true);\
+						printf("--> M2=");printchex((char*)M2hash.GetDigest(),20,true);\
+					)
+
+					// Calc CRC & CRC_hash
+					// i don't know yet how to calc it, so set it to zero
+					char crc_hash[20+1];
+					nullify(crc_hash,20);
+
+
+					// now lets prepare the packet 
+					DEBUG2(printf("Calculations finished, preparing packet...\n");)
+					char outpkt[100]; 
+					memset(outpkt,0,100);
+					outpkt[0]=0x01; // opcode: CLIENT_GOGON_PROOF
+					memcpy(&outpkt[1],A.AsByteArray(),BNLEN);
+					memcpy(&outpkt[33],M1hash.GetDigest(),M1hash.GetLength());
+					memcpy(&outpkt[53],crc_hash,20); // TODO: as soon as crc_hash is calculated, correct this line!
+					outpkt[73]=0; // number_of_keys=0
+                    outpkt[74]=0; // unk=0 (added in 1.12.1)
+					DEBUG3(printf("... finished, packet content=");printchex(outpkt,73,true);)
+					memcpy(Auth_M2,M2hash.GetDigest(),M2hash.GetLength()); // save M2 to an extern var to check it later
+					DEBUG2(printf("Sending packet\n");)
+                    if(clientbuild>5302)
+					    realmCon.Send(outpkt,75); // 1.11.x and upwards
+                    else
+                        realmCon.Send(outpkt,74); // < 1.11.x compatibility
+
+
+
+}
