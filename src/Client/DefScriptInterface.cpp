@@ -6,7 +6,6 @@
 #include "NameTables.h"
 #include "DefScript/DefScript.h"
 #include "Player.h"
-#include "CMSGConstructor.h"
 #include "Opcodes.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"
