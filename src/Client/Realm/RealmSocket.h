@@ -33,6 +33,7 @@ public:
     void OnRead(void);
     //void OnAccept(void);
     void OnConnect(void);
+    void RealmSocket::OnConnectFailed(void);
 
 
 private:
