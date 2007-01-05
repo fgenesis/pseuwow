@@ -38,6 +38,7 @@ PseuInstance::PseuInstance()
     _ver_short="A12-dev1" DEBUG_APPENDIX;
     _wsession=NULL;
     _rsession=NULL;
+    _stop=false;
 
 
 }
@@ -69,18 +70,18 @@ bool PseuInstance::Init(void) {
 	
 	if(!_scp->variables.ReadVarsFromFile(_confdir + "PseuWoW.conf"))
 	{
-		printf("Error reading conf file [%s]",_confdir.append("PseuoW.conf").c_str()); 
+		printf("Error reading conf file [%s]",_confdir.append("PseuWoW.conf").c_str()); 
 		return false;
 	}
 	_conf->ApplyFromVarSet(_scp->variables);
 	
-    if(!_scp->variables.ReadVarsFromFile(_confdir + "users.conf"))
+    if(_scp->variables.ReadVarsFromFile(_confdir + "users.conf"))
 	{
-		//printf("-> Done.\n");
+		printf("-> Done reading users.\n");
 	}
 	else
 	{
-		printf("Error reading conf file [%s] - NO PERMISSIONS SET!",_confdir.append("users.conf").c_str()); 
+		printf("Error reading conf file [%s] - NO PERMISSIONS SET!\n",_confdir.append("users.conf").c_str()); 
 	}
 
 
@@ -96,9 +97,9 @@ bool PseuInstance::Init(void) {
 
 
   //  //DEBUG1(printf("Main_Init: Loading DefScripts from folder '%s'\n",defScpPath.c_str()););
-    if(!_scp->RunScriptByName("_startup",NULL,255)){
-        printf("Main_Init: Error executing '_startup.def'\n");
-    }
+    //if(!_scp->RunScriptByName("_startup",NULL,255)){
+    //    printf("Main_Init: Error executing '_startup.def'\n");
+    //}
 
     if(_stop){
 			printf("Errors while initializing, proc halted!!\n");

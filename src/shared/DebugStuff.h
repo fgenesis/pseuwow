@@ -7,7 +7,7 @@
     #define DEBUG_APPENDIX " - DEBUG"
     #define CODEDEB(code) fprintf(stderr,"[[ %s ]]\n",#code); code;
 #else 
-    #define DEB(code)
+    #define DEB(code) ;
     #define DEBUG_APPENDIX
     #define CODEDEB(code) code;
 #endif
