@@ -14,7 +14,6 @@ public:
     inline void SetOpcode(uint16 opcode) { _opcode=opcode; }
     inline uint16 GetOpcode(void) { return _opcode; }
     uint64 GetPackedGuid(void);
-    ~WorldPacket();
 
 private:
     uint16 _opcode;

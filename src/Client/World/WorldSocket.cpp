@@ -3,6 +3,12 @@
 #include "WorldSession.h"
 #include "WorldSocket.h"
 
+WorldSocket::WorldSocket(SocketHandler &h, WorldSession *s) : TcpSocket(h)
+{
+    _session = s;
+}
+    
+
 void WorldSocket::OnConnect()
 {
     printf("Connected to world server.\r\n");

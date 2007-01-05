@@ -463,4 +463,9 @@ void RealmSocket::_HandleLogonProof(void)
         //...
     }
 }
+
+void RealmSocket::OnConnect()
+{
+    printf("DEBUG: RealmSocket connected!\n");
+}
     
