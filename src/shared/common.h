@@ -12,6 +12,9 @@
 #include <string>
 #include <string.h>
 #include <sstream>
+#include <list>
+#include <deque>
+#include <vector>
 
 #include <SDL/SDL.h>
 #include "zthread/FastMutex.h"

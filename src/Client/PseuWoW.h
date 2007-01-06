@@ -2,15 +2,15 @@
 #ifndef _PSEUWOW_H
 #define _PSEUWOW_H
 
-#include "../shared/common.h"
+#include "common.h"
 #include "Auth/BigNumber.h"
 #include "DefScript/DefScript.h"
-#include "../shared/Network/SocketHandler.h"
-
+#include "Network/SocketHandler.h"
 
 class RealmSocket;
 class WorldSession;
 class Sockethandler;
+class PseuInstanceRunnable;
 
 class PseuInstanceConf
 {
@@ -45,7 +45,7 @@ class PseuInstance
 {
 	public:
 
-	PseuInstance();
+	PseuInstance(PseuInstanceRunnable *run);
 	~PseuInstance();	
 	
 
@@ -53,6 +53,7 @@ class PseuInstance
     RealmSocket *GetRSession(void) { return _rsession; }
     PseuInstanceConf *GetConf(void) { return _conf; }
     DefScriptPackage *GetScripts(void) { return _scp; }
+    PseuInstanceRunnable *GetRunnable(void) { return _runnable; }
     void SetConfDir(std::string dir) { _confdir = dir; }
     void SetScpDir(std::string dir) { _scpdir = dir; }
     void SetSessionKey(BigNumber key) { _sessionkey = key; }
@@ -64,21 +65,24 @@ class PseuInstance
 	bool Init();
 	void SaveAllCache(void);
     void Stop(void) { _stop = true; }
+    void SetFastQuit(bool q=true) { _fastquit=true; }
 	void Quit(void);
     void Run(void);
     void Update(void);	
+    void Sleep(uint32 msecs);
 	
 	
 	
 	private:
 
+    PseuInstanceRunnable *_runnable;
 	RealmSocket *_rsession;
 	WorldSession *_wsession;
 	PseuInstanceConf *_conf;
 	DefScriptPackage *_scp;
 	std::string _confdir,_scpdir;
 	bool _initialized;	
-	bool _stop;
+	bool _stop,_fastquit;
 	BigNumber _sessionkey;
     char *_ver,*_ver_short;
     SocketHandler _sh;
@@ -89,60 +93,14 @@ class PseuInstance
 class PseuInstanceRunnable : public ZThread::Runnable
 {
 public:
-    void run();
+    PseuInstanceRunnable::PseuInstanceRunnable();
+    void run(void);
+    void sleep(uint32);
+    PseuInstance *GetInstance(void) { return _i; }
+
+private:
+    PseuInstance *_i;
 };
-	
-	
-	
 
-// OBOELETE
-/*
-
-class SDLTCPConnection;
-class DefScriptPackage;
-class PlayerNameCache;
-class VarSet;
-
-extern char DEBUG;
-extern char *ver;
-extern char *realmlist,*accname,*accpass,*realmname;
-extern bool quit,quitted,exitonerror;
-extern unsigned char error;
-extern unsigned char clientversion[3];
-extern unsigned short clientbuild;
-extern char clientlang[4];
-extern bool something_went_wrong;
-
-extern unsigned int c_port;
-extern bool allowcontroller;
-extern char *c_password;
-
-extern unsigned int rs_port;
-extern unsigned short clientbuild;
-extern char clientlang[4];
-
-extern unsigned int ws_port;
-extern std::string worldhost, charname;
-extern SDLTCPConnection worldCon,realmCon,ctrlCon;
-extern bool inworld;
-extern unsigned short idleSleepTime;
-
-extern DefScriptPackage defScp;
-extern std::string defScpPath;
-
-extern PlayerNameCache plrNameCache;
-
-extern VarSet playerPermissions;
-
-extern uint64 _myGUID, _targetGUID, _followGUID;
-
-
-// --- Some Functions ---
-
-void quitproc_error(void);
-void quitproc(void);
-void _SaveAllCache(void);
-
-*/
 
 #endif

@@ -29,6 +29,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _instance = in;
     _valid=_authed=_logged=false;
     _socket=new WorldSocket(_sh,this);
+    _socket->SetDeleteByHandler();
     _sh.Add(_socket);
     _targetGUID=0; // no target
     _followGUID=0; // dont follow anything
@@ -38,7 +39,7 @@ WorldSession::WorldSession(PseuInstance *in)
 
 WorldSession::~WorldSession()
 {
-    delete _socket;
+    //delete _socket; the socket will be deleted by its handler!!
 }
 
 void WorldSession::AddToDataQueue(uint8 *data, uint32 len)

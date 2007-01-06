@@ -21,9 +21,13 @@ opcode handler table vervollstädigen + funktionen dafür umschreiben
 
 //###### Start of program code #######
 
+PseuInstanceRunnable::PseuInstanceRunnable()
+{
+}
+
 void PseuInstanceRunnable::run(void)
 {
-    PseuInstance *_i = new PseuInstance();
+    _i = new PseuInstance(this);
 	_i->SetConfDir("./conf/");
     _i->SetScpDir("./scripts/");
 	_i->Init();
@@ -32,13 +36,22 @@ void PseuInstanceRunnable::run(void)
     delete _i;
 }
 
-PseuInstance::PseuInstance()
+void PseuInstanceRunnable::sleep(uint32 msecs)
 {
+    ZThread::Thread::sleep(msecs);
+}
+
+PseuInstance::PseuInstance(PseuInstanceRunnable *run)
+{
+    _runnable=run;
     _ver="PseuWoW Alpha Build 12 dev 2" DEBUG_APPENDIX;
     _ver_short="A12-dev1" DEBUG_APPENDIX;
     _wsession=NULL;
     _rsession=NULL;
+    _scp=NULL;
+    _conf=NULL;
     _stop=false;
+    _fastquit=false;
 
 
 }
@@ -47,7 +60,7 @@ PseuInstance::~PseuInstance()
 {
     delete _scp;
 	delete _conf;
-	delete _rsession;
+	//delete _rsession; // deleted by SocketHandler!!!!!
 	delete _wsession;
 }
 
@@ -138,6 +151,16 @@ void PseuInstance::Run(void)
     {
         Update();
     }
+
+    if(_fastquit)
+    {
+        printf("Aborting Instance...\n");
+        return;
+    }
+    
+    printf("Shutting down instance...\n");
+
+
     // save all data here
 
 }
@@ -145,18 +168,23 @@ void PseuInstance::Run(void)
 void PseuInstance::Update()
 {
     if(_sh.GetCount())
-        _sh.Select(1,0); // update the realmsocket
+        _sh.Select(0,0); // update the realmsocket
     //else
         // socket invalid?
 
-    _wsession->Update();
-
+    _wsession->Update(); // update the worldSESSION, which will update the worldsocket itself
+    this->Sleep(GetConf()->networksleeptime);
 }
 
 void PseuInstance::SaveAllCache(void)
 {
     GetWSession()->plrNameCache.SaveToFile();
     //...
+}
+
+void PseuInstance::Sleep(uint32 msecs)
+{
+    GetRunnable()->sleep(msecs);
 }
 
 

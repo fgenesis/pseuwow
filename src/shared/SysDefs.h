@@ -83,4 +83,9 @@
     typedef uint32      DWORD;
 #endif
 
+#ifndef SIGQUIT
+#define SIGQUIT 3
+#endif
+
+
 #endif

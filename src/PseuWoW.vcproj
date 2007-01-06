@@ -106,7 +106,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib sdl.lib sdl_net.lib sdlmain.lib libeay32MT.lib ssleay32MT.lib WS2_32.LIB"
 				OutputFile="$(OutDir)/$(InputName).exe"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
