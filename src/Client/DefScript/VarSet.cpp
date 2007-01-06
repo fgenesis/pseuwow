@@ -17,7 +17,7 @@ VarSet::~VarSet()
 
 std::string VarSet::Get(std::string varname)
 {
-    for(std::list<Var>::iterator i=buffer.begin();i!=buffer.end();i++)
+    for(std::deque<Var>::iterator i=buffer.begin();i!=buffer.end();i++)
 		if( i->name==varname )
 			return i->value;
     return ""; // if var has not been set return empty string
@@ -27,7 +27,7 @@ void VarSet::Set(std::string varname, std::string varvalue)
 {
 	if(varname.empty())
         return;
-	for(std::list<Var>::iterator i = buffer.begin();i!=buffer.end();i++)
+	for(std::deque<Var>::iterator i = buffer.begin();i!=buffer.end();i++)
     {
 		if( i->name==varname )
         {
@@ -49,7 +49,7 @@ unsigned int VarSet::Size(void)
 
 bool VarSet::Exists(std::string varname)
 {
-	for(std::list<Var>::iterator i = buffer.begin();i!=buffer.end();i++)
+	for(std::deque<Var>::iterator i = buffer.begin();i!=buffer.end();i++)
         if(i->name==varname)
             return true;
 	return false;
@@ -59,7 +59,7 @@ void VarSet::Unset(std::string varname)
 {
     if ( varname.empty() )
         return;
-	for(std::list<Var>::iterator i = buffer.begin();i!=buffer.end();i++)
+	for(std::deque<Var>::iterator i = buffer.begin();i!=buffer.end();i++)
     {
 		if(i->name==varname)
         {
@@ -73,6 +73,11 @@ void VarSet::Clear(void)
 {
     buffer.clear();
 }
+
+Var VarSet::operator[](unsigned int id)
+ {
+     return buffer.at(id);
+ }
 	
 bool VarSet::ReadVarsFromFile(std::string fn)
 {

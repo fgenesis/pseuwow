@@ -2,7 +2,7 @@
 #define __VARSET_H
 
 #include <string>
-#include <list>
+#include <deque>
 
 
 struct Var {
@@ -19,12 +19,13 @@ public:
 	unsigned int Size(void);
 	bool Exists(std::string);
     bool ReadVarsFromFile(std::string fn);
+    Var operator[](unsigned int id);
 	VarSet();
 	~VarSet();
 	// far future: MergeWith(VarSet,bool overwrite);
 
 private:
-    std::list<Var> buffer;
+    std::deque<Var> buffer;
     std::string toLower(std::string);
     std::string toUpper(std::string);
 

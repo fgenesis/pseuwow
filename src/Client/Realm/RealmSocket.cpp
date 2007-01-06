@@ -115,7 +115,7 @@ void RealmSocket::Start(void)
 void RealmSocket::Stop(void)
 {
     _valid=false;
-    this->SetCloseAndDelete();
+    this->Close();
     memset(_m2,0,20);
     _key=0;
 }

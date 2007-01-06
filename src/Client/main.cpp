@@ -1,10 +1,9 @@
-#include "../shared/common.h"
+#include "common.h"
 #include "main.h"
 #include "PseuWoW.h"
 
-#ifndef SIGQUIT
-#define SIGQUIT 3
-#endif
+std::list<PseuInstanceRunnable*> instanceList; // TODO: move this to a "Master" class later
+
 
 void _HookSignals(void)
 {
@@ -24,28 +23,50 @@ void _OnSignal(int s)
         case SIGINT:
         case SIGQUIT:
         case SIGTERM:
-        case SIGABRT:
             quitproc();            
             break;
+        case SIGABRT:
+        #ifndef _DEBUG
+        case SIGSEGV:
+        #endif
         #ifdef _WIN32
         case SIGBREAK:
-            exit(0);
-            break;
         #endif
+            abortproc();
+            break;
     }
     signal(s, _OnSignal);
 }
 
-void quitproc(void){
-    exit(0);
+void quitproc(void)
+{
+    printf("Waiting for all instances to finish... [%u]\n",instanceList.size());
+    for(std::list<PseuInstanceRunnable*>::iterator i=instanceList.begin();i!=instanceList.end();i++)
+    {
+        (*i)->GetInstance()->Stop();
+    }
 }
 
+void abortproc(void)
+{
+    printf("Terminating all instances... [%u]\n",instanceList.size());
+    for(std::list<PseuInstanceRunnable*>::iterator i=instanceList.begin();i!=instanceList.end();i++)
+    {
+        (*i)->GetInstance()->SetFastQuit(true);
+        (*i)->GetInstance()->Stop();
+    }
+}
 
 int main(int argc, char* argv[]) {
     try 
     {
+        
         _HookSignals();
-        ZThread::Thread t(new PseuInstanceRunnable);
+
+        // 1 instance is enough for now
+        PseuInstanceRunnable *r=new PseuInstanceRunnable();
+        ZThread::Thread t(r);
+        instanceList.push_back(r);
         t.setPriority((ZThread::Priority)2);
         //...
         t.wait();
