@@ -62,6 +62,8 @@ void WorldSession::SendWorldPacket(WorldPacket &pkt)
 
 void WorldSession::Update(void)
 {
+    if (GetInstance()->GetConf()->worldhost.empty() || GetInstance()->GetConf()->worldport==0)
+        return;
     WorldPacket packet;
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     while(pktQueue.size()>5)

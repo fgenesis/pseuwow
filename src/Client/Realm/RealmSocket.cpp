@@ -18,7 +18,7 @@ struct SRealmHeader
 {
     uint8	cmd;			// OP code = CMD_REALM_LIST
 	uint16	size;			// size of the rest of packet, without this part
-	uint32	unknown;		// 0x00 00 00 00
+    uint32	unknown;		// 0x00 00 00 00
 	uint8	count;			// quantity of realms
 };
 
@@ -122,25 +122,41 @@ void RealmSocket::Stop(void)
 
 void RealmSocket::_HandleRealmList(void)
 {
-    SRealmHeader hd;
     std::string realmAddr;
-    ibuf.Read((char*)&hd, sizeof(SRealmHeader));
+    ByteBuffer realmbuf;
+    realmbuf.reserve(ibuf.GetLength());
+    ibuf.Read((char*)realmbuf.contents(), ibuf.GetLength());
+
+    uint32 unk;
+    uint16 len;
+    uint8 cmd,count;
+    realmbuf >> cmd >> len >> unk >> count;
+
+    printf("DEBUG: Realm cmd=%u, count=%u, size=%u, unk=%u\n",cmd,count,len,unk);
 	
-	
-	////DEBUG1(printf("Realms in List: %d\n",count););
-    // no realm?!
-    if(hd.count==0)
+    // no realm?
+    if(count==0)
         return;
 
     // alloc space for as many realms as needed
-	SRealmInfo *realms=new SRealmInfo[hd.count];
+	SRealmInfo *realms=new SRealmInfo[count];
 
     // readout realms
-	for(uint8 i=0;i<hd.count;i++)
-		ibuf.Read((char*)&realms[i], sizeof(SRealmInfo));	
+	for(uint8 i=0;i<count;i++)
+    {
+        realmbuf >> realms[i].icon;
+        realmbuf >> realms[i].color;
+        realmbuf >> realms[i].name;
+        realmbuf >> realms[i].addr_port;
+        realmbuf >> realms[i].population;
+        realmbuf >> realms[i].chars_here;
+        realmbuf >> realms[i].timezone;
+        realmbuf >> realms[i].unknown;
+    }
+		
 	// the rest of the packet is not interesting
 
-    for(uint8 i=0;i<hd.count;i++)
+    for(uint8 i=0;i<count;i++)
     {
         if(realms[i].name==GetInstance()->GetConf()->realmname)
         {
@@ -463,9 +479,9 @@ void RealmSocket::_HandleLogonChallenge(void)
 
 void RealmSocket::_HandleLogonProof(void)
 {
-    printf("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),sizeof(sAuthLogonProof_S));
+    printf("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),26);
     sAuthLogonProof_S lp;
-    ibuf.Read((char*)&lp, sizeof(sAuthLogonProof_S));
+    ibuf.Read((char*)&lp, 26); // the compiler didnt like 'sizeof(sAuthLogonProof_S)', said it was 28
     printchex((char*)&lp, sizeof(sAuthLogonProof_S),true);
     if(!memcmp(lp.M2,this->_m2,20))
     {
