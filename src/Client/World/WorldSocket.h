@@ -14,6 +14,7 @@ public:
     
     void OnRead();
     void OnConnect();
+    void OnConnectFailed();
 
 private:
     WorldSession *_session;

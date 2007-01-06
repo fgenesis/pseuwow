@@ -34,6 +34,8 @@ public:
     void Connect(std::string addr,uint16 port);
     WorldPacket BuildWorldPacket(void);
     void Update(void);
+    void Start(void);
+    bool IsValid(void) { return _valid; }
     void SendWorldPacket(WorldPacket&);
 
     void SetTarget(uint64 guid);

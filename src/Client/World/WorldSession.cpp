@@ -8,6 +8,7 @@
 #include "WorldSocket.h"
 #include "WorldSession.h"
 #include "NameTables.h"
+#include "RealmSocket.h"
 
 
 struct ClientPktHeader
@@ -33,6 +34,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _sh.Add(_socket);
     _targetGUID=0; // no target
     _followGUID=0; // dont follow anything
+    _myGUID=0; // i dont have a guid yet
     plrNameCache.ReadFromFile(); // load names/guids of known players
     //...
 }
@@ -40,6 +42,13 @@ WorldSession::WorldSession(PseuInstance *in)
 WorldSession::~WorldSession()
 {
     //delete _socket; the socket will be deleted by its handler!!
+}
+
+void WorldSession::Start(void)
+{
+    _socket->Open(GetInstance()->GetConf()->worldhost,GetInstance()->GetConf()->worldport);
+    GetInstance()->GetRSession()->SetCloseAndDelete(); // realm socket is no longer needed
+    _valid=true;
 }
 
 void WorldSession::AddToDataQueue(uint8 *data, uint32 len)
@@ -63,8 +72,10 @@ void WorldSession::SendWorldPacket(WorldPacket &pkt)
 
 void WorldSession::Update(void)
 {
-    if (GetInstance()->GetConf()->worldhost.empty() || GetInstance()->GetConf()->worldport==0)
+    if (!IsValid())
         return;
+    if(_sh.GetCount())
+        _sh.Select(0,0);
     WorldPacket packet;
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     while(pktQueue.size()>5)

@@ -72,7 +72,8 @@ class PseuInstance
     void Sleep(uint32 msecs);
 	
 	
-	
+	bool createWorldSession;
+
 	private:
 
     PseuInstanceRunnable *_runnable;
