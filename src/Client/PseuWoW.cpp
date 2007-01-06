@@ -52,6 +52,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _conf=NULL;
     _stop=false;
     _fastquit=false;
+    createWorldSession=false;
 
 
 }
@@ -83,7 +84,6 @@ bool PseuInstance::Init(void) {
     _scp->SetParentMethod((void*)this);
 	_conf=new PseuInstanceConf();	
 	_rsession=new RealmSocket(_sh);
-	_wsession=new WorldSession(this);
 	
 	if(!_scp->variables.ReadVarsFromFile(_confdir + "PseuWoW.conf"))
 	{
@@ -171,8 +171,20 @@ void PseuInstance::Update()
         _sh.Select(0,0); // update the realmsocket
     //else
         // socket invalid?
+    if(createWorldSession)
+    {
+        createWorldSession=false;
+        _wsession=new WorldSession(this);
+    }
+    if(_wsession && !_wsession->IsValid())
+    {
+        _wsession->Start(); // update the worldSESSION, which will update the worldsocket itself
+    }
+    if(_wsession && _wsession->IsValid())
+    {
+        _wsession->Update(); // update the worldSESSION, which will update the worldsocket itself
+    }
 
-    _wsession->Update(); // update the worldSESSION, which will update the worldsocket itself
     this->Sleep(GetConf()->networksleeptime);
 }
 

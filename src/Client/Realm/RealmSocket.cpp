@@ -4,6 +4,7 @@
 #include "Auth/Sha1.h"
 #include "Auth/BigNumber.h"
 #include "RealmSocket.h"
+#include "WorldSession.h"
 
 
 
@@ -185,6 +186,9 @@ void RealmSocket::_HandleRealmList(void)
     // set vars
     GetInstance()->GetScripts()->variables.Set("WORLDHOST",GetInstance()->GetConf()->worldhost);
     GetInstance()->GetScripts()->variables.Set("WORLDPORT",toString((uint64)(GetInstance()->GetConf()->worldport)));
+
+    // now we have the correct addr/port, time to create the WorldSession
+    GetInstance()->createWorldSession=true;
 }
 
 
