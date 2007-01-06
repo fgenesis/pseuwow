@@ -107,11 +107,6 @@ void RealmSocket::Start(void)
     if(_rhost.empty() || _rport==0 || _instance==NULL)
         return;
 
-// is here any other socket code neded?
-//    _socket.Init()
-//    _socket.SetHost(_host);
-//    _socket.SetPort(_port);
-
     bool result=Open(_rhost,_rport);
     //...
     _valid=true;
@@ -199,6 +194,7 @@ void RealmSocket::OnRead(void)
     {
         printf("RealmSocket: Got unknown packet, cmd=%u\n",cmd);
     }
+    ibuf.Remove(ibuf.GetLength()); // if we have data crap left on the buf, delete it
 }
 
 /*
@@ -319,6 +315,7 @@ PseuInstance *RealmSocket::GetInstance(void)
 
 void RealmSocket::_HandleLogonChallenge(void)
 {
+    printf("RealmSocket: Got AUTH_LOGON_CHALLENGE [%u of %u bytes]\n",ibuf.GetLength(),sizeof(sAuthLogonChallenge_S));
     sAuthLogonChallenge_S lc;
     ibuf.Read((char*)&lc, sizeof(sAuthLogonChallenge_S));
 
@@ -331,6 +328,7 @@ void RealmSocket::_HandleLogonChallenge(void)
         printf("Account \"%s\" is already logged in!\n",GetInstance()->GetConf()->accname.c_str());
         break;
     case 0:
+        {
         printf("Login successful, now calculating proof packet...\n");
 
         // now lets start calculating
@@ -428,8 +426,8 @@ void RealmSocket::_HandleLogonChallenge(void)
 
 
 		////DEBUG3(
-		//	printf("--> M1=");printchex((char*)M1hash.GetDigest(),20,true);\
-		//	printf("--> M2=");printchex((char*)M2hash.GetDigest(),20,true);\
+			printf("--> M1=");printchex((char*)M1hash.GetDigest(),20,true);
+			printf("--> M2=");printchex((char*)M2hash.GetDigest(),20,true);
 		//)
 
 		// Calc CRC & CRC_hash
@@ -453,19 +451,22 @@ void RealmSocket::_HandleLogonChallenge(void)
         memcpy(this->_m2,M2hash.GetDigest(),M2hash.GetLength()); // save M2 to an extern var to check it later
 
         SendBuf((char*)packet.contents(),packet.size());
+        }
         break;
 
-    //default:
-    //    printf("Unknown realm server response! opcode=0x%x\n",(unsigned char)lc.error);
-    //    break;
+    default:
+        printf("Unknown realm server response! opcode=0x%x\n",(unsigned char)lc.error);
+        break;
     }
 }
 
 
 void RealmSocket::_HandleLogonProof(void)
 {
+    printf("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),sizeof(sAuthLogonProof_S));
     sAuthLogonProof_S lp;
     ibuf.Read((char*)&lp, sizeof(sAuthLogonProof_S));
+    printchex((char*)&lp, sizeof(sAuthLogonProof_S),true);
     if(!memcmp(lp.M2,this->_m2,20))
     {
         // auth successful
@@ -476,8 +477,10 @@ void RealmSocket::_HandleLogonProof(void)
     }
     else
     {
-        // auth failed, M2 differs
-        //...
+        printf("Auth failed, M2 differs!\n");
+        printf("My M2 :"); printchex((char*)_m2,20,true);
+        printf("Srv M2:"); printchex((char*)lp.M2,20,true);
+
     }
 }
 

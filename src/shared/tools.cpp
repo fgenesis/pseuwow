@@ -23,9 +23,19 @@ void printchex(std::string in, bool spaces=true){
     len=in.length();
 	printf("[");
 	if(spaces)
-		for(i=0;i<=len-1;i++)printf("%x ",(unsigned char)in[i]); 
+		for(i=0;i<len;i++)printf("%x ",(unsigned char)in[i]); 
 	else
-		for(i=0;i<=len-1;i++)printf("%x",(unsigned char)in[i]); 
+		for(i=0;i<len;i++)printf("%x",(unsigned char)in[i]); 
+	printf("]\n");
+}
+
+void printchex(char *in, uint32 len, bool spaces=true){
+	unsigned int i;
+	printf("[");
+	if(spaces)
+		for(i=0;i<len;i++)printf("%x ",(unsigned char)in[i]); 
+	else
+		for(i=0;i<len;i++)printf("%x",(unsigned char)in[i]); 
 	printf("]\n");
 }
 
