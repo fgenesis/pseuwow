@@ -11,27 +11,11 @@
 #include "RealmSocket.h"
 
 
-struct ClientPktHeader
-{
-    uint16 size;
-    uint16 cmd;
-	uint16 nil;
-};
-
-struct ServerPktHeader
-{
-    uint16 size;
-    uint16 cmd;
-};
-
-
 WorldSession::WorldSession(PseuInstance *in)
 {
     _instance = in;
     _valid=_authed=_logged=false;
     _socket=new WorldSocket(_sh,this);
-    _socket->SetDeleteByHandler();
-    _sh.Add(_socket);
     _targetGUID=0; // no target
     _followGUID=0; // dont follow anything
     _myGUID=0; // i dont have a guid yet
@@ -41,33 +25,36 @@ WorldSession::WorldSession(PseuInstance *in)
 
 WorldSession::~WorldSession()
 {
+    WorldPacket *packet;
+    // clear the queue
+    while(!pktQueue.empty())
+    {
+        packet = pktQueue.next();
+        delete packet;
+    }
     //delete _socket; the socket will be deleted by its handler!!
 }
 
 void WorldSession::Start(void)
 {
+    printf("Connecting to '%s' on port %u\n",GetInstance()->GetConf()->worldhost.c_str(),GetInstance()->GetConf()->worldport);
     _socket->Open(GetInstance()->GetConf()->worldhost,GetInstance()->GetConf()->worldport);
     GetInstance()->GetRSession()->SetCloseAndDelete(); // realm socket is no longer needed
     _valid=true;
+    _sh.Add(_socket);
+    _socket->SetDeleteByHandler();
+    _sh.Select(1,0);
 }
 
-void WorldSession::AddToDataQueue(uint8 *data, uint32 len)
+void WorldSession::AddToPktQueue(WorldPacket *pkt)
 {
-    for (uint32 i=0;i<len;i++)
-        pktQueue.push_back(data[i]);
+    pktQueue.add(pkt);
+    printf("-- Added Packet to queue, size is now %u\n",pktQueue.size());
 }
 
 void WorldSession::SendWorldPacket(WorldPacket &pkt)
 {
-    ClientPktHeader hdr;
-    memset(&hdr,0,sizeof(ClientPktHeader));
-    hdr.size = ntohs(pkt.size()+4);
-    hdr.cmd = pkt.GetOpcode();
-    _crypt.EncryptSend((uint8*)&hdr, 6);
-    ByteBuffer final(pkt.size()+6);
-    final.append((uint8*)&hdr,sizeof(ClientPktHeader));
-    final.append(pkt.contents(),pkt.size());
-    _socket->SendBuf((char*)final.contents(),final.size());
+    _socket->SendWorldPacket(pkt);
 }
 
 void WorldSession::Update(void)
@@ -76,42 +63,32 @@ void WorldSession::Update(void)
         return;
     if(_sh.GetCount())
         _sh.Select(0,0);
-    WorldPacket packet;
+
     OpcodeHandler *table = _GetOpcodeHandlerTable();
-    while(pktQueue.size()>5)
+    bool known=false;
+    while(!pktQueue.empty())
     {
-        packet = BuildWorldPacket();
+        WorldPacket *packet = pktQueue.next();
+        printf("QUEUE: %u packets left\n",pktQueue.size());
+        printf(">> Opcode %u [%s]\n",packet->GetOpcode(),LookupName(packet->GetOpcode(),g_worldOpcodeNames));
         
         for (uint16 i = 0; table[i].handler != NULL; i++)
-            if (table[i].opcode == packet.GetOpcode())
-                (this->*table[i].handler)(packet);
+        {
+            if (table[i].opcode == packet->GetOpcode())
+            {
+                (this->*table[i].handler)(*packet);
+                known=true;
+                break;
+            }
+        }
+        //if(!known)
+        
 
-        packet.clear();
+        delete packet;
     }
     // do more stuff here
 }
 
-WorldPacket WorldSession::BuildWorldPacket(void)
-{
-    ServerPktHeader hdr;
-    WorldPacket wp;
-    uint16 _remaining;
-    for (uint8 i=0;i<sizeof(ServerPktHeader);i++)
-    {
-        ((uint8*)&hdr)[i] = pktQueue.front();
-        pktQueue.pop_front();
-    }
-    _crypt.DecryptRecv((uint8*)&hdr,sizeof(ServerPktHeader));
-    _remaining = ntohs(hdr.size)-2;
-    wp.SetOpcode(hdr.cmd);
-    for (uint16 i=0;i<_remaining;i++)
-    {
-        wp << pktQueue.front();
-        pktQueue.pop_front();
-    }
-    return wp;
-    
-}
 
 OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 {
@@ -167,7 +144,7 @@ void WorldSession::OnEnterWorld(void)
     if(!_logged)
     {
         _logged=true;
-        GetInstance()->GetScripts()->RunScriptByName("_enterworld",NULL,255);
+        //GetInstance()->GetScripts()->RunScriptByName("_enterworld",NULL,255);
     }
 }
 
@@ -182,7 +159,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
 	uint32 serverseed;
 	recvPacket >> serverseed;
-	//DEBUG3(printf("W:auth: serverseed=0x%X\n",serverseed);)
+	printf("W:auth: serverseed=0x%X\n",serverseed);
 	Sha1Hash digest;
 	digest.UpdateData(acc);
 	uint32 unk=0;
@@ -207,10 +184,13 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
 	//	printf("CMSG_AUTH_SESSION=");
 	//	printchex((char*)outpkt.contents(),outpkt.size(),true);
 	//)
-		SendWorldPacket(auth);
-		_crypt.SetKey(GetInstance()->GetSessionKey().AsByteArray(), 40);
-		_crypt.Init();
-        _authed=true;
+	SendWorldPacket(auth);
+
+    // note that if the sessionkey/auth is wrong or failed, the server sends the following packet UNENCRYPTED!
+    // so its not 100% correct to init the crypt here, but it should do the job if authing was correct
+	_socket->InitCrypt(GetInstance()->GetSessionKey().AsByteArray(), 40); 
+
+    _authed=true;
 
 }
 

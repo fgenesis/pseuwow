@@ -6,6 +6,19 @@
 
 class WorldSession;
 
+struct ClientPktHeader
+{
+    uint16 size;
+    uint16 cmd;
+	uint16 nil;
+};
+
+struct ServerPktHeader
+{
+    uint16 size;
+    uint16 cmd;
+};
+
 class WorldSocket : public TcpSocket
 {
 public:
@@ -16,8 +29,16 @@ public:
     void OnConnect();
     void OnConnectFailed();
 
+    void SendWorldPacket(WorldPacket &pkt);
+    void InitCrypt(uint8*,uint32);
+
 private:
     WorldSession *_session;
+    AuthCrypt _crypt;
+    bool _gothdr; // true if only the header was recieved yet
+    ByteBuffer _hdr;
+    uint16 _opcode;
+    uint16 _remaining;
 
 };
 
