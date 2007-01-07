@@ -30,9 +30,8 @@ public:
 
     OpcodeHandler *_GetOpcodeHandlerTable(void) const;
 
-    void AddToDataQueue(uint8*, uint32);
+    void AddToPktQueue(WorldPacket *pkt);
     void Connect(std::string addr,uint16 port);
-    WorldPacket BuildWorldPacket(void);
     void Update(void);
     void Start(void);
     bool IsValid(void) { return _valid; }
@@ -73,9 +72,8 @@ private:
 
 
     PseuInstance *_instance;
-    AuthCrypt _crypt;
     WorldSocket *_socket;
-    std::deque<uint8> pktQueue;
+    ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
     bool _valid,_authed,_logged; // world status
     SocketHandler _sh; // handles the WorldSocket
     uint64 _targetGUID,_followGUID,_myGUID;

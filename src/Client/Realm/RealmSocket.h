@@ -31,7 +31,6 @@ public:
     void _HandleLogonChallenge(void);
 
     void OnRead(void);
-    //void OnAccept(void);
     void OnConnect(void);
     void OnConnectFailed(void);
 
