@@ -33,34 +33,35 @@ void WorldSocket::OnRead()
 
     ByteBuffer bb;
     bb.append(buf,len);
-    bb.hexlike();
+   // bb.hexlike();
 
     uint32 offset=0;
 
     // this is a bit tricky, but needed, because sometimes packets come over as [[hdr][data][hdr]]
     // and the 2nd header needs to be extracted too
-    while(true)
+    while(len > 0)
     {
 
         if(_gothdr) // already got header, this packet has to be the data part
         {
             _gothdr=false;
-            if( len != _remaining )
+            /*if( len != _remaining )
             {
                 printf("WP: Recieved packet is not correct (%u of %u)\n",len,_remaining);
                 break;
-            }
+            }*/
 
-            printf("WP: Building complete WorldPacket with opcode %u\n",_opcode);
+            printf("WP: Fetched DATA part, building complete WorldPacket with opcode %u\n",_opcode);
             WorldPacket *wp = new WorldPacket;
-            wp->append(buf+offset,len);
+            wp->append(buf+offset,_remaining);
             wp->SetOpcode(_opcode);
             GetSession()->AddToPktQueue(wp);
-            break;
+            offset += _remaining; // skip the data already used
+            len -= _remaining;
         }
         else // no pending header stored, so this packet must be a header
         {
-            printf("WP: Got header (%u bytes)\n",len);
+            printf("WP: Fetched header (%u bytes)\n",len);
             ServerPktHeader hdr;
             memcpy(&hdr,buf+offset,sizeof(ServerPktHeader));
             _crypt.DecryptRecv((uint8*)&hdr,sizeof(ServerPktHeader));
@@ -71,50 +72,18 @@ void WorldSocket::OnRead()
             // the header is fine, now check if there are more data
             if(_remaining == 0)
             {
-                printf("WP: Got header-only Packet, building WorldPacket\n");
+                printf("WP: Packet has no body, building WorldPacket\n");
                 WorldPacket *wp = new WorldPacket;
                 wp->SetOpcode(_opcode);
                 GetSession()->AddToPktQueue(wp);
-                break;
+                offset += 4 ; // skip the data already used
+                len -= 4;
             }
-            else if( _remaining && len-4==0 )
+            else
             {
-                printf("WP: Got ONLY a header, waiting for data...\n");
                 _gothdr=true; // only got the header, next packet wil contain the data
-                break;
-            }
-            else // if the packet is bigger then 4 bytes, header & packet are merged
-            {
-                if( (len - sizeof(ServerPktHeader)) == _remaining )
-                {
-                    printf("WP: Got merged Packet, building WorldPacket\n");
-                    WorldPacket *wp = new WorldPacket;
-                    wp->append(buf+4+offset,_remaining); // skip first 4 bytes (header)
-                    wp->SetOpcode(_opcode);
-                    GetSession()->AddToPktQueue(wp);
-                    break;
-                }
-                else if ( (len - sizeof(ServerPktHeader)) < _remaining )
-                {
-                    printf("WP: Got too small merged packet (total=%u, data=%u)\n",len,_remaining);
-                    break;
-                }
-                else if( (len - sizeof(ServerPktHeader)) > _remaining)
-                {
-                    WorldPacket *wp = new WorldPacket;
-                    wp->append(buf+4+offset,_remaining); // skip first 4 bytes (header)
-                    wp->SetOpcode(_opcode);
-                    GetSession()->AddToPktQueue(wp);
-
-                    offset += (4 + _remaining); // skip the header & the data already used
-                    len -= (4 + _remaining);
-                    printf("WP: Got too big merged packet, new offset=%u, new len=%u, reading more data..\n",offset,len);
-
-                    if(len <= 0)
-                        break; // all data done
-                    else
-                        continue; // read next part
-                }
+                offset += 4 ; // skip the data already used
+                len -= 4;
             }
         }
     }
