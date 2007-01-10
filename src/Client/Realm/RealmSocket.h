@@ -5,6 +5,7 @@
 #define _REALMSOCKET_H
 
 #include "Network/ResolvSocket.h"
+#include "PseuWoW.h"
 
 class RealmSocket : public TcpSocket
 {

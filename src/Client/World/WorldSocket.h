@@ -28,6 +28,7 @@ public:
     void OnRead();
     void OnConnect();
     void OnConnectFailed();
+    void OnDelete();
 
     void SendWorldPacket(WorldPacket &pkt);
     void InitCrypt(uint8*,uint32);
@@ -36,9 +37,8 @@ private:
     WorldSession *_session;
     AuthCrypt _crypt;
     bool _gothdr; // true if only the header was recieved yet
-    ByteBuffer _hdr;
-    uint16 _opcode;
-    uint16 _remaining;
+    uint16 _opcode; // stores the last recieved opcode
+    uint16 _remaining; // bytes amount of the next data packet
 
 };
 
