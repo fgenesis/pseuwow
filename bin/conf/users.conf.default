@@ -1,0 +1,18 @@
+/////////////////////////////////////////////////////////////
+// Player Permission Configuration file
+/////////////////////////////////////////////////////////////
+// Permission reaches from 0 to 255
+
+[USERS]
+
+Gamemaster=100
+Admin=255
+Trusted=30
+Niceplayer=10
+Falsegenesis=150
+//...
+// Add your names here
+
+
+
+// rest is 0 automatically

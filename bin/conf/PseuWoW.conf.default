@@ -1,0 +1,60 @@
+//////////////////////////////////////////////////////////////////////////
+// PseuWoW config file
+//
+// still under development :D
+///////////////////////////////////////////////////////////////////////////
+//
+// use // for comments (C++ style)
+
+// its important to read & store the main conf variables UPPERCASED!!
+[#uppercase]
+[#noprefix]
+
+// 3=max, 0=no debug output
+debug=0
+
+// defines if the program should quit on error/exception or stay opened (for debugging)
+exitonerror=0
+
+// reconnect on failure/disconnect
+reconnect=0
+
+// 0 - show none
+// 1 - show only known/handled
+// 2 - show only unknown/unhandled
+// 3 - show all
+showopcodes=3
+
+
+// the IP or hostname the wow server is running on
+realmlist=localhost
+
+// port on which the realm server is listening (default=3724)
+realmport=3724
+
+// PseuWoW will login on this realm
+realmname=My WoW Realm
+
+// your account name
+accname=test
+
+// your account password
+accpass=test
+
+// the character name PseuWoW should choose to enter the world
+charname=PseuWoW
+
+
+// Client emulation configuration
+ClientVersion=1.12.1
+ClientBuild=5875
+ClientLanguage=enUS
+// or change to enGB, deDE, ...
+
+
+// packets get fetched every xx msecs. default=50
+// setting this to 0 will let PseuWoW eat up all CPU power
+// 1 is a good setting for maximum network performance and lowest ping times
+NetworkSleepTime=50
+
+

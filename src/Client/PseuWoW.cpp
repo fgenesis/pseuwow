@@ -99,18 +99,16 @@ bool PseuInstance::Init(void) {
 //    //DEBUG1(printf("Main_Init: Setting up DefScripts path '%s'\n",defScpPath.c_str()););
     _scp->SetPath(_scpdir);
 
-  //  //DEBUG1(printf("Main_Init: Setting up custom DefScript function interface...\n"););
-    //_scp->SetFunctionTable(_GetSCTable());
-
   //  //DEBUG1(printf("Main_Init: Setting up predefined DefScript macros...\n"););
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);
 
 
   //  //DEBUG1(printf("Main_Init: Loading DefScripts from folder '%s'\n",defScpPath.c_str()););
-    //if(!_scp->RunScriptByName("_startup",NULL,255)){
-    //    printf("Main_Init: Error executing '_startup.def'\n");
-    //}
+    if(!_scp->RunScript("_startup",NULL))
+    {
+        printf("Main_Init: Error executing '_startup.def'\n");
+    }
 
     if(_stop){
 			printf("Errors while initializing, proc halted!!\n");
@@ -319,6 +317,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 	realmname=v.Get("REALMNAME");
 	charname=v.Get("CHARNAME");
 	networksleeptime=atoi(v.Get("NETWORKSLEEPTIME").c_str());
+    showopcodes=atoi(v.Get("SHOWOPCODES").c_str());
 
     // clientversion is a bit more complicated to add
     {

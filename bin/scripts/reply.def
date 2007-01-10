@@ -1,0 +1,11 @@
+#permission=255
+
+SET,player ${@thiswhisper_name}
+SET,lang ${@thiswhisper_lang}
+SET,msg ${@def}
+
+WHISPER,{${player}},{${lang}} ${msg}
+
+UNSET player
+UNSET lang
+UNSET msg

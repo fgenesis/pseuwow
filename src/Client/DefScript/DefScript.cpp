@@ -7,26 +7,15 @@
 #include "VarSet.h"
 #include "DefScript.h"
 
-struct DefScriptXChgResult {
-    std::string str;
-    bool change;
-};
-
 // --- SECTION FOR SCRIPT PACKAGES ---
-DefScriptPackage::DefScriptPackage(){
-	scripts=0;
-	Script=NULL;
-    curIsDebug=false;
-    recursionLevel=0;
-    functions=0;
+DefScriptPackage::DefScriptPackage()
+{
     functionTable=_GetFunctionTable();
-
-    
-
 //    printf("---> DefScriptPackage inited!\n");
 }
 
-DefScriptPackage::~DefScriptPackage(){
+DefScriptPackage::~DefScriptPackage()
+{
 	Clear();		
 }
 
@@ -35,21 +24,23 @@ void DefScriptPackage::SetParentMethod(void *p)
     parentMethod = p;
 }
 
-void DefScriptPackage::Clear(void){
-	//for(unsigned int i=0;i<scripts;i++){
-	//	Script[i].Clear();
-	//}
-	delete [] Script;
-	Script=NULL;
-	scripts=0;
+void DefScriptPackage::Clear(void)
+{
+    for(std::map<std::string,DefScript*>::iterator i = Script.begin(); i != Script.end(); i++)
+    {
+        delete i->second; // delete each script
+    }
+
+	Script.empty();
 }
 
 DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
 {
     static DefScriptFunctionTable table[] = {
         // basic functions:
+        {"out",&DefScriptPackage::func_out},
         {"set",&DefScriptPackage::func_set},
-        {"defult",&DefScriptPackage::func_default},
+        {"default",&DefScriptPackage::func_default},
         {"unset",&DefScriptPackage::func_unset},
         {"shdn",&DefScriptPackage::func_shdn},
         {"loaddef",&DefScriptPackage::func_loaddef},
@@ -69,7 +60,8 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
     return table;
 }
 
-void DefScriptPackage::SetFunctionTable(DefScriptFunctionTable *tab){
+void DefScriptPackage::SetFunctionTable(DefScriptFunctionTable *tab)
+{
     functionTable=tab;
 }
 
@@ -77,38 +69,26 @@ void DefScriptPackage::SetPath(std::string p){
     scPath=p;
 }
 
-DefScript DefScriptPackage::GetScript(unsigned int id){
-	return Script[id];
+DefScript *DefScriptPackage::GetScript(std::string scname){
+    if(Script.find(scname) != NULL)
+	    return Script[scname];
+    else
+        return NULL;
 }
 
 unsigned int DefScriptPackage::GetScripts(void){
-	return scripts;
+    return Script.size();
 }
 
-std::string DefScriptPackage::GetScriptName(unsigned int id){
-	if(id>scripts) return NULL;
-	return Script[id].GetName();
-}
-
-// returns array position!
-unsigned int DefScriptPackage::GetScriptID(std::string name){
-	for(unsigned int i=0;i<scripts;i++){
-		if( !Script[i].GetName().empty() && Script[i].GetName()==name ){
-			return  i;
-		}
-	}
-	return 0; // Be careful you check if the script exists before you trust it. this could
-			  // also mean Script[0]!!
-}
-
-bool DefScriptPackage::ScriptExists(std::string name){
-	if(Script==NULL) return false;
-	for(unsigned int i=0;i<scripts;i++){
-		if( !Script[i].GetName().empty() && Script[i].GetName()==name ){
-			return true;
-		}
-	}
-	return false;
+bool DefScriptPackage::ScriptExists(std::string name)
+{
+    for (std::map<std::string,DefScript*>::iterator i = Script.begin();i != Script.end();i++)
+        if(i->first == name && i->second != NULL)
+            return true;
+    for(unsigned int i=0;functionTable[i].func!=NULL;i++)
+        if(name == functionTable[i].name)
+            return true;
+    return false;
 }
 
 bool DefScriptPackage::LoadByName(std::string name){
@@ -116,32 +96,8 @@ bool DefScriptPackage::LoadByName(std::string name){
 }
 
 bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
-	bool increase_flag=false;
 	std::string label, value;
-	unsigned int id;
-	if(fn.empty() || sn.empty()) return false;	
-	if(ScriptExists(sn)){ // if the script already exists, clear it and reassign content
-		id=GetScriptID(sn); // script exists, get ID...
-		Script[id].Clear(); // ... and remove content to refill it later on
-	} else { // if not, set scripts as ID for new script. scripts is equal to new array index then
-		id=scripts;
-		increase_flag=true;	
-
-		// Script does not yet exist, since the scriptcount will be increased we have to alloc mem before
-        DefScript *Script_old;
-        if(scripts){		    
-            Script_old=new DefScript[scripts];
-		    memcpy(Script_old,Script,scripts*sizeof(DefScript));
-		    delete [] Script;
-        }
-		Script = new DefScript[scripts+1];
-        if(scripts){
-		    memcpy(Script,Script_old,scripts*sizeof(DefScript));
-            delete [] Script_old;
-        }
-  
-	}
-
+	if(fn.empty() || sn.empty()) return false;
     std::fstream f;
     f.open(fn.c_str(),std::ios_base::in);
     if(!f.is_open())
@@ -149,6 +105,10 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 	std::string line;
     char z;
     bool load_debug=false,load_notify=false;
+    if(GetScript(sn))
+        delete GetScript(sn);
+    DefScript *newscript = new DefScript(this);
+    Script[sn] = newscript;
 	while(!f.eof()){
 		line.clear();
         while (true) {
@@ -166,175 +126,160 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 			continue;
 		if(line.at(0)=='/' && line.at(1)=='/') 
 			continue; // line is comment, proceed with next line
-		if(line.at(0)=='#'){
+		if(line.at(0)=='#')
+        {
 			line.erase(0,1); // remove #
 			label=line.substr(0,line.find('=',0));
 			value=line.substr(line.find('=',0)+1,line.length());
-			if(label=="permission"){
-				Script[id].SetPermission((unsigned char)atoi(value.c_str())); // MAYBE: instead of this use Var @permission
+			if(label=="permission")
+            {
+                scriptPermissionMap[sn] = atoi(value.c_str());
 			}  // ...	
             if(line=="load_debug")
                 load_debug=true;
             if(line=="load_notify")
                 load_notify=true;
             if(line=="debug")
-                Script[id].SetDebug(true);
+                Script[sn]->SetDebug(true);
             //...
             continue; // line was an option, not script content
 		}
         if(load_debug)
             std::cout<<"~LOAD: "<<line<<"\n";
-		Script[id].AddLine(line);
+		Script[sn]->AddLine(line);
 		
 		
 	}
 	f.close();
-	//Script[id].AddLine("eof"); // to be sure the script is terminated correctly
-    Script[id].SetName(sn);
+    Script[sn]->SetName(sn); // necessary that the script knows its own name
     if(load_notify)
         std::cout << "+> Script '" << sn << "' [" << fn << "] successfully loaded.\n";
 	
 	// ...
-	if(increase_flag) scripts++;
     return true;
 }
 	
 
 // --- SECTION FOR THE INDIVIDUAL SCRIPTS IN A PACKAGE ---
 
-DefScript::DefScript(){
-	lines=0;
-	Line=NULL;
-    permission=0;
+DefScript::DefScript(DefScriptPackage *p)
+{
+    _parent=p;
 	scriptname="{NONAME}";
     debugmode=false;
 //    printf("--> DefScript inited!\n");
 }
 
-DefScript::~DefScript(){
+DefScript::~DefScript()
+{
 	Clear();
 }
 
-void DefScript::Clear(void){
-	//if(lines)
-    //    delete [] Line; //?! causes crash!
-	Line=NULL;
-	lines=0;
-    permission=0;
+void DefScript::Clear(void)
+{
+    Line.clear();
 }
 
-void DefScript::SetDebug(bool d){
+void DefScript::SetDebug(bool d)
+{
     debugmode=d;
 }
 
-bool DefScript::GetDebug(void){
+bool DefScript::GetDebug(void)
+{
     return debugmode;
 }
 
-void DefScript::SetName(std::string name){
+void DefScript::SetName(std::string name)
+{
 	scriptname=name;
 }
 
-std::string DefScript::GetName(void){
+std::string DefScript::GetName(void)
+{
 	return scriptname;
 }
 
-void DefScript::SetPermission(unsigned char p){
-	permission=p;
+unsigned int DefScript::GetLines(void)
+{
+    return Line.size();
 }
 
-unsigned char DefScript::GetPermission(void){
-	return permission;
-}
-
-unsigned int DefScript::GetLines(void){
-	return lines;
-}
-
-std::string DefScript::GetLine(unsigned int id){
-	if(id>lines)
-		return "";
+std::string DefScript::GetLine(unsigned int id)
+{
 	return Line[id];
 }
 
 bool DefScript::AddLine(std::string l){
 	if(l.empty())
 		return false;
-	std::string *Line_old=new std::string[lines];
-	for(unsigned int i=0;i<lines;i++)
-		Line_old[i]=Line[i];
-	delete [] Line;
-    Line=new std::string[lines+1];
-	for(unsigned int i=0;i<lines;i++)
-		Line[i]=Line_old[i];
-    Line[lines]=l;
-	lines++;
-    delete [] Line_old;
+    Line.insert(Line.end(),l);
 	return true;
 }
 
 
 // --- SECTION FOR COMMAND SETS ---
 
-CmdSet::CmdSet(){
-	for(unsigned int i=0;i<MAXARGS;i++){
-		arg[i]="";
-	}
-	cmd="";
-    defaultarg="";
+CmdSet::CmdSet(DefScript *p){
+	Clear();
+    owner = p;
 }
 
 CmdSet::~CmdSet(){
 	Clear();
 }
 
-void CmdSet::Clear(){
-	
+void CmdSet::Clear()
+{
+    for(unsigned int i=0;i<MAXARGS;i++){
+		arg[i]="";
+	}
+	cmd="";
+    defaultarg="";
+    caller="";
 }
 
 
 // --- FUNCTIONS TO PARSE AND EXECUTE A SCRIPT --- PARENT: DefScriptPackage!
 
-bool DefScriptPackage::RunScriptByID(unsigned int id, CmdSet *pSet, unsigned char p){
-    if(id>GetScripts())
+
+// the referred pSet is the parent from which RunScript() has been called
+bool DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
+{
+    if(!ScriptExists(name))
+        if(!LoadByName(name))
+            return false; // doesnt exist & cant be loaded
+
+    DefScript *sc = GetScript(name);
+    if(!sc)
         return false;
 
-    curIsDebug=GetScript(id).GetDebug();
+    CmdSet temp(sc);
+    if(!pSet)
+    {
+        pSet = &temp;
+    }
+    pSet->caller=pSet->myname;
+    pSet->myname=name;
 
-	for(unsigned int cur_line=0;cur_line<GetScript(id).GetLines();cur_line++){
-           
-		std::string line=GetScript(id).GetLine(cur_line);
-        std::string final=ReplaceVars(line,pSet,false,0,GetScript(id).GetName()); // must only parse globals if pSet == NULL
-		CmdSet curSet=SplitLine(final);
-		Interpret(curSet,GetScript(id).GetName(), p);
-	}
-
-	curIsDebug=false;
+    for(unsigned int i=0;i<sc->GetLines();i++)
+    {   
+        CmdSet curSet(NULL);
+        DefXChgResult final=ReplaceVars(sc->GetLine(i),pSet,false);
+        //printf("SC: \"%s\"\n",final.str.c_str());
+	    curSet=SplitLine(final.str);
+        curSet.owner=sc; // must set the owner after SplitLine()
+        curSet.myname=name;
+        curSet.caller=pSet?pSet->myname:"";
+        Interpret(curSet);
+    }
     return true;
 }
 
-bool DefScriptPackage::RunScriptByName(std::string scname, CmdSet *pSet, unsigned char p){
-	if(scname.empty())
-        return false;
-	if(ScriptExists(scname)){
-		RunScriptByID(GetScriptID(scname),pSet,p);
-        return true;
-    } else {
-        bool result=LoadByName(scname);
-        if(result){
-            RunScriptByID(GetScriptID(scname),pSet,p);
-            return true;
-        }
-    }
-    return false;
-		
-}
-
-bool DefScriptPackage::RunSingleLine(std::string line, unsigned char p){
-    unsigned int temp=0;
-    std::string final=ReplaceVars(line,NULL,false,temp,"");
-	CmdSet curSet=SplitLine(final);
-    return Interpret(curSet,"",p);
+bool DefScriptPackage::RunSingleLine(std::string line){
+    DefXChgResult final=ReplaceVars(line,NULL,false);
+	CmdSet curSet=SplitLine(final.str);
+    return Interpret(curSet);
 }
 
 CmdSet DefScriptPackage::SplitLine(std::string line){	
@@ -343,7 +288,7 @@ CmdSet DefScriptPackage::SplitLine(std::string line){
 	unsigned int bracketsOpen=0,curParam=0;
     bool cmdDefined=false;
     std::string tempLine;
-	CmdSet outSet;
+	CmdSet outSet(NULL);
 
 //	extract cmd+params and txt
     for(i=0;i<line.length();i++){
@@ -391,7 +336,8 @@ CmdSet DefScriptPackage::SplitLine(std::string line){
     if(cmdDefined && !outSet.cmd.empty() && outSet.defaultarg.empty())
         outSet.arg[curParam]=tempLine;
 
-    outSet.cmd.assign(strlwr((char*)outSet.cmd.c_str()));
+    outSet.cmd.assign(strlwr((char*)outSet.cmd.c_str())); // TODO: use toLower() instead!
+    outSet.owner=GetScript(outSet.cmd);
     return RemoveBrackets(outSet);	
 }
 
@@ -469,28 +415,31 @@ CmdSet DefScriptPackage::RemoveBrackets(CmdSet oldSet){
 }
 
 
-std::string DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool isVar, unsigned int vardepth, std::string sc_name){
-   //std::cout<<">>ReplaceVars: '"<<str<<"'  var="<<isVar<<"\n";
+DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool isVar){
+
     unsigned int  
         
-        openingBracket=0, // defines the position from where the recursive call should be started
+        openingBracket=0, // defines the position from where the recursive call is started
         closingBracket=0, // the closing bracket
-        bracketsOpen=0,
+        bracketsOpen=0, // amount of brackets opened
         bLen=0; // the lenth of the string in brackets, e.g. ${abc} == 3
 
-    bool nextIsVar=false, hasVar=false;
+    bool 
+        nextIsVar=false, // true if the last bracket was preceded by '$'
+        hasVar=false, // true if openingBracket (= the first bracket) was preceded by '$'
+        hasChanged=false; // additional helper. once true, xchg.result will be true later also
+
+    //  isVar (arg)  : defines if the current string is a variable (can only be true in recursive calls!)
 
 
-    std::string subStr,retStr;
-    char temp;
+    std::string subStr;
+    DefXChgResult xchg;
 	
-	while(str.at(0)==' ' || str.at(0)=='\t')
-		str.erase(0,1); // trim spaces if there are any
+	//while(str.at(0)==' ' || str.at(0)=='\t')
+	//	str.erase(0,1); // trim spaces if there are any
 
-    for(unsigned int i=0;i<str.length();i++){
-        temp=str.at(i);
-
-
+    for(unsigned int i=0;i<str.length();i++)
+    {
         if(str[i]=='{')		
         {
             if(!bracketsOpen)
@@ -515,54 +464,56 @@ std::string DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool is
                 {
                     str.erase(closingBracket,1);
                     str.erase(openingBracket,1);
-                    i-=2;
+                    i=openingBracket; // jump to the pos where the opening bracket was
                     continue;
                 }
                 else
                 {
                     bLen=closingBracket-openingBracket-1;
                     subStr=str.substr(openingBracket+1,bLen);
-                    retStr=ReplaceVars(subStr,pSet,nextIsVar,vardepth+(nextIsVar?1:0),sc_name);
-                    if( hasVar && !nextIsVar && subStr!=retStr )
+                    //printf("SUBSTR: \"%s\"\n",subStr.c_str());
+                    xchg=ReplaceVars(subStr,pSet,nextIsVar);
+                    if( (!nextIsVar) && hasVar && xchg.changed )
                     {
                         str.erase(openingBracket+1,subStr.length());
-                        str.insert(openingBracket+1,retStr);
+                        str.insert(openingBracket+1,xchg.str);
                         hasVar=false;
                         nextIsVar=false;
                         i-=(subStr.length()+1);
+                        hasChanged=true;
                     }
-                    else if( hasVar && nextIsVar && subStr!=retStr )
+                    else if( nextIsVar && hasVar && xchg.changed )
                     {
-                        str.erase(openingBracket-1,bLen+3); // remove {...
+                        str.erase(openingBracket-1,bLen+3); // remove ${...} (+3 because of '${}')
                         i-=(bLen+2); // adjust position
-                        str.insert(i,retStr);
+                        str.insert(i,xchg.str);
                         //i--;
                         hasVar=false;
                         nextIsVar=false;
                     }
-                    else
-                        continue;
                 }
             }
-       } // end if {
+       } // end if '}'
     } // end for
-    if(!bracketsOpen && isVar && vardepth)
+    if(!bracketsOpen && isVar)
     {
-        std::string vname=_NormalizeVarName(str, sc_name);
+        std::string vname=_NormalizeVarName(str, (pSet==NULL) ? "" : pSet->myname);
         if(vname[0]=='@')
         {
             std::stringstream vns;
             std::string subs=vname.substr(1,str.length()-1);
             unsigned int vn=atoi( subs.c_str() );
             vns << vn;
-            if(pSet && vns.str()==subs)
+            if(pSet && vns.str()==subs) // resolve arg macros @0 - @99
                 str=pSet->arg[vn];
             else if(pSet && subs=="def")
                 str=pSet->defaultarg;
+            else if(pSet && subs=="myname")
+                str=pSet->myname;
             else if(pSet && subs=="cmd")
                 str=pSet->cmd;
-            //else if(pSet && subs=="parent")
-            //    str=pSet->parent;
+            else if(pSet && subs=="caller")
+                str=pSet->caller;
             else if(variables.Exists(vname))
                 str=variables.Get(vname);
             else
@@ -571,18 +522,21 @@ std::string DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool is
                 //...
                 str.clear();
             }
-
-
+            xchg.changed=true;
         }
         else
             if(variables.Exists(vname))
+            {
                 str=variables.Get(vname);
-            else if(!variables.Exists(vname) && !subStr.empty())
-                str="${"+str+"}";
+                xchg.changed=true;
+            }
     }
 
-   
-    return str;
+    xchg.str = str;
+    if(hasChanged)
+        xchg.changed=true;
+    //printf("XCHG:%u: \"%s\"\n",xchg.changed,xchg.str.c_str());
+    return xchg;
 }
 
 std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string sn){
@@ -600,39 +554,33 @@ std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string s
     return vn;
 }
 
-bool DefScriptPackage::Interpret(CmdSet Set, std::string sc_name, unsigned char p){
+bool DefScriptPackage::Interpret(CmdSet Set)
+{
     bool result=false;
 
-    for(unsigned int i=0;result==false;i++){
-        if(functionTable[i].func==NULL || functionTable[i].name==NULL){ // reached the end of the table?
+    // first search if the script is defined in the internal functions
+    for(unsigned int i=0;result==false;i++)
+    {
+        if(functionTable[i].func==NULL || functionTable[i].name==NULL) // reached the end of the table?
+        {
             break;
         }
-        if(Set.cmd==functionTable[i].name){
+        if(Set.cmd==functionTable[i].name)
+        {
             result=(this->*functionTable[i].func)(Set);
             break;
         }
     }
 
-    // if still nothing has been found its maybe a script command
-    if(!result){
-        unsigned int perm=GetScript(GetScriptID(Set.cmd)).GetPermission();
-        if(p<perm)
-            return false; // permisson level too low
-		
-	    result=RunScriptByName(Set.cmd,&Set,255); // call the subscript, this time with full privileges
-        if(!result && curIsDebug)
+    // if nothing has been found its maybe an external script file to run
+    if(!result)
+    {
+	    result=RunScript(Set.cmd, &Set);
+        if((!result) /*&& Script[Set.cmd]->GetDebug()*/)
             std::cout << "Could not execute script command '" << Set.cmd << "'\n";
     }
 
     return result;
 }
-
-// TODO: how to get this work?!
-/*
-bool DefScriptPackage::CallFunction(bool *func, CmdSet *pSet){
-    //bool result = *func(pSet, this);
-    //return result;
-}
-*/
 
 

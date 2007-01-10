@@ -94,7 +94,6 @@ void WorldSession::Update(void)
     while(!pktQueue.empty())
     {
         WorldPacket *packet = pktQueue.next();
-        printf(">> Opcode %u [%s]\n",packet->GetOpcode(),LookupName(packet->GetOpcode(),g_worldOpcodeNames));
         
         for (uint16 i = 0; table[i].handler != NULL; i++)
         {
@@ -105,7 +104,13 @@ void WorldSession::Update(void)
                 break;
             }
         }
-        //if(!known)
+        if( (known && GetInstance()->GetConf()->showopcodes==1)
+            || ((!known) && GetInstance()->GetConf()->showopcodes==2)
+            || (GetInstance()->GetConf()->showopcodes==3) )
+        {
+            printf(">> Opcode %u [%s]\n",packet->GetOpcode(),LookupName(packet->GetOpcode(),g_worldOpcodeNames));
+        }
+            
         
 
         delete packet;
@@ -170,7 +175,7 @@ void WorldSession::_OnEnterWorld(void)
     if(!_logged)
     {
         _logged=true;
-        //GetInstance()->GetScripts()->RunScriptByName("_enterworld",NULL,255);
+        GetInstance()->GetScripts()->RunScript("_enterworld",NULL);
         
     }
 }
@@ -426,8 +431,8 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 		defScp.variables.Set("@lastwhisper_lang",defScp.variables.Get("@thiswhisper_lang"));
         defScp.variables.Set("@thiswhisper_name",plrname);
 		defScp.variables.Set("@thiswhisper",toString(target_guid));
-        defScp.variables.Set("@thiswhisper_lang",toString((uint64)lang));
-        defScp.RunScriptByName("_onwhisper",NULL,255);*/
+        defScp.variables.Set("@thiswhisper_lang",toString((uint64)lang));*/
+        GetInstance()->GetScripts()->RunScript("_onwhisper",NULL);
     }
 }
 void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
