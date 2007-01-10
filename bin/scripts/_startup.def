@@ -1,0 +1,33 @@
+#permission=255
+
+
+// PSEUWOW DEF_SCRIPT STARTUP FILE
+
+OUT * DefScript StartUp [${@version_short}]...
+
+// preload the script here, however its not important to load it now. it will get
+// loaded automatically if needed
+loaddef _enterworld
+loaddef _onwhisper
+loaddef _nopermission
+loaddef _setconf
+loaddef yell
+loaddef say
+loaddef whisper
+loaddef outv
+loaddef sayv
+loaddef reply
+loaddef quit
+// ...
+
+// remove dangerous variables
+OUT * Cleaning up variables...
+UNSET #ACCPASS
+UNSET #ACCNAME
+OUT * Dangerous variables removed.
+
+
+// do more stuff here in future...
+
+OUT * StartUp complete!
+

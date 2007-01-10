@@ -1,0 +1,28 @@
+#permission=255
+
+// PSEUWOW DEF_SCRIPT WORLD-ENTER FILE
+
+OUT * World entered, executing appropriate script...
+
+// not yet implemented
+// CASTSPELL 836
+
+// yaay we are online
+EMOTE 5
+
+// MaNGOS: make PseuWoW invincible
+SAY .gmon
+
+// you can also teleport on every startup to a certain player...
+// simple: use the .goname command as usual.
+// SAY .goname Gamemaster
+
+// to know everything worked fine, etc
+SAY [${@version_short}] login successful.
+
+
+// add your own stuff here
+// ...
+
+
+OUT * finished executing script.

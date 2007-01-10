@@ -133,6 +133,10 @@ bool VarSet::ReadVarsFromFile(std::string fn)
                         upper=false;
                         prefix.clear();
                     }
+                    else if(prefix=="#noprefix")
+                    {
+                        prefix.clear();
+                    }
                     else
                     {
                             prefix+="::";

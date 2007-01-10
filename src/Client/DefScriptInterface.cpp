@@ -12,7 +12,7 @@
 
 
 bool DefScriptPackage::SCpause(CmdSet Set){
-    SDL_Delay(atoi(Set.defaultarg.c_str()));
+    ((PseuInstance*)parentMethod)->Sleep(atoi(Set.defaultarg.c_str()));
     return true;
 }
 

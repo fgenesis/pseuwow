@@ -1,0 +1,1 @@
+RENAME or COPY *.conf.default to *.conf and modify it to your needs.

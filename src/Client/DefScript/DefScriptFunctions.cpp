@@ -92,12 +92,15 @@ bool DefScriptPackage::func_set(CmdSet Set){
         return false;
     }
     std::string vname,vval=Set.defaultarg;
-    vname=_NormalizeVarName(Set.arg[0], Set.caller);
+    vname=_NormalizeVarName(Set.arg[0], Set.myname);
 
    if(!stricmp(Set.arg[1].c_str(),"onfail") && vval.find("${")!=std::string::npos)
         vval=Set.arg[2];
 
     variables.Set(vname,vval);
+
+    if(Set.owner && Set.owner->GetDebug())
+        printf("VAR: %s = '%s'\n",vname.c_str(),vval.c_str());
 
     return true;
 }

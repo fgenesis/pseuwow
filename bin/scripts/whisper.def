@@ -1,0 +1,15 @@
+#permissionn=255
+
+// setup some default values
+SET,msg ${@def}
+SET,player ${@0}
+SET,lang ${@1}
+
+DEFAULT,lang 0
+
+OUT * Whisp to '{${player}}' '{${msg}}' in lang '${lang}'
+
+SENDCHATMESSAGE,6,{${lang}},{${msg}},{${player}}
+UNSET lang
+UNSET msg
+UNSET player

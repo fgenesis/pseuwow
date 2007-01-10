@@ -37,6 +37,7 @@ class PseuInstanceConf
 	std::string charname;
     std::string worldhost;
 	uint16 networksleeptime;
+    uint8 showopcodes;
 	
 	
 };

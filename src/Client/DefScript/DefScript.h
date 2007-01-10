@@ -10,20 +10,29 @@
 #endif
 
 #include <map>
+#include <deque>
 #include "VarSet.h"
 
 class DefScriptPackage;
+class DefScript;
+
+struct DefXChgResult {
+    DefXChgResult() { changed=false; }
+    bool changed;
+    std::string str;
+};
 
 class CmdSet {
 	public:
-	CmdSet();
+	CmdSet(DefScript *p);
 	~CmdSet();
 	void Clear();
 	std::string cmd;
 	std::string arg[MAXARGS];
 	std::string defaultarg;
-    DefScriptPackage *pack;
+    std::string myname;
     std::string caller;
+    DefScript *owner;
     void *ptr;
 };
 
@@ -34,7 +43,7 @@ struct DefScriptFunctionTable {
 
 class DefScript {
 public:
-	DefScript();
+	DefScript(DefScriptPackage *p);
 	~DefScript();
 	std::string GetLine(unsigned int);
 	unsigned int GetLines(void);
@@ -50,13 +59,13 @@ public:
 
 
 private:
-	std::string *Line;
+    std::deque<std::string> Line;
 	unsigned int lines;
 	std::string scriptname;
 	unsigned char permission;
     bool debugmode;
     
-    //DefScriptPackage *_parent;
+    DefScriptPackage *_parent;
     //CmdSet _mySet;
    	
 };
@@ -66,43 +75,36 @@ class DefScriptPackage {
 public:
 	DefScriptPackage();
 	~DefScriptPackage();
-    void SetParentMethod(void*);
+    void SetParentMethod(void*); // used to extend the scripts with own c++ interface functions
 	void Clear(void);
-	DefScript GetScript(unsigned int);
+    DefScript *GetScript(std::string);
 	unsigned int GetScripts(void);
 	bool LoadScriptFromFile(std::string,std::string);
-	bool RunScriptByName(std::string,CmdSet*,unsigned char);
-	bool RunScriptByID(unsigned int,CmdSet*,unsigned char);
-	std::string GetScriptName(unsigned int);
+	bool RunScript(std::string,CmdSet*);
 	unsigned int GetScriptID(std::string);
-	bool RunSingleLine(std::string, unsigned char);
+	bool RunSingleLine(std::string);
 	bool ScriptExists(std::string);
 	VarSet variables;
     void SetPath(std::string);
     bool LoadByName(std::string);
     void SetFunctionTable(DefScriptFunctionTable*);
     std::string _NormalizeVarName(std::string, std::string);
-    bool DefScriptPackage::CallFunction(bool *func, CmdSet *pSet);
 
     std::string scPath;
 
 private:
-    std::string ReplaceVars(std::string, CmdSet*, bool, unsigned int, std::string); // changes the string directly
+    DefXChgResult ReplaceVars(std::string, CmdSet*, bool);
 	CmdSet SplitLine(std::string);
-    bool Interpret(CmdSet, std::string, unsigned char);
+    bool Interpret(CmdSet);
     CmdSet RemoveBrackets(CmdSet);
     std::string RemoveBracketsFromString(std::string);
     DefScriptFunctionTable *_GetFunctionTable(void) const;
-
-    bool curIsDebug;
-	unsigned int scripts;
-	DefScript *Script;
-    unsigned int recursionLevel;
     DefScriptFunctionTable *functionTable;
     unsigned int functions;
     void *parentMethod;
 
-    std::map<std::string, unsigned int> permissionMap;
+    std::map<std::string, unsigned char> scriptPermissionMap;
+    std::map<std::string,DefScript*> Script;
 
     // Usable internal basic functions:
     bool func_default(CmdSet);
