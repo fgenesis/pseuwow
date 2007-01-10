@@ -44,7 +44,7 @@ bool PlayerNameCache::SaveToFile(void){
     fh.open(fn, std::ios_base::out | std::ios_base::binary);
     if(!fh)
 	{
-		printf("ERROR: could not open file '%s'!\n",fn);
+		printf("ERROR: could not write to file '%s'!\n",fn);
         return false;
     }
     uint32 size=_cache.size();

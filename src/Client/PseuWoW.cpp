@@ -12,12 +12,6 @@
 #include "Realm/RealmSocket.h"
 #include "World/WorldSession.h"
 
-/* TODO: 
-defscriptpackage fix, xchgresult einbauen, CmdSet.caller einbauen, permissionmap einbauen
-WorldSesssion::Update() rein
-opcode handler table vervollstädigen + funktionen dafür umschreiben
-
-*/
 
 //###### Start of program code #######
 
@@ -52,6 +46,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _conf=NULL;
     _stop=false;
     _fastquit=false;
+    _startrealm=true;
     createWorldSession=false;
 
 
@@ -83,7 +78,6 @@ bool PseuInstance::Init(void) {
 	_scp=new DefScriptPackage();
     _scp->SetParentMethod((void*)this);
 	_conf=new PseuInstanceConf();	
-	_rsession=new RealmSocket(_sh);
 	
 	if(!_scp->variables.ReadVarsFromFile(_confdir + "PseuWoW.conf"))
 	{
@@ -132,36 +126,40 @@ bool PseuInstance::Init(void) {
 
 void PseuInstance::Run(void)
 {
-    if(!_initialized)
-        return;
-
-    _rsession->SetDeleteByHandler();
-    _rsession->SetHost(GetConf()->realmlist);
-    _rsession->SetPort(GetConf()->realmport);
-    _rsession->SetInstance(this);
-    _rsession->Start();
-    
-    if(_rsession->IsValid())
+    do
     {
-        _sh.Add(_rsession);
-        _sh.Select(1,0);
-    }
+        if(!_initialized)
+            return;
 
-    while(!_stop)
-    {
-        Update();
+        _rsession=new RealmSocket(_sh);
+        _rsession->SetDeleteByHandler();
+        _rsession->SetHost(GetConf()->realmlist);
+        _rsession->SetPort(GetConf()->realmport);
+        _rsession->SetInstance(this);
+        _rsession->Start();
+        
+        if(_rsession->IsValid())
+        {
+            _sh.Add(_rsession);
+            _sh.Select(1,0);
+        }
+        _startrealm=false; // the realm is started now
+
+        while((!_stop) && (!_startrealm))
+        {
+            Update();
+        }
     }
+    while(GetConf()->reconnect && (!_stop));
 
     if(_fastquit)
     {
         printf("Aborting Instance...\n");
         return;
     }
-    
     printf("Shutting down instance...\n");
 
-
-    // save all data here
+    SaveAllCache();
 
 }
 
@@ -169,9 +167,8 @@ void PseuInstance::Update()
 {
     if(_sh.GetCount())
         _sh.Select(0,0); // update the realmsocket
-    //else
-        // socket invalid?
-    if(createWorldSession)
+
+    if(createWorldSession && (!_wsession))
     {
         createWorldSession=false;
         _wsession=new WorldSession(this);
@@ -183,6 +180,14 @@ void PseuInstance::Update()
     if(_wsession && _wsession->IsValid())
     {
         _wsession->Update(); // update the worldSESSION, which will update the worldsocket itself
+    }
+    if(_wsession && _wsession->DeleteMe())
+    {
+        delete _wsession;
+        _wsession=NULL;
+        _startrealm=true;
+        this->Sleep(1000); // wait 1 sec before reconnecting
+        return;
     }
 
     this->Sleep(GetConf()->networksleeptime);
@@ -306,6 +311,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 	accname=v.Get("ACCNAME");
 	accpass=v.Get("ACCPASS");
 	exitonerror=(bool)atoi(v.Get("EXITONERROR").c_str());
+    reconnect=(bool)atoi(v.Get("RECONNECT").c_str());
 	realmport=atoi(v.Get("REALMPORT").c_str());
     clientversion_string=v.Get("CLIENTVERSION");
 	clientbuild=atoi(v.Get("CLIENTBUILD").c_str());

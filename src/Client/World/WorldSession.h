@@ -6,11 +6,12 @@
 #include "Network/SocketHandler.h"
 #include "common.h"
 #include "Player.h"
-#include "../Auth/AuthCrypt.h"
+#include "Auth/AuthCrypt.h"
 #include "SharedDefines.h"
 
 class WorldSocket;
 class WorldPacket;
+class PingerThread;
 
 struct OpcodeHandler
 {
@@ -30,11 +31,14 @@ public:
 
     OpcodeHandler *_GetOpcodeHandlerTable(void) const;
 
+    void SetSocket(WorldSocket *sock);
+
     void AddToPktQueue(WorldPacket *pkt);
     void Connect(std::string addr,uint16 port);
     void Update(void);
     void Start(void);
     bool IsValid(void) { return _valid; }
+    bool DeleteMe(void);
     void SendWorldPacket(WorldPacket&);
 
     void SetTarget(uint64 guid);
@@ -55,7 +59,9 @@ public:
 private:
 
     // Helpers
-    void OnEnterWorld(void);
+    void _OnEnterWorld(void); // = login
+    void _OnLeaveWorld(void); // = logout
+    void _DoTimedActions(void);
     
     // Opcode Handlers
     void _HandleAuthChallengeOpcode(WorldPacket& recvPacket);
@@ -74,7 +80,7 @@ private:
     PseuInstance *_instance;
     WorldSocket *_socket;
     ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
-    bool _valid,_authed,_logged; // world status
+    bool _valid,_authed,_logged,_deleteme; // world status
     SocketHandler _sh; // handles the WorldSocket
     uint64 _targetGUID,_followGUID,_myGUID;
     

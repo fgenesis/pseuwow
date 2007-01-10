@@ -26,6 +26,7 @@ class PseuInstanceConf
 	std::string accname;
 	std::string accpass;
 	bool exitonerror;
+    bool reconnect;
 	uint16 realmport;
     uint16 worldport;
 	uint8 clientversion[3];
@@ -84,6 +85,7 @@ class PseuInstance
 	std::string _confdir,_scpdir;
 	bool _initialized;	
 	bool _stop,_fastquit;
+    bool _startrealm;
 	BigNumber _sessionkey;
     char *_ver,*_ver_short;
     SocketHandler _sh;

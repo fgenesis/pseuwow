@@ -6,9 +6,10 @@
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSocket.h"
-#include "WorldSession.h"
 #include "NameTables.h"
 #include "RealmSocket.h"
+
+#include "WorldSession.h"
 
 
 WorldSession::WorldSession(PseuInstance *in)
@@ -20,6 +21,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _followGUID=0; // dont follow anything
     _myGUID=0; // i dont have a guid yet
     plrNameCache.ReadFromFile(); // load names/guids of known players
+    _deleteme = false;
     //...
 }
 
@@ -32,6 +34,8 @@ WorldSession::~WorldSession()
         packet = pktQueue.next();
         delete packet;
     }
+    _OnLeaveWorld();
+
     //delete _socket; the socket will be deleted by its handler!!
 }
 
@@ -46,10 +50,19 @@ void WorldSession::Start(void)
     _sh.Select(1,0);
 }
 
+bool WorldSession::DeleteMe(void)
+{
+    return _deleteme;
+}
+
+void WorldSession::SetSocket(WorldSocket *sock)
+{
+    _socket = sock;
+}
+
 void WorldSession::AddToPktQueue(WorldPacket *pkt)
 {
     pktQueue.add(pkt);
-    printf("-- Added Packet to queue, size is now %u\n",pktQueue.size());
 }
 
 void WorldSession::SendWorldPacket(WorldPacket &pkt)
@@ -61,15 +74,26 @@ void WorldSession::Update(void)
 {
     if (!IsValid())
         return;
-    if(_sh.GetCount())
+
+    if( _socket && _sh.GetCount() )
         _sh.Select(0,0);
+
+    if(!_socket)
+    {
+        if(_valid)
+        {
+            _deleteme = true;
+        }
+        _logged=_authed=_valid=false;
+        return;
+    }
+
 
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     bool known=false;
     while(!pktQueue.empty())
     {
         WorldPacket *packet = pktQueue.next();
-        printf("QUEUE: %u packets left\n",pktQueue.size());
         printf(">> Opcode %u [%s]\n",packet->GetOpcode(),LookupName(packet->GetOpcode(),g_worldOpcodeNames));
         
         for (uint16 i = 0; table[i].handler != NULL; i++)
@@ -86,7 +110,9 @@ void WorldSession::Update(void)
 
         delete packet;
     }
-    // do more stuff here
+
+    _DoTimedActions();
+    
 }
 
 
@@ -139,12 +165,36 @@ void WorldSession::SetFollowTarget(uint64 guid)
     _followGUID=guid;
 }
 
-void WorldSession::OnEnterWorld(void)
+void WorldSession::_OnEnterWorld(void)
 {
     if(!_logged)
     {
         _logged=true;
         //GetInstance()->GetScripts()->RunScriptByName("_enterworld",NULL,255);
+        
+    }
+}
+
+void WorldSession::_OnLeaveWorld(void)
+{
+    if(_logged)
+    {
+        _logged=false;
+
+    }
+}
+
+void WorldSession::_DoTimedActions(void)
+{
+    static clock_t pingtime=0;
+    if(_logged)
+    {
+        if(pingtime < clock())
+        {
+            pingtime=clock() + 30*CLOCKS_PER_SEC;
+            SendPing(clock());
+        }
+        //...
     }
 }
 
@@ -281,12 +331,12 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleSetProficiencyOpcode(WorldPacket& recvPacket)
 {
-    OnEnterWorld();
+    _OnEnterWorld();
 }
 
 void WorldSession::_HandleAccountDataMD5Opcode(WorldPacket& recvPacket)
 {
-    OnEnterWorld();
+    _OnEnterWorld();
 }
 
 void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
