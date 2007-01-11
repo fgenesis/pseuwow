@@ -160,7 +160,7 @@ void PseuInstance::Run(void)
 
         while((!_stop) && (!_startrealm))
         {
-            //Update();
+            Update();
         }
     }
     while(GetConf()->reconnect && (!_stop));
