@@ -368,10 +368,8 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
             plrname="Unknown Entity";
         }
     }
-	/*defScp.variables.Set("@lastmsg_name",defScp.variables.Get("@thismsg_name"));
-	defScp.variables.Set("@lastmsg",defScp.variables.Get("@lastmsg"));
-	defScp.variables.Set("@thismsg_name",plrname);
-	defScp.variables.Set("@thismsg",toString(target_guid));*/
+	GetInstance()->GetScripts()->variables.Set("@thismsg_name",plrname);
+	GetInstance()->GetScripts()->variables.Set("@thismsg",toString(target_guid));
 	
 	
 	if(type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
