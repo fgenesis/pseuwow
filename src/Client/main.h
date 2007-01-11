@@ -2,6 +2,7 @@
 #define _MAIN_H
 
 void _HookSignals(void);
+void _UnhookSignals(void);
 void _OnSignal(int);
 void quitproc(void);
 void abortproc(void);

@@ -11,6 +11,7 @@ class RealmSocket;
 class WorldSession;
 class Sockethandler;
 class PseuInstanceRunnable;
+class CliRunnable;
 
 class PseuInstanceConf
 {
@@ -92,6 +93,8 @@ class PseuInstance
 	BigNumber _sessionkey;
     char *_ver,*_ver_short;
     SocketHandler _sh;
+    CliRunnable *_cli;
+    ZThread::Thread _clithread;
 
 
 };

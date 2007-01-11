@@ -20,6 +20,11 @@ bool DefScriptPackage::SCpause(CmdSet Set){
 }
 
 bool DefScriptPackage::SCSendChatMessage(CmdSet Set){
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        printf("Invalid Script call: SCSendChatMessage: WorldSession not valid\n");
+        return false;
+    }
     std::stringstream ss;
     uint32 type=atoi(Set.arg[0].c_str());
     uint32 lang=atoi(Set.arg[1].c_str());
@@ -45,17 +50,23 @@ bool DefScriptPackage::SCsavecache(CmdSet Set){
    ((PseuInstance*)parentMethod)->SaveAllCache();
     std::stringstream tmp;
     std::string str;
-    tmp << ((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetSize();
-    str+="Cache saved. [ "+tmp.str()+ " Playernames ]";
-    ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str,"");
+    if(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid())
+    {
+        tmp << ((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetSize();
+        str+="Cache saved. [ "+tmp.str()+ " Playernames ]";
+        ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str,"");
+    }
     return true;
-
-
 }
 
 bool DefScriptPackage::SCemote(CmdSet Set){
     if(Set.defaultarg.empty())
         return true;
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        printf("Invalid Script call: SCEmote: WorldSession not valid\n");
+        return false;
+    }
     uint32 id=atoi(Set.defaultarg.c_str());
     ((PseuInstance*)parentMethod)->GetWSession()->SendEmote(id);
     return true;

@@ -61,4 +61,6 @@ NetworkSleepTime=50
 // set this to 0 and PseuWoW will not react to given commands
 allowgamecmd=1
 
+// enable this if you plan to enter commands on the console
+enablecli=1
 

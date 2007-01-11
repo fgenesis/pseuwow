@@ -11,6 +11,7 @@
 #include "DefScript/DefScript.h"
 #include "Realm/RealmSocket.h"
 #include "World/WorldSession.h"
+#include "Cli.h"
 
 
 //###### Start of program code #######
@@ -44,6 +45,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _rsession=NULL;
     _scp=NULL;
     _conf=NULL;
+    _cli=NULL;
     _stop=false;
     _fastquit=false;
     _startrealm=true;
@@ -54,10 +56,15 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
 
 PseuInstance::~PseuInstance()
 {
+    if(GetConf()->enablecli && _cli)
+    {
+        _cli->stop();
+    }
     delete _scp;
 	delete _conf;
 	//delete _rsession; // deleted by SocketHandler!!!!!
 	delete _wsession;
+    
 }
 
 bool PseuInstance::Init(void) {
@@ -112,6 +119,12 @@ bool PseuInstance::Init(void) {
         printf("Main_Init: Error executing '_startup.def'\n");
     }
 
+    if(GetConf()->enablecli)
+    {
+        _cli = new CliRunnable(this);
+        ZThread::Thread t(_cli);
+    }
+
     if(_stop){
 			printf("Errors while initializing, proc halted!!\n");
             if(GetConf()->exitonerror)
@@ -147,7 +160,7 @@ void PseuInstance::Run(void)
 
         while((!_stop) && (!_startrealm))
         {
-            Update();
+            //Update();
         }
     }
     while(GetConf()->reconnect && (!_stop));
@@ -195,8 +208,12 @@ void PseuInstance::Update()
 
 void PseuInstance::SaveAllCache(void)
 {
-    GetWSession()->plrNameCache.SaveToFile();
     //...
+    if(GetWSession() && GetWSession()->IsValid())
+    {
+        GetWSession()->plrNameCache.SaveToFile();
+        //...
+    }
 }
 
 void PseuInstance::Sleep(uint32 msecs)
