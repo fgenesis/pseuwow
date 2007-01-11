@@ -16,6 +16,17 @@ void _HookSignals(void)
     #endif
 }
 
+void _UnhookSignals(void)
+{
+    signal(SIGINT, 0);
+    signal(SIGQUIT, 0);
+    signal(SIGTERM, 0);
+    signal(SIGABRT, 0);
+    #ifdef _WIN32
+    signal(SIGBREAK, 0);
+    #endif
+}
+
 void _OnSignal(int s)
 {
     switch (s)
@@ -71,7 +82,8 @@ int main(int argc, char* argv[]) {
         //...
         t.wait();
         //...
-        return 0;
+        _UnhookSignals();
+        raise(SIGQUIT);
 	} 
     catch (...)
     {
