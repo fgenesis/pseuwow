@@ -425,9 +425,9 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     }
     if(type==CHAT_MSG_WHISPER && !isCmd)
     {
-        defScp.variables.Set("@thiswhisper_name",plrname);
-		defScp.variables.Set("@thiswhisper",toString(target_guid));
-        defScp.variables.Set("@thiswhisper_lang",toString((uint64)lang));
+        GetInstance()->GetScripts()->variables.Set("@thiswhisper_name",plrname);
+		GetInstance()->GetScripts()->variables.Set("@thiswhisper",toString(target_guid));
+        GetInstance()->GetScripts()->variables.Set("@thiswhisper_lang",toString((uint64)lang));
         GetInstance()->GetScripts()->RunScript("_onwhisper",NULL);
     }
 }
