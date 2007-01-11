@@ -26,7 +26,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(SolutionDir)/temp/$(ProjectName)/zthread.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -35,7 +35,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./dep/lib/zthread.lib"/>
+				OutputFile="./dep/lib/debug/zthread.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -67,7 +67,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(SolutionDir)/temp/$(ProjectName)/zthread.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -76,7 +76,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./dep/lib/zthread.lib"/>
+				OutputFile="./dep/lib/release/zthread.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

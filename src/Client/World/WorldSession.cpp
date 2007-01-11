@@ -91,7 +91,7 @@ void WorldSession::Update(void)
 
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     bool known=false;
-    while(!pktQueue.empty())
+    while(pktQueue.size())
     {
         WorldPacket *packet = pktQueue.next();
         
@@ -386,7 +386,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         printf("W:CHAT: %s [%s]: %s\n",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
 	}
 
-    if(target_guid!=_myGUID && msg.length()>1 && msg.at(0)=='-')
+    if(target_guid!=_myGUID && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
         isCmd=true;
 
     // some fun code :P
@@ -410,28 +410,24 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 
     if(isCmd)
     {
-		/*defScp.variables.Set("@lastcmd_name",defScp.variables.Get("@thiscmd_name"));
-		defScp.variables.Set("@lastcmd",defScp.variables.Get("@lastcmd"));
-		defScp.variables.Set("@thiscmd_name",plrname);
-		defScp.variables.Set("@thiscmd",toString(target_guid));
+		GetInstance()->GetScripts()->variables.Set("@thiscmd_name",plrname);
+		GetInstance()->GetScripts()->variables.Set("@thiscmd",toString(target_guid));
         std::string lin=msg.substr(1,msg.length()-1);
-        uint8 perm=atoi(playerPermissions.Get(plrname).c_str());
-        try{
-            if(!defScp.RunSingleLine(lin,perm))
-				defScp.RunScriptByName("_nopermission",NULL,255);
-        } catch (...) {
+        try
+        {
+            GetInstance()->GetScripts()->My_Run(lin,plrname);
+        }
+        catch (...)
+        {
             SendChatMessage(CHAT_MSG_SAY,0,"Exception while trying to execute: [ "+lin+" ]","");
-        }*/
+        }
         
     }
     if(type==CHAT_MSG_WHISPER && !isCmd)
     {
-		/*defScp.variables.Set("@lastwhisper_name",defScp.variables.Get("@thiswhisper_name"));
-		defScp.variables.Set("@lastwhisper",defScp.variables.Get("@thiswhisper"));
-		defScp.variables.Set("@lastwhisper_lang",defScp.variables.Get("@thiswhisper_lang"));
         defScp.variables.Set("@thiswhisper_name",plrname);
 		defScp.variables.Set("@thiswhisper",toString(target_guid));
-        defScp.variables.Set("@thiswhisper_lang",toString((uint64)lang));*/
+        defScp.variables.Set("@thiswhisper_lang",toString((uint64)lang));
         GetInstance()->GetScripts()->RunScript("_onwhisper",NULL);
     }
 }

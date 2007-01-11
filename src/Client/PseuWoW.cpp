@@ -103,6 +103,8 @@ bool PseuInstance::Init(void) {
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);
 
+    _scp->My_LoadUserPermissions(_scp->variables);
+
 
   //  //DEBUG1(printf("Main_Init: Loading DefScripts from folder '%s'\n",defScpPath.c_str()););
     if(!_scp->RunScript("_startup",NULL))
@@ -318,6 +320,8 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 	charname=v.Get("CHARNAME");
 	networksleeptime=atoi(v.Get("NETWORKSLEEPTIME").c_str());
     showopcodes=atoi(v.Get("SHOWOPCODES").c_str());
+    enablecli=(bool)atoi(v.Get("ENABLECLI").c_str());
+    allowgamecmd=(bool)atoi(v.Get("ALLOWGAMECMD").c_str());
 
     // clientversion is a bit more complicated to add
     {

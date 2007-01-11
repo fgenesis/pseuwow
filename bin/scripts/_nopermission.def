@@ -1,0 +1,15 @@
+#permission=255
+
+// GETS EXECUTED IF A PLAYER TRIES TO GIVE PSEUWOW A COMMAND AND IS NOT ALLOWED TO
+
+// Arguments:
+// ==========
+// @0 : name of the player who wanted to execute a command
+// @1 : permission level of this user
+// @2 : permission level needed to execute the script
+// @3 : name of the script that should get executed
+
+SAY Forget it, ${@0}, you have only permission ${@1} but need ${@2} to run the script '${@3}'
+
+// say NO!
+EMOTE 66

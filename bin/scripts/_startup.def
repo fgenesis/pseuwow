@@ -27,6 +27,28 @@ UNSET #ACCNAME
 OUT * Dangerous variables removed.
 
 
+OUT * Assigning permissions for internal functions...
+
+// this is important because players could reset permissions for dangerous functions
+SETSCRIPTPERMISSION,setscriptpermission 255
+
+SETSCRIPTPERMISSION,out 0
+SETSCRIPTPERMISSION,set 255
+SETSCRIPTPERMISSION,default 255
+SETSCRIPTPERMISSION,unset 255
+SETSCRIPTPERMISSION,shdn 255
+SETSCRIPTPERMISSION,loaddef 255
+SETSCRIPTPERMISSION,reloaddef 255
+SETSCRIPTPERMISSION,pause 255
+SETSCRIPTPERMISSION,emote 0
+SETSCRIPTPERMISSION,savecache 10
+SETSCRIPTPERMISSION,sendchatmessage 255
+
+OUT * Permissions set.
+
+
+
+
 // do more stuff here in future...
 
 OUT * StartUp complete!

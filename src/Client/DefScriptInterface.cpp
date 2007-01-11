@@ -1,5 +1,3 @@
-#ifndef __DEFSCRIPTINTERFACE_H
-#define __DEFSCRIPTINTERFACE_H
 
 #include "common.h"
 #include "PseuWoW.h"
@@ -10,6 +8,11 @@
 #include "SharedDefines.h"
 #include "WorldSession.h"
 
+bool DefScriptPackage::SCshdn(CmdSet Set)
+{
+    ((PseuInstance*)parentMethod)->Stop();
+    return true;
+}
 
 bool DefScriptPackage::SCpause(CmdSet Set){
     ((PseuInstance*)parentMethod)->Sleep(atoi(Set.defaultarg.c_str()));
@@ -78,6 +81,56 @@ bool DefScriptPackage::SCfollow(CmdSet Set){
 
 }
 
+void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
+{
+    static char *prefix = "USERS::";
+    std::string sub,usr;
+    for(uint32 i=0;i<variables.Size();i++)
+    {
+        sub = variables[i].name.substr(0,strlen(prefix));
+        if(sub == prefix)
+        {   
+            usr = variables[i].name.substr(strlen(prefix), variables[i].name.length() - strlen(prefix));
+            my_usrPermissionMap[usr] = atoi(variables[i].value.c_str());
+            DEBUG( printf("Player '%s' permission = %u\n",usr.c_str(),atoi(variables[i].value.c_str())); )
+        }
+    }
+}
 
+bool DefScriptPackage::My_Run(std::string line, std::string username)
+{
+    DefXChgResult final=ReplaceVars(line,NULL,false);
+	CmdSet curSet=SplitLine(final.str);
 
-#endif
+    uint8 scperm=0,usrperm=0;
+    
+    for (std::map<std::string,unsigned char>::iterator i = my_usrPermissionMap.begin(); i != my_usrPermissionMap.end(); i++)
+    {
+        if(i->first == username)
+        {
+            usrperm = i->second;
+        }
+    }
+
+    for (std::map<std::string,unsigned char>::iterator i = scriptPermissionMap.begin(); i != scriptPermissionMap.end(); i++)
+    {
+        if(i->first == curSet.cmd)
+        {
+            scperm = i->second;
+        }
+    }
+
+    if(usrperm < scperm)
+    {
+        CmdSet Set(NULL);
+        Set.arg[0] = username;
+        Set.arg[1] = toString(usrperm);
+        Set.arg[2] = toString(scperm);
+        Set.arg[3] = curSet.cmd;
+        RunScript("_nopermission",&Set);
+        return false;
+    }
+
+    Interpret(curSet);
+    return true;
+}

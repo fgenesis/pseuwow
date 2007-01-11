@@ -45,6 +45,8 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         {"shdn",&DefScriptPackage::func_shdn},
         {"loaddef",&DefScriptPackage::func_loaddef},
         {"reloaddef",&DefScriptPackage::func_reloaddef},
+        {"setscriptpermission",&DefScriptPackage::func_setscriptpermission},
+
 
         // user functions:
         {"pause",&DefScriptPackage::SCpause},
@@ -134,7 +136,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 			if(label=="permission")
             {
                 scriptPermissionMap[sn] = atoi(value.c_str());
-			}  // ...	
+			}
             if(line=="load_debug")
                 load_debug=true;
             if(line=="load_notify")
