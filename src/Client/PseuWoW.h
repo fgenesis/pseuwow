@@ -38,6 +38,8 @@ class PseuInstanceConf
     std::string worldhost;
 	uint16 networksleeptime;
     uint8 showopcodes;
+    bool allowgamecmd;
+    bool enablecli;
 	
 	
 };

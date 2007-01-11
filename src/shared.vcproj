@@ -29,9 +29,9 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\Debug/PseuWoW_Controller.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"/>
@@ -73,17 +73,19 @@
 			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="1"
+				Optimization="3"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="dep/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
+				BufferSecurityCheck="FALSE"
+				EnableFunctionLevelLinking="FALSE"
+				EnableEnhancedInstructionSet="0"
 				PrecompiledHeaderFile=".\Release/PseuWoW_Controller.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"/>
 			<Tool

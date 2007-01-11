@@ -32,7 +32,9 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="FALSE"
 				RuntimeLibrary="2"
+				BufferSecurityCheck="FALSE"
 				EnableFunctionLevelLinking="FALSE"
+				EnableEnhancedInstructionSet="1"
 				PrecompiledHeaderFile=".\Release/PseuWoW.pch"
 				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
 				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
@@ -43,11 +45,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib sdl.lib sdl_net.lib sdlmain.lib libeay32MT.lib ssleay32MT.lib WS2_32.LIB"
+				AdditionalDependencies="odbc32.lib odbccp32.lib sdl.lib sdlmain.lib libeay32MT.lib WS2_32.LIB"
+				ShowProgress="0"
 				OutputFile="$(OutDir)/$(InputName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories=""
+				IgnoreAllDefaultLibraries="FALSE"
+				AssemblyDebug="0"
 				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/Release/PseuWoW.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -104,7 +109,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib sdl.lib sdl_net.lib sdlmain.lib libeay32MT.lib ssleay32MT.lib WS2_32.LIB"
+				AdditionalDependencies="odbc32.lib odbccp32.lib sdl.lib sdlmain.lib libeay32MT.lib WS2_32.LIB"
 				OutputFile="$(OutDir)/$(InputName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"

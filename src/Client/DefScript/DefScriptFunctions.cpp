@@ -9,7 +9,9 @@
 
 
 bool DefScriptPackage::func_shdn(CmdSet Set){
-    exit(0);
+    //exit(0);
+    // need to define own
+    SCshdn(Set);
     return true;
 }
 
@@ -122,5 +124,14 @@ bool DefScriptPackage::func_default(CmdSet Set){
     if(variables.Get(vname).empty())
         variables.Set(vname,vval); // set only if it has no value
 
+    return true;
+}
+
+bool DefScriptPackage::func_setscriptpermission(CmdSet Set)
+{
+    if(Set.defaultarg.empty() || Set.arg[0].empty())
+        return false;
+
+    scriptPermissionMap[Set.arg[0]] = atoi(Set.defaultarg.c_str());
     return true;
 }

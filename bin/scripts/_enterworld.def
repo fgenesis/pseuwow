@@ -7,9 +7,6 @@ OUT * World entered, executing appropriate script...
 // not yet implemented
 // CASTSPELL 836
 
-// yaay we are online
-EMOTE 5
-
 // MaNGOS: make PseuWoW invincible
 SAY .gmon
 
@@ -19,6 +16,10 @@ SAY .gmon
 
 // to know everything worked fine, etc
 SAY [${@version_short}] login successful.
+
+// yaay we are online. Ready!
+// 126 = TEXTEMOTE_READY
+EMOTE 126
 
 
 // add your own stuff here

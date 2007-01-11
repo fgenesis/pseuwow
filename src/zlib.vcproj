@@ -37,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./dep/lib/zlib.lib"/>
+				OutputFile="./dep/lib/debug/zlib.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -78,7 +78,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./dep/lib/zlib.lib"/>
+				OutputFile="./dep/lib/release/zlib.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

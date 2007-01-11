@@ -92,6 +92,10 @@ public:
 
     std::string scPath;
 
+    // Own executor functions
+    void My_LoadUserPermissions(VarSet&);
+    bool My_Run(std::string line,std::string username);
+
 private:
     DefXChgResult ReplaceVars(std::string, CmdSet*, bool);
 	CmdSet SplitLine(std::string);
@@ -102,9 +106,8 @@ private:
     DefScriptFunctionTable *functionTable;
     unsigned int functions;
     void *parentMethod;
-
-    std::map<std::string, unsigned char> scriptPermissionMap;
     std::map<std::string,DefScript*> Script;
+    std::map<std::string,unsigned char> scriptPermissionMap;
 
     // Usable internal basic functions:
     bool func_default(CmdSet);
@@ -115,6 +118,7 @@ private:
     bool func_out(CmdSet);
     bool func_eof(CmdSet);
     bool func_shdn(CmdSet);
+    bool func_setscriptpermission(CmdSet);
 
     // Useable own internal functions:
     bool SCpause(CmdSet);
@@ -122,6 +126,10 @@ private:
     bool SCsavecache(CmdSet);
     bool SCemote(CmdSet);
     bool SCfollow(CmdSet);
+    bool SCshdn(CmdSet);
+
+    // Own variable declarations
+    std::map<std::string, unsigned char> my_usrPermissionMap;
 
 };
 
