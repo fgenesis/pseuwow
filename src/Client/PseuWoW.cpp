@@ -50,6 +50,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _fastquit=false;
     _startrealm=true;
     createWorldSession=false;
+    _error=false;
 
 
 }
@@ -179,6 +180,14 @@ void PseuInstance::Run(void)
     log("Shutting down instance...");
 
     SaveAllCache();
+
+    if(GetConf()->exitonerror == false && _error)
+    {
+        log("Exiting on error is disabled, PseuWoW is now IDLE");
+        log("-- Press enter to exit --");
+        char crap[100];
+        fgets(crap,sizeof(crap),stdin); 
+    }
 
 }
 

@@ -107,8 +107,9 @@ void RealmSocket::Start(void)
 {
     if(_rhost.empty() || _rport==0 || _instance==NULL)
         return;
+    log("Connecting to Realm Server on '%s:%u'",_rhost.c_str(),_rport);
+    Open(_rhost,_rport);
 
-    bool result=Open(_rhost,_rport);
     //...
     _valid=true;
 }

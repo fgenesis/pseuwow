@@ -27,6 +27,11 @@ void WorldSocket::OnDelete()
         _session->SetSocket(NULL);
 }
 
+void WorldSocket::OnException()
+{
+    this->SetCloseAndDelete();
+}
+
 void WorldSocket::OnRead()
 {
     TcpSocket::OnRead();
