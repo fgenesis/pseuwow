@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -28,9 +28,6 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(SolutionDir)/temp/$(ProjectName)/zthread.pch"
-				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
-				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
-				ProgramDataBaseFileName="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
@@ -60,21 +57,18 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="dep/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(SolutionDir)/temp/$(ProjectName)/zthread.pch"
-				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
-				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
-				ProgramDataBaseFileName="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
