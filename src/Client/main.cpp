@@ -83,7 +83,9 @@ int main(int argc, char* argv[]) {
         t.wait();
         //...
         _UnhookSignals();
+        raise(SIGABRT);  // this way to terminate is not nice but the only way to quit the CLI thread
         raise(SIGQUIT);
+        return 0;
 	} 
     catch (...)
     {
