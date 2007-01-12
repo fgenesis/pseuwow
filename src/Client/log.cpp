@@ -81,4 +81,9 @@ void logdebug(const char *str, ...)
     }
     fflush(stdout);
 }
+
+void log_close()
+{
+	fclose(logfile);
+}
     

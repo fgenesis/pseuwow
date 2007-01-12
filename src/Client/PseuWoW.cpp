@@ -64,6 +64,7 @@ PseuInstance::~PseuInstance()
 	delete _conf;
 	//delete _rsession; // deleted by SocketHandler!!!!!
 	delete _wsession;
+	log_close();
     
 }
 
