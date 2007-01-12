@@ -26,6 +26,5 @@
 #include "DebugStuff.h"
 #include "tools.h"
 
-
 #endif
 

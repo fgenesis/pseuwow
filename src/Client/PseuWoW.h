@@ -3,6 +3,7 @@
 #define _PSEUWOW_H
 
 #include "common.h"
+#include "log.h"
 #include "Auth/BigNumber.h"
 #include "DefScript/DefScript.h"
 #include "Network/SocketHandler.h"

@@ -71,6 +71,7 @@ void abortproc(void)
 int main(int argc, char* argv[]) {
     try 
     {
+        printf("\n   (C) 2006, Snowstorm Software\n\n\n");
         
         _HookSignals();
 

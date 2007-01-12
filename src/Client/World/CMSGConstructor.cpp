@@ -17,7 +17,6 @@ void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, st
 		case CHAT_MSG_GUILD:
 		case CHAT_MSG_OFFICER: // not sure about that
 			packet<<msg;
-			//DEBUG2(printf("W:CHAT->: \"%s\"\n",msg.c_str()););
 			break;
 		case CHAT_MSG_WHISPER:
             if(to.empty())
@@ -51,7 +50,7 @@ void WorldSession::SendPing(uint32 ping){
     packet << ping;
     packet.SetOpcode(CMSG_PING);
     SendWorldPacket(packet);
-    //DEBUG2(printf("Sent CMSG_PING, clock=%u\n",ping););
+    logdebug("Sent CMSG_PING, clock=%u",ping);
 }
 
 void WorldSession::SendEmote(uint32 id){

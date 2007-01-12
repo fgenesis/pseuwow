@@ -68,6 +68,7 @@ PseuInstance::~PseuInstance()
 }
 
 bool PseuInstance::Init(void) {
+    log_prepare("logfile.txt",this);
 
     if(_confdir.empty())
         _confdir="./conf/";
@@ -78,7 +79,7 @@ bool PseuInstance::Init(void) {
 	RAND_set_rand_method(RAND_SSLeay()); // init openssl randomizer
 
 	if(SDL_Init(0)==-1) {
-			printf("SDL_Init: %s\n", SDL_GetError());
+			log("SDL_Init: %s", SDL_GetError());
 			return false;
 		}
 	
@@ -86,53 +87,57 @@ bool PseuInstance::Init(void) {
     _scp->SetParentMethod((void*)this);
 	_conf=new PseuInstanceConf();	
 	
+    log("Reading PseuWoW.conf...");
 	if(!_scp->variables.ReadVarsFromFile(_confdir + "PseuWoW.conf"))
 	{
-		printf("Error reading conf file [%s]",_confdir.append("PseuWoW.conf").c_str()); 
+		log("Error reading conf file [%s]",_confdir.append("PseuWoW.conf").c_str()); 
 		return false;
 	}
+    logdetail("Applying configuration...");
 	_conf->ApplyFromVarSet(_scp->variables);
 	
+    log("Reading user permissions...");
     if(_scp->variables.ReadVarsFromFile(_confdir + "users.conf"))
 	{
-		printf("-> Done reading users.\n");
+		log("-> Done reading users.");
 	}
 	else
 	{
-		printf("Error reading conf file [%s] - NO PERMISSIONS SET!\n",_confdir.append("users.conf").c_str()); 
+		log("Error reading conf file [%s] - NO PERMISSIONS SET!",_confdir.append("users.conf").c_str()); 
 	}
 
 
-//    //DEBUG1(printf("Main_Init: Setting up DefScripts path '%s'\n",defScpPath.c_str()););
+    logdebug("Setting up DefScripts path '%s'",_scpdir.c_str());
     _scp->SetPath(_scpdir);
 
-  //  //DEBUG1(printf("Main_Init: Setting up predefined DefScript macros...\n"););
+    logdebug("Setting up predefined DefScript macros...");
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);
 
+    logdetail("Applying user permissions...");
     _scp->My_LoadUserPermissions(_scp->variables);
 
-
-  //  //DEBUG1(printf("Main_Init: Loading DefScripts from folder '%s'\n",defScpPath.c_str()););
+    log("Loading DefScripts from folder '%s'",_scpdir.c_str());
     if(!_scp->RunScript("_startup",NULL))
     {
-        printf("Main_Init: Error executing '_startup.def'\n");
+        printf("Error executing '_startup.def'");
     }
 
     if(GetConf()->enablecli)
     {
+        log("Starting CLI...");
         _cli = new CliRunnable(this);
         ZThread::Thread t(_cli);
     }
 
     if(_stop){
-			printf("Errors while initializing, proc halted!!\n");
+			log("Errors while initializing, proc halted!!");
             if(GetConf()->exitonerror)
                 exit(0);
 			while(true)SDL_Delay(1000);
     }
 
-//	if(DEBUG)printf("Main_Init: Init complete.\n");
+    log("Init complete.\n");
 	_initialized=true; 
 	return true;
 }
@@ -167,10 +172,10 @@ void PseuInstance::Run(void)
 
     if(_fastquit)
     {
-        printf("Aborting Instance...\n");
+        log("Aborting Instance...");
         return;
     }
-    printf("Shutting down instance...\n");
+    log("Shutting down instance...");
 
     SaveAllCache();
 
@@ -221,100 +226,6 @@ void PseuInstance::Sleep(uint32 msecs)
     GetRunnable()->sleep(msecs);
 }
 
-
-
-    /*
-    printf("%s\n",ver);
-    for(unsigned int temp=0;temp<=strlen(ver);temp++)printf("~");printf("\n");
-	printf("[Compiled on: %s , %s]\n\n",__DATE__,__TIME__);
-    if (!initproc()) quitproc_error();
-
-	bool _auth_sent=false;
-	bool _first_wpacket=true;
-    clock_t ping_time=clock()-25000;
-
-	while (true) {
-
-		if(something_went_wrong){
-			if(inworld){
-				SendChatMessage(CHAT_MSG_YELL,0,"ERROR! Something went wrong, exiting...","");
-			}
-			printf("!!! Something went wrong, proc halted.!!!\n");
-			ctrlCon.Close();
-			worldCon.Close();
-			realmCon.Close();
-			if(exitonerror)quitproc();
-			while(true)SDL_Delay(1000);
-		}
-
-		if( !realmCon.IsConnected() && !worldCon.IsConnected() && !something_went_wrong){
-			printf("Opening realm TCP connection <%s:%d>\n",realmlist,rs_port);
-			while(!realmCon.ConnectTo(realmlist,rs_port));
-			_auth_sent=false;
-		}
-
-		if(realmCon.IsConnected() && !worldCon.IsConnected() && !something_went_wrong){
-			if(!_auth_sent){
-				CLIENT_LOGON_CHALLENGE(accname, accpass);
-				_auth_sent=true;
-			}
-		}
-		if(realmCon.HasData()){
-            Buf buf;
-            buf=realmCon.GetData();
-            rs_parser(buf.str,buf.len); // TODO: change type to Buf (also the func arg!)
-		}
-
-		
-		
-		while(worldCon.GetBufferLevel()>1){
-			////DEBUG3(
-			//	printf("WS_IN, %d bytes. Buffer Level=%u\n",worldCon.GetKeepData().len,worldCon.GetBufferLevel());
-			//	printchex(worldCon.GetKeepData().str,worldCon.GetKeepData().len,true);
-			//)
-			//_first_wpacket=false;
-			ByteBuffer pk2;
-			pk2.append(worldCon.GetDataString());
-			pk2.resize(pk2.size()-1);
-			HandleWorldPacket(pk2);
-		}
-
-		// this covers the first serverseed packet, which get sometimes merged into 1 packet instead of 2
-		if(worldCon.HasData() && _first_wpacket && worldCon.GetKeepData().len==8){
-			_first_wpacket=false;
-			ByteBuffer pk2;
-			pk2.append(worldCon.GetDataString());
-			pk2.resize(pk2.size()-1);
-			HandleWorldPacket(pk2);
-		}
-
-
-		if(!worldCon.IsConnected() && inworld){
-			printf("Disconnected from World server!\n");
-			inworld=false;
-			_first_wpacket=true;
-			_auth_sent=false;
-		}
-
-        if(clock()-ping_time>30000)
-        { 
-            ping_time=clock();
-            SendPing(ping_time);
-        }
-
-
-		SDL_Delay(idleSleepTime);
-		if (error)return error;
-
-
-
-
-void _SaveAllCache(void){
-    bool result;
-    result=plrNameCache.SaveToFile();    
-    // +++
-}
-*/
 
 
 PseuInstanceConf::PseuInstanceConf()

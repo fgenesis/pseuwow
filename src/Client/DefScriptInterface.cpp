@@ -22,7 +22,7 @@ bool DefScriptPackage::SCpause(CmdSet Set){
 bool DefScriptPackage::SCSendChatMessage(CmdSet Set){
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
-        printf("Invalid Script call: SCSendChatMessage: WorldSession not valid\n");
+        log("Invalid Script call: SCSendChatMessage: WorldSession not valid");
         return false;
     }
     std::stringstream ss;
@@ -64,7 +64,7 @@ bool DefScriptPackage::SCemote(CmdSet Set){
         return true;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
-        printf("Invalid Script call: SCEmote: WorldSession not valid\n");
+        log("Invalid Script call: SCEmote: WorldSession not valid");
         return false;
     }
     uint32 id=atoi(Set.defaultarg.c_str());
@@ -103,7 +103,7 @@ void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
         {   
             usr = variables[i].name.substr(strlen(prefix), variables[i].name.length() - strlen(prefix));
             my_usrPermissionMap[usr] = atoi(variables[i].value.c_str());
-            DEBUG( printf("Player '%s' permission = %u\n",usr.c_str(),atoi(variables[i].value.c_str())); )
+            DEBUG( log("Player '%s' permission = %u",usr.c_str(),atoi(variables[i].value.c_str())); )
         }
     }
 }
