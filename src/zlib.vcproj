@@ -70,7 +70,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="dep/include/zlib;dep/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(SolutionDir)/temp/$(ProjectName)/zlib.pch"
