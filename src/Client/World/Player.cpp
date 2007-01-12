@@ -38,13 +38,13 @@ uint64 PlayerNameCache::GetGuid(std::string name){
 }
 
 bool PlayerNameCache::SaveToFile(void){
-	printf("Saving PlayerNameCache...\n");
+	log("Saving PlayerNameCache...");
 	char *fn="./cache/playernames.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::out | std::ios_base::binary);
     if(!fh)
 	{
-		printf("ERROR: could not write to file '%s'!\n",fn);
+		log("ERROR: could not write to file '%s'!",fn);
         return false;
     }
     uint32 size=_cache.size();
@@ -59,22 +59,22 @@ bool PlayerNameCache::SaveToFile(void){
         len=(*i)->_name.length();
         fh.write( (char*)&len,sizeof(uint8) );
         fh.write( (char*)(*i)->_name.c_str(),len );
-        DEBUG(printf( "PlayerNameCache << " I64FMT " -> %s\n", (*i)->_guid, (*i)->_name.c_str()););
+        DEBUG(log( "PlayerNameCache << " I64FMT " -> %s", (*i)->_guid, (*i)->_name.c_str()););
     }
     fh.close();
-	printf("PlayerNameCache saved successfully.\n");
+	log("PlayerNameCache saved successfully.");
     return true;
 }
 
 bool PlayerNameCache::ReadFromFile(void){
 	char *fn="./cache/playernames.cache";
-	printf("Loading PlayerNameCache...\n");
+	log("Loading PlayerNameCache...");
     bool success=true;
     std::fstream fh;
     fh.open(fn, std::ios_base::in | std::ios_base::binary);
     if(!fh)
 	{
-		printf("ERROR: could not open file '%s'!\n",fn);
+		log("ERROR: could not open file '%s'!",fn);
         return false;
     }
     uint32 size;
@@ -90,8 +90,8 @@ bool PlayerNameCache::ReadFromFile(void){
         fh.read((char*)&(cacheItem->_guid),sizeof(uint64));
         fh.read((char*)&len,sizeof(uint8));
         if(len>12 || len<2){
-            printf("\nERROR: PlayerNameCache data seem corrupt [namelength=%d, should be <=12}]\n",len);
-            printf("-> Clearing cache, creating new.\n");
+            log("\nERROR: PlayerNameCache data seem corrupt [namelength=%d, should be <=12}]",len);
+            log("-> Clearing cache, creating new.\n");
             _cache.clear();
             success=false;
             break;
@@ -106,7 +106,7 @@ bool PlayerNameCache::ReadFromFile(void){
     delete nameptr;
     fh.close();
 	if(success)
-		printf("PlayerNameCache successfully loaded.\n");
+		log("PlayerNameCache successfully loaded.");
     return success;
 }
 

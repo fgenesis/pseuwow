@@ -197,7 +197,7 @@ std::string getDateString(void)
 {
     time_t t = time(NULL);
     tm* aTm = localtime(&t);
-    char str[19];
+    char str[30];
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
@@ -207,3 +207,4 @@ std::string getDateString(void)
     sprintf(str,"%-4d-%02d-%02d %02d:%02d:%02d ",aTm->tm_year+1900,aTm->tm_mon+1,aTm->tm_mday,aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
     return std::string(str);
 }
+

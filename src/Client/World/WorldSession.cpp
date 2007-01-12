@@ -41,7 +41,7 @@ WorldSession::~WorldSession()
 
 void WorldSession::Start(void)
 {
-    printf("Connecting to '%s' on port %u\n",GetInstance()->GetConf()->worldhost.c_str(),GetInstance()->GetConf()->worldport);
+    log("Connecting to '%s' on port %u",GetInstance()->GetConf()->worldhost.c_str(),GetInstance()->GetConf()->worldport);
     _socket->Open(GetInstance()->GetConf()->worldhost,GetInstance()->GetConf()->worldport);
     GetInstance()->GetRSession()->SetCloseAndDelete(); // realm socket is no longer needed
     _valid=true;
@@ -108,7 +108,7 @@ void WorldSession::Update(void)
             || ((!known) && GetInstance()->GetConf()->showopcodes==2)
             || (GetInstance()->GetConf()->showopcodes==3) )
         {
-            printf(">> Opcode %u [%s]\n",packet->GetOpcode(),LookupName(packet->GetOpcode(),g_worldOpcodeNames));
+            log(">> Opcode %u [%s]",packet->GetOpcode(),LookupName(packet->GetOpcode(),g_worldOpcodeNames));
         }
             
         
@@ -214,7 +214,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
 	uint32 serverseed;
 	recvPacket >> serverseed;
-	printf("W:auth: serverseed=0x%X\n",serverseed);
+	logdebug("Auth: serverseed=0x%X",serverseed);
 	Sha1Hash digest;
 	digest.UpdateData(acc);
 	uint32 unk=0;
@@ -235,10 +235,6 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
 	auth<<(uint32)0; // no addons? no idea, but seems to work. MaNGOS doesnt accept without this.
     auth.SetOpcode(CMSG_AUTH_SESSION);
 
-	//DEBUG3(
-	//	printf("CMSG_AUTH_SESSION=");
-	//	printchex((char*)outpkt.contents(),outpkt.size(),true);
-	//)
 	SendWorldPacket(auth);
 
     // note that if the sessionkey/auth is wrong or failed, the server sends the following packet UNENCRYPTED!
@@ -254,12 +250,12 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
     uint8 errcode;
     recvPacket >> errcode;
     if(errcode==0xC){
-	    //DEBUG1(printf("World Authentication successful, preparing for char list request...\n"););
+	    logdetail("World Authentication successful, preparing for char list request...");
         WorldPacket pkt;
         pkt.SetOpcode(CMSG_CHAR_ENUM);
 	    SendWorldPacket(pkt);
     } else {
-	    printf("World Authentication failed, errcode=0x%X\n",(unsigned char)errcode);
+	    log("World Authentication failed, errcode=0x%X",(unsigned char)errcode);
     }
 }
 
@@ -272,11 +268,11 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 
 	recvPacket >> num;
 	if(num==0){
-		printf("W:No chars found!\n");
+		log("No chars found!\n");
 		GetInstance()->Stop();
 		return;
 	}
-	printf("W: Chars in list: %u\n",num);
+	logdetail("W: Chars in list: %u\n",num);
 	for(unsigned int i=0;i<num;i++){
 		recvPacket >> plr[i]._guid;
 		recvPacket >> plr[i]._name;
@@ -308,10 +304,10 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 	}
 	bool char_found=false;
 	for(unsigned int i=0;i<num;i++){
-		printf("## %s (%u) [%s/%s]\n",
+		log("## %s (%u) [%s/%s]",
 			plr[i]._name.c_str(),plr[i]._level,raceName[plr[i]._race],className[plr[i]._class]);
-		//DEBUG1(printf("-> coords: map=%u zone=%u x=%f y=%f z=%f\n",
-		//	plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);)
+		logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
+			plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
         if(plr[i]._name==GetInstance()->GetConf()->charname){
 			char_found=true;
 			_myGUID=plr[i]._guid;
@@ -319,11 +315,11 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 
 	}
 	if(!char_found){
-		printf("W: Character \"%s\" was not found on char list!\n",GetInstance()->GetConf()->charname.c_str());
+		log("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
 		GetInstance()->Stop();
 		return;
 	} else {
-		printf("W: Entering World with Character \"%s\"...\n",GetInstance()->GetConf()->charname.c_str());
+		log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
 		WorldPacket pkt;
         pkt.SetOpcode(CMSG_PLAYER_LOGIN);
 		pkt << _myGUID;
@@ -377,11 +373,11 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 	
 	recvPacket >> msglen >> msg;
 	if (type == CHAT_MSG_SYSTEM){
-		printf("W:SYSMSG: \"%s\"\n",msg.c_str());
+		log("SYSMSG: \"%s\"",msg.c_str());
 	} else if (type==CHAT_MSG_WHISPER ){
-        printf("W:WHISP: %s [%s]: %s\n",plrname.c_str(),LookupName(lang,langNames),msg.c_str());                
+        log("W:WHISP: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());                
     } else {
-        printf("W:CHAT: %s [%s]: %s\n",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
+        log("W:CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
 	}
 
     if(target_guid!=_myGUID && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
@@ -439,10 +435,9 @@ void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
     // rest of the packet is not interesting for now
     if(plrNameCache.AddInfo(pguid,pname))
     {
-        printf("CACHE: Assigned new player name: '%s'",pname.c_str());
-        SendChatMessage(CHAT_MSG_SAY,0,"Player "+pname+" added to cache.","");
-        //DEBUG2(printf(" to guid "I64FMTD,pguid););
-        printf("\n");
+        logdetail("CACHE: Assigned new player name: '%s' = " I64FMTD ,pname.c_str(),pguid);
+        if(GetInstance()->GetConf()->debug > 1)
+            SendChatMessage(CHAT_MSG_SAY,0,"Player "+pname+" added to cache.","");
     }
 }
 
@@ -450,7 +445,7 @@ void WorldSession::_HandlePongOpcode(WorldPacket& recvPacket)
 {
     uint32 pong;
     recvPacket >> pong;
-    printf("Recieved Ping reply: %u ms latency.\n",clock()-pong);
+    log("Recieved Ping reply: %u ms latency.",clock()-pong);
 }
 void WorldSession::_HandleTradeStatusOpcode(WorldPacket& recvPacket)
 {

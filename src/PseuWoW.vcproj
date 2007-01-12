@@ -160,6 +160,12 @@
 				RelativePath=".\Client\DefScriptInterface.cpp">
 			</File>
 			<File
+				RelativePath=".\Client\log.cpp">
+			</File>
+			<File
+				RelativePath=".\Client\log.h">
+			</File>
+			<File
 				RelativePath=".\Client\main.cpp">
 			</File>
 			<File

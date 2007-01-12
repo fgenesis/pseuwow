@@ -132,8 +132,6 @@ void RealmSocket::_HandleRealmList(void)
     uint16 len;
     uint8 cmd,count;
     realmbuf >> cmd >> len >> unk >> count;
-
-    printf("DEBUG: Realm cmd=%u, count=%u, size=%u, unk=%u\n",cmd,count,len,unk);
 	
     // no realm?
     if(count==0)
@@ -163,16 +161,13 @@ void RealmSocket::_HandleRealmList(void)
         {
             realmAddr=realms[i].addr_port;
         }
-		printf("Realm: %s (%s)",realms[i].name.c_str(),realms[i].addr_port.c_str());
-        printf("[chars:%d][population:%f][timezone:%d]",realms[i].chars_here,realms[i].population,realms[i].timezone);
-        printf("\n");
+		log("Realm: %s (%s)",realms[i].name.c_str(),realms[i].addr_port.c_str());
+        logdetail(" [chars:%d][population:%f][timezone:%d]",realms[i].chars_here,realms[i].population,realms[i].timezone);
     }
 
 	// now setup where the woldserver is and how to login there
     if(realmAddr.empty()){
-		printf("Realm \"%s\" was not found on the realmlist!\n",GetInstance()->GetConf()->realmname.c_str());
-		//something_went_wrong=true;
-		//realmCon.Close();
+		log("Realm \"%s\" was not found on the realmlist!",GetInstance()->GetConf()->realmname.c_str());
 		return;
 	}
 	
@@ -196,7 +191,7 @@ void RealmSocket::OnRead(void)
 {
     TcpSocket::OnRead();
     bool known=false;
-    printf("RealmSocket::OnRead() %u bytes\n",ibuf.GetLength());
+    //printf("RealmSocket::OnRead() %u bytes\n",ibuf.GetLength());
     if(!ibuf.GetLength())
         return;
     uint8 cmd, i=0;
@@ -212,96 +207,17 @@ void RealmSocket::OnRead(void)
     }
     if(!known)
     {
-        printf("RealmSocket: Got unknown packet, cmd=%u\n",cmd);
+        log("RealmSocket: Got unknown packet, cmd=%u",cmd);
     }
     ibuf.Remove(ibuf.GetLength()); // if we have data crap left on the buf, delete it
 }
-
-/*
-	switch(rs_state){
-		unsigned int i;
-		case 1:{		
-			if(pkt[2]==4){
-					printf("Realm Server did not find account \"%s\"!\n",accname);
-					something_went_wrong=true;
-					realmCon.Close();
-			} else
-			if(pkt[2]==6){
-					printf("Account \"%s\" is already logged in!\n",accname);
-					realmCon.Close();
-					something_went_wrong=true;
-			} else
-			if(pkt[2]!=0){
-					printf("Unknown realm server response! opcode=0x%x\n",(unsigned char)pkt[2]);
-					something_went_wrong=true;
-					realmCon.Close();
-			} else
-			if(pkt[2]==0){
-					//DEBUG1(printf("Login successful, now calculating proof packet...\n"););
-					ProcessClientLogonProof(pkt);
-					rs_state=2; // 2=waiting for server proof			
-			}
-		}break;			
-
-		case 2:{
-			if(pkt[1]==4){
-			printf("Wrong password!\n");
-			something_went_wrong=true;
-			realmCon.Close();
-			} else
-			if(pkt[0]==1 && pkt[1]==0 && memcmp(&pkt[2],Auth_M2,20)!=0){
-				printf("Something with Authenticating went wrong, although the password seems correct!\n");
-				//DEBUG1(printf("-> expected M2=");printchex(Auth_M2,20,true);)
-				//DEBUG1(printf("->      got M2=");printchex(&pkt[2],20,true);)
-				something_went_wrong=true;
-				realmCon.Close();
-			} else 
-			if(pkt[0]==1 && pkt[1]==0 && memcmp(&pkt[2],Auth_M2,20)==0){
-				printf("Password is correct!! Requesting Realmlist.\n");
-				rs_state=3; // requesting realmlist
-				// Request Realmlist
-				char realmrequest[]={0x10,0,0,0,0}; // 0x10 is opcode, rest is an uint32, nulled 
-				realmCon.Send(realmrequest,5);
-			}
-			else {
-				printf("Unknown ErrorID recieved, check the packet hexdump.\n");
-				printf("-> IDs=");printchex(pkt,2,true);
-				something_went_wrong=true;
-				realmCon.Close();
-			}		
-		}break;
-
-		case 3:{
-			if(pkt[0]!=0x10){
-				printf("Expected a realmlist packet, got something different. opcode=0x%x\n",(unsigned char)pkt[0]);
-				something_went_wrong=true;
-				realmCon.Close();
-			}
-            ByteBuffer bbuf;
-            bbuf.append(pkt,size);
-			if(HandleRealmList(bbuf)==true){
-				printf("Connecting to realm \"%s\" at \"%s\", port %d\n",realmname,worldhost.c_str(),ws_port);
-				while(!worldCon.IsConnected()){
-					worldCon.ConnectTo((char*)worldhost.c_str(),ws_port); // init world server connection, we have all info we need to enter
-				}
-				realmCon.Close(); // close the realm server connection, its no longer needed now
-			}
-		}break;
-			// more?
-		default:{
-			//...
-				}
-	}
-}
-*/
-
 
 
 void RealmSocket::SendLogonChallenge(void)
 {
     if(!this->Ready())
     {
-        printf("Error sending AUTH_LOGON_CHALLENGE, port is not ready!\n");
+        log("Error sending AUTH_LOGON_CHALLENGE, port is not ready!\n");
         return;
     }
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
@@ -322,8 +238,6 @@ void RealmSocket::SendLogonChallenge(void)
     packet << (uint8)acc.length(); // length of acc name without \0
     packet.append(acc.c_str(),acc.length()); // append accname, skip \0
 
-    packet.hexlike();
-
     SendBuf((char*)packet.contents(),packet.size());
 
 }
@@ -335,21 +249,21 @@ PseuInstance *RealmSocket::GetInstance(void)
 
 void RealmSocket::_HandleLogonChallenge(void)
 {
-    printf("RealmSocket: Got AUTH_LOGON_CHALLENGE [%u of %u bytes]\n",ibuf.GetLength(),sizeof(sAuthLogonChallenge_S));
+    logdebug("RealmSocket: Got AUTH_LOGON_CHALLENGE [%u of %u bytes]",ibuf.GetLength(),sizeof(sAuthLogonChallenge_S));
     sAuthLogonChallenge_S lc;
     ibuf.Read((char*)&lc, sizeof(sAuthLogonChallenge_S));
 
     switch (lc.error)
     {
     case 4:
-        printf("Realm Server did not find account \"%s\"!\n",GetInstance()->GetConf()->accname.c_str());
+        log("Realm Server did not find account \"%s\"!",GetInstance()->GetConf()->accname.c_str());
         break;
     case 6:
-        printf("Account \"%s\" is already logged in!\n",GetInstance()->GetConf()->accname.c_str());
+        log("Account \"%s\" is already logged in!",GetInstance()->GetConf()->accname.c_str());
         break;
     case 0:
         {
-        printf("Login successful, now calculating proof packet...\n");
+        logdetail("Login successful, now calculating proof packet...");
 
         // now lets start calculating
         BigNumber N,A,B,a,u,x,v,S,salt,unk1,g,k(3); // init BNs, default k to 3
@@ -362,17 +276,6 @@ void RealmSocket::_HandleLogonChallenge(void)
         salt.SetBinary(lc.salt,32);
         unk1.SetBinary(lc.unk3,16);
 
-	    /*
-	    // debug output	
-	    //DEBUG3(printchex(B_str,BNLEN,true);)
-	    //DEBUG3(printchex(g_str,1,true);)
-	    //DEBUG3(printchex(N_str,BNLEN,true);)
-	    //DEBUG3(printchex(salt_str,BNLEN,true);)
-	    //DEBUG3(printchex(unk1_str,16,true);)
-        */
-
-	    // client-side BN calculations:
-	    ////DEBUG3(printf("--> k=%s\n",k.AsHexStr());)
 	    a.SetRand(19*8);
 	    Sha1Hash userhash,xhash,uhash;
 	    userhash.UpdateData(_authstr);
@@ -381,23 +284,23 @@ void RealmSocket::_HandleLogonChallenge(void)
 	    xhash.UpdateData(userhash.GetDigest(),userhash.GetLength());
 	    xhash.Finalize();
 	    x.SetBinary(xhash.GetDigest(),xhash.GetLength());
-	    ////DEBUG3(printf("--> x=%s\n",x.AsHexStr());)
+	    logdebug("--> x=%s",x.AsHexStr());
 	    v=g.ModExp(x,N);
-	    ////DEBUG3(printf("--> v=%s\n",v.AsHexStr());)
+	    logdebug("--> v=%s",v.AsHexStr());
 	    A=g.ModExp(a,N);
-	    ////DEBUG3(printf("--> A=%s\n",A.AsHexStr());)
+	    logdebug("--> A=%s",A.AsHexStr());
         uhash.UpdateBigNumbers(&A, &B, NULL);
         uhash.Finalize();
         u.SetBinary(uhash.GetDigest(), 20);
-	    ////DEBUG3(printf("--> u=%s\n",u.AsHexStr());)
+	    logdebug("--> u=%s",u.AsHexStr());
 	    S=(B - k*g.ModExp(x,N) ).ModExp((a + u * x),N);
-	    ////DEBUG3(printf("--> S=%s\n",S.AsHexStr());)
+	    logdebug("--> S=%s",S.AsHexStr());
 
 	    // calc M1 & M2
 	    unsigned int i=0;
 	    char S1[16+1],S2[16+1]; // 32/2=16 :) +1 for \0
 	    // split it into 2 seperate strings, interleaved
-	    for(i=0;i<=15;i++){
+	    for(i=0;i<16;i++){
 	        S1[i]=S.AsByteArray()[i*2];
 		    S2[i]=S.AsByteArray()[i*2+1];
 	    }
@@ -445,10 +348,8 @@ void RealmSocket::_HandleLogonChallenge(void)
 		M2hash.Finalize();
 
 
-		////DEBUG3(
-			printf("--> M1=");printchex((char*)M1hash.GetDigest(),20,true);
-			printf("--> M2=");printchex((char*)M2hash.GetDigest(),20,true);
-		//)
+	    //logdebug("--> M1=");printchex((char*)M1hash.GetDigest(),20,true);
+		//logdebug("--> M2=");printchex((char*)M2hash.GetDigest(),20,true);
 
 		// Calc CRC & CRC_hash
 		// i don't know yet how to calc it, so set it to zero
@@ -475,7 +376,7 @@ void RealmSocket::_HandleLogonChallenge(void)
         break;
 
     default:
-        printf("Unknown realm server response! opcode=0x%x\n",(unsigned char)lc.error);
+        log("Unknown realm server response! opcode=0x%x\n",(unsigned char)lc.error);
         break;
     }
 }
@@ -483,10 +384,10 @@ void RealmSocket::_HandleLogonChallenge(void)
 
 void RealmSocket::_HandleLogonProof(void)
 {
-    printf("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),26);
+    logdetail("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),26);
     sAuthLogonProof_S lp;
     ibuf.Read((char*)&lp, 26); // the compiler didnt like 'sizeof(sAuthLogonProof_S)', said it was 28
-    printchex((char*)&lp, sizeof(sAuthLogonProof_S),true);
+    //printchex((char*)&lp, sizeof(sAuthLogonProof_S),true);
     if(!memcmp(lp.M2,this->_m2,20))
     {
         // auth successful
@@ -497,7 +398,7 @@ void RealmSocket::_HandleLogonProof(void)
     }
     else
     {
-        printf("Auth failed, M2 differs!\n");
+        log("Auth failed, M2 differs!");
         printf("My M2 :"); printchex((char*)_m2,20,true);
         printf("Srv M2:"); printchex((char*)lp.M2,20,true);
 
@@ -506,12 +407,12 @@ void RealmSocket::_HandleLogonProof(void)
 
 void RealmSocket::OnConnect()
 {
-    printf("DEBUG: RealmSocket connected!\n");
+    logdetail("RealmSocket connected!");
     SendLogonChallenge();
 }
 
 void RealmSocket::OnConnectFailed(void)
 {
-    printf("RealmSocket::OnConnectFailed()\n");
+    log("Connecting to Realm failed!");
 }
     
