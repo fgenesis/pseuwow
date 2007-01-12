@@ -29,6 +29,7 @@ public:
     void OnConnect();
     void OnConnectFailed();
     void OnDelete();
+    void OnException();
 
     void SendWorldPacket(WorldPacket &pkt);
     void InitCrypt(uint8*,uint32);

@@ -91,6 +91,7 @@ class PseuInstance
 	bool _initialized;	
 	bool _stop,_fastquit;
     bool _startrealm;
+    bool _error;
 	BigNumber _sessionkey;
     char *_ver,*_ver_short;
     SocketHandler _sh;
