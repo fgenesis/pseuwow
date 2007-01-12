@@ -29,9 +29,9 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\Debug/PseuWoW_Controller.pch"
-				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
-				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
-				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/"
+				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"/>
@@ -83,9 +83,9 @@
 				EnableFunctionLevelLinking="FALSE"
 				EnableEnhancedInstructionSet="0"
 				PrecompiledHeaderFile=".\Release/PseuWoW_Controller.pch"
-				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
-				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
-				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/"
+				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"/>
 			<Tool

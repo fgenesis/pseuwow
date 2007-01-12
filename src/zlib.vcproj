@@ -30,6 +30,9 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(SolutionDir)/temp/$(ProjectName)/zlib.pch"
+				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
@@ -71,6 +74,9 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(SolutionDir)/temp/$(ProjectName)/zlib.pch"
+				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
