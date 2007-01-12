@@ -76,6 +76,8 @@ private:
     void _HandleTradeStatusOpcode(WorldPacket& recvPacket);
     void _HandleGroupInviteOpcode(WorldPacket& recvPacket);
 
+	void _HandleTelePortAckOpcode(WorldPacket& recvPacket);
+
 
     PseuInstance *_instance;
     WorldSocket *_socket;

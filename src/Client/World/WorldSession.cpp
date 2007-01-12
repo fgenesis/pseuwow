@@ -153,6 +153,8 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_HEARTBEAT, &WorldSession::_HandleMovementOpcode},
         {MSG_MOVE_FALL_LAND, &WorldSession::_HandleMovementOpcode},
 
+		{MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
+
         // table termination
         { 0,                         NULL }
     };
@@ -492,4 +494,24 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     //    SendWorldPacket(opcode,&bb);
     //}
     // more to come
+}
+
+void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
+{
+	uint8 unk;
+	uint16 unk1, unk2;
+	uint32 unk3, unk4;
+	uint64 guid;
+
+	float x, y, z, o, ang;
+
+	recvPacket >> unk >> guid >> unk3 >> unk1 >> unk2 >> o >> x >> y >> z >> ang >> unk4;
+
+	//printf("DEBUG: Got teleport, data: x: %f, y: %f, z: %f, o: %f, guid: %d\n", x, y, z, o, guid);
+
+	// TODO: Still bugs with animation
+	WorldPacket response;
+	response.SetOpcode(MSG_MOVE_FALL_LAND);
+	response << uint32(0) << uint32(0) << x << y << z << o << uint32(0);
+	SendWorldPacket(response);
 }
