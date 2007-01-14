@@ -517,7 +517,7 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 
 	recvPacket >> unk >> guid >> unk3 >> unk1 >> unk2 >> o >> x >> y >> z >> ang >> unk4;
 
-	//printf("DEBUG: Got teleport, data: x: %f, y: %f, z: %f, o: %f, guid: %d\n", x, y, z, o, guid);
+	logdetail("DEBUG: Got teleport, data: x: %f, y: %f, z: %f, o: %f, guid: %d\n", x, y, z, o, guid);
 
 	// TODO: Still bugs with animation
 	WorldPacket response;
