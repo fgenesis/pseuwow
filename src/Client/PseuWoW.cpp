@@ -260,6 +260,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     showopcodes=atoi(v.Get("SHOWOPCODES").c_str());
     enablecli=(bool)atoi(v.Get("ENABLECLI").c_str());
     allowgamecmd=(bool)atoi(v.Get("ALLOWGAMECMD").c_str());
+	enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());
 
     // clientversion is a bit more complicated to add
     {

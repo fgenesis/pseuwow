@@ -42,6 +42,7 @@ class PseuInstanceConf
     uint8 showopcodes;
     bool allowgamecmd;
     bool enablecli;
+	bool enablechatai;
 	
 	
 };

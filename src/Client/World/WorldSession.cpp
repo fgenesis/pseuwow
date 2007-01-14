@@ -394,7 +394,12 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     // some fun code :P
     if(type==CHAT_MSG_SAY && target_guid!=_myGUID && !isCmd)
     {
-        Chat *chat = new Chat(msg);
+		if (GetInstance()->GetConf()->enablechatai)
+		{
+			Chat *chat = new Chat(msg);
+			SendChatMessage(CHAT_MSG_SAY, lang, chat->GetResult(), "");
+			delete chat;
+		}
 
 		SendChatMessage(CHAT_MSG_SAY, lang, chat->GetResult(), "");
 

@@ -7,23 +7,6 @@
 
 #include "Chat.h"
 
-/*
-int chatCallBackQuestionTypes(void *arg, int nColumns, char **sValues, char **sNames)
-{
-	if (nColumns != 2)
-	{
-		log("Got wrong number of columns for table `talk_types`, columns was: ", nColumns, ", expected 2 columns.");
-		return -1;
-	}
-
-	ChatTypes[nChatTypes].type = sValues[0];
-	ChatTypes[nChatTypes].remove = atoi(sValues[1]);
-	nChatTypes++;
-
-	return 0;
-}*/
-
-
 // TODO: Rewrite class (Rewritten from old php code - i didn't knew anything else but very simple select, insert, delete statements when
 // the code was originaly written. :P
 
@@ -52,12 +35,13 @@ Chat::Chat(std::string sentence)
 	// 1. Find the type of sentence
 	// 2. Answer the sentence the right way
 
+	sentence = stringToLower(sentence);
 	result = "";
 
 	Database chatDB("db/chat");
 
 	Query query(chatDB);
-	query.get_result("select type, remove from talk_types");
+	query.get_result("select type, remove from talk_types order by type DESC");
 
 	std::string type, part, resultSentence;
 	int remove;
@@ -70,13 +54,9 @@ Chat::Chat(std::string sentence)
 		Query query2(chatDB);
 		query2.get_result("select part from talk_types_parts where type='" + type + "'");
 
-		printf("Type: %s\n", type.c_str());
-
 		while (query2.fetch_row())
 		{
-			part = query2.getstr();
-
-			printf("Type: %s, Sentence: %s, Part: %s\n", type.c_str(), sentence.c_str(), part.c_str());
+			part = stringToLower(query2.getstr());
 
 			if (sentence.find(part) != std::string::npos)
 			{
