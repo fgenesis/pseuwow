@@ -8,6 +8,7 @@
 #include "WorldSocket.h"
 #include "NameTables.h"
 #include "RealmSocket.h"
+#include "../Chat.h"
 
 #include "WorldSession.h"
 
@@ -305,6 +306,8 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
 	}
 	bool char_found=false;
+	int playerNum = 0;
+
 	for(unsigned int i=0;i<num;i++){
 		log("## %s (%u) [%s/%s]",
 			plr[i]._name.c_str(),plr[i]._level,raceName[plr[i]._race],className[plr[i]._class]);
@@ -313,6 +316,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         if(plr[i]._name==GetInstance()->GetConf()->charname){
 			char_found=true;
 			_myGUID=plr[i]._guid;
+			playerNum = i;
 		}
 
 	}
@@ -322,6 +326,8 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 		return;
 	} else {
 		log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
+		_player = plr[i];
+
 		WorldPacket pkt;
         pkt.SetOpcode(CMSG_PLAYER_LOGIN);
 		pkt << _myGUID;
@@ -387,7 +393,11 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 
     // some fun code :P
     if(type==CHAT_MSG_SAY && target_guid!=_myGUID && !isCmd)
-    {           
+    {
+        Chat *chat = new Chat(msg);
+
+		SendChatMessage(CHAT_MSG_SAY, lang, chat->GetResult(), "");
+
         /*if(msg=="lol")
             SendChatMessage(CHAT_MSG_SAY,lang,"say \"lol\" if you have nothing else to say... lol xD","");
         else if(msg.length()>4 && msg.find("you?")!=std::string::npos)

@@ -78,14 +78,14 @@ private:
 
 	void _HandleTelePortAckOpcode(WorldPacket& recvPacket);
 
+	PlayerEnum _player; // The connected character
 
     PseuInstance *_instance;
     WorldSocket *_socket;
     ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
     bool _valid,_authed,_logged,_deleteme; // world status
     SocketHandler _sh; // handles the WorldSocket
-    uint64 _targetGUID,_followGUID,_myGUID;
-    
+    uint64 _targetGUID,_followGUID,_myGUID;  
 };
 
 #endif
