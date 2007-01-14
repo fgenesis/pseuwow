@@ -20,10 +20,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shared", "src\shared.vcproj
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480} = {262199E8-EEDF-4700-A1D1-E9CC901CF480}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite", "src\sqlite.vcproj", "{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Debug.ActiveCfg = Debug|Win32
@@ -42,6 +48,10 @@ Global
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Debug.Build.0 = Debug|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Release.ActiveCfg = Release|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Release.Build.0 = Release|Win32
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Debug.ActiveCfg = Debug|Win32
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Debug.Build.0 = Debug|Win32
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release.ActiveCfg = Release|Win32
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
