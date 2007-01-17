@@ -401,8 +401,6 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 			delete chat;
 		}
 
-		SendChatMessage(CHAT_MSG_SAY, lang, chat->GetResult(), "");
-
         /*if(msg=="lol")
             SendChatMessage(CHAT_MSG_SAY,lang,"say \"lol\" if you have nothing else to say... lol xD","");
         else if(msg.length()>4 && msg.find("you?")!=std::string::npos)

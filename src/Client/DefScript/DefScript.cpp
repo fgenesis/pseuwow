@@ -11,7 +11,6 @@
 DefScriptPackage::DefScriptPackage()
 {
     functionTable=_GetFunctionTable();
-//    printf("---> DefScriptPackage inited!\n");
 }
 
 DefScriptPackage::~DefScriptPackage()
@@ -46,6 +45,18 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         {"loaddef",&DefScriptPackage::func_loaddef},
         {"reloaddef",&DefScriptPackage::func_reloaddef},
         {"setscriptpermission",&DefScriptPackage::func_setscriptpermission},
+
+        // mathematical functions:
+        {"toint",&DefScriptPackage::func_toint},
+        {"add",&DefScriptPackage::func_add},
+        {"sub",&DefScriptPackage::func_sub},
+        {"mul",&DefScriptPackage::func_mul},
+        {"div",&DefScriptPackage::func_div},
+        {"mod",&DefScriptPackage::func_mod},
+        {"pow",&DefScriptPackage::func_pow},
+        {"bitor",&DefScriptPackage::func_bitor},
+        {"bitand",&DefScriptPackage::func_bitand},
+        {"bitxor",&DefScriptPackage::func_bitxor},
 
 
         // user functions:

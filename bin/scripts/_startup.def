@@ -1,6 +1,5 @@
 #permission=255
 
-
 // PSEUWOW DEF_SCRIPT STARTUP FILE
 
 OUT * DefScript StartUp [${@version_short}]...

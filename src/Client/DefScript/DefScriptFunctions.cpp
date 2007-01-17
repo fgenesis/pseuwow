@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <math.h>
 #include "DefScript.h"
 
 
@@ -133,5 +134,160 @@ bool DefScriptPackage::func_setscriptpermission(CmdSet Set)
         return false;
 
     scriptPermissionMap[Set.arg[0]] = atoi(Set.defaultarg.c_str());
+    return true;
+}
+
+bool DefScriptPackage::func_toint(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myint = strtol(Set.defaultarg.c_str(), NULL, 10);
+    std::stringstream ss;
+    ss << myint;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_add(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    long long myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    myvar += myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_sub(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    myvar -= myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_mul(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    myvar *= myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_div(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    if(myadd==0)
+    {
+        // TODO: some error handling
+        variables.Set(vname,"0");
+    }
+    myvar /= myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_mod(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    myvar %= myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_pow(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    long double myd=(long double)myvar,mya=(long double)myadd;
+    myd = (long double)pow(myd,mya);
+    myvar = (def_int64)myd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_bitor(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    myvar |= myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_bitand(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    myvar &= myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
+    return true;
+}
+
+bool DefScriptPackage::func_bitxor(CmdSet Set)
+{
+    if(Set.arg[0].empty())
+        return false;
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
+    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
+    myvar ^= myadd;
+    std::stringstream ss;
+    ss << myvar;
+    variables.Set(vname,ss.str());
     return true;
 }

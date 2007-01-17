@@ -92,6 +92,7 @@ bool DefScriptPackage::SCfollow(CmdSet Set){
 
 }
 
+
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {
     static char *prefix = "USERS::";
