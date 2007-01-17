@@ -9,6 +9,14 @@
 #    define _DEFSC_DEBUG(code) /* code */
 #endif
 
+#if COMPILER == COMPILER_MICROSOFT
+typedef __int64            def_int64;
+#else
+typedef __int64_t   def_int64;
+#endif
+
+
+
 #include <map>
 #include <deque>
 #include "VarSet.h"
@@ -119,6 +127,16 @@ private:
     bool func_eof(CmdSet);
     bool func_shdn(CmdSet);
     bool func_setscriptpermission(CmdSet);
+    bool func_toint(CmdSet);
+    bool func_add(CmdSet);
+    bool func_sub(CmdSet);
+    bool func_mul(CmdSet);
+    bool func_div(CmdSet);
+    bool func_mod(CmdSet);
+    bool func_pow(CmdSet);
+    bool func_bitor(CmdSet);
+    bool func_bitand(CmdSet);
+    bool func_bitxor(CmdSet);
 
     // Useable own internal functions:
     bool SCpause(CmdSet);
