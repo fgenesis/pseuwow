@@ -24,9 +24,8 @@ void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, st
 			packet<<to<<msg;
 			break;
 		case CHAT_MSG_CHANNEL:
-            if(to.empty())
+            if(to.empty() || !_channel->IsOnChannel(to))
                 return;
-			// TODO: be sure the channel is joined before writing into this channel
 			packet<<to<<msg;
 			break;
 	}
