@@ -11,7 +11,7 @@
 
 class WorldSocket;
 class WorldPacket;
-class PingerThread;
+class Channel;
 
 struct OpcodeHandler
 {
@@ -46,6 +46,7 @@ public:
     void SetFollowTarget(uint64 guid);
     uint64 GetFollowTarget(void) { return _followGUID; }
     uint64 GetGuid(void) { return _myGUID; }
+    Channel *GetChannels(void) { return _channels; }
 
 
     // CMSGConstructor
@@ -75,8 +76,9 @@ private:
     void _HandlePongOpcode(WorldPacket& recvPacket);
     void _HandleTradeStatusOpcode(WorldPacket& recvPacket);
     void _HandleGroupInviteOpcode(WorldPacket& recvPacket);
-
 	void _HandleTelePortAckOpcode(WorldPacket& recvPacket);
+    void _HandleChannelNotifyOpcode(WorldPacket& recvPacket);
+    
 
 	PlayerEnum _player; // The connected character
 
@@ -85,6 +87,7 @@ private:
     ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
     bool _valid,_authed,_logged,_deleteme; // world status
     SocketHandler _sh; // handles the WorldSocket
+    Channel *_channels;
     uint64 _targetGUID,_followGUID,_myGUID;  
 };
 

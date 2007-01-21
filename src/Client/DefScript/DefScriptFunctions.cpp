@@ -32,7 +32,10 @@ bool DefScriptPackage::func_loaddef(CmdSet Set){
     bool result=false;
     std::string fn;
     if(Set.arg[0].empty())
+    {
         result=LoadByName(Set.defaultarg);
+        fn=(scPath + Set.defaultarg).append(".def");
+    }
     else
     {
         std::string::size_type pos = Set.arg[0].find('/');
@@ -42,16 +45,19 @@ bool DefScriptPackage::func_loaddef(CmdSet Set){
             fn=Set.arg[0];
         result=LoadScriptFromFile(fn,Set.defaultarg);
     }
-    //if(!result && curIsDebug)
-    //    std::cout << "Could not load script '" << Set->defaultarg << "' [" << fn << "]\n";
-    return result;
+    if(!result)
+        std::cout << "Could not load script '" << Set.defaultarg << "' [" << fn << "]\n";
+    return true;
 }
 
 bool DefScriptPackage::func_reloaddef(CmdSet Set){
     bool result=false;
     std::string fn;
     if(Set.arg[0].empty())
+    {
         result=LoadByName(Set.defaultarg);
+        fn=(scPath + Set.defaultarg).append(".def");
+    }
     else
     {
         std::string::size_type pos = Set.arg[0].find('/');
@@ -61,9 +67,9 @@ bool DefScriptPackage::func_reloaddef(CmdSet Set){
             fn=Set.arg[0];
         result=LoadScriptFromFile(fn,Set.defaultarg);
     }
-    //if(!result && curIsDebug)
-    //    std::cout << "Could not load script '" << Set->defaultarg << "' [" << fn << "]\n";
-    return result;
+    if(!result)
+        std::cout << "Could not load script '" << Set.defaultarg << "' [" << fn << "]\n";
+    return true;
 }
 
 bool DefScriptPackage::func_unset(CmdSet Set){

@@ -6,13 +6,6 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-struct ChannelStruct
-{
-	std::string channel;
-	std::string password;
-	bool joined;
-};
-
 class Channel
 {
 public:
@@ -30,7 +23,7 @@ public:
 	// TODO: Add Kick/Ban/Mode/Owner/Mute/Invite and all that stuff
 
 private:
-	std::vector<ChannelStruct>channels;
+    std::vector<std::string> channels;
 	WorldSession *_worldSession;
 };
 

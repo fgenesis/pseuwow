@@ -264,6 +264,12 @@
 				Name="World"
 				Filter="">
 				<File
+					RelativePath=".\Client\World\Channel.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Channel.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\CMSGConstructor.cpp">
 				</File>
 				<File

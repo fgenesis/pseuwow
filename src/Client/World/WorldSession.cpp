@@ -8,7 +8,8 @@
 #include "WorldSocket.h"
 #include "NameTables.h"
 #include "RealmSocket.h"
-#include "../Chat.h"
+#include "Chat.h"
+#include "Channel.h"
 
 #include "WorldSession.h"
 
@@ -23,6 +24,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _myGUID=0; // i dont have a guid yet
     plrNameCache.ReadFromFile(); // load names/guids of known players
     _deleteme = false;
+    _channels = new Channel(this);
     //...
 }
 
@@ -37,6 +39,7 @@ WorldSession::~WorldSession()
     }
     _OnLeaveWorld();
 
+    delete _channels;
     //delete _socket; the socket will be deleted by its handler!!
 }
 
@@ -136,6 +139,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_PONG, &WorldSession::_HandlePongOpcode},
         {SMSG_TRADE_STATUS, &WorldSession::_HandleTradeStatusOpcode},
         {SMSG_GROUP_INVITE, &WorldSession::_HandleGroupInviteOpcode},
+        {SMSG_CHANNEL_NOTIFY, &WorldSession::_HandleChannelNotifyOpcode},
 
         // movement opcodes
         {MSG_MOVE_SET_FACING, &WorldSession::_HandleMovementOpcode},
@@ -353,14 +357,17 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     uint8 type=0;
 	uint32 lang=0;
 	uint64 target_guid=0;
-	uint32 msglen=0;
-	std::string msg,ext;
+	uint32 msglen=0,unk;
+	std::string msg,channel="";
     bool isCmd=false;
 
 	recvPacket >> type >> lang;
 	
 	if (type == CHAT_MSG_CHANNEL)
-		recvPacket >> ext; // extract channel name
+    {
+		recvPacket >> channel; // extract channel name
+        recvPacket >> unk;
+    }
 		
 	recvPacket >> target_guid;
     std::string plrname;
@@ -380,12 +387,21 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 		recvPacket >> target_guid;
 	
 	recvPacket >> msglen >> msg;
-	if (type == CHAT_MSG_SYSTEM){
+	if (type == CHAT_MSG_SYSTEM)
+    {
 		log("SYSMSG: \"%s\"",msg.c_str());
-	} else if (type==CHAT_MSG_WHISPER ){
-        log("W:WHISP: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());                
-    } else {
-        log("W:CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
+	}
+    else if (type==CHAT_MSG_WHISPER )
+    {
+        log("WHISP: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());                
+    }
+    else if (type==CHAT_MSG_CHANNEL )
+    {
+        log("CHANNEL [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+    }
+    else
+    {
+        log("CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
 	}
 
     if(target_guid!=_myGUID && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
@@ -527,4 +543,9 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 	response.SetOpcode(MSG_MOVE_FALL_LAND);
 	response << uint32(0) << uint32(0) << x << y << z << o << uint32(0);
 	SendWorldPacket(response);
+}
+
+void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
+{
+    _channels->HandleNotifyOpcode(recvPacket);
 }

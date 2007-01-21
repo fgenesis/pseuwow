@@ -7,6 +7,7 @@
 #include "Opcodes.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"
+#include "Channel.h"
 
 bool DefScriptPackage::SCshdn(CmdSet Set)
 {
@@ -70,8 +71,6 @@ bool DefScriptPackage::SCemote(CmdSet Set){
     uint32 id=atoi(Set.defaultarg.c_str());
     ((PseuInstance*)parentMethod)->GetWSession()->SendEmote(id);
     return true;
-    
-
 }
 
 bool DefScriptPackage::SCfollow(CmdSet Set){
@@ -90,6 +89,30 @@ bool DefScriptPackage::SCfollow(CmdSet Set){
     ws->SendChatMessage(CHAT_MSG_SAY,0,ss.str(),"");
     return true;
 
+}
+
+bool DefScriptPackage::SCjoinchannel(CmdSet Set){
+    if(Set.defaultarg.empty())
+        return true;
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        log("Invalid Script call: SCjoinchannel: WorldSession not valid");
+        return false;
+    }
+    ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->Join(Set.defaultarg,Set.arg[0]);
+    return true;
+}
+
+bool DefScriptPackage::SCleavechannel(CmdSet Set){
+    if(Set.defaultarg.empty())
+        return true;
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        log("Invalid Script call: SCleavechannel: WorldSession not valid");
+        return false;
+    }
+    ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->Leave(Set.defaultarg);
+    return true;
 }
 
 

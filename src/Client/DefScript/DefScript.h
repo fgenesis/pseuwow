@@ -145,6 +145,8 @@ private:
     bool SCemote(CmdSet);
     bool SCfollow(CmdSet);
     bool SCshdn(CmdSet);
+    bool SCjoinchannel(CmdSet);
+    bool SCleavechannel(CmdSet);
 
     // Own variable declarations
     std::map<std::string, unsigned char> my_usrPermissionMap;
