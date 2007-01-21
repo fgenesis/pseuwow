@@ -21,6 +21,12 @@ SAY [${@version_short}] login successful.
 // 126 = TEXTEMOTE_READY
 EMOTE 126
 
+// join some channels...
+JOINCHANNEL generalchat
+JOINCHANNEL help
+JOINCHANNEL tradee
+// ...
+
 
 // add your own stuff here
 // ...

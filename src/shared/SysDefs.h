@@ -38,11 +38,10 @@
 #endif
 
 #if COMPILER == COMPILER_MICROSOFT
-    #  pragma warning( disable : 4267 )                         // conversion from 'size_t' to 'int', possible loss of data
-    #  pragma warning( disable : 4786 )                         // identifier was truncated to '255' characters in the debug information
-    #ifndef _DEBUG
-        #  pragma warning( disable : 4244 )                         // conversion from 'uint64' to 'int16', possible loss of data
-    #endif
+#  pragma warning( disable : 4267 )    // conversion from 'size_t' to 'int', possible loss of data
+#  pragma warning( disable : 4786 )    // identifier was truncated to '255' characters in the debug information
+#  pragma warning( disable : 4800 )    // conversion to bool, performance warning
+#  pragma warning( disable : 4244 )    // conversion from 'uint64' to 'int16', possible loss of data
 #endif
 
 ////////////////////////////////////

@@ -4,6 +4,7 @@
 #include "Opcodes.h"
 #include "Player.h"
 #include "WorldSession.h"
+#include "Channel.h"
 
 void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, std::string to){
     if((!_valid) || (!_logged) || msg.empty())
@@ -24,7 +25,7 @@ void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, st
 			packet<<to<<msg;
 			break;
 		case CHAT_MSG_CHANNEL:
-            if(to.empty() || !_channel->IsOnChannel(to))
+            if(to.empty() /*|| !_channels->IsOnChannel(to)*/)
                 return;
 			packet<<to<<msg;
 			break;

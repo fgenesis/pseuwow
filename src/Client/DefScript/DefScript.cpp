@@ -65,6 +65,8 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         //{"follow",&DefScriptPackage::SCfollow},
         {"savecache",&DefScriptPackage::SCsavecache},
         {"sendchatmessage",&DefScriptPackage::SCSendChatMessage},
+        {"joinchannel",&DefScriptPackage::SCjoinchannel},
+        {"leavechannel",&DefScriptPackage::SCleavechannel},
 
         // table termination
         {NULL,NULL}
