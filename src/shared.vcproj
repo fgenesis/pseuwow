@@ -249,37 +249,6 @@
 					RelativePath=".\shared\Network\Utility.h">
 				</File>
 			</Filter>
-			<Filter
-				Name="sqlitewrapped"
-				Filter="">
-				<File
-					RelativePath=".\shared\sqlitewrapped\Database.cpp">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\Database.h">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\IError.h">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\Query.cpp">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\Query.h">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\StderrLog.cpp">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\StderrLog.h">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\SysLog.cpp">
-				</File>
-				<File
-					RelativePath=".\shared\sqlitewrapped\SysLog.h">
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

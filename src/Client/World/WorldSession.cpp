@@ -8,7 +8,6 @@
 #include "WorldSocket.h"
 #include "NameTables.h"
 #include "RealmSocket.h"
-#include "Chat.h"
 #include "Channel.h"
 
 #include "WorldSession.h"
@@ -411,27 +410,24 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     // some fun code :P
     if(type==CHAT_MSG_SAY && target_guid!=_myGUID && !isCmd)
     {
+        // TODO: insert a good ChatAI here.
 		if (GetInstance()->GetConf()->enablechatai)
 		{
-			Chat *chat = new Chat(msg);
-			SendChatMessage(CHAT_MSG_SAY, lang, chat->GetResult(), "");
-			delete chat;
-		}
-
-        /*if(msg=="lol")
-            SendChatMessage(CHAT_MSG_SAY,lang,"say \"lol\" if you have nothing else to say... lol xD","");
-        else if(msg.length()>4 && msg.find("you?")!=std::string::npos)
-            SendChatMessage(CHAT_MSG_SAY,lang,std::string(ver).append(" -- i am a bot, made by False.Genesis, my master."),"");
-        else if(msg=="hi")
-            SendChatMessage(CHAT_MSG_SAY,lang,"Hi, wadup?",""); 
-        else if(msg.length()<12 && msg.find("wtf")!=std::string::npos)
-            SendChatMessage(CHAT_MSG_SAY,lang,"Yeah, WTF is a good way to say you dont understand anything... :P","");
-        else if(msg.length()<15 && (msg.find("omg")!=std::string::npos || msg.find("omfg")!=std::string::npos) )
-            SendChatMessage(CHAT_MSG_SAY,lang,"OMG a bot logged in, you don't believe it :O","");
-        else if(msg.find("from")!=std::string::npos || msg.find("download")!=std::string::npos)
-            SendChatMessage(CHAT_MSG_SAY,lang,"you can dl me from http://my.opera.com/PseuWoW","");
-        else if(msg.find("Genesis")!=std::string::npos || msg.find("genesis")!=std::string::npos)
-            SendChatMessage(CHAT_MSG_YELL,lang,"False.Genesis, they are calling you!! Come here, master xD","");*/         
+		    if(msg=="lol")
+                SendChatMessage(CHAT_MSG_SAY,lang,"say \"lol\" if you have nothing else to say... lol xD","");
+            else if(msg.length()>4 && msg.find("you?")!=std::string::npos)
+                SendChatMessage(CHAT_MSG_SAY,lang,GetInstance()->GetScripts()->variables.Get("@version").append(" -- i am a bot, made by False.Genesis, my master."),"");
+            else if(msg=="hi")
+                SendChatMessage(CHAT_MSG_SAY,lang,"Hi, wadup?",""); 
+            else if(msg.length()<12 && msg.find("wtf")!=std::string::npos)
+                SendChatMessage(CHAT_MSG_SAY,lang,"Yeah, WTF is a good way to say you dont understand anything... :P","");
+            else if(msg.length()<15 && (msg.find("omg")!=std::string::npos || msg.find("omfg")!=std::string::npos) )
+                SendChatMessage(CHAT_MSG_SAY,lang,"OMG a bot logged in, you don't believe it :O","");
+            else if(msg.find("from")!=std::string::npos || msg.find("download")!=std::string::npos)
+                SendChatMessage(CHAT_MSG_SAY,lang,"you can dl me from http://my.opera.com/PseuWoW","");
+            else if(msg.find("Genesis")!=std::string::npos || msg.find("genesis")!=std::string::npos)
+                SendChatMessage(CHAT_MSG_YELL,lang,"False.Genesis, they are calling you!! Come here, master xD","");
+        }
     }
 
     if(isCmd)

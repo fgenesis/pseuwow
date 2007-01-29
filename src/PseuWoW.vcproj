@@ -151,12 +151,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\Client\Chat.cpp">
-			</File>
-			<File
-				RelativePath=".\Client\Chat.h">
-			</File>
-			<File
 				RelativePath=".\Client\Cli.cpp">
 			</File>
 			<File
