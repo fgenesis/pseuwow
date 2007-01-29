@@ -115,6 +115,45 @@ bool DefScriptPackage::SCleavechannel(CmdSet Set){
     return true;
 }
 
+bool DefScriptPackage::SCloadconf(CmdSet Set){
+    if(Set.defaultarg.empty())
+        return true;
+    std::string fn;
+    if(Set.defaultarg.find('/')==std::string::npos && Set.defaultarg.find('\\')==std::string::npos)
+        fn += ((PseuInstance*)parentMethod)->GetConfDir();
+    fn += Set.defaultarg;
+
+    if(variables.ReadVarsFromFile(fn))
+        log("Loaded conf file [%s]",fn.c_str());
+    else
+        log("Error loading conf file [%s]",fn.c_str());
+    return true;
+}
+
+bool DefScriptPackage::SCapplypermissions(CmdSet Set){
+    this->My_LoadUserPermissions(variables);
+    return true;
+}
+
+bool DefScriptPackage::SCapplyconf(CmdSet Set){
+    ((PseuInstance*)parentMethod)->GetConf()->ApplyFromVarSet(variables);
+    return true;
+}
+
+bool DefScriptPackage::SClog(CmdSet Set){
+    log(Set.defaultarg.c_str());
+    return true;
+}
+
+bool DefScriptPackage::SClogdetail(CmdSet Set){
+    logdetail(Set.defaultarg.c_str());
+    return true;
+}
+
+bool DefScriptPackage::SClogdebug(CmdSet Set){
+    logdebug(Set.defaultarg.c_str());
+    return true;
+}
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {

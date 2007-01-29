@@ -1,0 +1,47 @@
+
+OUT * Assigning permissions for internal functions...
+
+set,p 255
+
+// this is important because players could reset permissions for dangerous functions
+SETSCRIPTPERMISSION,setscriptpermission 255
+
+SETSCRIPTPERMISSION,out ${p}
+SETSCRIPTPERMISSION,set ${p}
+SETSCRIPTPERMISSION,default ${p}
+SETSCRIPTPERMISSION,unset ${p}
+SETSCRIPTPERMISSION,shdn ${p}
+SETSCRIPTPERMISSION,loaddef ${p}
+SETSCRIPTPERMISSION,reloaddef ${p}
+
+SETSCRIPTPERMISSION,toint ${p}
+SETSCRIPTPERMISSION,add ${p}
+SETSCRIPTPERMISSION,sub ${p}
+SETSCRIPTPERMISSION,mul ${p}
+SETSCRIPTPERMISSION,div ${p}
+SETSCRIPTPERMISSION,mod ${p}
+SETSCRIPTPERMISSION,pow ${p}
+SETSCRIPTPERMISSION,bitor ${p}
+SETSCRIPTPERMISSION,bitand ${p}
+SETSCRIPTPERMISSION,bitxor ${p}
+SETSCRIPTPERMISSION,sendchatmessage ${p}
+
+SETSCRIPTPERMISSION,pause ${p}
+// emotes are not relly dangerous, allow for all users
+SETSCRIPTPERMISSION,emote 0
+SETSCRIPTPERMISSION,savecache ${p}
+SETSCRIPTPERMISSION,sendchatmessage ${p}
+SETSCRIPTPERMISSION,joinchannel ${p}
+SETSCRIPTPERMISSION,leavechannel ${p}
+SETSCRIPTPERMISSION,loadconf ${p}
+SETSCRIPTPERMISSION,applyconf ${p}
+SETSCRIPTPERMISSION,applypermissions ${p}
+SETSCRIPTPERMISSION,log ${p}
+SETSCRIPTPERMISSION,logdetail ${p}
+SETSCRIPTPERMISSION,logdebug ${p}
+
+
+UNSET p
+
+
+OUT * Permissions set.

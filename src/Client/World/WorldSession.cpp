@@ -192,6 +192,7 @@ void WorldSession::_OnLeaveWorld(void)
     if(_logged)
     {
         _logged=false;
+        GetInstance()->GetScripts()->RunScript("_leaveworld",NULL);
 
     }
 }
@@ -276,7 +277,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 	recvPacket >> num;
 	if(num==0){
 		log("No chars found!\n");
-		GetInstance()->Stop();
+		GetInstance()->SetError();
 		return;
 	}
 	logdetail("W: Chars in list: %u\n",num);
@@ -326,7 +327,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 	}
 	if(!char_found){
 		log("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
-		GetInstance()->Stop();
+		GetInstance()->SetError();
 		return;
 	} else {
 		log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
@@ -476,7 +477,8 @@ void WorldSession::_HandlePongOpcode(WorldPacket& recvPacket)
 {
     uint32 pong;
     recvPacket >> pong;
-    log("Recieved Ping reply: %u ms latency.",clock()-pong);
+    if(GetInstance()->GetConf()->notifyping)
+        log("Recieved Ping reply: %u ms latency.",clock()-pong);
 }
 void WorldSession::_HandleTradeStatusOpcode(WorldPacket& recvPacket)
 {

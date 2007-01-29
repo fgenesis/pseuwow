@@ -6,7 +6,7 @@ SET,msg ${@def}
 
 default,lang 0
 
-OUT * Yelling '${msg}' in lang ${lang}
+LOGDEBUG * Yelling '${msg}' in lang ${lang}
 
 SENDCHATMESSAGE,5,${lang},{${msg}}
 UNSET lang

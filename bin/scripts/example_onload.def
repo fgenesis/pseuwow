@@ -1,0 +1,13 @@
+// EXAMPLE SCRIPT!!!
+// purpose: demonstrate the #onload part that gets executed everytime the script is loaded
+// result: on the first call the number '1001' will be written, 2nd call '1002', etc.
+
+#permission=255
+#onload
+	out Loading "loadtest.def" --[[
+	set,mytest 1000
+	out finished ]]--
+#endonload
+
+add,mytest 1
+out ${mytest}

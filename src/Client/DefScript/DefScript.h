@@ -110,6 +110,7 @@ private:
     bool Interpret(CmdSet);
     CmdSet RemoveBrackets(CmdSet);
     std::string RemoveBracketsFromString(std::string);
+    bool RunSingleLineFromScript(std::string line, DefScript *pScript);
     DefScriptFunctionTable *_GetFunctionTable(void) const;
     DefScriptFunctionTable *functionTable;
     unsigned int functions;
@@ -147,6 +148,12 @@ private:
     bool SCshdn(CmdSet);
     bool SCjoinchannel(CmdSet);
     bool SCleavechannel(CmdSet);
+    bool SCloadconf(CmdSet);
+    bool SCapplypermissions(CmdSet);
+    bool SCapplyconf(CmdSet);
+    bool SClog(CmdSet);
+    bool SClogdetail(CmdSet);
+    bool SClogdebug(CmdSet);
 
     // Own variable declarations
     std::map<std::string, unsigned char> my_usrPermissionMap;

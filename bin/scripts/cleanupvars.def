@@ -1,0 +1,6 @@
+
+
+OUT * Cleaning up variables...
+UNSET #ACCPASS
+UNSET #ACCNAME
+OUT * Dangerous variables removed.

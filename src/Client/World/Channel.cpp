@@ -72,7 +72,7 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 				}
 			}
 
-			logdetail("%s joined channel %s", channel.c_str());
+			log("%s joined channel %s", channel.c_str());
 			break;
 
 		// Player leaved channel you are on
@@ -87,7 +87,7 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 				}
 			}
 
-			logdetail("%s leaved channel %s", channel.c_str());
+			log("%s left channel %s", channel.c_str());
 			break;
 
 		// You joined channel successfully

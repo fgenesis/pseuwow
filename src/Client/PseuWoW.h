@@ -43,6 +43,7 @@ class PseuInstanceConf
     bool allowgamecmd;
     bool enablecli;
 	bool enablechatai;
+    bool notifyping;
 	
 	
 };
@@ -62,9 +63,11 @@ class PseuInstance
     DefScriptPackage *GetScripts(void) { return _scp; }
     PseuInstanceRunnable *GetRunnable(void) { return _runnable; }
     void SetConfDir(std::string dir) { _confdir = dir; }
+    std::string GetConfDir(void) { return _confdir; }
     void SetScpDir(std::string dir) { _scpdir = dir; }
     void SetSessionKey(BigNumber key) { _sessionkey = key; }
     BigNumber GetSessionKey(void) { return _sessionkey; }
+    void SetError(void) { _error = true; }
 
 	
 	
