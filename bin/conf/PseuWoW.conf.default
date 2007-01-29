@@ -68,3 +68,7 @@ enablecli=1
 // like "Hi" and "What do you think of x" etc.
 enablechatai=1
 
+// show ping responses & ping time
+notifyping=1
+
+
