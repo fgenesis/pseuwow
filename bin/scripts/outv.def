@@ -2,6 +2,6 @@
 
 SET,vn #${@caller}::${@def}
 SET,vv,onfail,{<value not set>} ${${vn}}
-OUT * Var '${@def}' = '${vv}'
+LOG * Var '${@def}' = '${vv}'
 UNSET vv
 UNSET vn

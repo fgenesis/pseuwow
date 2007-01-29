@@ -7,7 +7,7 @@ SET,lang ${@1}
 
 DEFAULT,lang 0
 
-OUT * Whisp to '{${player}}' '{${msg}}' in lang '${lang}'
+LOGDEBUG * Whisp to '{${player}}' '{${msg}}' in lang '${lang}'
 
 SENDCHATMESSAGE,6,{${lang}},{${msg}},{${player}}
 UNSET lang

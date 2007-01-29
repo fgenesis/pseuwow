@@ -1,5 +1,5 @@
 
-OUT * Assigning permissions for internal functions...
+LOG * Assigning permissions for internal functions...
 
 set,p 255
 
@@ -44,4 +44,4 @@ SETSCRIPTPERMISSION,logdebug ${p}
 UNSET p
 
 
-OUT * Permissions set.
+LOG * Permissions set.

@@ -2,7 +2,7 @@
 
 // PSEUWOW DEF_SCRIPT STARTUP FILE
 
-OUT * DefScript StartUp [${@version_short}]...
+LOG * DefScript StartUp [${@version_short}]...
 
 // Load required conf files.
 LOADCONF PseuWoW.conf
@@ -29,6 +29,6 @@ INTERNAL_PERM
 
 // do more stuff here in future...
 
-OUT * StartUp complete!
+LOG * StartUp complete!
 
 

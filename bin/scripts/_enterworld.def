@@ -2,7 +2,7 @@
 
 // PSEUWOW DEF_SCRIPT WORLD-ENTER FILE
 
-OUT * World entered, executing appropriate script...
+LOG * World entered, executing appropriate script...
 
 // not yet implemented
 // CASTSPELL 836
@@ -34,4 +34,4 @@ JOINCHANNEL tradee
 // ...
 
 
-OUT * finished executing script.
+LOG * finished executing script.
