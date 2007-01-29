@@ -155,6 +155,36 @@ bool DefScriptPackage::SClogdebug(CmdSet Set){
     return true;
 }
 
+bool DefScriptPackage::SCcastspell(CmdSet Set)
+{
+	if(Set.defaultarg.empty())
+		return true;
+	if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+	{
+		log("Invalid Script call: SCcastspell: WorldSession not valid");
+		return false;
+	}
+
+	uint32 spellId = 0;// = atoi(Set.defaultarg.c_str());
+	uint64 spellTarget = 0;// atoi(Set.arg[0]);
+
+	spellId = atoi(Set.defaultarg.c_str());
+
+	if (spellId <= 0)
+	{
+		log("Invalid Script call: SCcastspell: SpellId not valid");
+		return false;
+	}
+
+	if (spellTarget <= 0)
+	{
+		spellTarget = ((PseuInstance*)parentMethod)->GetWSession()->GetGuid();
+	}
+
+	((PseuInstance*)parentMethod)->GetWSession()->GetPlayerSettings()->CastSpell(spellId, spellTarget);
+	return true;
+}
+
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {
     static char *prefix = "USERS::";
