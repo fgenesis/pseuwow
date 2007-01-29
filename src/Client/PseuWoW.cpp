@@ -39,8 +39,8 @@ void PseuInstanceRunnable::sleep(uint32 msecs)
 PseuInstance::PseuInstance(PseuInstanceRunnable *run)
 {
     _runnable=run;
-    _ver="PseuWoW Alpha Build 12 dev 2" DEBUG_APPENDIX;
-    _ver_short="A12-dev1" DEBUG_APPENDIX;
+    _ver="PseuWoW Alpha Build 12" DEBUG_APPENDIX;
+    _ver_short="A12" DEBUG_APPENDIX;
     _wsession=NULL;
     _rsession=NULL;
     _scp=NULL;
