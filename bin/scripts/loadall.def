@@ -1,0 +1,27 @@
+
+// preloads the most important scripts
+
+OUT Loading DefScripts...
+
+RELOADDEF _enterworld
+RELOADDEF _leaveworld
+RELOADDEF _nopermission
+RELOADDEF _onwhisper
+RELOADDEF cleanupvars
+RELOADDEF internal_perm
+RELOADDEF chan
+RELOADDEF quit
+RELOADDEF reply
+RELOADDEF say
+RELOADDEF yell
+RELOADDEF whisper
+RELOADDEF makechatitem
+
+RELOADDEF gc
+RELOADDEF sayred
+RELOADDEF outv
+RELOADDEF sayv
+RELOADDEF s
+RELOADDEF y
+
+OUT * DefScripts loaded.

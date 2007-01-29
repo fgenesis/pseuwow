@@ -1,0 +1,2 @@
+#permission=0
+SAY,{${@0}}  ${@def}

@@ -57,6 +57,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
 
 PseuInstance::~PseuInstance()
 {
+	delete _wsession;
     if(GetConf()->enablecli && _cli)
     {
         _cli->stop();
@@ -64,7 +65,6 @@ PseuInstance::~PseuInstance()
     delete _scp;
 	delete _conf;
 	//delete _rsession; // deleted by SocketHandler!!!!!
-	delete _wsession;
 	log_close();
     
 }
@@ -88,26 +88,6 @@ bool PseuInstance::Init(void) {
 	_scp=new DefScriptPackage();
     _scp->SetParentMethod((void*)this);
 	_conf=new PseuInstanceConf();	
-	
-    log("Reading PseuWoW.conf...");
-	if(!_scp->variables.ReadVarsFromFile(_confdir + "PseuWoW.conf"))
-	{
-		log("Error reading conf file [%s]",_confdir.append("PseuWoW.conf").c_str()); 
-		return false;
-	}
-    logdetail("Applying configuration...");
-	_conf->ApplyFromVarSet(_scp->variables);
-	
-    log("Reading user permissions...");
-    if(_scp->variables.ReadVarsFromFile(_confdir + "users.conf"))
-	{
-		log("-> Done reading users.");
-	}
-	else
-	{
-		log("Error reading conf file [%s] - NO PERMISSIONS SET!",_confdir.append("users.conf").c_str()); 
-	}
-
 
     logdebug("Setting up DefScripts path '%s'",_scpdir.c_str());
     _scp->SetPath(_scpdir);
@@ -115,9 +95,6 @@ bool PseuInstance::Init(void) {
     logdebug("Setting up predefined DefScript macros...");
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);
-
-    logdetail("Applying user permissions...");
-    _scp->My_LoadUserPermissions(_scp->variables);
 
     log("Loading DefScripts from folder '%s'",_scpdir.c_str());
     if(!_scp->RunScript("_startup",NULL))
@@ -136,7 +113,7 @@ bool PseuInstance::Init(void) {
 			log("Errors while initializing, proc halted!!");
             if(GetConf()->exitonerror)
                 exit(0);
-			while(true)SDL_Delay(1000);
+			while(true)this->Sleep(1000);
     }
 
     log("Init complete.\n");
@@ -165,9 +142,11 @@ void PseuInstance::Run(void)
         }
         _startrealm=false; // the realm is started now
 
-        while((!_stop) && (!_startrealm))
+        while( (!_stop) && (!_startrealm) )
         {
             Update();
+            if(_error)
+                _stop=true;
         }
     }
     while(GetConf()->reconnect && (!_stop));
@@ -186,7 +165,7 @@ void PseuInstance::Run(void)
         log("Exiting on error is disabled, PseuWoW is now IDLE");
         log("-- Press enter to exit --");
         char crap[100];
-        fgets(crap,sizeof(crap),stdin); 
+        fgets(crap,sizeof(crap),stdin); // workaround, need to press enter 2x for now
     }
 
 }
@@ -203,7 +182,7 @@ void PseuInstance::Update()
     }
     if(_wsession && !_wsession->IsValid())
     {
-        _wsession->Start(); // update the worldSESSION, which will update the worldsocket itself
+        _wsession->Start();
     }
     if(_wsession && _wsession->IsValid())
     {
@@ -261,6 +240,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     enablecli=(bool)atoi(v.Get("ENABLECLI").c_str());
     allowgamecmd=(bool)atoi(v.Get("ALLOWGAMECMD").c_str());
 	enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());
+    notifyping=(bool)atoi(v.Get("NOTIFYPING").c_str());
 
     // clientversion is a bit more complicated to add
     {

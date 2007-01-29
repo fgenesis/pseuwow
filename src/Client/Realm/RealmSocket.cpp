@@ -402,7 +402,7 @@ void RealmSocket::_HandleLogonProof(void)
         log("Auth failed, M2 differs!");
         printf("My M2 :"); printchex((char*)_m2,20,true);
         printf("Srv M2:"); printchex((char*)lp.M2,20,true);
-
+        GetInstance()->SetError();
     }
 }
 

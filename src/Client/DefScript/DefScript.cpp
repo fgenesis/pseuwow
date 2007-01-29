@@ -67,6 +67,12 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         {"sendchatmessage",&DefScriptPackage::SCSendChatMessage},
         {"joinchannel",&DefScriptPackage::SCjoinchannel},
         {"leavechannel",&DefScriptPackage::SCleavechannel},
+        {"loadconf",&DefScriptPackage::SCloadconf},
+        {"applyconf",&DefScriptPackage::SCapplyconf},
+        {"applypermissions",&DefScriptPackage::SCapplypermissions},
+        {"log",&DefScriptPackage::SClog},
+        {"logdetail",&DefScriptPackage::SClogdetail},
+        {"logdebug",&DefScriptPackage::SClogdebug},
 
         // table termination
         {NULL,NULL}
@@ -111,19 +117,22 @@ bool DefScriptPackage::LoadByName(std::string name){
 }
 
 bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
-	std::string label, value;
 	if(fn.empty() || sn.empty()) return false;
+
+	std::string label, value, line;
     std::fstream f;
+    bool load_debug=false,load_notify=false, exec=false;
+    char z;
+
     f.open(fn.c_str(),std::ios_base::in);
     if(!f.is_open())
         return false;
-	std::string line;
-    char z;
-    bool load_debug=false,load_notify=false;
+
     if(GetScript(sn))
         delete GetScript(sn);
     DefScript *newscript = new DefScript(this);
     Script[sn] = newscript;
+    Script[sn]->SetName(sn); // necessary that the script knows its own name
 	while(!f.eof()){
 		line.clear();
         while (true) {
@@ -156,17 +165,25 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
                 load_notify=true;
             if(line=="debug")
                 Script[sn]->SetDebug(true);
+            if(line=="onload")
+                exec=true;
+            if(line=="endonload" || line=="/onload")
+                exec=false;
             //...
             continue; // line was an option, not script content
 		}
         if(load_debug)
             std::cout<<"~LOAD: "<<line<<"\n";
-		Script[sn]->AddLine(line);
+        if(!exec)
+		    Script[sn]->AddLine(line);
+        else
+        {
+            this->RunSingleLineFromScript(line,Script[sn]);
+        }
 		
 		
 	}
 	f.close();
-    Script[sn]->SetName(sn); // necessary that the script knows its own name
     if(load_notify)
         std::cout << "+> Script '" << sn << "' [" << fn << "] successfully loaded.\n";
 	
@@ -294,6 +311,15 @@ bool DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
 bool DefScriptPackage::RunSingleLine(std::string line){
     DefXChgResult final=ReplaceVars(line,NULL,false);
 	CmdSet curSet=SplitLine(final.str);
+    return Interpret(curSet);
+}
+
+bool DefScriptPackage::RunSingleLineFromScript(std::string line, DefScript *pScript){
+    CmdSet Set(pScript);
+
+    DefXChgResult final=ReplaceVars(line,&Set,false);
+    CmdSet curSet=SplitLine(final.str);
+    curSet.myname=pScript->GetName(); // temp fix, this needs to be cleaned up later
     return Interpret(curSet);
 }
 
@@ -432,8 +458,7 @@ CmdSet DefScriptPackage::RemoveBrackets(CmdSet oldSet){
 
 DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool isVar){
 
-    unsigned int  
-        
+    unsigned int
         openingBracket=0, // defines the position from where the recursive call is started
         closingBracket=0, // the closing bracket
         bracketsOpen=0, // amount of brackets opened
@@ -449,9 +474,6 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool 
 
     std::string subStr;
     DefXChgResult xchg;
-	
-	//while(str.at(0)==' ' || str.at(0)=='\t')
-	//	str.erase(0,1); // trim spaces if there are any
 
     for(unsigned int i=0;i<str.length();i++)
     {
@@ -529,6 +551,8 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool 
                 str=pSet->cmd;
             else if(pSet && subs=="caller")
                 str=pSet->caller;
+            else if(subs=="n")
+                str="\n";
             else if(variables.Exists(vname))
                 str=variables.Get(vname);
             else
@@ -550,20 +574,24 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, bool 
     xchg.str = str;
     if(hasChanged)
         xchg.changed=true;
-    //printf("XCHG:%u: \"%s\"\n",xchg.changed,xchg.str.c_str());
     return xchg;
 }
 
 std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string sn){
     std::string vn=vn_in;
-    if(sn.empty())
-        return vn;
-    if(vn.at(0)=='#')
-		while(vn.at(0)=='#')
+    bool global=false;
+    while(true)
+    {
+        if(sn.empty())
+            return vn;
+        if(vn.at(0)=='#')
+            global = true;
+        if(vn.at(0)=='#' || vn.at(0)==':')
 			vn.erase(0,1);
-    else if(vn.at(0)=='@')
-        ;// do nothing for now
-    else
+        else
+            break;
+    }
+    if( (!global) && (vn.at(0)!='@') )  
         vn=sn+"::"+vn;
 
     return vn;

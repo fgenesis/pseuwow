@@ -1,0 +1,5 @@
+// example script to "say" a clickable item (in WoW)
+
+MAKECHATITEM,i ${@def}
+SAY ${i}
+UNSET i

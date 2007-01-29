@@ -10,3 +10,4 @@
 SET,lang ${@1}
 DEFAULT,lang 0
 SENDCHATMESSAGE,14,{${lang}},{${@def}},{${@0}}
+UNSET lang
