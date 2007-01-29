@@ -24,6 +24,7 @@ WorldSession::WorldSession(PseuInstance *in)
     plrNameCache.ReadFromFile(); // load names/guids of known players
     _deleteme = false;
     _channels = new Channel(this);
+	_playerSettings->Init(this);
     //...
 }
 
@@ -111,7 +112,7 @@ void WorldSession::Update(void)
             || ((!known) && GetInstance()->GetConf()->showopcodes==2)
             || (GetInstance()->GetConf()->showopcodes==3) )
         {
-            log(">> Opcode %u [%s]",packet->GetOpcode(),LookupName(packet->GetOpcode(),g_worldOpcodeNames));
+			log(">> Opcode %u - %s - [%s]", packet->GetOpcode(), known ? "Known" : "UNKNOWN", LookupName(packet->GetOpcode(),g_worldOpcodeNames));
         }
             
         
@@ -158,6 +159,8 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_FALL_LAND, &WorldSession::_HandleMovementOpcode},
 
 		{MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
+
+		{SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -271,7 +274,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
     uint8 num;
 	PlayerEnum plr[10]; // max characters per realm is 10
 	uint8 dummy8;
-	uint32 dummy32;
+	//uint32 dummy32; // Unused
 
 	recvPacket >> num;
 	if(num==0){
@@ -305,7 +308,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 		recvPacket >> plr[i]._petLevel;
 		recvPacket >> plr[i]._petFamilyId;
 		for(unsigned int inv=0;inv<20;inv++){
-			recvPacket >> dummy32 >> dummy8; // item data are not relevant yet ( (uint32)itemID , (uint8)inventorytype )
+			recvPacket >> plr[i]._items[inv].itemID >> plr[i]._items[inv].inventorytype; // item data are not relevant yet ( (uint32)itemID , (uint8)inventorytype )
 		}
         plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
 	}
@@ -330,7 +333,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 		return;
 	} else {
 		log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
-		_player = plr[i];
+		_player->Init(plr[i]);
 
 		WorldPacket pkt;
         pkt.SetOpcode(CMSG_PLAYER_LOGIN);
@@ -536,7 +539,6 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 
 	logdetail("DEBUG: Got teleport, data: x: %f, y: %f, z: %f, o: %f, guid: %d\n", x, y, z, o, guid);
 
-	// TODO: Still bugs with animation
 	WorldPacket response;
 	response.SetOpcode(MSG_MOVE_FALL_LAND);
 	response << uint32(0) << uint32(0) << x << y << z << o << uint32(0);
@@ -545,5 +547,10 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
 {
-    _channels->HandleNotifyOpcode(recvPacket);
+	_channels->HandleNotifyOpcode(recvPacket);
+}
+
+void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
+{
+	_playerSettings->HandleCastResultOpcode(recvPacket);
 }

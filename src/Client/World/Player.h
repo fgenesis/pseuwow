@@ -2,6 +2,14 @@
 #define _PLAYER_H
 
 #include <vector>
+#include "WorldPacket.h"
+#include "SysDefs.h"
+
+struct PlayerItem
+{
+	uint32 itemID;
+	uint8 inventorytype;
+};
 
 struct PlayerNameCacheItem {
     uint64 _guid;
@@ -44,12 +52,49 @@ public:
 	uint32 _petInfoId;
 	uint32 _petLevel;
 	uint32 _petFamilyId;
-// more to come...[items]
+	PlayerItem _items[20];
 
 private:
 
     
 };
+
+class Player
+{
+public:
+	void Init(PlayerEnum player);
+
+private:
+	int hp;
+	int bar; // Mana/Energy/Rage
+	PlayerEnum player;
+};
+
+class PlayerSettings
+{
+public:
+	PlayerSettings()
+	{
+		castingSpell = false;
+		init = false;
+	}
+
+	void Init(WorldSession *worldSession)
+	{
+		_worldSession = worldSession;
+	}
+
+	void SetActionButtons(WorldPacket &data);
+	void SetSpells(WorldPacket &data);
+	void CastSpell(uint32 spellId, uint64 target);
+	void HandleCastResultOpcode(WorldPacket &packet);
+
+private:
+	bool castingSpell;
+	WorldSession *_worldSession;
+	bool init;
+};
+
 /*
 class PlayerCache {
 public:

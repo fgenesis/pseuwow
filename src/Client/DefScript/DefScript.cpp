@@ -73,6 +73,7 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         {"log",&DefScriptPackage::SClog},
         {"logdetail",&DefScriptPackage::SClogdetail},
         {"logdebug",&DefScriptPackage::SClogdebug},
+		{"castspell", &DefScriptPackage::SCcastspell},
 
         // table termination
         {NULL,NULL}
