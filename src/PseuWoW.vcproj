@@ -267,6 +267,12 @@
 					RelativePath=".\Client\World\CMSGConstructor.cpp">
 				</File>
 				<File
+					RelativePath=".\Client\World\Object.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Object.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\Opcodes.cpp">
 				</File>
 				<File
@@ -280,6 +286,9 @@
 				</File>
 				<File
 					RelativePath=".\Client\World\SharedDefines.h">
+				</File>
+				<File
+					RelativePath=".\Client\World\UpdateFields.h">
 				</File>
 				<File
 					RelativePath=".\Client\World\WorldPacket.cpp">
