@@ -154,6 +154,7 @@ private:
     bool SClog(CmdSet);
     bool SClogdetail(CmdSet);
     bool SClogdebug(CmdSet);
+    bool SClogerror(CmdSet);
 	bool SCcastspell(CmdSet);
 
     // Own variable declarations

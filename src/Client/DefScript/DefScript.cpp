@@ -72,6 +72,7 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         {"applypermissions",&DefScriptPackage::SCapplypermissions},
         {"log",&DefScriptPackage::SClog},
         {"logdetail",&DefScriptPackage::SClogdetail},
+        {"logerror",&DefScriptPackage::SClogerror},
         {"logdebug",&DefScriptPackage::SClogdebug},
 		{"castspell", &DefScriptPackage::SCcastspell},
 

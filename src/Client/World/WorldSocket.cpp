@@ -71,7 +71,7 @@ void WorldSocket::OnRead()
             _opcode = hdr.cmd;
             if(_opcode > 800) // no opcode has yet a number over 800
             {
-                printf("CRYPT ERROR: opcode=%u, remain=%u\n",_opcode,_remaining);
+                logcritical("CRYPT ERROR: opcode=%u, remain=%u",_opcode,_remaining);
                 GetSession()->GetInstance()->SetError();
                 // if the crypt gets messy its hardly possible to recover it, especially if we dont know
                 // the lentgh of the following data part

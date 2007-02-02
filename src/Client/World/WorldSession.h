@@ -47,8 +47,8 @@ public:
     uint64 GetFollowTarget(void) { return _followGUID; }
     uint64 GetGuid(void) { return _myGUID; }
     Channel *GetChannels(void) { return _channels; }
-	Player *GetPlayer(void) { return _player; }
-	PlayerSettings *GetPlayerSettings(void) { return _playerSettings; }
+//	Player *GetPlayer(void) { return _player; }
+//	PlayerSettings *GetPlayerSettings(void) { return _playerSettings; }
 
 
     // CMSGConstructor
@@ -81,10 +81,12 @@ private:
 	void _HandleTelePortAckOpcode(WorldPacket& recvPacket);
     void _HandleChannelNotifyOpcode(WorldPacket& recvPacket);
 	void _HandleCastResultOpcode(WorldPacket& recvPacket);
+    void _HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket);
+    void _HandleUpdateObjectOpcode(WorldPacket& recvPacket);
     
 
-	Player *_player; // The connected character
-	PlayerSettings *_playerSettings; // Settings for the connected character
+	//Player *_player; // The connected character
+	//PlayerSettings *_playerSettings; // Settings for the connected character
 
     PseuInstance *_instance;
     WorldSocket *_socket;
