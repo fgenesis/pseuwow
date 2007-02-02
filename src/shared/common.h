@@ -24,6 +24,7 @@
 
 #include "SysDefs.h"
 #include "DebugStuff.h"
+#include "HelperDefs.h"
 #include "tools.h"
 
 #endif

@@ -17,6 +17,23 @@ Object::~Object()
     if(_uint32values)
         delete [] _uint32values;
 }
+
+void Object::_InitValues()
+{
+    _uint32values = new uint32[ _valuescount ];
+    memset(_uint32values, 0, _valuescount*sizeof(uint32));
+}
+
+void Object::_Create( uint64 guid )
+{
+    if(!_uint32values)
+        _InitValues();
+
+    SetUInt32Value( OBJECT_FIELD_GUID, GUID_LOPART(guid) );
+    SetUInt32Value( OBJECT_FIELD_GUID+1, GUID_HIPART(guid) );
+    SetUInt32Value( OBJECT_FIELD_TYPE, _type );
+}
+
    
 WorldObject::WorldObject()
 {
@@ -32,3 +49,4 @@ void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
     _o = o;
     _m = _map;
 }
+
