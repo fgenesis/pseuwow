@@ -65,14 +65,20 @@ public:
     {
         _floatvalues[ index ] = value;
     }
+    inline void SetUInt32Value( uint16 index, float value )
+    {
+        _uint32values[ index ] = value;
+    }
     
 protected:
     ~Object();
+    void _Create(uint64 guid);
+    void _InitValues(void);
         
     uint16 _valuescount;
     union
     {
-        uint8 *_uint32values;
+        uint32 *_uint32values;
         float *_floatvalues;
     };
     uint8 _type;
@@ -88,7 +94,6 @@ public:
     inline float GetY(void) { return _y; }
     inline float GetZ(void) { return _z; }
     inline float GetO(void) { return _o; }
-
 protected:
     float _x,_y,_z,_o; // coords, orientation
     uint16 _m; // map

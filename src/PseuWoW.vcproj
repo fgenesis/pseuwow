@@ -160,6 +160,9 @@
 				RelativePath=".\Client\DefScriptInterface.cpp">
 			</File>
 			<File
+				RelativePath=".\Client\HelperDefs.h">
+			</File>
+			<File
 				RelativePath=".\Client\log.cpp">
 			</File>
 			<File
@@ -265,6 +268,12 @@
 				</File>
 				<File
 					RelativePath=".\Client\World\CMSGConstructor.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Item.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Item.h">
 				</File>
 				<File
 					RelativePath=".\Client\World\Object.cpp">

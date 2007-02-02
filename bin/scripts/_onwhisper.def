@@ -3,4 +3,4 @@
 // EXECUTED EVERYTIME A WHISPER IS BEEING RECIEVED
 
 // comment out the following line if you dont need it
-REPLY,0 No need to whisper me, i am not yet programmed for it!
+//REPLY,0 No need to whisper me, i am not yet programmed for it!
