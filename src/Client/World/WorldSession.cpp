@@ -24,7 +24,7 @@ WorldSession::WorldSession(PseuInstance *in)
     plrNameCache.ReadFromFile(); // load names/guids of known players
     _deleteme = false;
     _channels = new Channel(this);
-	_playerSettings->Init(this);
+//	_playerSettings->Init(this);
     //...
 }
 
@@ -112,11 +112,8 @@ void WorldSession::Update(void)
             || ((!known) && GetInstance()->GetConf()->showopcodes==2)
             || (GetInstance()->GetConf()->showopcodes==3) )
         {
-			log(">> Opcode %u - %s - [%s]", packet->GetOpcode(), known ? "Known" : "UNKNOWN", LookupName(packet->GetOpcode(),g_worldOpcodeNames));
+			logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), LookupName(packet->GetOpcode(),g_worldOpcodeNames), known ? "Known" : "UNKNOWN");
         }
-            
-        
-
         delete packet;
     }
 
@@ -159,7 +156,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_FALL_LAND, &WorldSession::_HandleMovementOpcode},
 
 		{MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
-
+        {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
 		{SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
 
         // table termination
@@ -265,7 +262,8 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
         pkt.SetOpcode(CMSG_CHAR_ENUM);
 	    SendWorldPacket(pkt);
     } else {
-	    log("World Authentication failed, errcode=0x%X",(unsigned char)errcode);
+	    logcritical("World Authentication failed, errcode=0x%X",(unsigned char)errcode);
+        GetInstance()->SetError();
     }
 }
 
@@ -278,7 +276,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 
 	recvPacket >> num;
 	if(num==0){
-		log("No chars found!\n");
+		logerror("No chars found!");
 		GetInstance()->SetError();
 		return;
 	}
@@ -328,12 +326,12 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 
 	}
 	if(!char_found){
-		log("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
+		logerror("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
 		GetInstance()->SetError();
 		return;
 	} else {
 		log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
-		_player->Init(plr[i]);
+//		_player->Init(plr[i]);
 
 		WorldPacket pkt;
         pkt.SetOpcode(CMSG_PLAYER_LOGIN);
@@ -392,19 +390,19 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 	recvPacket >> msglen >> msg;
 	if (type == CHAT_MSG_SYSTEM)
     {
-		log("SYSMSG: \"%s\"",msg.c_str());
+		logcustom(0,WHITE,"SYSMSG: \"%s\"",msg.c_str());
 	}
     else if (type==CHAT_MSG_WHISPER )
     {
-        log("WHISP: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());                
+        logcustom(0,WHITE,"WHISP: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());                
     }
     else if (type==CHAT_MSG_CHANNEL )
     {
-        log("CHANNEL [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"CHANNEL [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
     }
     else
     {
-        log("CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
+        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
 	}
 
     if(target_guid!=_myGUID && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
@@ -552,5 +550,5 @@ void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 {
-	_playerSettings->HandleCastResultOpcode(recvPacket);
+//	_playerSettings->HandleCastResultOpcode(recvPacket);
 }

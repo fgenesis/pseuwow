@@ -137,6 +137,12 @@
 			<File
 				RelativePath=".\shared\tools.h">
 			</File>
+			<File
+				RelativePath=".\shared\ZCompressor.cpp">
+			</File>
+			<File
+				RelativePath=".\shared\ZCompressor.h">
+			</File>
 			<Filter
 				Name="Network"
 				Filter="">

@@ -23,7 +23,7 @@ bool DefScriptPackage::SCpause(CmdSet Set){
 bool DefScriptPackage::SCSendChatMessage(CmdSet Set){
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
-        log("Invalid Script call: SCSendChatMessage: WorldSession not valid");
+        logerror("Invalid Script call: SCSendChatMessage: WorldSession not valid");
         return false;
     }
     std::stringstream ss;
@@ -65,7 +65,7 @@ bool DefScriptPackage::SCemote(CmdSet Set){
         return true;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
-        log("Invalid Script call: SCEmote: WorldSession not valid");
+        logerror("Invalid Script call: SCEmote: WorldSession not valid");
         return false;
     }
     uint32 id=atoi(Set.defaultarg.c_str());
@@ -96,7 +96,7 @@ bool DefScriptPackage::SCjoinchannel(CmdSet Set){
         return true;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
-        log("Invalid Script call: SCjoinchannel: WorldSession not valid");
+        logerror("Invalid Script call: SCjoinchannel: WorldSession not valid");
         return false;
     }
     ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->Join(Set.defaultarg,Set.arg[0]);
@@ -108,7 +108,7 @@ bool DefScriptPackage::SCleavechannel(CmdSet Set){
         return true;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
-        log("Invalid Script call: SCleavechannel: WorldSession not valid");
+        logerror("Invalid Script call: SCleavechannel: WorldSession not valid");
         return false;
     }
     ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->Leave(Set.defaultarg);
@@ -155,13 +155,18 @@ bool DefScriptPackage::SClogdebug(CmdSet Set){
     return true;
 }
 
+bool DefScriptPackage::SClogerror(CmdSet Set){
+    logerror(Set.defaultarg.c_str());
+    return true;
+}
+
 bool DefScriptPackage::SCcastspell(CmdSet Set)
 {
 	if(Set.defaultarg.empty())
 		return true;
 	if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
 	{
-		log("Invalid Script call: SCcastspell: WorldSession not valid");
+		logerror("Invalid Script call: SCcastspell: WorldSession not valid");
 		return false;
 	}
 
@@ -172,7 +177,7 @@ bool DefScriptPackage::SCcastspell(CmdSet Set)
 
 	if (spellId <= 0)
 	{
-		log("Invalid Script call: SCcastspell: SpellId not valid");
+		logerror("Invalid Script call: SCcastspell: SpellId not valid");
 		return false;
 	}
 
@@ -181,7 +186,7 @@ bool DefScriptPackage::SCcastspell(CmdSet Set)
 		spellTarget = ((PseuInstance*)parentMethod)->GetWSession()->GetGuid();
 	}
 
-	((PseuInstance*)parentMethod)->GetWSession()->GetPlayerSettings()->CastSpell(spellId, spellTarget);
+//	((PseuInstance*)parentMethod)->GetWSession()->GetPlayerSettings()->CastSpell(spellId, spellTarget);
 	return true;
 }
 
@@ -196,7 +201,7 @@ void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
         {   
             usr = variables[i].name.substr(strlen(prefix), variables[i].name.length() - strlen(prefix));
             my_usrPermissionMap[usr] = atoi(variables[i].value.c_str());
-            DEBUG( log("Player '%s' permission = %u",usr.c_str(),atoi(variables[i].value.c_str())); )
+            DEBUG( logdebug("Player '%s' permission = %u",usr.c_str(),atoi(variables[i].value.c_str())); )
         }
     }
 }
