@@ -306,6 +306,9 @@
 					RelativePath=".\Client\World\UpdateFields.h">
 				</File>
 				<File
+					RelativePath=".\Client\World\UpdateMask.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\WorldPacket.cpp">
 				</File>
 				<File
