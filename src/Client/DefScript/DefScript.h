@@ -156,6 +156,7 @@ private:
     bool SClogdebug(CmdSet);
     bool SClogerror(CmdSet);
 	bool SCcastspell(CmdSet);
+    bool SCqueryitem(CmdSet);
 
     // Own variable declarations
     std::map<std::string, unsigned char> my_usrPermissionMap;

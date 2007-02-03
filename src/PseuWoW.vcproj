@@ -261,6 +261,12 @@
 				Name="World"
 				Filter="">
 				<File
+					RelativePath=".\Client\World\CacheHandler.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\CacheHandler.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\Channel.cpp">
 				</File>
 				<File
@@ -280,6 +286,12 @@
 				</File>
 				<File
 					RelativePath=".\Client\World\Object.h">
+				</File>
+				<File
+					RelativePath=".\Client\World\ObjMgr.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\ObjMgr.h">
 				</File>
 				<File
 					RelativePath=".\Client\World\Opcodes.cpp">

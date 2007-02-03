@@ -22,6 +22,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _followGUID=0; // dont follow anything
     _myGUID=0; // i dont have a guid yet
     plrNameCache.ReadFromFile(); // load names/guids of known players
+    ItemProtoCache_InsertDataToSession(this);
     _deleteme = false;
     _channels = new Channel(this);
 //	_playerSettings->Init(this);
@@ -157,7 +158,8 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 
 		{MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
-		{SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
+	    {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},	
+        {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -272,7 +274,6 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
     uint8 num;
 	PlayerEnum plr[10]; // max characters per realm is 10
 	uint8 dummy8;
-	//uint32 dummy32; // Unused
 
 	recvPacket >> num;
 	if(num==0){
@@ -305,9 +306,10 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 		recvPacket >> plr[i]._petInfoId;
 		recvPacket >> plr[i]._petLevel;
 		recvPacket >> plr[i]._petFamilyId;
-		for(unsigned int inv=0;inv<20;inv++){
-			recvPacket >> plr[i]._items[inv].itemID >> plr[i]._items[inv].inventorytype; // item data are not relevant yet ( (uint32)itemID , (uint8)inventorytype )
-		}
+		for(unsigned int inv=0;inv<20;inv++)
+        {
+			recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype;
+        }
         plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
 	}
 	bool char_found=false;
@@ -318,7 +320,13 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 			plr[i]._name.c_str(),plr[i]._level,raceName[plr[i]._race],className[plr[i]._class]);
 		logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
 			plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
-        if(plr[i]._name==GetInstance()->GetConf()->charname){
+        for(unsigned int inv=0;inv<20;inv++)
+        {
+            if(plr[i]._items[inv].displayId)
+                logdebug("-> Has Item: Model=%u InventoryType=%u",plr[i]._items[inv].displayId,plr[i]._items[inv].inventorytype);
+        }
+        if(plr[i]._name==GetInstance()->GetConf()->charname)
+        {
 			char_found=true;
 			_myGUID=plr[i]._guid;
 			playerNum = i;
@@ -535,7 +543,7 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 
 	recvPacket >> unk >> guid >> unk3 >> unk1 >> unk2 >> o >> x >> y >> z >> ang >> unk4;
 
-	logdetail("DEBUG: Got teleport, data: x: %f, y: %f, z: %f, o: %f, guid: %d\n", x, y, z, o, guid);
+	logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: %d\n", x, y, z, o, guid);
 
 	WorldPacket response;
 	response.SetOpcode(MSG_MOVE_FALL_LAND);

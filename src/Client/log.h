@@ -22,7 +22,7 @@ enum Color
     WHITE
 };
 
-void log_prepare(char *fn, PseuInstance* p);
+void log_prepare(char *fn, PseuInstance* p); // instance reference needed for log level determination
 void log(const char *str, ...);
 void logdetail(const char *str, ...);
 void logdebug(const char *str, ...);

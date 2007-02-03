@@ -93,6 +93,301 @@ enum SellFailure
     SELL_ERR_CANT_FIND_VENDOR               = 3
 };
 
+enum ITEM_STAT_TYPE
+{
+    ITEM_STAT_POWER      = 0,
+    ITEM_STAT_HEALTH     = 1,
+    ITEM_STAT_UNKNOWN    = 2,
+    ITEM_STAT_AGILITY    = 3,
+    ITEM_STAT_STRENGTH   = 4,
+    ITEM_STAT_INTELLECT  = 5,
+    ITEM_STAT_SPIRIT     = 6,
+    ITEM_STAT_STAMINA    = 7
+};
+
+enum ITEM_DAMAGE_TYPE
+{
+    NORMAL_DAMAGE  = 0,
+    HOLY_DAMAGE    = 1,
+    FIRE_DAMAGE    = 2,
+    NATURE_DAMAGE  = 3,
+    FROST_DAMAGE   = 4,
+    SHADOW_DAMAGE  = 5,
+    ARCANE_DAMAGE  = 6
+};
+
+enum ITEM_SPELLTRIGGER_TYPE
+{
+    USE           = 0,
+    ON_EQUIP      = 1,
+    CHANCE_ON_HIT = 2,
+    SOULSTONE     = 4
+};
+
+enum ITEM_BONDING_TYPE
+{
+    NO_BIND              = 0,
+    BIND_WHEN_PICKED_UP  = 1,
+    BIND_WHEN_EQUIPED    = 2,
+    BIND_WHEN_USE        = 3,
+    //TODO: Better name these
+    QUEST_ITEM           = 4,
+    QUEST_ITEM1          = 5
+};
+
+// masks for ITEM_FIELD_FLAGS field
+enum ITEM_FLAGS
+{
+    ITEM_FLAGS_BINDED = 1
+};
+
+enum BAG_FAMILY
+{
+    BAG_FAMILY_NONE                             = 0,
+    BAG_FAMILY_ARROWS                           = 1,
+    BAG_FAMILY_BULLETS                          = 2,
+    BAG_FAMILY_SOUL_SHARDS                      = 3,
+    //BAG_FAMILY_UNK1                           = 4,
+    //BAG_FAMILY_UNK1                           = 5,
+    BAG_FAMILY_HERBS                            = 6,
+    BAG_FAMILY_ENCHANTING_SUPP                  = 7,
+    BAG_FAMILY_ENGINEERING_SUPP                 = 8,
+    BAG_FAMILY_KEYS                             = 9,
+    BAG_FAMILY_GEMS                             = 10,
+    //BAG_FAMILY_UNK3                           = 11,
+    BAG_FAMILY_MINING_SUPP                      = 12
+};
+
+enum INVENTORY_TYPES
+{
+    INVTYPE_NON_EQUIP      = 0,
+    INVTYPE_HEAD           = 1,
+    INVTYPE_NECK           = 2,
+    INVTYPE_SHOULDERS      = 3,
+    INVTYPE_BODY           = 4,
+    INVTYPE_CHEST          = 5,
+    INVTYPE_WAIST          = 6,
+    INVTYPE_LEGS           = 7,
+    INVTYPE_FEET           = 8,
+    INVTYPE_WRISTS         = 9,
+    INVTYPE_HANDS          = 10,
+    INVTYPE_FINGER         = 11,
+    INVTYPE_TRINKET        = 12,
+    INVTYPE_WEAPON         = 13,
+    INVTYPE_SHIELD         = 14,
+    INVTYPE_RANGED         = 15,
+    INVTYPE_CLOAK          = 16,
+    INVTYPE_2HWEAPON       = 17,
+    INVTYPE_BAG            = 18,
+    INVTYPE_TABARD         = 19,
+    INVTYPE_ROBE           = 20,
+    INVTYPE_WEAPONMAINHAND = 21,
+    INVTYPE_WEAPONOFFHAND  = 22,
+    INVTYPE_HOLDABLE       = 23,
+    INVTYPE_AMMO           = 24,
+    INVTYPE_THROWN         = 25,
+    INVTYPE_RANGEDRIGHT    = 26,
+    INVTYPE_SLOT_ITEM      = 27,
+    INVTYPE_RELIC          = 28,
+    NUM_INVENTORY_TYPES    = 29
+};
+
+enum INVENTORY_CLASS
+{
+    ITEM_CLASS_CONSUMABLE    = 0,
+    ITEM_CLASS_CONTAINER     = 1,
+    ITEM_CLASS_WEAPON        = 2,
+    ITEM_CLASS_JEWELRY       = 3,
+    ITEM_CLASS_ARMOR         = 4,
+    ITEM_CLASS_REAGENT       = 5,
+    ITEM_CLASS_PROJECTILE    = 6,
+    ITEM_CLASS_TRADE_GOODS   = 7,
+    ITEM_CLASS_GENERIC       = 8,
+    ITEM_CLASS_BOOK          = 9,
+    ITEM_CLASS_MONEY         = 10,
+    ITEM_CLASS_QUIVER        = 11,
+    ITEM_CLASS_QUEST         = 12,
+    ITEM_CLASS_KEY           = 13,
+    ITEM_CLASS_PERMANENT     = 14,
+    ITEM_CLASS_JUNK          = 15
+};
+
+// Client understand only 0 subclass for ITEM_CLASS_CONSUMABLE
+// but this value used in code as implementation workaround
+enum ITEM_SUBCLASS_CONSUMABLE
+{
+    ITEM_SUBCLASS_FOOD                    = 1,
+    ITEM_SUBCLASS_LIQUID                  = 2,
+    ITEM_SUBCLASS_POTION                  = 3,
+    ITEM_SUBCLASS_SCROLL                  = 4,
+    ITEM_SUBCLASS_BANDAGE                 = 5,
+    ITEM_SUBCLASS_HEALTHSTONE             = 6,
+    ITEM_SUBCLASS_COMBAT_EFFECT           = 7
+};
+
+enum ITEM_SUBCLASS_CONTAINER
+{
+    ITEM_SUBCLASS_CONTAINER               = 0,
+    ITEM_SUBCLASS_SOUL_CONTAINER          = 1,
+    ITEM_SUBCLASS_HERB_CONTAINER          = 2,
+    ITEM_SUBCLASS_ENCHANTING_CONTAINER    = 3,
+    ITEM_SUBCLASS_ENGINEERING_CONTAINER   = 4
+};
+
+enum INVENTORY_SUBCLASS_WEAPON
+{
+    ITEM_SUBCLASS_WEAPON_AXE           = 0,
+    ITEM_SUBCLASS_WEAPON_AXE2          = 1,
+    ITEM_SUBCLASS_WEAPON_BOW           = 2,
+    ITEM_SUBCLASS_WEAPON_GUN           = 3,
+    ITEM_SUBCLASS_WEAPON_MACE          = 4,
+    ITEM_SUBCLASS_WEAPON_MACE2         = 5,
+    ITEM_SUBCLASS_WEAPON_POLEARM       = 6,
+    ITEM_SUBCLASS_WEAPON_SWORD         = 7,
+    ITEM_SUBCLASS_WEAPON_SWORD2        = 8,
+    ITEM_SUBCLASS_WEAPON_obsolete      = 9,
+    ITEM_SUBCLASS_WEAPON_STAFF         = 10,
+    ITEM_SUBCLASS_WEAPON_EXOTIC        = 11,
+    ITEM_SUBCLASS_WEAPON_EXOTIC2       = 12,
+    ITEM_SUBCLASS_WEAPON_UNARMED       = 13,
+    ITEM_SUBCLASS_WEAPON_GENERIC       = 14,
+    ITEM_SUBCLASS_WEAPON_DAGGER        = 15,
+    ITEM_SUBCLASS_WEAPON_THROWN        = 16,
+    ITEM_SUBCLASS_WEAPON_SPEAR         = 17,
+    ITEM_SUBCLASS_WEAPON_CROSSBOW      = 18,
+    ITEM_SUBCLASS_WEAPON_WAND          = 19,
+    ITEM_SUBCLASS_WEAPON_FISHING_POLE  = 20
+};
+
+enum ITEM_SUBCLASS_ARMOR
+{
+    ITEM_SUBCLASS_ARMOR_GENERIC     = 0,
+    ITEM_SUBCLASS_ARMOR_CLOTH       = 1,
+    ITEM_SUBCLASS_ARMOR_LEATHER     = 2,
+    ITEM_SUBCLASS_ARMOR_MAIL        = 3,
+    ITEM_SUBCLASS_ARMOR_PLATE       = 4,
+    ITEM_SUBCLASS_ARMOR_BUCKLER     = 5,
+    ITEM_SUBCLASS_ARMOR_SHIELD      = 6
+};
+
+enum ITEM_SUBCLASS_PROJECTILE
+{
+    ITEM_SUBCLASS_ARROW             = 2,
+    ITEM_SUBCLASS_BULLET            = 3
+};
+
+enum ITEM_SUBCLASS_TRADE_GOODS
+{
+    ITEM_SUBCLASS_TRADE_GOODS       = 0,
+    ITEM_SUBCLASS_PARTS             = 1,
+    ITEM_SUBCLASS_EXPLOSIVES        = 2,
+    ITEM_SUBCLASS_DEVICES           = 3
+};
+
+enum ITEM_SUBCLASS_BOOK
+{
+    ITEM_SUBCLASS_BOOK                   = 0,
+    ITEM_SUBCLASS_LEATHERWORKING_PATTERN = 1,
+    ITEM_SUBCLASS_TAILORING_PATTERN      = 2,
+    ITEM_SUBCLASS_ENGINEERING_SCHEMATIC  = 3,
+    ITEM_SUBCLASS_COOKING_RECIPE         = 5,
+    ITEM_SUBCLASS_ALCHEMY_RECIPE         = 6,
+    ITEM_SUBCLASS_FIRST_AID_MANUAL       = 7,
+    ITEM_SUBCLASS_ENCHANTING_FORMULA     = 8,
+    ITEM_SUBCLASS_FISHING_MANUAL         = 9
+};
+
+enum ITEM_SUBCLASS_QUIVER
+{
+    ITEM_SUBCLASS_QUIVER            = 2,
+    ITEM_SUBCLASS_AMMO_POUCH        = 3
+};
+
+struct _ItemStat
+{
+    uint32 ItemStatType;
+    uint32 ItemStatValue;
+
+};
+
+struct _ItemSpell
+{
+    uint32 SpellId;
+    uint32 SpellTrigger;
+    uint32  SpellCharges;
+    uint32  SpellCooldown;
+    uint32 SpellCategory;
+    uint32  SpellCategoryCooldown;
+
+};
+
+struct _ItemDamage
+{
+    float DamageMin;
+    float DamageMax;
+    uint32 DamageType;
+
+};
+
+struct ItemProto
+{
+    uint32 Id;
+    uint32 Class;
+    uint32 SubClass;
+    std::string Name[4];
+    uint32 DisplayInfoID;
+    uint32 Quality;
+    uint32 Flags;
+    uint32 BuyCount;
+    uint32 BuyPrice;
+    uint32 SellPrice;
+    uint32 InventoryType;
+    uint32 AllowableClass;
+    uint32 AllowableRace;
+    uint32 ItemLevel;
+    uint32 RequiredLevel;
+    uint32 RequiredSkill;
+    uint32 RequiredSkillRank;
+    uint32 RequiredSpell;
+    uint32 RequiredHonorRank;
+    uint32 RequiredCityRank;
+    uint32 RequiredReputationFaction;
+    uint32 RequiredReputationRank;
+    uint32 MaxCount;
+    uint32 Stackable;
+    uint32 ContainerSlots;
+    _ItemStat ItemStat[10];
+    _ItemDamage Damage[5];
+    uint32 Armor;
+    uint32 HolyRes;
+    uint32 FireRes;
+    uint32 NatureRes;
+    uint32 FrostRes;
+    uint32 ShadowRes;
+    uint32 ArcaneRes;
+    uint32 Delay;
+    uint32 Ammo_type;
+    float  RangedModRange;
+    _ItemSpell Spells[5];
+    uint32 Bonding;
+    std::string Description;
+    uint32 PageText;
+    uint32 LanguageID;
+    uint32 PageMaterial;
+    uint32 StartQuest;
+    uint32 LockID;
+    uint32 Material;
+    uint32 Sheath;
+    uint32 Extra;
+    uint32 Block;
+    uint32 ItemSet;
+    uint32 MaxDurability;
+    uint32 Area;
+    uint32 BagFamily;
+    uint32 Unknown1;
+    uint32 Unknown2;
+};
+
 class Item : public Object
 {
 public:

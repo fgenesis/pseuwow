@@ -13,7 +13,6 @@ Object::Object()
 
 Object::~Object()
 {
-    // TODO: unregister object from object mgr
     if(_uint32values)
         delete [] _uint32values;
 }

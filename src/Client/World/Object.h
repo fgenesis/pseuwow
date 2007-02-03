@@ -34,7 +34,7 @@ enum TYPEID
 class Object
 {
 public:
-    Object();
+    virtual ~Object();
     inline const uint64 GetGUID() const { return GetUInt64Value(0); }
     inline const uint32 GetGUIDLow() const { return GetUInt32Value(0); }
     inline const uint32 GetGUIDHigh() const { return GetUInt32Value(1); }
@@ -71,7 +71,7 @@ public:
     }
     
 protected:
-    ~Object();
+    Object();
     void _Create(uint64 guid);
     void _InitValues(void);
         
