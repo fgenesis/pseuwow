@@ -11,6 +11,8 @@
 #include "DefScript/DefScript.h"
 #include "Realm/RealmSocket.h"
 #include "World/WorldSession.h"
+#include "CacheHandler.h"
+
 #include "Cli.h"
 
 
@@ -206,6 +208,7 @@ void PseuInstance::SaveAllCache(void)
     if(GetWSession() && GetWSession()->IsValid())
     {
         GetWSession()->plrNameCache.SaveToFile();
+        ItemProtoCache_WriteDataToCache(GetWSession());
         //...
     }
 }

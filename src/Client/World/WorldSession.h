@@ -1,17 +1,20 @@
 #ifndef _WORLDSESSION_H
 #define _WORLDSESSION_H
 
-#include <deque>
+#include "common.h"
 #include "PseuWoW.h"
 #include "Network/SocketHandler.h"
-#include "common.h"
 #include "Player.h"
 #include "Auth/AuthCrypt.h"
 #include "SharedDefines.h"
+#include "ObjMgr.h"
+#include "CacheHandler.h"
 
 class WorldSocket;
 class WorldPacket;
 class Channel;
+
+
 
 struct OpcodeHandler
 {
@@ -56,8 +59,10 @@ public:
     void SendQueryPlayerName(uint64 guid);
     void SendPing(uint32);
     void SendEmote(uint32);
+    void SendQueryItem(uint32, uint64);
 
     PlayerNameCache plrNameCache;
+    ObjMgr objmgr;
 
 private:
 
@@ -83,18 +88,15 @@ private:
 	void _HandleCastResultOpcode(WorldPacket& recvPacket);
     void _HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket);
     void _HandleUpdateObjectOpcode(WorldPacket& recvPacket);
+    void _HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket);
     
-
-	//Player *_player; // The connected character
-	//PlayerSettings *_playerSettings; // Settings for the connected character
-
     PseuInstance *_instance;
     WorldSocket *_socket;
     ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
     bool _valid,_authed,_logged,_deleteme; // world status
     SocketHandler _sh; // handles the WorldSocket
     Channel *_channels;
-    uint64 _targetGUID,_followGUID,_myGUID;  
+    uint64 _targetGUID,_followGUID,_myGUID;
 };
 
 #endif

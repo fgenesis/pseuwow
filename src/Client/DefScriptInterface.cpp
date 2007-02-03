@@ -49,13 +49,17 @@ bool DefScriptPackage::SCSendChatMessage(CmdSet Set){
 
 bool DefScriptPackage::SCsavecache(CmdSet Set){
    ((PseuInstance*)parentMethod)->SaveAllCache();
-    std::stringstream tmp;
-    std::string str;
+    std::stringstream str;
     if(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid())
     {
-        tmp << ((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetSize();
-        str+="Cache saved. [ "+tmp.str()+ " Playernames ]";
-        ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str,"");
+        str << "Cache saved. [ ";
+        str << ((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetSize();
+        str << " Playernames, ";
+        str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProtoCount();
+        str << " Item Prototypes";
+        str << " ]";
+        
+        ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str.str(),"");
     }
     return true;
 }
@@ -188,6 +192,20 @@ bool DefScriptPackage::SCcastspell(CmdSet Set)
 
 //	((PseuInstance*)parentMethod)->GetWSession()->GetPlayerSettings()->CastSpell(spellId, spellTarget);
 	return true;
+}
+
+bool DefScriptPackage::SCqueryitem(CmdSet Set){
+    uint32 id = atoi(Set.defaultarg.c_str());
+    if(!id)
+        return true;
+
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCqueryitem: WorldSession not valid");
+        return false;
+    }
+    ((PseuInstance*)parentMethod)->GetWSession()->SendQueryItem(id,0);
+    return true;
 }
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)

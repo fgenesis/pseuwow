@@ -5,28 +5,10 @@
 #include "WorldPacket.h"
 #include "SysDefs.h"
 
-struct PlayerItem
+struct PlayerEnumItem
 {
-	uint32 itemID;
+	uint32 displayId;
 	uint8 inventorytype;
-};
-
-struct PlayerNameCacheItem {
-    uint64 _guid;
-    std::string _name;
-};
-
-class PlayerNameCache {
-public:
-    std::string GetName(uint64);
-    uint64 GetGuid(std::string);
-    bool AddInfo(uint64 guid, std::string name);
-    bool AddInfo(PlayerNameCacheItem*);
-    bool SaveToFile(void);
-    bool ReadFromFile(void);
-    uint32 GetSize(void);
-private:
-    std::vector<PlayerNameCacheItem*> _cache;
 };
 
 class PlayerEnum {
@@ -52,7 +34,7 @@ public:
 	uint32 _petInfoId;
 	uint32 _petLevel;
 	uint32 _petFamilyId;
-	PlayerItem _items[20];
+	PlayerEnumItem _items[20];
 
 private:
 
@@ -70,45 +52,28 @@ private:
 	PlayerEnum player;
 };
 
-class PlayerSettings
+
+// class about the character that is used to login.
+// needs to store known spells, action buttons,...
+// basically everything that is needed to play.
+class MyCharacter : public Player
 {
 public:
-	PlayerSettings()
+    MyCharacter(WorldSession *ws)
 	{
-		castingSpell = false;
-		init = false;
+        _worldSession = ws;
+		_isbusy = false;
 	}
 
-	void Init(WorldSession *worldSession)
-	{
-		_worldSession = worldSession;
-	}
-
-	void SetActionButtons(WorldPacket &data);
+	/*void SetActionButtons(WorldPacket &data);
 	void SetSpells(WorldPacket &data);
 	void CastSpell(uint32 spellId, uint64 target);
-	void HandleCastResultOpcode(WorldPacket &packet);
+	void HandleCastResultOpcode(WorldPacket &packet);*/
 
 private:
-	bool castingSpell;
+	bool _isbusy;
 	WorldSession *_worldSession;
-	bool init;
 };
-
-/*
-class PlayerCache {
-public:
-    void Add(Player*);
-    void Remove(Player*);
-    void Remove(uint64);
-    uint32 GetCount(void) { return _players.size(); }
-
-private:
-    std::vector<Player*> _players;
-
-};
-*/
-
 
 
 #endif

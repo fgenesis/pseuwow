@@ -92,13 +92,13 @@ void logdebug(const char *str, ...)
 void logerror(const char *str, ...)
 {
     va_list ap;
-    _log_setcolor(true,LRED);
+    _log_setcolor(false,LRED);
     va_start(ap, str);
-    vprintf( str, ap );
+    vfprintf( stderr,  str, ap );
     va_end(ap);
-    _log_resetcolor(true);
+    _log_resetcolor(false);
 
-    printf("\n");
+    fprintf(stderr,"\n");
 
     if(logfile)
     {
@@ -117,13 +117,13 @@ void logcritical(const char *str, ...)
     if(!str || instance->GetConf()->debug < 2)
         return;
     va_list ap;
-    _log_setcolor(true,RED);
+    _log_setcolor(false,RED);
     va_start(ap, str);
-    vprintf( str, ap );
+    vfprintf( stderr, str, ap );
     va_end(ap);
-    _log_resetcolor(true);
+    _log_resetcolor(false);
 
-    printf("\n");
+    fprintf(stderr,"\n");
 
     if(logfile)
     {

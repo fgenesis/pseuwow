@@ -41,6 +41,7 @@ void WorldSession::SendQueryPlayerName(uint64 guid){
     packet << guid;
     packet.SetOpcode(CMSG_NAME_QUERY);
     SendWorldPacket(packet);
+    // to prevent opcode spam, we need to make a list with already requested names
 }
 
 void WorldSession::SendPing(uint32 ping){
@@ -60,6 +61,20 @@ void WorldSession::SendEmote(uint32 id){
     packet << id << id << _targetGUID; // TODO: correct this!
     packet.SetOpcode(CMSG_TEXT_EMOTE);
     SendWorldPacket(packet);
+}
+
+void WorldSession::SendQueryItem(uint32 id, uint64 guid) // is it a guid? not sure
+{
+    if(objmgr.ItemNonExistent(id))
+    {
+        logdebug("Skipped query of item %u (was marked as nonexistent before)",id);
+        return;
+    }
+    WorldPacket packet;
+    packet << id << guid;
+    packet.SetOpcode(CMSG_ITEM_QUERY_SINGLE);
+    SendWorldPacket(packet);
+    // to prevent opcode spam, we need to make a list with already requested items
 }
 
 
