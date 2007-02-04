@@ -222,6 +222,9 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
 
 void ItemProtoCache_WriteDataToCache(WorldSession *session)
 {
+	if (session->objmgr.GetItemProtoCount() <= 0)
+		return;
+
     char* fn = "./cache/ItemPrototypes.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::out | std::ios_base::binary);
