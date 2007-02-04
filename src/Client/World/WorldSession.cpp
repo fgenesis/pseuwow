@@ -461,6 +461,30 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         GetInstance()->GetScripts()->variables.Set("@thiswhisper_lang",toString((uint64)lang));
         GetInstance()->GetScripts()->RunScript("_onwhisper",NULL);
     }
+
+    // the following block searches for items in chat and queries them if they are unknown
+    if(!isCmd && target_guid!=_myGUID && msg.length()>strlen(CHAT_ITEM_BEGIN_STRING))
+    {
+        for(uint32 pos=0;pos<msg.length()-strlen(CHAT_ITEM_BEGIN_STRING);pos++)
+        {
+            if(!memcmp(msg.c_str()+pos,CHAT_ITEM_BEGIN_STRING,strlen(CHAT_ITEM_BEGIN_STRING)))
+            {
+                std::string itemid;
+                uint32 id;
+
+                while(msg[pos] != ':')
+                {
+                    itemid += msg[pos+strlen(CHAT_ITEM_BEGIN_STRING)];
+                    pos++;
+                }
+                id = atoi(itemid.c_str());
+                logdebug("Found Item in chat message: %u",id);
+                if(objmgr.GetItemProto(id)==NULL)
+                    SendQueryItem(id,0);
+            }
+        }
+    }
+
 }
 void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
 {

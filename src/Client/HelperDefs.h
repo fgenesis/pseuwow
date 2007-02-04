@@ -5,4 +5,6 @@
 #define GUID_LOPART(x)   (*((uint32*)&(x)))
 #define MAKE_GUID(l, h)  uint64( uint32(l) | ( uint64(h) << 32 ) )
 
+#define CHAT_ITEM_BEGIN_STRING "|Hitem:"
+
 #endif
