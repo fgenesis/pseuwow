@@ -1,7 +1,7 @@
 
 // preloads the most important scripts
 
-LOG Loading DefScripts...
+LOG * Loading DefScripts...
 
 RELOADDEF _enterworld
 RELOADDEF _leaveworld

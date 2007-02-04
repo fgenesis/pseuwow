@@ -101,7 +101,8 @@ bool PseuInstance::Init(void) {
     log("Loading DefScripts from folder '%s'",_scpdir.c_str());
     if(!_scp->RunScript("_startup",NULL))
     {
-        printf("Error executing '_startup.def'");
+        logerror("Error executing '_startup.def'");
+        SetError();
     }
 
     if(GetConf()->enablecli)
@@ -111,11 +112,10 @@ bool PseuInstance::Init(void) {
         ZThread::Thread t(_cli);
     }
 
-    if(_stop){
-			log("Errors while initializing, proc halted!!");
-            if(GetConf()->exitonerror)
-                exit(0);
-			while(true)this->Sleep(1000);
+    if(_error)
+    {
+		logcritical("Errors while initializing!");
+        return false;
     }
 
     log("Init complete.\n");
@@ -129,6 +129,14 @@ void PseuInstance::Run(void)
     {
         if(!_initialized)
             return;
+
+        if(GetConf()->realmlist.empty() || GetConf()->realmport==0)
+        {
+            logcritical("Realmlist address not set, can't connect.");
+            SetError();
+            break;
+        }
+
 
         _rsession=new RealmSocket(_sh);
         _rsession->SetDeleteByHandler();

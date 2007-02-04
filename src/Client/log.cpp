@@ -114,8 +114,6 @@ void logerror(const char *str, ...)
 
 void logcritical(const char *str, ...)
 {
-    if(!str || instance->GetConf()->debug < 2)
-        return;
     va_list ap;
     _log_setcolor(false,RED);
     va_start(ap, str);

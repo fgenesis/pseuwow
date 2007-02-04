@@ -218,7 +218,14 @@ void RealmSocket::SendLogonChallenge(void)
 {
     if(!this->Ready())
     {
-        log("Error sending AUTH_LOGON_CHALLENGE, port is not ready!\n");
+        logerror("Error sending AUTH_LOGON_CHALLENGE, port is not ready!\n");
+        return;
+    }
+    if( GetInstance()->GetConf()->accname.empty() || GetInstance()->GetConf()->clientversion_string.empty()
+        || GetInstance()->GetConf()->clientbuild==0 || GetInstance()->GetConf()->clientlang.empty() )
+    {
+        logcritical("Missing data, can't send Login to Realm Server!");
+        GetInstance()->SetError();
         return;
     }
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
