@@ -70,6 +70,7 @@ void WorldSession::SendQueryItem(uint32 id, uint64 guid) // is it a guid? not su
         logdebug("Skipped query of item %u (was marked as nonexistent before)",id);
         return;
     }
+    logdebug("Sending Item query, id=%u",id);
     WorldPacket packet;
     packet << id << guid;
     packet.SetOpcode(CMSG_ITEM_QUERY_SINGLE);
