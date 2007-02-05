@@ -73,6 +73,8 @@ PseuInstance::~PseuInstance()
 
 bool PseuInstance::Init(void) {
     log_prepare("logfile.txt",this);
+    log("\n");
+    log("--- Initializing Instance ---");
 
     if(_confdir.empty())
         _confdir="./conf/";
@@ -91,10 +93,8 @@ bool PseuInstance::Init(void) {
     _scp->SetParentMethod((void*)this);
 	_conf=new PseuInstanceConf();	
 
-    logdebug("Setting up DefScripts path '%s'",_scpdir.c_str());
     _scp->SetPath(_scpdir);
 
-    logdebug("Setting up predefined DefScript macros...");
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);
 
@@ -252,6 +252,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     allowgamecmd=(bool)atoi(v.Get("ALLOWGAMECMD").c_str());
 	enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());
     notifyping=(bool)atoi(v.Get("NOTIFYPING").c_str());
+    showmyopcodes=(bool)atoi(v.Get("SHOWMYOPCODES").c_str());
 
     // clientversion is a bit more complicated to add
     {

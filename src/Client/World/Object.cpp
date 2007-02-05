@@ -49,3 +49,11 @@ void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
     _m = _map;
 }
 
+void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
+{
+    uint64 guid;
+    recvPacket >> guid;
+    logdebug("Destroy Object "I64FMT,guid);
+    objmgr.RemoveObject(guid);
+}
+

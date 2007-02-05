@@ -162,7 +162,7 @@ void RealmSocket::_HandleRealmList(void)
         {
             realmAddr=realms[i].addr_port;
         }
-		log("Realm: %s (%s)",realms[i].name.c_str(),realms[i].addr_port.c_str());
+		logcustom(0,LGREEN,"Realm: %s (%s)",realms[i].name.c_str(),realms[i].addr_port.c_str());
         logdetail(" [chars:%d][population:%f][timezone:%d]",realms[i].chars_here,realms[i].population,realms[i].timezone);
     }
 

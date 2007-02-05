@@ -44,6 +44,7 @@ class PseuInstanceConf
     bool enablecli;
 	bool enablechatai;
     bool notifyping;
+    bool showmyopcodes;
 	
 	
 };

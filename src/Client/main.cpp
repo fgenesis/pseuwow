@@ -71,7 +71,11 @@ void abortproc(void)
 int main(int argc, char* argv[]) {
     try 
     {
-        printf("\n   (C) 2006,2007 Snowstorm Software\n\n\n");
+        _log_setcolor(true,LGREEN);
+        printf("+----------------------------------+\n"
+               "| (C) 2006,2007 Snowstorm Software |\n"
+               "+----------------------------------+\n");
+        _log_resetcolor(true);
         
         _HookSignals();
 
