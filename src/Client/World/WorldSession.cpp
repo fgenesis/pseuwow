@@ -15,6 +15,7 @@
 
 WorldSession::WorldSession(PseuInstance *in)
 {
+    logdebug("-> Starting WorldSession");
     _instance = in;
     _valid=_authed=_logged=false;
     _socket=new WorldSocket(_sh,this);
@@ -72,6 +73,8 @@ void WorldSession::AddToPktQueue(WorldPacket *pkt)
 
 void WorldSession::SendWorldPacket(WorldPacket &pkt)
 {
+    if(GetInstance()->GetConf()->showmyopcodes)
+        logcustom(0,BROWN,"<< Opcode %u [%s]", pkt.GetOpcode(), LookupName(pkt.GetOpcode(),g_worldOpcodeNames));
     _socket->SendWorldPacket(pkt);
 }
 
@@ -160,6 +163,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
 	    {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},	
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
+        {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -316,7 +320,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 	int playerNum = 0;
 
 	for(unsigned int i=0;i<num;i++){
-		log("## %s (%u) [%s/%s]",
+		logcustom(0,LGREEN,"## %s (%u) [%s/%s]",
 			plr[i]._name.c_str(),plr[i]._level,raceName[plr[i]._race],className[plr[i]._class]);
 		logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
 			plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);

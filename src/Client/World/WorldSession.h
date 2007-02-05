@@ -89,6 +89,7 @@ private:
     void _HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket);
     void _HandleUpdateObjectOpcode(WorldPacket& recvPacket);
     void _HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket);
+    void _HandleDestroyObjectOpcode(WorldPacket& recvPacket);
     
     PseuInstance *_instance;
     WorldSocket *_socket;

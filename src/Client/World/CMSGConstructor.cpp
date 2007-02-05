@@ -51,7 +51,6 @@ void WorldSession::SendPing(uint32 ping){
     packet << ping;
     packet.SetOpcode(CMSG_PING);
     SendWorldPacket(packet);
-    logdebug("Sent CMSG_PING, clock=%u",ping);
 }
 
 void WorldSession::SendEmote(uint32 id){
