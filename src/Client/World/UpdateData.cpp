@@ -58,16 +58,27 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 
             case UPDATETYPE_VALUES:
             {
-                uguid = recvPacket.GetPackedGuid(); // not 100% sure if this is correct
-                uint8 maskblocks;
-                recvPacket >> maskblocks;
-                logdebug("UPDATETYPE_VALUES: guid="I64FMT" maskblocks=%u",uguid,maskblocks);
-                // need some help with the lines below, got no idea what to do now.
-                UpdateMask umask;
-                umask.SetCount(maskblocks*8); // ??
-                std::vector<uint8> udata;
-                //udata.resize(?)
+				uint8 blockcount, masksize, valuesCount = 1500;
+				uint32 value;
+				uguid = recvPacket.GetPackedGuid();
+				recvPacket >> blockcount;
+				masksize = blockcount * 4;
+				logdebug("UPDATETYPE_VALUES: guid="I64FMT" blockcount=%u masksize=%d",uguid,blockcount, masksize);
 
+				UpdateMask umask;
+				umask.SetCount(masksize);
+				uint32 *updateMask = new uint32[100];
+				recvPacket.read((uint8*)updateMask, masksize);
+				umask.SetMask(updateMask);
+
+				for (int i = 0; i < valuesCount; i++) // How do i get valuesCount?
+				{
+					if (umask.GetBit(i))
+					{
+						recvPacket >> value;
+						logdebug("Value (%d): %d", i, value);
+					}
+				}
 
             }
             break;
