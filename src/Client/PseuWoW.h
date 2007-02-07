@@ -40,6 +40,7 @@ class PseuInstanceConf
     std::string worldhost;
 	uint16 networksleeptime;
     uint8 showopcodes;
+	bool hidefreqopcodes;
     bool allowgamecmd;
     bool enablecli;
 	bool enablechatai;

@@ -26,6 +26,12 @@ reconnect=0
 showopcodes=3
 
 
+// Hide opcodes which is coming very frequently?
+// 1 - yes
+// 0 - No
+hidefreqopcodes=1
+
+
 // the IP or hostname the wow server is running on
 realmlist=localhost
 

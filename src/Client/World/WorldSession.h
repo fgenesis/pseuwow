@@ -91,6 +91,8 @@ private:
     void _HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket);
     void _HandleDestroyObjectOpcode(WorldPacket& recvPacket);
     
+	void _MovementUpdate(uint8 objtypeid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
+
     PseuInstance *_instance;
     WorldSocket *_socket;
     ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
