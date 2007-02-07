@@ -99,27 +99,37 @@ void WorldSession::Update(void)
 
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     bool known=false;
-    while(pktQueue.size())
-    {
-        WorldPacket *packet = pktQueue.next();
-        
-        for (uint16 i = 0; table[i].handler != NULL; i++)
-        {
-            if (table[i].opcode == packet->GetOpcode())
-            {
-                (this->*table[i].handler)(*packet);
-                known=true;
-                break;
-            }
-        }
-        if( (known && GetInstance()->GetConf()->showopcodes==1)
-            || ((!known) && GetInstance()->GetConf()->showopcodes==2)
-            || (GetInstance()->GetConf()->showopcodes==3) )
-        {
+	while(pktQueue.size())
+	{
+		WorldPacket *packet = pktQueue.next();
+
+		for (uint16 i = 0; table[i].handler != NULL; i++)
+		{
+			if (table[i].opcode == packet->GetOpcode())
+			{
+				(this->*table[i].handler)(*packet);
+				known=true;
+				break;
+			}
+		}
+
+		bool hideOpcode = false;
+
+		// TODO: Maybe make table or something with all the frequently opcodes
+		if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
+		{
+			hideOpcode = true;
+		}
+
+		if( ( (known && GetInstance()->GetConf()->showopcodes==1)
+			|| ((!known) && GetInstance()->GetConf()->showopcodes==2)
+			|| (GetInstance()->GetConf()->showopcodes==3) )
+			&& (!GetInstance()->GetConf()->hidefreqopcodes || GetInstance()->GetConf()->hidefreqopcodes && !hideOpcode))
+		{
 			logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), LookupName(packet->GetOpcode(),g_worldOpcodeNames), known ? "Known" : "UNKNOWN");
-        }
-        delete packet;
-    }
+		}
+		delete packet;
+	}
 
     _DoTimedActions();
     
