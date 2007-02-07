@@ -53,6 +53,7 @@ class UpdateMask
         inline uint32 GetLength() { return mBlocks << 2; }
         inline uint32 GetCount() { return mCount; }
         inline uint8* GetMask() { return (uint8*)mUpdateMask; }
+		inline void SetMask(uint32 *updateMask) { mUpdateMask = updateMask; }
 
         inline void SetCount (uint32 valuesCount)
         {
