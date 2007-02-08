@@ -206,6 +206,7 @@ void PseuInstance::Update()
         this->Sleep(1000); // wait 1 sec before reconnecting
         return;
     }
+    GetScripts()->GetEventMgr()->Update();
 
     this->Sleep(GetConf()->networksleeptime);
 }

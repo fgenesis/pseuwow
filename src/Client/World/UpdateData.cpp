@@ -48,8 +48,8 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 		{
 		case UPDATETYPE_VALUES:
 			{
-				uint8 blockcount, masksize, valuesCount = 1500;
-				uint32 value;
+				uint8 blockcount, masksize;
+				uint32 value, valuesCount = 1500;
 				uguid = recvPacket.GetPackedGuid();
 				recvPacket >> blockcount;
 				masksize = blockcount * 4;
@@ -61,7 +61,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				recvPacket.read((uint8*)updateMask, masksize);
 				umask.SetMask(updateMask);
 
-				for (int i = 0; i < valuesCount; i++) // How do i get valuesCount?
+				for (uint32 i = 0; i < valuesCount; i++) // How do i get valuesCount?
 				{
 					if (umask.GetBit(i))
 					{
