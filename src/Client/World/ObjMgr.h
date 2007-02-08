@@ -18,9 +18,9 @@ public:
     void Add(ItemProto*);
     void AddNonexistentItem(uint32);
     bool ItemNonExistent(uint32);
-    Object *GetObject(uint64);
+    Object *GetObj(uint64);
     void RemoveObject(uint64);
-    uint32 GetOjectCount(void) { return _obj.size(); }
+    uint32 GetObjectCount(void) { return _obj.size(); }
     uint32 GetItemProtoCount(void) { return _iproto.size(); }
     ItemProto *GetItemProto(uint32);
     ItemProto *GetItemProtoByPos(uint32);

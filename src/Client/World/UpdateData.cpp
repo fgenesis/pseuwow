@@ -77,7 +77,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 		case UPDATETYPE_MOVEMENT:
 			{
                 recvPacket >> uguid;
-                Object *obj = objmgr.GetObject(uguid); // WTF is wrong with this?! plz correct!
+                Object *obj = objmgr.GetObj(uguid);
                 if(obj)
 				    this->_MovementUpdate(obj->GetTypeId(),uguid,recvPacket);
                 else

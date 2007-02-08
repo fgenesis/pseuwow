@@ -20,7 +20,7 @@ void ObjMgr::Add(Object *o)
     _obj.push_back(o);
 }
 
-Object *ObjMgr::GetObject(uint64 guid)
+Object *ObjMgr::GetObj(uint64 guid)
 {
     for(ObjList::iterator i = _obj.begin(); i!=_obj.end(); i++)
         if((*i)->GetGUID() == guid)
