@@ -93,7 +93,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				recvPacket >> objtypeid >> flags;
 				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
 
-				this->_MovementUpdate(objtypeid, uguid, recvPacket);
+				//this->_MovementUpdate(objtypeid, uguid, recvPacket); // i think thats the wrong place for this [FG]
 
 				// (TODO) and then: Add object to objmgr
 			}
@@ -105,7 +105,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 			{
 				uguid = recvPacket.GetPackedGuid(); // not 100% sure if this is correct
 				logdebug("GUID "I64FMT" out of range",uguid);
-				// TODO: delete object from known objects list
+				objmgr.RemoveObject(uguid);
 			}
 			break;
 
