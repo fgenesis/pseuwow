@@ -20,6 +20,7 @@ typedef __int64_t   def_int64;
 #include <map>
 #include <deque>
 #include "VarSet.h"
+#include "DynamicEvent.h"
 
 class DefScriptPackage;
 class DefScript;
@@ -97,7 +98,9 @@ public:
     bool LoadByName(std::string);
     void SetFunctionTable(DefScriptFunctionTable*);
     std::string _NormalizeVarName(std::string, std::string);
-
+    bool RunSingleLineFromScript(std::string line, DefScript *pScript);
+    DefScript_DynamicEventMgr *GetEventMgr(void);
+    
     std::string scPath;
 
     // Own executor functions
@@ -110,11 +113,11 @@ private:
     bool Interpret(CmdSet);
     CmdSet RemoveBrackets(CmdSet);
     std::string RemoveBracketsFromString(std::string);
-    bool RunSingleLineFromScript(std::string line, DefScript *pScript);
     DefScriptFunctionTable *_GetFunctionTable(void) const;
     DefScriptFunctionTable *functionTable;
     unsigned int functions;
     void *parentMethod;
+    DefScript_DynamicEventMgr *_eventmgr;
     std::map<std::string,DefScript*> Script;
     std::map<std::string,unsigned char> scriptPermissionMap;
 
@@ -138,6 +141,8 @@ private:
     bool func_bitor(CmdSet);
     bool func_bitand(CmdSet);
     bool func_bitxor(CmdSet);
+    bool func_addevent(CmdSet);
+    bool func_removeevent(CmdSet);
 
     // Useable own internal functions:
     bool SCpause(CmdSet);

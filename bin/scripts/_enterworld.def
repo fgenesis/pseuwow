@@ -29,6 +29,9 @@ JOINCHANNEL help
 JOINCHANNEL tradee
 // ...
 
+// uncomment the following line to enable the autobroadcast script (first broadcast will happen after the timer (check the script) has expired)
+// LOADDEF autobroadcast
+
 
 // add your own stuff here
 // ...

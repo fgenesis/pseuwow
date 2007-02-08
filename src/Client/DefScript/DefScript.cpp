@@ -11,11 +11,13 @@
 DefScriptPackage::DefScriptPackage()
 {
     functionTable=_GetFunctionTable();
+    _eventmgr=new DefScript_DynamicEventMgr(this);
 }
 
 DefScriptPackage::~DefScriptPackage()
 {
-	Clear();		
+    delete _eventmgr;
+	Clear();	
 }
 
 void DefScriptPackage::SetParentMethod(void *p)
@@ -57,7 +59,8 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         {"bitor",&DefScriptPackage::func_bitor},
         {"bitand",&DefScriptPackage::func_bitand},
         {"bitxor",&DefScriptPackage::func_bitxor},
-
+        {"addevent",&DefScriptPackage::func_addevent},
+        {"removeevent",&DefScriptPackage::func_removeevent},
 
         // user functions:
         {"pause",&DefScriptPackage::SCpause},
@@ -102,6 +105,11 @@ DefScript *DefScriptPackage::GetScript(std::string scname){
 
 unsigned int DefScriptPackage::GetScripts(void){
     return Script.size();
+}
+
+DefScript_DynamicEventMgr *DefScriptPackage::GetEventMgr(void)
+{
+    return _eventmgr;
 }
 
 bool DefScriptPackage::ScriptExists(std::string name)
@@ -319,7 +327,7 @@ bool DefScriptPackage::RunSingleLine(std::string line){
 
 bool DefScriptPackage::RunSingleLineFromScript(std::string line, DefScript *pScript){
     CmdSet Set(pScript);
-
+    Set.myname=pScript->GetName(); // temp fix, this needs to be cleaned up later
     DefXChgResult final=ReplaceVars(line,&Set,false);
     CmdSet curSet=SplitLine(final.str);
     curSet.myname=pScript->GetName(); // temp fix, this needs to be cleaned up later

@@ -1,0 +1,56 @@
+
+// load this file to register an autobroadcast
+// run this file to broadcast immediately (the timer will not change if you do!)
+
+#permission=255
+
+#onload
+
+    // --- CONFIG ---
+    
+    // your command you use to broadcast
+    set,cmd .announce
+    
+    // set the broadcast interval (in seconds!)
+    // here we set it to 20 mins
+    set,secs 1200
+    
+    // configure the amount of texts we have
+    set,textcount 3
+    // configure the texts to broadcast (must begin with text1)
+    set,text1 This is PseuWoW autobroadcast #1
+    set,text2 And another one! Autobroadcast #2
+    set,text3 The world is round, and so am I!
+    //... Add more texts here...
+    
+    // --- END CONFIG --
+    
+    // convert secs into msecs
+    set,timer ${secs}
+    mul,timer 1000
+    
+    // we need this variable later as "array-index"
+    set,x 0
+    
+    // register the timer.
+    // script name is "autobroadcast", so the event name will be "event_autobroadcast" and the script command to call will be "autobroadcast"
+    // so we basically register ourselves
+    addevent,event_{${@myname}},${timer} ${@myname}
+	
+	// yay we are loaded :)
+    log ** AutoBroadcast loaded. ${textcount} Texts.
+    
+#endonload
+
+// --- begin of the script body ---
+
+// every call the value of x gets increased by 1
+add,x 1
+
+// broadcast the text number x
+say ${cmd} ${text${x}}
+
+// if x = textcount: reset text counter x to 0 (using the modulo operator)
+mod,x ${textcount}
+
+

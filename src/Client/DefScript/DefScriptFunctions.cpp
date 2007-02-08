@@ -297,3 +297,15 @@ bool DefScriptPackage::func_bitxor(CmdSet Set)
     variables.Set(vname,ss.str());
     return true;
 }
+
+bool DefScriptPackage::func_addevent(CmdSet Set)
+{
+    GetEventMgr()->Add(Set.arg[0],Set.defaultarg,atoi(Set.arg[1].c_str()),Set.myname.c_str());
+    return true;
+}
+
+bool DefScriptPackage::func_removeevent(CmdSet Set)
+{
+    GetEventMgr()->Remove(Set.defaultarg);
+    return true;
+}
