@@ -91,7 +91,7 @@ private:
     void _HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket);
     void _HandleDestroyObjectOpcode(WorldPacket& recvPacket);
     
-	void _MovementUpdate(uint8 objtypeid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
+	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
 
     PseuInstance *_instance;
     WorldSocket *_socket;

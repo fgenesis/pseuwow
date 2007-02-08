@@ -1,5 +1,4 @@
 #include "common.h"
-#include "Object.h"
 #include "Item.h"
 #include "ObjMgr.h"
 
@@ -25,7 +24,7 @@ Object *ObjMgr::GetObject(uint64 guid)
 {
     for(ObjList::iterator i = _obj.begin(); i!=_obj.end(); i++)
         if((*i)->GetGUID() == guid)
-            return *i;
+            return (*i);
     return NULL;
 }
 

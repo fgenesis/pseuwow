@@ -1,9 +1,10 @@
 #include "common.h"
 #include "ZCompressor.h"
 #include "WorldSession.h"
-#include "Object.h"
 #include "UpdateData.h"
 #include "UpdateFields.h"
+#include "Object.h"
+#include "ObjMgr.h"
 #include "UpdateMask.h"
 
 
@@ -75,8 +76,12 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 
 		case UPDATETYPE_MOVEMENT:
 			{
-				//this->_MovementUpdate(objtypeid, recvPacket);
-				// TODO: Get objtypeid from objmgr
+                recvPacket >> uguid;
+                Object *obj = objmgr.GetObject(uguid); // WTF is wrong with this?! plz correct!
+                if(obj)
+				    this->_MovementUpdate(obj->GetTypeId(),uguid,recvPacket);
+                else
+                    logerror("Got UpdateObject_Movement for unknown object "I64FMT,uguid);
 			}
 			break;
 
@@ -88,7 +93,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				recvPacket >> objtypeid >> flags;
 				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
 
-				this->_MovementUpdate(objtypeid, recvPacket);
+				this->_MovementUpdate(objtypeid, uguid, recvPacket);
 
 				// (TODO) and then: Add object to objmgr
 			}
@@ -105,23 +110,24 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 			break;
 
 		default:
+            logerror("Got unk updatetype 0x%X",utype);
 			break;
 		}
 	}
 }
 
-void WorldSession::_MovementUpdate(uint8 objtypeid, WorldPacket& recvPacket)
+void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& recvPacket)
 {
 	if(objtypeid==TYPEID_PLAYER)
 	{
-		uint32 flags2, time;
-		uint64 tguid;
+		uint32 flags, flags2, time;
+		uint64 tguid,guid;
 		float nul;
 		float x, y, z, o;
 		float tx, ty, tz, to;
 		float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn;
 
-		recvPacket >> flags2 >> time;
+		recvPacket >> guid >> flags >> flags2 >> time;
 
 		if (flags2 & 0x02000000) // On a transport
 		{
@@ -137,10 +143,10 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, WorldPacket& recvPacket)
 		if(flags2 & 0x2000) // Self update
 		{
 			// What is this data used for?
-			recvPacket << nul;
-			recvPacket << nul;
-			recvPacket << nul;
-			recvPacket << nul;
+			recvPacket >> nul;
+			recvPacket >> nul;
+			recvPacket >> nul;
+			recvPacket >> nul;
 		}
 
 		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim >> speedWalkBack >> speedTurn;
