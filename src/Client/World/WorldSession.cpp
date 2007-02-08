@@ -121,12 +121,12 @@ void WorldSession::Update(void)
 			hideOpcode = true;
 		}
 
-		if( ( (known && GetInstance()->GetConf()->showopcodes==1)
+		if( (known && GetInstance()->GetConf()->showopcodes==1)
 			|| ((!known) && GetInstance()->GetConf()->showopcodes==2)
 			|| (GetInstance()->GetConf()->showopcodes==3) )
-			&& (!GetInstance()->GetConf()->hidefreqopcodes || GetInstance()->GetConf()->hidefreqopcodes && !hideOpcode))
 		{
-			logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), LookupName(packet->GetOpcode(),g_worldOpcodeNames), known ? "Known" : "UNKNOWN");
+            if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode)) 
+			    logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), LookupName(packet->GetOpcode(),g_worldOpcodeNames), known ? "Known" : "UNKNOWN");
 		}
 		delete packet;
 	}
@@ -174,6 +174,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 	    {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},	
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
+        {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -598,3 +599,18 @@ void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 {
 //	_playerSettings->HandleCastResultOpcode(recvPacket);
 }
+
+void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
+{
+    uint8 unk;
+    uint16 spellid,spellslot,count;
+    recvPacket >> unk >> count;
+    logdebug("Got initial spells list, %u spells.",count);
+    for(uint16 i = 0; i < count; i++)
+    {
+        recvPacket >> spellid >> spellslot;
+        logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
+        // these data need to be added to MyCharacter later
+    }
+}
+
