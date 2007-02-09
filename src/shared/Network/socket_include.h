@@ -27,6 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/param.h>
 #endif
 
+#if COMPILER == COMPILER_MICROSOFT
+#  pragma warning( disable : 4996 )    // disable warning for "too old" functions (VC80)
+#endif
+
 #ifndef _WIN32
 // ----------------------------------------
 // common unix includes / defines

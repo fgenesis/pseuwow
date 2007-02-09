@@ -8,6 +8,11 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
+#if COMPILER == COMPILER_MICROSOFT
+#  pragma warning( disable : 4267 )    // conversion from 'size_t' to 'int', possible loss of data
+#  pragma warning( disable : 4996 )    // disable warning for "too old" functions (VC80)
+#endif
+
 /*
  * If you *really* need a unique prefix for all types and library functions,
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
