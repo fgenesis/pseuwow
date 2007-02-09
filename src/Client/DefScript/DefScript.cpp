@@ -97,10 +97,7 @@ void DefScriptPackage::SetPath(std::string p){
 }
 
 DefScript *DefScriptPackage::GetScript(std::string scname){
-    if(Script.find(scname) != NULL)
-	    return Script[scname];
-    else
-        return NULL;
+    return ScriptExists(scname) ? Script[scname] : NULL;
 }
 
 unsigned int DefScriptPackage::GetScripts(void){
