@@ -3,7 +3,7 @@
 SET,vn ${@def}
 SET,vl ${@0}
 DEFAULT,vl 0
-SET,vv,onfail,{<value not set>} ${#${@def}}
+SET,vv,onfail,{<value not set>} ${#${@caller}::${@def}}
 SAY,{${vl}} * Var '${vn}' = '${vv}'
 
 UNSET vv
