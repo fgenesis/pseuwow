@@ -184,12 +184,6 @@
 				RelativePath=".\Client\PseuWoW.h">
 			</File>
 			<File
-				RelativePath=".\Client\PseuWoW.rc">
-			</File>
-			<File
-				RelativePath=".\Client\resource1.h">
-			</File>
-			<File
 				RelativePath=".\Client\SysDefs.h">
 			</File>
 			<Filter
@@ -350,7 +344,13 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 			<File
-				RelativePath=".\Pseu1.ico">
+				RelativePath=".\Client\Pseu1.ico">
+			</File>
+			<File
+				RelativePath=".\Client\PseuWoW.rc">
+			</File>
+			<File
+				RelativePath=".\Client\resource.h">
 			</File>
 		</Filter>
 	</Files>
