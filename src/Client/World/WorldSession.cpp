@@ -171,6 +171,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 
 		{MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
+		{SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
 	    {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},	
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},

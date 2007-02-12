@@ -65,7 +65,7 @@ public:
     {
         _floatvalues[ index ] = value;
     }
-    inline void SetUInt32Value( uint16 index, float value )
+    inline void SetUInt32Value( uint16 index, uint32 value )
     {
         _uint32values[ index ] = value;
     }

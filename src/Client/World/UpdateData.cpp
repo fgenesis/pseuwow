@@ -52,25 +52,51 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				uint8 blockcount, masksize;
 				uint32 value, valuesCount = 1500;
 				uguid = recvPacket.GetPackedGuid();
-				recvPacket >> blockcount;
-				masksize = blockcount * 4;
-				logdebug("UPDATETYPE_VALUES: guid="I64FMT" blockcount=%u masksize=%d",uguid,blockcount, masksize);
 
-				UpdateMask umask;
-				umask.SetCount(masksize);
-				uint32 *updateMask = new uint32[100];
-				recvPacket.read((uint8*)updateMask, masksize);
-				umask.SetMask(updateMask);
+				Object *obj = objmgr.GetObj(uguid);
 
-				for (uint32 i = 0; i < valuesCount; i++) // How do i get valuesCount?
+				if (obj)
 				{
-					if (umask.GetBit(i))
+					recvPacket >> blockcount;
+					masksize = blockcount * 4;
+					logdebug("UPDATETYPE_VALUES: guid="I64FMT" blockcount=%u masksize=%d",uguid,blockcount, masksize);
+
+					uint32 *updateMask = new uint32[100];
+					UpdateMask umask;
+					umask.SetCount(masksize);
+					recvPacket.read((uint8*)updateMask, masksize);
+					umask.SetMask(updateMask);
+
+					for (uint32 i = 0; i < valuesCount; i++) // How do we get valuesCount?
 					{
-						recvPacket >> value;
-						//logdebug("Value (%d): %d", i, value);
+						if (umask.GetBit(i))
+						{
+							recvPacket >> value;
+
+							// These values are sent by the server as uint32 but must be stored at the client as float values
+							if( obj->isType(TYPE_UNIT) && (
+								i >= UNIT_FIELD_POWER1         && i <= UNIT_FIELD_MAXPOWER5 ||
+								i >= UNIT_FIELD_BASEATTACKTIME && i <= UNIT_FIELD_RANGEDATTACKTIME ||
+								i >= UNIT_FIELD_STR            && i <= UNIT_FIELD_RESISTANCES + 6 )
+								|| obj->isType(TYPE_PLAYER) &&
+								i >= PLAYER_FIELD_POSSTAT0 && i <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6 )
+							{
+								obj->SetFloatValue(i, (float)value);
+							}
+							else
+							{
+
+								obj->SetUInt32Value(i, value);
+							}
+
+							//logdebug("Value (%d): %d", i, value);
+						}
 					}
 				}
-
+				else
+				{
+					logerror("Got UpdateObject_Values for unknown object "I64FMT,uguid);
+				}
 			}
 			break;
 
@@ -93,9 +119,10 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				recvPacket >> objtypeid >> flags;
 				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
 
-				//this->_MovementUpdate(objtypeid, uguid, recvPacket); // i think thats the wrong place for this [FG]
+				this->_MovementUpdate(objtypeid, uguid, recvPacket); // i think thats the wrong place for this [FG]
+																	 // Double checked - seems right - if i really am wrong, please correct [Mini]
 
-				// (TODO) and then: Add object to objmgr
+				// TODO: Add object to objmgr
 			}
 			break;
 
