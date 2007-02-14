@@ -27,6 +27,7 @@ showopcodes=3
 
 
 // Hide opcodes which is coming very frequently?
+// Has only an effect if you have showopcodes > 0
 // 1 - yes
 // 0 - No
 hidefreqopcodes=1
@@ -74,7 +75,10 @@ enablecli=1
 // like "Hi" and "What do you think of x" etc.
 enablechatai=1
 
-// show ping responses & ping time
+// show ping responses
 notifyping=1
+
+// shows the opcodes pseuwow sends to the server
+showmyopcodes=0
 
 
