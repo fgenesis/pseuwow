@@ -107,7 +107,16 @@ void WorldSession::Update(void)
 		{
 			if (table[i].opcode == packet->GetOpcode())
 			{
-				(this->*table[i].handler)(*packet);
+                try
+                {
+    				(this->*table[i].handler)(*packet);
+                }
+                catch (...)
+                {
+                    logerror("Exception while handling opcode %u!",packet->GetOpcode());
+                    logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[i].handler,pktQueue.size());
+                }
+
 				known=true;
 				break;
 			}
@@ -129,6 +138,7 @@ void WorldSession::Update(void)
 			    logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), LookupName(packet->GetOpcode(),g_worldOpcodeNames), known ? "Known" : "UNKNOWN");
 		}
 		delete packet;
+        known=false;
 	}
 
     _DoTimedActions();
@@ -422,11 +432,23 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     }
     else if (type==CHAT_MSG_CHANNEL )
     {
-        logcustom(0,WHITE,"CHANNEL [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"CHANNEL: [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+    }
+    else if (type==CHAT_MSG_SAY )
+    {
+        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+    }
+    else if (type==CHAT_MSG_YELL )
+    {
+        logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+    }
+    else if (type==CHAT_MSG_WHISPER_INFORM )
+    {
+        logcustom(0,WHITE,"TO %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
     }
     else
     {
-        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());
+        logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),LookupName(lang,langNames),msg.c_str());
 	}
 
     if(target_guid!=_myGUID && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)

@@ -25,6 +25,7 @@ void Object::_InitValues()
 
 void Object::_Create( uint64 guid )
 {
+    //ASSERT(_valuescount > 0);
     if(!_uint32values)
         _InitValues();
 
@@ -48,6 +49,20 @@ void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
     _o = o;
     _m = _map;
 }
+/*
+void WorldObject::_Create( uint64 guid, uint32 mapid, float x, float y, float z, float ang, uint32 entry )
+{
+Object::_Create(guid);
+
+    SetUInt32Value( OBJECT_FIELD_ENTRY,entry);
+
+    _m = mapid;
+    _x = x;
+    _y = y;
+    _z = z;
+    _o = ang;
+}
+*/
 
 void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
 {

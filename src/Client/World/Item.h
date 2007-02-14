@@ -409,9 +409,6 @@ public:
 private:
     uint8 _slot;
     // Bag *_bag; // not yet implemented
-    // ItemProto *_proto; // not yet implemented.
-    // is it good to use a proto here?
-
 
 };
 

@@ -309,6 +309,12 @@
 					RelativePath=".\Client\World\SharedDefines.h">
 				</File>
 				<File
+					RelativePath=".\Client\World\Unit.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Unit.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\UpdateData.cpp">
 				</File>
 				<File

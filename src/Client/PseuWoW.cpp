@@ -196,7 +196,15 @@ void PseuInstance::Update()
     }
     if(_wsession && _wsession->IsValid())
     {
-        _wsession->Update(); // update the worldSESSION, which will update the worldsocket itself
+        try
+        {
+            _wsession->Update(); // update the worldSESSION, which will update the worldsocket itself
+        }
+        catch (...)
+        {
+            logerror("Unhandled exception in WorldSession::Update()");
+        }
+        
     }
     if(_wsession && _wsession->DeleteMe())
     {

@@ -118,6 +118,9 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				uint8 objtypeid, flags;
 				recvPacket >> objtypeid >> flags;
 				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
+                //Object *obj = new Object;
+                //obj->_Create(uguid);
+                //objmgr.Add((Object*)obj);
 
 				this->_MovementUpdate(objtypeid, uguid, recvPacket); // i think thats the wrong place for this [FG]
 																	 // Double checked - seems right - if i really am wrong, please correct [Mini]
