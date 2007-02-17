@@ -17,6 +17,10 @@ APPLYPERMISSIONS
 // preload the scripts, however its not important to load them now.
 //they will get loaded automatically if needed
 LOADALL
+
+// load the uptime counter
+LOADDEF uptime
+
 // RELOADDEF myscript
 // ...
 

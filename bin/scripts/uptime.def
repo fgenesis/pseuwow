@@ -1,0 +1,29 @@
+#permission=0
+
+// purpose: pseuwow uptime counter
+// args: none
+// usage: - load the script to register the uptime counter
+//        - call the script to say the uptime formatted in hours, mins & secs
+
+#onload
+	set,#uptime 0
+	removeevent event_{${@myname}}
+	addevent,event_{${@myname}},1000 add,#uptime 1
+#endonload
+
+set,s ${#uptime}
+
+set,h ${s}
+div,h 3600
+mod,s 3600
+
+set,m ${s}
+div,m 60
+mod,s 60
+
+out UPTIME: ${#uptime} secs = ${h}h ${m}m ${s}s
+say UPTIME: ${h} hours, ${m} minutes, ${s} seconds
+
+unset h
+unset m
+unset s

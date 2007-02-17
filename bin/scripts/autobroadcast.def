@@ -31,6 +31,9 @@
     
     // we need this variable later as "array-index"
     set,x 0
+	
+	// unregister the timer if it has been registered before
+	removeevent event_{${@myname}}
     
     // register the timer.
     // script name is "autobroadcast", so the event name will be "event_autobroadcast" and the script command to call will be "autobroadcast"
