@@ -15,7 +15,7 @@
 
 WorldSession::WorldSession(PseuInstance *in)
 {
-    logdebug("-> Starting WorldSession");
+    logdebug("-> Starting WorldSession from instance 0x%X",in); // should never output a null ptr
     _instance = in;
     _valid=_authed=_logged=false;
     _socket=new WorldSocket(_sh,this);

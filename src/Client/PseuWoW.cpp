@@ -41,8 +41,8 @@ void PseuInstanceRunnable::sleep(uint32 msecs)
 PseuInstance::PseuInstance(PseuInstanceRunnable *run)
 {
     _runnable=run;
-    _ver="PseuWoW Alpha Build 12" DEBUG_APPENDIX;
-    _ver_short="A12" DEBUG_APPENDIX;
+    _ver="PseuWoW Alpha Build 13 development version 1" DEBUG_APPENDIX;
+    _ver_short="A13-dev1" DEBUG_APPENDIX;
     _wsession=NULL;
     _rsession=NULL;
     _scp=NULL;
@@ -83,11 +83,6 @@ bool PseuInstance::Init(void) {
 
 	srand((unsigned)time(NULL));
 	RAND_set_rand_method(RAND_SSLeay()); // init openssl randomizer
-
-	if(SDL_Init(0)==-1) {
-			log("SDL_Init: %s", SDL_GetError());
-			return false;
-		}
 	
 	_scp=new DefScriptPackage();
     _scp->SetParentMethod((void*)this);

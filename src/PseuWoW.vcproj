@@ -36,16 +36,16 @@
 				EnableFunctionLevelLinking="FALSE"
 				EnableEnhancedInstructionSet="1"
 				PrecompiledHeaderFile=".\Release/PseuWoW.pch"
-				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
-				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
-				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib sdl.lib sdlmain.lib libeay32MT.lib WS2_32.LIB"
+				AdditionalDependencies="odbc32.lib odbccp32.lib libeay32MT.lib WS2_32.LIB"
 				ShowProgress="0"
 				OutputFile="$(OutDir)/$(InputName).exe"
 				LinkIncremental="1"
@@ -55,6 +55,8 @@
 				AssemblyDebug="0"
 				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/Release/PseuWoW.pdb"
 				SubSystem="1"
+				OptimizeReferences="2"
+				SetChecksum="TRUE"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -98,9 +100,9 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				PrecompiledHeaderFile=""
-				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/"
-				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/"
-				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -109,14 +111,15 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib sdl.lib sdlmain.lib libeay32MT.lib WS2_32.LIB"
-				OutputFile="$(OutDir)/$(InputName).exe"
+				AdditionalDependencies="odbc32.lib odbccp32.lib libeay32MT.lib WS2_32.LIB"
+				OutputFile="$(OutDir)/$(InputName)_debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/PseuWoW.pdb"
 				SubSystem="1"
+				OptimizeReferences="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -248,16 +251,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Realm"
-				Filter="">
-				<File
-					RelativePath=".\Client\Realm\RealmSocket.cpp">
-				</File>
-				<File
-					RelativePath=".\Client\Realm\RealmSocket.h">
-				</File>
-			</Filter>
-			<Filter
 				Name="World"
 				Filter="">
 				<File
@@ -343,6 +336,16 @@
 				</File>
 				<File
 					RelativePath=".\Client\World\WorldSocket.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="Realm"
+				Filter="">
+				<File
+					RelativePath=".\Client\Realm\RealmSocket.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Realm\RealmSocket.h">
 				</File>
 			</Filter>
 		</Filter>
