@@ -16,7 +16,9 @@
 #include <deque>
 #include <vector>
 
-#include <SDL/SDL.h>
+#define SDL_THREADS_DISABLED true
+
+//#include "SDL/SDL.h" // disabled for now until needed
 #include "zthread/FastMutex.h"
 #include "zthread/LockedQueue.h"
 #include "zthread/Runnable.h"

@@ -13,6 +13,7 @@ Object::Object()
 
 Object::~Object()
 {
+    DEBUG(logdebug("~Object() id=%u ptr=0x%X valuesptr=0x%X",this->GetTypeId(),this,_uint32values));
     if(_uint32values)
         delete [] _uint32values;
 }
@@ -49,26 +50,13 @@ void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
     _o = o;
     _m = _map;
 }
-/*
-void WorldObject::_Create( uint64 guid, uint32 mapid, float x, float y, float z, float ang, uint32 entry )
-{
-Object::_Create(guid);
-
-    SetUInt32Value( OBJECT_FIELD_ENTRY,entry);
-
-    _m = mapid;
-    _x = x;
-    _y = y;
-    _z = z;
-    _o = ang;
-}
-*/
 
 void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
 {
     uint64 guid;
     recvPacket >> guid;
     logdebug("Destroy Object "I64FMT,guid);
-    objmgr.RemoveObject(guid);
+    objmgr.Remove(guid);
 }
+
 

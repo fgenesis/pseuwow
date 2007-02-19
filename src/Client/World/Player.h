@@ -4,6 +4,7 @@
 #include <vector>
 #include "WorldPacket.h"
 #include "SysDefs.h"
+#include "Unit.h"
 
 struct PlayerEnumItem
 {
@@ -41,15 +42,14 @@ private:
     
 };
 
-class Player
+class Player : public Unit
 {
 public:
-	void Init(PlayerEnum player);
+    Player();
+    void Create(uint64);
 
 private:
-	int hp;
-	int bar; // Mana/Energy/Rage
-	PlayerEnum player;
+
 };
 
 
@@ -59,11 +59,7 @@ private:
 class MyCharacter : public Player
 {
 public:
-    MyCharacter(WorldSession *ws)
-	{
-        _worldSession = ws;
-		_isbusy = false;
-	}
+    MyCharacter();
 
 	/*void SetActionButtons(WorldPacket &data);
 	void SetSpells(WorldPacket &data);
@@ -71,8 +67,7 @@ public:
 	void HandleCastResultOpcode(WorldPacket &packet);*/
 
 private:
-	bool _isbusy;
-	WorldSession *_worldSession;
+
 };
 
 

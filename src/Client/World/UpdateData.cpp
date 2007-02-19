@@ -4,6 +4,7 @@
 #include "UpdateData.h"
 #include "UpdateFields.h"
 #include "Object.h"
+#include "Unit.h"
 #include "ObjMgr.h"
 #include "UpdateMask.h"
 
@@ -33,33 +34,31 @@ void WorldSession::_HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 {
-	//recvPacket.hexlike();
 	uint8 utype;
 	uint8 unk8;
 	uint32 usize, ublocks;
 	uint64 uguid;
 	recvPacket >> ublocks >> unk8;
 	logdebug("UpdateObject: ublocks=%u unk=%u",ublocks,unk8);
-	//while(true) // need to read full packet as soon as the structure is 100% known & implemented
-	// for now reading first object is enough
+	while(true) // TODO: find out correct packet structure or this loop will fail!
 	{
 		recvPacket >> utype;
-		logdebug("UpdateObject: utype=%u",utype);
+		logdebug("-UpdateObject: utype=%u",utype);
 		switch(utype)
 		{
 		case UPDATETYPE_VALUES:
 			{
 				uint8 blockcount, masksize;
-				uint32 value, valuesCount = 1500;
+                uint32 value, valuesCount = GetValuesCountByTypeId(utype);
 				uguid = recvPacket.GetPackedGuid();
-
-				Object *obj = objmgr.GetObj(uguid);
+                
+                Object *obj = objmgr.GetObj(uguid,utype);
 
 				if (obj)
 				{
 					recvPacket >> blockcount;
 					masksize = blockcount * 4;
-					logdebug("UPDATETYPE_VALUES: guid="I64FMT" blockcount=%u masksize=%d",uguid,blockcount, masksize);
+					logdebug("--UPDATETYPE_VALUES: guid="I64FMT" blockcount=%u masksize=%d",uguid,blockcount, masksize);
 
 					uint32 *updateMask = new uint32[100];
 					UpdateMask umask;
@@ -95,19 +94,19 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				}
 				else
 				{
-					logerror("Got UpdateObject_Values for unknown object "I64FMT,uguid);
+					logerror("--Got UpdateObject_Values for unknown object "I64FMT,uguid);
 				}
 			}
 			break;
 
 		case UPDATETYPE_MOVEMENT:
 			{
-                recvPacket >> uguid;
-                Object *obj = objmgr.GetObj(uguid);
+                recvPacket >> uguid; // the guid is NOT packed here!
+                Object *obj = objmgr.GetObj(uguid,utype);
                 if(obj)
 				    this->_MovementUpdate(obj->GetTypeId(),uguid,recvPacket);
                 else
-                    logerror("Got UpdateObject_Movement for unknown object "I64FMT,uguid);
+                    logerror("--Got UpdateObject_Movement for unknown object "I64FMT,uguid);
 			}
 			break;
 
@@ -115,49 +114,76 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 		case UPDATETYPE_CREATE_OBJECT2:
 			{
 				uguid = recvPacket.GetPackedGuid();
-				uint8 objtypeid, flags;
-				recvPacket >> objtypeid >> flags;
-				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
-                //Object *obj = new Object;
-                //obj->_Create(uguid);
-                //objmgr.Add((Object*)obj);
+				uint8 objtypeid;
+				recvPacket >> objtypeid;
+				logdebug("--Create Object type %u with guid "I64FMT,objtypeid,uguid);
 
-				this->_MovementUpdate(objtypeid, uguid, recvPacket); // i think thats the wrong place for this [FG]
-																	 // Double checked - seems right - if i really am wrong, please correct [Mini]
+                
 
-				// TODO: Add object to objmgr
+                switch(objtypeid)
+                {
+                case TYPEID_OBJECT: // no data to read
+                    {
+                        logerror("--Got UPDATE_OBJECT for Object!"); // getting this should not be the case
+                    }
+                case TYPEID_ITEM:
+                    {
+                        Item *item = new Item();
+                        // item needs to be created, e.g. item->Create(uguid);
+                        objmgr.Add(item);
+                        break;
+                    }
+                 //case TYPEID_CONTAINER: // not yet handled
+                case TYPEID_UNIT:
+                    {
+                        logerror("--Got UPDATE_OBJECT for Unit!");
+                        break;
+                    }
+                case TYPEID_PLAYER:
+                    {
+                    logdetail("--DEBUG: create player");
+                    recvPacket.hexlike();
+                    Player *player = new Player();
+                    player->Create(uguid);
+                    objmgr.Add(player);
+                    break;
+                    }
+                }
+
+                this->_MovementUpdate(objtypeid, uguid, recvPacket);
 			}
 			break;
+
 
 		case UPDATETYPE_OUT_OF_RANGE_OBJECTS:
 			recvPacket >> usize;
 			for(uint16 i=0;i<usize;i++)
 			{
 				uguid = recvPacket.GetPackedGuid(); // not 100% sure if this is correct
-				logdebug("GUID "I64FMT" out of range",uguid);
-				objmgr.RemoveObject(uguid);
+				logdebug("--GUID "I64FMT" out of range",uguid);
+				objmgr.Remove(uguid);
 			}
 			break;
 
 		default:
-            logerror("Got unk updatetype 0x%X",utype);
-			break;
-		}
-	}
-}
+            logerror("-Got unk updatetype 0x%X",utype);
+            return;
+        } // switch
+    } // while
+} // func
 
 void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& recvPacket)
 {
 	if(objtypeid==TYPEID_PLAYER)
 	{
 		uint32 flags, flags2, time;
-		uint64 tguid,guid;
+		uint64 tguid;
 		float nul;
 		float x, y, z, o;
 		float tx, ty, tz, to;
 		float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn;
 
-		recvPacket >> guid >> flags >> flags2 >> time;
+		recvPacket >> flags >> flags2 >> time;
 
 		if (flags2 & 0x02000000) // On a transport
 		{

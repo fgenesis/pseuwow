@@ -10,18 +10,18 @@
 #include "WorldSession.h"
 
 
-/*void Player::Init(PlayerEnum player)
+Player::Player() : Unit()
 {
-	this->player = player;
+    _type = TYPE_PLAYER;
+    _typeid = TYPEID_PLAYER;
+    _valuescount = PLAYER_END;
 }
 
-void PlayerSettings::SetActionButtons(WorldPacket &data)
+void Player::Create(uint64 guid)
 {
-	if (!init)
-		return;
+    Object::_Create(guid);
+}
 
-	// TODO: Implent this
-}*/
 
 /*void PlayerSettings::SetSpells(WorldPacket &data)
 {

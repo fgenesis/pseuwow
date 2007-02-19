@@ -70,6 +70,8 @@ public:
     {
         _uint32values[ index ] = value;
     }
+
+    static uint32 GetValuesCountByTypeId(uint8);
     
 protected:
     void _Create(uint64 guid);
@@ -99,6 +101,22 @@ protected:
     uint16 _m; // map
 
 };
+
+inline uint32 GetValuesCountByTypeId(uint8 tid)
+{
+    switch(tid)
+    {
+    case TYPEID_OBJECT: return OBJECT_END;
+    case TYPEID_UNIT: return UNIT_END;
+    case TYPEID_PLAYER: return PLAYER_END;
+    case TYPEID_ITEM: return ITEM_END;
+    case TYPEID_CONTAINER: return CONTAINER_END;
+    case TYPEID_GAMEOBJECT: return GAMEOBJECT_END;
+    case TYPEID_DYNAMICOBJECT: return DYNAMICOBJECT_END;
+    case TYPEID_CORPSE: return CORPSE_END;
+    }
+    return 0;
+}
 
 
 
