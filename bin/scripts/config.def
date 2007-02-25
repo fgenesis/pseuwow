@@ -1,0 +1,9 @@
+// Load required conf files.
+LOADCONF PseuWoW.conf
+LOADCONF users.conf
+
+// Apply the configureation
+APPLYCONF
+
+// Apply user permissions
+APPLYPERMISSIONS

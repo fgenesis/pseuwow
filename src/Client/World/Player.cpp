@@ -19,7 +19,7 @@ Player::Player() : Unit()
 
 void Player::Create(uint64 guid)
 {
-    Object::_Create(guid);
+    Object::Create(guid);
 }
 
 

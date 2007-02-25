@@ -2,6 +2,7 @@
 #define _OBJECT_H
 
 #include "UpdateFields.h"
+#include "ObjectDefines.h"
 
 enum TYPE
 {
@@ -71,9 +72,10 @@ public:
         _uint32values[ index ] = value;
     }
 
+    void Create(uint64 guid);
     
 protected:
-    void _Create(uint64 guid);
+
     void _InitValues(void);
         
     uint16 _valuescount;

@@ -24,7 +24,7 @@ void Object::_InitValues()
     memset(_uint32values, 0, _valuescount*sizeof(uint32));
 }
 
-void Object::_Create( uint64 guid )
+void Object::Create( uint64 guid )
 {
     //ASSERT(_valuescount > 0);
     if(!_uint32values)

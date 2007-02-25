@@ -392,6 +392,7 @@ class Item : public Object
 {
 public:
     Item();
+    void Create(uint64);
     uint8 GetSlot(void) { return _slot; }
     void SetSlot(uint8 nr) { _slot = nr; }
     //void SetProto(ItemProto *proto) { _proto = proto; }
