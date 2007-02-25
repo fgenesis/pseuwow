@@ -254,6 +254,12 @@
 				Name="World"
 				Filter="">
 				<File
+					RelativePath=".\Client\World\Bag.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Bag.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\CacheHandler.cpp">
 				</File>
 				<File
@@ -267,6 +273,24 @@
 				</File>
 				<File
 					RelativePath=".\Client\World\CMSGConstructor.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Corpse.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\Corpse.h">
+				</File>
+				<File
+					RelativePath=".\Client\World\DynamicObject.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\DynamicObject.h">
+				</File>
+				<File
+					RelativePath=".\Client\World\GameObject.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\GameObject.h">
 				</File>
 				<File
 					RelativePath=".\Client\World\Item.cpp">

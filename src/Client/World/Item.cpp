@@ -2,6 +2,7 @@
 #include "UpdateFields.h"
 
 #include "Item.h"
+#include "Bag.h"
 
 void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 {

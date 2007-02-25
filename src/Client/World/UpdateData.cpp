@@ -5,6 +5,10 @@
 #include "UpdateFields.h"
 #include "Object.h"
 #include "Unit.h"
+#include "Bag.h"
+#include "GameObject.h"
+#include "Corpse.h"
+#include "DynamicObject.h"
 #include "ObjMgr.h"
 #include "UpdateMask.h"
 
@@ -90,7 +94,13 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                         objmgr.Add(item);
                         break;
                     }
-                 //case TYPEID_CONTAINER: // not yet handled
+                case TYPEID_CONTAINER:
+                    {
+                        Bag *bag = new Bag();
+                        bag->Create(uguid);
+                        objmgr.Add(bag);
+                        break;
+                    }
                 case TYPEID_UNIT:
                     {
                         Unit *unit = new Unit();
@@ -103,6 +113,27 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                         Player *player = new Player();
                         player->Create(uguid);
                         objmgr.Add(player);
+                        break;
+                    }
+                case TYPEID_GAMEOBJECT:
+                    {
+                        GameObject *go = new GameObject();
+                        go->Create(uguid);
+                        objmgr.Add(go);
+                        break;
+                    }
+                case TYPEID_CORPSE:
+                    {
+                        Corpse *corpse = new Corpse();
+                        corpse->Create(uguid);
+                        objmgr.Add(corpse);
+                        break;
+                    }
+                case TYPEID_DYNAMICOBJECT:
+                    {
+                        DynamicObject *dobj = new DynamicObject();
+                        dobj->Create(uguid);
+                        objmgr.Add(dobj);
                         break;
                     }
                 }

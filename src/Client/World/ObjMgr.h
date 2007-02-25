@@ -4,8 +4,6 @@
 #include "common.h"
 #include <list>
 #include "Object.h"
-#include "Player.h"
-#include "Unit.h"
 #include "Item.h"
 
 typedef std::vector<ItemProto*> ItemProtoList;
