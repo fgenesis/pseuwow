@@ -1,3 +1,4 @@
+#permission=255
 // Load required conf files.
 LOADCONF PseuWoW.conf
 LOADCONF users.conf
@@ -7,3 +8,6 @@ APPLYCONF
 
 // Apply user permissions
 APPLYPERMISSIONS
+
+// remove dangerous variables
+CLEANUPVARS

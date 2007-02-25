@@ -17,9 +17,6 @@ LOADDEF uptime
 // RELOADDEF myscript
 // ...
 
-// remove dangerous variables
-CLEANUPVARS
-
 // set permissions for internal functions
 INTERNAL_PERM
 
