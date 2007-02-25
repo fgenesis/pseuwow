@@ -104,3 +104,9 @@ Item::Item()
     _slot = 0;
     //_bag = NULL; // not yet implemented
 }
+
+void Item::Create(uint64 guid)
+{
+    Object::Create(guid);
+    // what else?
+}

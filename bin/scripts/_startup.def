@@ -4,15 +4,8 @@
 
 LOG * DefScript StartUp [${@version_short}]...
 
-// Load required conf files.
-LOADCONF PseuWoW.conf
-LOADCONF users.conf
-
-// Apply the configureation
-APPLYCONF
-
-// Apply user permissions
-APPLYPERMISSIONS
+// loads & applies the configuration
+CONFIG
 
 // preload the scripts, however its not important to load them now.
 //they will get loaded automatically if needed

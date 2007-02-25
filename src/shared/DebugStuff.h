@@ -12,7 +12,7 @@
     #define CODEDEB(code) (code;)
 #endif
 
-#define ASSERT( assertion ) { if( !(assertion) ) { fprintf( stderr, "\n%s:%i ASSERTION FAILED:\n  %s\n", __FILE__, __LINE__, #assertion ); throw "Assertion Failed";
+#define ASSERT( assertion ) { if( !(assertion) ) { fprintf( stderr, "\n%s:%i ASSERTION FAILED:\n  %s\n", __FILE__, __LINE__, #assertion ); throw "Assertion Failed"; }}
 
 
 

@@ -281,6 +281,9 @@
 					RelativePath=".\Client\World\Object.h">
 				</File>
 				<File
+					RelativePath=".\Client\World\ObjectDefines.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\ObjMgr.cpp">
 				</File>
 				<File
