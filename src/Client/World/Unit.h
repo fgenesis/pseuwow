@@ -7,6 +7,8 @@ class Unit : public WorldObject
 {
 public:
     Unit();
+    void Create(uint64);
+    uint8 GetGender(void);
 private:
 
 };

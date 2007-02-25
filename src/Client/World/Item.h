@@ -4,6 +4,8 @@
 #include "common.h"
 #include "Object.h"
 
+class Bag;
+
 enum InventoryChangeFailure
 {
     EQUIP_ERR_OK                                 = 0,
@@ -395,21 +397,14 @@ public:
     void Create(uint64);
     uint8 GetSlot(void) { return _slot; }
     void SetSlot(uint8 nr) { _slot = nr; }
-    //void SetProto(ItemProto *proto) { _proto = proto; }
-    //ItemProto *GetProto(void) { return _proto; }
     uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
     uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
-    //void SetBag(Bag *b) { _bag = b; }
-    //void GetBag(Bag *b) { _bag = b; }
-    //bool IsInBag() const { return _bag != NULL; }
-    /*bool Item::IsEquipped() const
-    {
-        return !IsInBag() && _slot < EQUIPMENT_SLOT_END;
-    }*/
+    Bag *GetBag(void) { return _bag; }
+    bool IsInBag() const { return _bag != NULL; }
 
-private:
+protected:
     uint8 _slot;
-    // Bag *_bag; // not yet implemented
+    Bag *_bag; // not yet implemented
 
 };
 

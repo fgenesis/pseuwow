@@ -1,5 +1,3 @@
-#include "common.h"
-#include "Item.h"
 #include "ObjMgr.h"
 
 ObjMgr::~ObjMgr()
@@ -18,8 +16,11 @@ void ObjMgr::Remove(uint64 guid)
 {
     for(ObjectList::iterator i = _obj.begin(); i!=_obj.end(); i++)
         if((*i)->GetGUID() == guid)
+        {
             _obj.erase(i);
             delete *i;
+            return;
+        }
 
 }
 
