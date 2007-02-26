@@ -35,7 +35,6 @@ enum TYPEID
 class Object
 {
 public:
-    Object();
     virtual ~Object();
     inline const uint64 GetGUID() const { return GetUInt64Value(0); }
     inline const uint32 GetGUIDLow() const { return GetUInt32Value(0); }
@@ -75,7 +74,7 @@ public:
     void Create(uint64 guid);
     
 protected:
-
+    Object();
     void _InitValues(void);
         
     uint16 _valuescount;
@@ -91,13 +90,14 @@ protected:
 class WorldObject : public Object
 {
 public:
-    WorldObject();
+    virtual ~WorldObject ( ) {}
     void SetPosition(float x, float y, float z, float o, uint16 _map);
     inline float GetX(void) { return _x; }
     inline float GetY(void) { return _y; }
     inline float GetZ(void) { return _z; }
     inline float GetO(void) { return _o; }
 protected:
+    WorldObject();
     float _x,_y,_z,_o; // coords, orientation
     uint16 _m; // map
 

@@ -13,7 +13,8 @@ Object::Object()
 
 Object::~Object()
 {
-    DEBUG(logdebug("~Object() id=%u ptr=0x%X valuesptr=0x%X",this->GetTypeId(),this,_uint32values));
+    ASSERT(_valuescount > 0);
+    DEBUG(logdebug("~Object() GUID="I64FMT,GetGUID()));
     if(_uint32values)
         delete [] _uint32values;
 }
@@ -26,7 +27,7 @@ void Object::_InitValues()
 
 void Object::Create( uint64 guid )
 {
-    //ASSERT(_valuescount > 0);
+    ASSERT(_valuescount > 0);
     if(!_uint32values)
         _InitValues();
 
