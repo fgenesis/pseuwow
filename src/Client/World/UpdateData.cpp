@@ -82,10 +82,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 {
                 case TYPEID_OBJECT: // no data to read
                     {
-                        Object *obj = new Object();
-                        obj->Create(uguid);
-                        objmgr.Add(obj);
-                        break;
+                        logerror("Recieved wrong UPDATETYPE_CREATE_OBJECT to create Object base type!");
                     }
                 case TYPEID_ITEM:
                     {

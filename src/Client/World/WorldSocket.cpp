@@ -72,10 +72,11 @@ void WorldSocket::OnRead()
             if(_opcode > 800) // no opcode has yet a number over 800
             {
                 logcritical("CRYPT ERROR: opcode=%u, remain=%u",_opcode,_remaining);
-                GetSession()->GetInstance()->SetError();
+                //GetSession()->GetInstance()->SetError(); // please test if this is stable!!!
                 // if the crypt gets messy its hardly possible to recover it, especially if we dont know
                 // the lentgh of the following data part
                 // TODO: invent some way how to recover the crypt (reconnect?)
+                delete [] buf; // drop the current queue content
                 return;
             }
 
