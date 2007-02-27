@@ -1,0 +1,12 @@
+#permission=255
+// setup some default values
+SET,lang ${@0}
+SET,msg ${@def}
+
+default,lang 0
+
+LOGDEBUG * Saying '${msg}' in lang ${lang}
+
+SENDCHATMESSAGE,3,${lang},{${msg}}
+UNSET lang
+UNSET msg

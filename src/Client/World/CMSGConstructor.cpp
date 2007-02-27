@@ -74,7 +74,6 @@ void WorldSession::SendQueryItem(uint32 id, uint64 guid) // is it a guid? not su
     packet << id << guid;
     packet.SetOpcode(CMSG_ITEM_QUERY_SINGLE);
     SendWorldPacket(packet);
-    // to prevent opcode spam, we need to make a list with already requested items
 }
 
 void WorldSession::SendSetSelection(uint64 guid)
