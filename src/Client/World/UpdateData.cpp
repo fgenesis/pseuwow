@@ -15,8 +15,6 @@
 
 void WorldSession::_HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket)
 {
-    //printf("-> COMPRESSED_UPDATE_OBJECT, pktlen=%u\n",recvPacket.size());
-    //recvPacket.hexlike();
     uint32 realsize;
     recvPacket >> realsize;
     ZCompressor z;
@@ -26,7 +24,7 @@ void WorldSession::_HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket)
     z.Inflate();
     if(z.Compressed())
     {
-        logerror("_HandleCompressedUpdateObjectOpcode(): Inflate() failed!");
+        logerror("_HandleCompressedUpdateObjectOpcode(): Inflate() failed! size=%u realsize=%u",z.size(),realsize);
         return;
     }
     WorldPacket wp;
@@ -43,11 +41,9 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 	uint32 usize, ublocks;
 	uint64 uguid;
 	recvPacket >> ublocks >> unk8;
-	logdebug("UpdateObject: ublocks=%u unk=%u",ublocks,unk8);
 	while(recvPacket.rpos() < recvPacket.size())
 	{
 		recvPacket >> utype;
-		logdebug("-UpdateObject: utype=%u",utype);
 		switch(utype)
 		{
 		case UPDATETYPE_VALUES:
@@ -64,7 +60,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 if(obj)
 				    this->_MovementUpdate(obj->GetTypeId(),uguid,recvPacket);
                 else
-                    logerror("--Got UpdateObject_Movement for unknown object "I64FMT,uguid);
+                    logerror("Got UpdateObject_Movement for unknown object "I64FMT,uguid);
 			}
 			break;
 
@@ -74,7 +70,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				uguid = recvPacket.GetPackedGuid();
 				uint8 objtypeid;
 				recvPacket >> objtypeid;
-				logdebug("--Create Object type %u with guid "I64FMT,objtypeid,uguid);
+				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
 
                 
 
@@ -137,6 +133,8 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 
                 this->_MovementUpdate(objtypeid, uguid, recvPacket);
                 this->_ValuesUpdate(uguid, recvPacket);
+
+                _QueryObjectProto(uguid);
 			}
 			break;
 
@@ -146,19 +144,18 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 			for(uint16 i=0;i<usize;i++)
 			{
 				uguid = recvPacket.GetPackedGuid(); // not 100% sure if this is correct
-				logdebug("--GUID "I64FMT" out of range",uguid);
+				logdebug("GUID "I64FMT" out of range",uguid);
 				objmgr.Remove(uguid);
 			}
 			break;
 
 		default:
-            logerror("-Got unk updatetype 0x%X",utype);
-            logerror("## Read %u / %u bytes",recvPacket.rpos(),recvPacket.size());
+            logerror("UPDATE_OBJECT: Got unk updatetype 0x%X",utype);
+            logerror("UPDATE_OBJECT: Read %u / %u bytes, skipped rest",recvPacket.rpos(),recvPacket.size());
             return;
         } // switch
     } // while
-    logdebug("## Read %u / %u bytes",recvPacket.rpos(),recvPacket.size());
-    logdebug("## Parsing successful!!");
+
 } // func
 
 void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& recvPacket)
@@ -170,12 +167,10 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
     float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn;
 
     recvPacket >> flags;
-    logdebug("--- flags:%X",flags);
 
 	if(objtypeid==TYPEID_PLAYER)
 	{
 		recvPacket >> flags2 >> time;
-        logdebug("--- flags2=0x%X time=%u",flags2,time);
 
 		if (flags2 & 0x02000000) // On a transport
 		{
@@ -187,7 +182,6 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 		}
 
 		recvPacket >> unkf;
-        logdebug("--- DEBUG: %f == 0 ?",unkf);
 
 		if(flags2 & 0x2000) // Self update
 		{
@@ -197,12 +191,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 			recvPacket >> unkf;
 			recvPacket >> unkf;
 		}
-
 		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim >> speedWalkBack >> speedTurn;
-
-        logdebug("--- TYPEID_PLAYER: walk=%f run=%f swimb=%f swim=%f walkb=%f turn=%f",speedWalk,speedRun,speedSwimBack,speedSwim,speedWalkBack,speedTurn);
-		logdebug("--- TYPEID_PLAYER: OnTransport=%s x=%f y=%f z=%f o=%f", flags2 & 0x02000000 ? "true" : "false", x, y, z, o);
-
 	}
 	if(objtypeid==TYPEID_UNIT)
 	{
@@ -218,8 +207,6 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 				recvPacket >> unkf >> unkf >> unkf; // Some x, y, z value
 			}
 		}
-        logdebug("--- TYPEID_UNIT: walk=%f run=%f swimb=%f swim=%f walkb=%f turn=%f",speedWalk,speedRun,speedSwimBack,speedSwim,speedWalkBack,speedTurn);
-		logdebug("--- TYPEID_UNIT: flag=%s x=%f y=%f z=%f o=%f", flags2 & 0x400000 ? "true" : "false", x, y, z, o);
 	}
 	if( (objtypeid==TYPEID_CORPSE) || (objtypeid==TYPEID_GAMEOBJECT) || (objtypeid==TYPEID_DYNAMICOBJECT))
 	{
@@ -235,7 +222,6 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 	}
 
     recvPacket >> unk32; // (uint32)0x1
-    logdebug("--- REFERENCE: %u (should be = 1)",unk32);
 
     if ((GUID_HIPART(uguid) == HIGHGUID_TRANSPORT))
     {
@@ -258,8 +244,6 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
         valuesCount = obj->GetValuesCount();
         recvPacket >> blockcount;
         masksize = blockcount << 2; // each sizeof(uint32) == <4> * sizeof(uint8) // 1<<2 == <4>
-        logdebug("--UPDATETYPE_VALUES: guid="I64FMT" values=%u blockcount=%u masksize=%d",uguid,valuesCount,blockcount, masksize);
-
         UpdateMask umask;
         uint32 *updateMask = new uint32[blockcount];
         umask.SetCount(masksize);
@@ -288,14 +272,34 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
 
                     obj->SetUInt32Value(i, value);
                 }
-
-                logdebug("--- Value (%d): %d", i, value);
             }
         }
     }
     else
     {
-        logerror("--Got UpdateObject_Values for unknown object "I64FMT,uguid);
+        logerror("Got UpdateObject_Values for unknown object "I64FMT,uguid);
     }
 
+}
+
+void WorldSession::_QueryObjectProto(uint64 guid)
+{
+    Object *obj = objmgr.GetObj(guid);
+    if(obj)
+    {
+        switch(obj->GetTypeId())
+        {
+        case TYPEID_ITEM:
+        case TYPEID_CONTAINER:
+            {
+                ItemProto *proto = objmgr.GetItemProto(obj->GetEntry());
+                if(!proto)
+                {
+                    logdebug("Found unknown item: GUID="I64FMT" entry=%u",obj->GetGUID(),obj->GetEntry());
+                    SendQueryItem(obj->GetEntry(),obj->GetGUID()); // not sure if sending GUID is correct
+                }
+            }
+        // case ...
+        }
+    }
 }

@@ -95,6 +95,7 @@ private:
 
 	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
     void _ValuesUpdate(uint64 uguid, WorldPacket& recvPacket); // ...
+    void _QueryObjectProto(uint64 guid);
 
     PseuInstance *_instance;
     WorldSocket *_socket;

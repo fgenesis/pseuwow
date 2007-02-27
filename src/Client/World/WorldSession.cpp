@@ -446,6 +446,14 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     {
         logcustom(0,WHITE,"TO %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
     }
+    else if (type==CHAT_MSG_GUILD )
+    {
+        logcustom(0,WHITE,"GUILD: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+    }
+    else if (type==CHAT_MSG_PARTY )
+    {
+        logcustom(0,WHITE,"PARTY: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+    }
     else
     {
         logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),LookupName(lang,langNames),msg.c_str());
