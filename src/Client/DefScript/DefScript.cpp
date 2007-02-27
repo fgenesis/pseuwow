@@ -79,6 +79,7 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
         {"logdebug",&DefScriptPackage::SClogdebug},
 		{"castspell", &DefScriptPackage::SCcastspell},
         {"queryitem", &DefScriptPackage::SCqueryitem},
+        {"target", &DefScriptPackage::SCtarget},
 
         // table termination
         {NULL,NULL}

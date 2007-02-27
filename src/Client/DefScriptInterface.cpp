@@ -8,6 +8,7 @@
 #include "SharedDefines.h"
 #include "WorldSession.h"
 #include "Channel.h"
+#include "CacheHandler.h"
 
 bool DefScriptPackage::SCshdn(CmdSet Set)
 {
@@ -207,6 +208,35 @@ bool DefScriptPackage::SCqueryitem(CmdSet Set){
     ((PseuInstance*)parentMethod)->GetWSession()->SendQueryItem(id,0);
     return true;
 }
+
+bool DefScriptPackage::SCtarget(CmdSet Set)
+{
+    // TODO: special targets: _self _pet _nearest ...
+
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCtarget: WorldSession not valid");
+        return false;
+    }
+
+    if(Set.defaultarg.empty())
+    {
+        ((PseuInstance*)parentMethod)->GetWSession()->SendSetSelection(0); // no target
+        return true;
+    }
+
+    // TODO: search through all objects. for now only allow to target player
+    uint64 guid = (((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetGuid(Set.defaultarg));
+
+    if( guid && ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid) ) // object must be near
+        ((PseuInstance*)parentMethod)->GetWSession()->SendSetSelection(guid);
+    else
+        logdetail("Target '%s' not found!",Set.defaultarg.c_str());
+
+    return true;
+}
+
+
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {

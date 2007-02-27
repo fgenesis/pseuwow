@@ -60,6 +60,7 @@ public:
     void SendPing(uint32);
     void SendEmote(uint32);
     void SendQueryItem(uint32, uint64);
+    void SendSetSelection(uint64);
 
     PlayerNameCache plrNameCache;
     ObjMgr objmgr;

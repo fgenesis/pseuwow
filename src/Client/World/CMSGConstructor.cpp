@@ -77,6 +77,15 @@ void WorldSession::SendQueryItem(uint32 id, uint64 guid) // is it a guid? not su
     // to prevent opcode spam, we need to make a list with already requested items
 }
 
+void WorldSession::SendSetSelection(uint64 guid)
+{
+    // TODO: MyCharacter.SetTarget(guid);
+    logdebug("SetSelection GUID="I64FMT,guid);
+    WorldPacket packet;
+    packet << guid;
+    packet.SetOpcode(CMSG_SET_SELECTION);
+    SendWorldPacket(packet);
+}
 
 
 
