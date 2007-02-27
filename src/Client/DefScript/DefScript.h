@@ -162,6 +162,7 @@ private:
     bool SClogerror(CmdSet);
 	bool SCcastspell(CmdSet);
     bool SCqueryitem(CmdSet);
+    bool SCtarget(CmdSet);
 
     // Own variable declarations
     std::map<std::string, unsigned char> my_usrPermissionMap;
