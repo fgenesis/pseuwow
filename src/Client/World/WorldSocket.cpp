@@ -42,6 +42,12 @@ void WorldSocket::OnRead()
         this->CloseAndDelete();
         return;
     }
+    // a valid header needs to have at least 4 bytes
+    if(len < 4 && (!_gothdr))
+    {
+        logerror("WorldSocket::OnRead(): Got %u bytes (header too small) - waiting for more data",len);
+        return;
+    }
 
     uint8 *buf=new uint8[len];
     ibuf.Read((char*)buf,len);
@@ -76,7 +82,7 @@ void WorldSocket::OnRead()
                 // if the crypt gets messy its hardly possible to recover it, especially if we dont know
                 // the lentgh of the following data part
                 // TODO: invent some way how to recover the crypt (reconnect?)
-                delete [] buf; // drop the current queue content
+                delete buf; // drop the current queue content
                 return;
             }
 

@@ -546,6 +546,9 @@ void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
         if(GetInstance()->GetConf()->debug > 1)
             SendChatMessage(CHAT_MSG_SAY,0,"Player "+pname+" added to cache.","");
     }
+    WorldObject *wo = (WorldObject*)objmgr.GetObj(pguid);
+    if(wo)
+        wo->SetName(pname);
 }
 
 void WorldSession::_HandlePongOpcode(WorldPacket& recvPacket)
