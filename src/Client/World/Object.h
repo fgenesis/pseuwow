@@ -96,10 +96,13 @@ public:
     inline float GetY(void) { return _y; }
     inline float GetZ(void) { return _z; }
     inline float GetO(void) { return _o; }
+    inline void SetName(std::string name) { _name = name; }
+    inline std::string GetName(void) { return _name; }
 protected:
     WorldObject();
     float _x,_y,_z,_o; // coords, orientation
     uint16 _m; // map
+    std::string _name;
 
 };
 

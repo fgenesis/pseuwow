@@ -134,7 +134,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 this->_MovementUpdate(objtypeid, uguid, recvPacket);
                 this->_ValuesUpdate(uguid, recvPacket);
 
-                _QueryObjectProto(uguid);
+                _QueryObjectInfo(uguid);
 			}
 			break;
 
@@ -282,7 +282,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
 
 }
 
-void WorldSession::_QueryObjectProto(uint64 guid)
+void WorldSession::_QueryObjectInfo(uint64 guid)
 {
     Object *obj = objmgr.GetObj(guid);
     if(obj)
@@ -299,7 +299,19 @@ void WorldSession::_QueryObjectProto(uint64 guid)
                     SendQueryItem(obj->GetEntry(),obj->GetGUID()); // not sure if sending GUID is correct
                 }
             }
-        // case ...
+        case TYPEID_PLAYER:
+            {
+                std::string name = plrNameCache.GetName(guid);
+                if(name.empty())
+                {
+                    SendQueryPlayerName(guid);
+                }
+                else
+                {
+                    ((WorldObject*)obj)->SetName(name);
+                }
+            }
+        //case...
         }
     }
 }
