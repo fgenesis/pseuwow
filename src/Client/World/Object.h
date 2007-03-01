@@ -92,6 +92,7 @@ class WorldObject : public Object
 public:
     virtual ~WorldObject ( ) {}
     void SetPosition(float x, float y, float z, float o, uint16 _map);
+    void SetPosition(float x, float y, float z, float o);
     inline float GetX(void) { return _x; }
     inline float GetY(void) { return _y; }
     inline float GetZ(void) { return _z; }

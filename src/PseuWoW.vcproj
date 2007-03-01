@@ -27,14 +27,13 @@
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="shared;Client;Client/World;Client/Realm;dep/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				StringPooling="FALSE"
+				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="FALSE"
 				EnableFunctionLevelLinking="FALSE"
-				EnableEnhancedInstructionSet="1"
+				EnableEnhancedInstructionSet="0"
 				PrecompiledHeaderFile=".\Release/PseuWoW.pch"
 				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
@@ -71,7 +70,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1031"/>
+				Culture="0"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
