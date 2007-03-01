@@ -170,6 +170,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 
 	if(objtypeid==TYPEID_PLAYER)
 	{
+        Unit *u = (Unit*)objmgr.GetObj(uguid);
 		recvPacket >> flags2 >> time;
 
 		if (flags2 & 0x02000000) // On a transport
@@ -192,9 +193,24 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 			recvPacket >> unkf;
 		}
 		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim >> speedWalkBack >> speedTurn;
+        if(u)
+        {
+            u->SetPosition(x,y,z,o);
+            u->SetSpeed(MOVE_WALK,speedWalk);
+            u->SetSpeed(MOVE_RUN,speedRun);
+            u->SetSpeed(MOVE_SWIMBACK,speedSwimBack);
+            u->SetSpeed(MOVE_SWIM,speedSwim);
+            u->SetSpeed(MOVE_WALKBACK,speedWalkBack);
+            u->SetSpeed(MOVE_TURN,speedTurn);
+        }
+        else
+        {
+            logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+        }
 	}
 	if(objtypeid==TYPEID_UNIT)
 	{
+        Unit *u = (Unit*)objmgr.GetObj(uguid);
 		recvPacket >> flags2 >> unk32 >> x >> y >> z >> o >> unkf;
 		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim >> speedWalkBack >> speedTurn;
 
@@ -207,18 +223,41 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 				recvPacket >> unkf >> unkf >> unkf; // Some x, y, z value
 			}
 		}
+        if(u)
+        {
+            u->SetPosition(x,y,z,o);
+            u->SetSpeed(MOVE_WALK,speedWalk);
+            u->SetSpeed(MOVE_RUN,speedRun);
+            u->SetSpeed(MOVE_SWIMBACK,speedSwimBack);
+            u->SetSpeed(MOVE_SWIM,speedSwim);
+            u->SetSpeed(MOVE_WALKBACK,speedWalkBack);
+            u->SetSpeed(MOVE_TURN,speedTurn);
+        }
+        else
+        {
+            logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+        }
 	}
 	if( (objtypeid==TYPEID_CORPSE) || (objtypeid==TYPEID_GAMEOBJECT) || (objtypeid==TYPEID_DYNAMICOBJECT))
 	{
+        Unit *u = (Unit*)objmgr.GetObj(uguid);
         if(GUID_HIPART(uguid) != HIGHGUID_TRANSPORT)
         {
             recvPacket >> x >> y >> z;
+            if(u)
+                u->SetPosition(x,y,z,u->GetO());
+            else
+                logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
         }
         else
         {
             recvPacket >> unk32 >> unk32 >> unk32; // should be 0?
         }
 		recvPacket >> o;
+        if(u)
+            u->SetPosition(u->GetX(),u->GetY(),u->GetZ(),o);
+        else
+            logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
 	}
 
     recvPacket >> unk32; // (uint32)0x1

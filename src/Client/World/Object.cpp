@@ -43,12 +43,17 @@ WorldObject::WorldObject()
     _m = 0;
 }
 
-void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
+void WorldObject::SetPosition(float x, float y, float z, float o)
 {
     _x = x;
     _y = y;
     _z = z;
     _o = o;
+}
+
+void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
+{
+    SetPosition(x,y,z,o);
     _m = _map;
 }
 
