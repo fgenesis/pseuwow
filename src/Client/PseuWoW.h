@@ -7,6 +7,7 @@
 #include "Auth/BigNumber.h"
 #include "DefScript/DefScript.h"
 #include "Network/SocketHandler.h"
+#include "SCPDatabase.h"
 
 class RealmSocket;
 class WorldSession;
@@ -70,6 +71,7 @@ class PseuInstance
     void SetSessionKey(BigNumber key) { _sessionkey = key; }
     BigNumber GetSessionKey(void) { return _sessionkey; }
     void SetError(void) { _error = true; }
+    SCPDatabase& GetSCPDatabase(std::string);
 
 	
 	
@@ -103,6 +105,7 @@ class PseuInstance
     SocketHandler _sh;
     CliRunnable *_cli;
     ZThread::Thread _clithread;
+    std::map<std::string,SCPDatabase> _dbmap;
 
 
 };

@@ -1,6 +1,8 @@
+#psermission=255
 
 LOG * Assigning permissions for internal functions...
 
+// default permission level for all internal script commands
 set,p 255
 
 // this is important because players could reset permissions for dangerous functions
@@ -24,7 +26,6 @@ SETSCRIPTPERMISSION,pow ${p}
 SETSCRIPTPERMISSION,bitor ${p}
 SETSCRIPTPERMISSION,bitand ${p}
 SETSCRIPTPERMISSION,bitxor ${p}
-SETSCRIPTPERMISSION,sendchatmessage ${p}
 
 SETSCRIPTPERMISSION,pause ${p}
 // emotes are not relly dangerous, allow for all users
@@ -39,6 +40,8 @@ SETSCRIPTPERMISSION,applypermissions ${p}
 SETSCRIPTPERMISSION,log ${p}
 SETSCRIPTPERMISSION,logdetail ${p}
 SETSCRIPTPERMISSION,logdebug ${p}
+SETSCRIPTPERMISSION,target ${p}
+SETSCRIPTPERMISSION,loadscp ${p}
 
 
 UNSET p

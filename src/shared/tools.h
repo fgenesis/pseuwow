@@ -13,5 +13,6 @@ std::string stringToUpper(std::string);
 std::string stringToLower(std::string);
 std::string toString(uint64);
 std::string getDateString(void);
+uint64 toInt(std::string);
 
 #endif
