@@ -22,28 +22,42 @@ void Player::Create(uint64 guid)
     Object::Create(guid);
 }
 
-
-/*void PlayerSettings::SetSpells(WorldPacket &data)
+MyCharacter::MyCharacter()
 {
-	if (!init)
-		return;
-
-	uint8 unk;
-	uint16 numSpells;
-
-	data >> unk >> numSpells;
-
-	logdetail("Got %d spells", numSpells);
-
-	// TODO: Finish implenting this
+	_castingSpell = false;
 }
 
-void PlayerSettings::CastSpell(uint32 spellId, uint64 target)
+void MyCharacter::SetActionButtons(WorldPacket &data)
 {
-	if (castingSpell || !init)
+
+}
+
+void MyCharacter::SetSpells(WorldPacket &data)
+{
+	uint8 unk;
+	uint16 spellid,spellslot,count;
+	data >> unk >> count;
+	logdebug("Got initial spells list, %u spells.",count);
+	for(uint16 i = 0; i < count; i++)
+	{
+		data >> spellid >> spellslot;
+		logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
+
+		spell _spell;
+		_spell.spellId = spellid;
+		_spell.spellSlot = spellslot;
+
+		_spells.push_back(_spell);
+	}
+}
+
+void MyCharacter::CastSpell(uint32 spellId, uint64 target)
+{
+	/*
+	if (_castingSpell)
 		return;
 
-	castingSpell = !castingSpell;
+	_castingSpell = !_castingSpell;
 
 	WorldPacket packet;
 	packet.SetOpcode(CMSG_CAST_SPELL);
@@ -52,13 +66,12 @@ void PlayerSettings::CastSpell(uint32 spellId, uint64 target)
 	// Damn packed guid stuff! xD
 
 	_worldSession->SendWorldPacket(packet);
+	*/
 }
 
-void PlayerSettings::HandleCastResultOpcode(WorldPacket &packet)
+void MyCharacter::HandleCastResultOpcode(WorldPacket &packet)
 {
-	if (!init)
-		return;
-
+	/*
 	uint32 spellId;
 	uint8 statusFail;
 	uint8 failProblem;
@@ -66,7 +79,7 @@ void PlayerSettings::HandleCastResultOpcode(WorldPacket &packet)
 
 	packet >> spellId >> statusFail;
 
-	castingSpell = false;
+	_castingSpell = false;
 
 	sprintf(l, "Received cast result opcode. Spell = %d, statusFail = %d", spellId, statusFail);
 
@@ -78,4 +91,5 @@ void PlayerSettings::HandleCastResultOpcode(WorldPacket &packet)
 
 
 	//logdetail(l);
-}*/
+	*/
+}

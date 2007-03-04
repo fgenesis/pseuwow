@@ -63,6 +63,7 @@ public:
     void SendSetSelection(uint64);
 
     PlayerNameCache plrNameCache;
+	MyCharacter *myCharacter;
     ObjMgr objmgr;
 
 private:

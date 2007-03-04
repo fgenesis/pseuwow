@@ -195,13 +195,21 @@ class MyCharacter : public Player
 public:
     MyCharacter();
 
-	/*void SetActionButtons(WorldPacket &data);
+	void SetActionButtons(WorldPacket &data);
 	void SetSpells(WorldPacket &data);
 	void CastSpell(uint32 spellId, uint64 target);
-	void HandleCastResultOpcode(WorldPacket &packet);*/
+	void HandleCastResultOpcode(WorldPacket &packet);
 
 private:
+	bool _castingSpell;
 
+	typedef struct
+	{
+		uint16 spellId;
+		uint16 spellSlot;
+	} spell;
+
+	std::vector<spell> _spells;
 };
 
 

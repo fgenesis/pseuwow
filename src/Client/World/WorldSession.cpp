@@ -24,6 +24,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _myGUID=0; // i dont have a guid yet
     plrNameCache.ReadFromFile(); // load names/guids of known players
     ItemProtoCache_InsertDataToSession(this);
+	myCharacter = new MyCharacter();
     _deleteme = false;
     _channels = new Channel(this);
 //	_playerSettings->Init(this);
@@ -636,15 +637,6 @@ void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
 {
-    uint8 unk;
-    uint16 spellid,spellslot,count;
-    recvPacket >> unk >> count;
-    logdebug("Got initial spells list, %u spells.",count);
-    for(uint16 i = 0; i < count; i++)
-    {
-        recvPacket >> spellid >> spellslot;
-        logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
-        // these data need to be added to MyCharacter later
-    }
+	myCharacter->SetSpells(recvPacket);
 }
 
