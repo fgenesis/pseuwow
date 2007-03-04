@@ -1,0 +1,9 @@
+#permission=255
+
+LOG * Loading SCP data storages...
+
+// TODO: load stuff here
+// example:
+// LOADSCP,test data/test.scp
+
+LOG * SCP loaded.

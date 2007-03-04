@@ -27,9 +27,14 @@ void PseuInstanceRunnable::run(void)
     _i = new PseuInstance(this);
 	_i->SetConfDir("./conf/");
     _i->SetScpDir("./scripts/");
-	_i->Init();
-	// more
-	_i->Run();
+	if(_i->Init())
+    {
+        _i->Run();  
+    }
+    else
+    {
+        getchar();
+    }
     delete _i;
 }
 
@@ -53,6 +58,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _startrealm=true;
     createWorldSession=false;
     _error=false;
+    _initialized=false;
 
 
 }
@@ -230,10 +236,17 @@ void PseuInstance::Sleep(uint32 msecs)
     GetRunnable()->sleep(msecs);
 }
 
+SCPDatabase& PseuInstance::GetSCPDatabase(std::string dbname)
+{
+    return _dbmap[dbname];
+}
+
 
 
 PseuInstanceConf::PseuInstanceConf()
 {
+    enablecli=false;
+    exitonerror=false;
 }
 
 void PseuInstanceConf::ApplyFromVarSet(VarSet &v)

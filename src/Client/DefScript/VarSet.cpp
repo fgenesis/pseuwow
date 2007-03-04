@@ -110,43 +110,41 @@ bool VarSet::ReadVarsFromFile(std::string fn)
             }
             if(line.at(0)=='[' && line.at(line.length()-1)==']')
             {
-                prefix=line.substr(1,line.length()-2);
-                if(!prefix.empty())
+                std::string loadinfo;
+                loadinfo=line.substr(1,line.length()-2);
+                if(!loadinfo.empty())
                 {
-                    if(prefix.at(0)=='#')
-                        prefix=toLower(prefix);
-                    if(prefix=="#uppercase")
+                    if(loadinfo.at(0)=='#')
+                        loadinfo=toLower(loadinfo);
+                    if(loadinfo=="#uppercase")
                     {
                         upper=true;
                         lower=false;
-                        prefix.clear();
                     }
-                    else if(prefix=="#normal")
+                    else if(loadinfo=="#normal")
                     {
                         upper=false;
                         lower=false;
-                        prefix.clear();
                     }
-                    else if(prefix=="#lowercase")
+                    else if(loadinfo=="#lowercase")
                     {
                         lower=true;
                         upper=false;
-                        prefix.clear();
                     }
-                    else if(prefix=="#noprefix")
+                    else if(loadinfo=="#noprefix")
                     {
                         prefix.clear();
                     }
                     else
                     {
-                            prefix+="::";
+                            prefix=loadinfo+"::";
                     }
                 }
             }
             else
             {
                 unsigned int pos=line.find("=");
-                if(pos)
+                if(pos!=std::string::npos)
                 {
                     std::string v=line.substr(0,pos);;
                     

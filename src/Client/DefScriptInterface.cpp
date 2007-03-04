@@ -9,6 +9,7 @@
 #include "WorldSession.h"
 #include "Channel.h"
 #include "CacheHandler.h"
+#include "SCPDatabase.h"
 
 bool DefScriptPackage::SCshdn(CmdSet Set)
 {
@@ -233,6 +234,23 @@ bool DefScriptPackage::SCtarget(CmdSet Set)
     else
         logdetail("Target '%s' not found!",Set.defaultarg.c_str());
 
+    return true;
+}
+
+bool DefScriptPackage::SCloadscp(CmdSet Set)
+{
+    if(Set.arg[0].empty() || Set.defaultarg.empty())
+        return true;
+    std::string dbname = stringToLower(Set.arg[0]);
+    uint32 sections=((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).LoadFromFile((char*)Set.defaultarg.c_str());
+    if(sections)
+    {
+        logdetail("Loaded SCP: \"%s\" [%s] (%u sections)",dbname.c_str(),Set.defaultarg.c_str(),sections);
+    }
+    else
+    {
+        logerror("Failed to load SCP: \"%s\" [%s]",dbname.c_str(),Set.defaultarg.c_str());
+    }
     return true;
 }
 

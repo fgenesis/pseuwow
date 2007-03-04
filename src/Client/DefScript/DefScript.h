@@ -25,11 +25,21 @@ typedef __int64_t   def_int64;
 class DefScriptPackage;
 class DefScript;
 
-struct DefXChgResult {
+struct DefXChgResult
+{
     DefXChgResult() { changed=false; }
     bool changed;
     std::string str;
 };
+
+struct SecReturnResult
+{
+    bool ok; // true if the execution of the current statement was successful
+    bool abrt; // true if ALL current script execution must be aborted.
+    std::string ret; // return value used by ?{..}
+    std::string err; // error string, including tracestack, etc.
+};
+    
 
 class CmdSet {
 	public:
@@ -163,6 +173,7 @@ private:
 	bool SCcastspell(CmdSet);
     bool SCqueryitem(CmdSet);
     bool SCtarget(CmdSet);
+    bool SCloadscp(CmdSet);
 
     // Own variable declarations
     std::map<std::string, unsigned char> my_usrPermissionMap;

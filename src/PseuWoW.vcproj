@@ -186,6 +186,12 @@
 				RelativePath=".\Client\PseuWoW.h">
 			</File>
 			<File
+				RelativePath=".\Client\SCPDatabase.cpp">
+			</File>
+			<File
+				RelativePath=".\Client\SCPDatabase.h">
+			</File>
+			<File
 				RelativePath=".\Client\SysDefs.h">
 			</File>
 			<Filter

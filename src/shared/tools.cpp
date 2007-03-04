@@ -59,3 +59,14 @@ std::string getDateString(void)
     return std::string(str);
 }
 
+uint64 toInt(std::string str)
+{
+    if(str.empty())
+        return 0;
+    str=stringToUpper(str);
+    if(str.length() > 2 && str[0]=='0' && str[1]=='X')
+        return strtoul(&(str.c_str()[2]),NULL,16);
+    else
+        return strtoul(str.c_str(),NULL,10);
+}
+

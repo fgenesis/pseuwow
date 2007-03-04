@@ -80,6 +80,7 @@ DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
 		{"castspell", &DefScriptPackage::SCcastspell},
         {"queryitem", &DefScriptPackage::SCqueryitem},
         {"target", &DefScriptPackage::SCtarget},
+        {"loadscp", &DefScriptPackage::SCloadscp},
 
         // table termination
         {NULL,NULL}
