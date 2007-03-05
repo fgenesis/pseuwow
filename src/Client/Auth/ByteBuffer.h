@@ -30,7 +30,7 @@ class ByteBuffer
         {
         };
 
-        const static size_t DEFAULT_SIZE = 0x1000;
+        const static size_t DEFAULT_SIZE = 0xFF;
 
         ByteBuffer(): _rpos(0), _wpos(0)
         {

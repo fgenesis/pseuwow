@@ -126,7 +126,7 @@ void RealmSocket::_HandleRealmList(void)
 {
     std::string realmAddr;
     ByteBuffer realmbuf;
-    realmbuf.reserve(ibuf.GetLength());
+    realmbuf.resize(ibuf.GetLength());
     ibuf.Read((char*)realmbuf.contents(), ibuf.GetLength());
 
     uint32 unk;

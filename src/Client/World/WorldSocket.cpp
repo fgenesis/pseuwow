@@ -36,7 +36,7 @@ void WorldSocket::OnRead()
 {
     TcpSocket::OnRead();
     uint32 len = ibuf.GetLength();
-    //printf("WorldSocket::OnRead() %u bytes\n",len);
+    printf("WorldSocket::OnRead() %u bytes\n",len);
     if(!len)
     {
         this->CloseAndDelete();
@@ -116,7 +116,7 @@ void WorldSocket::SendWorldPacket(WorldPacket &pkt)
     _crypt.EncryptSend((uint8*)&hdr, 6);
     ByteBuffer final(pkt.size()+6);
     final.append((uint8*)&hdr,sizeof(ClientPktHeader));
-    final.append(pkt.contents(),pkt.size());
+    final.append(pkt);
     SendBuf((char*)final.contents(),final.size());
 }
 
