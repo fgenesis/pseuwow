@@ -47,6 +47,7 @@ class PseuInstanceConf
 	bool enablechatai;
     bool notifyping;
     bool showmyopcodes;
+    bool disablespellcheck;
 	
 	
 };

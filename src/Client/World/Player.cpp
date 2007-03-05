@@ -22,9 +22,9 @@ void Player::Create(uint64 guid)
     Object::Create(guid);
 }
 
-MyCharacter::MyCharacter()
+MyCharacter::MyCharacter() : Player()
 {
-	_castingSpell = false;
+    SetTarget(0);
 }
 
 void MyCharacter::SetActionButtons(WorldPacket &data)
@@ -43,53 +43,20 @@ void MyCharacter::SetSpells(WorldPacket &data)
 		data >> spellid >> spellslot;
 		logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
 
-		spell _spell;
-		_spell.spellId = spellid;
-		_spell.spellSlot = spellslot;
+		SpellBookEntry _spell;
+		_spell.id = spellid;
+		_spell.slot = spellslot;
 
 		_spells.push_back(_spell);
 	}
 }
 
-void MyCharacter::CastSpell(uint32 spellId, uint64 target)
+uint16 MyCharacter::GetSpellSlot(uint32 spellid)
 {
-	/*
-	if (_castingSpell)
-		return;
-
-	_castingSpell = !_castingSpell;
-
-	WorldPacket packet;
-	packet.SetOpcode(CMSG_CAST_SPELL);
-	packet << spellId << (uint16)2  << (uint8)1 << (uint8)target; // 2 = TARGET_FLAG_UNIT
-	// Can be bugged, not fully tested, probably doesn't work when the guid is high
-	// Damn packed guid stuff! xD
-
-	_worldSession->SendWorldPacket(packet);
-	*/
+    for(std::vector<SpellBookEntry>::iterator i=_spells.begin(); i != _spells.end(); i++)
+        if(i->id == spellid)
+            return i->slot;
+    return 0;
 }
 
-void MyCharacter::HandleCastResultOpcode(WorldPacket &packet)
-{
-	/*
-	uint32 spellId;
-	uint8 statusFail;
-	uint8 failProblem;
-	char l[150];
-
-	packet >> spellId >> statusFail;
-
-	_castingSpell = false;
-
-	sprintf(l, "Received cast result opcode. Spell = %d, statusFail = %d", spellId, statusFail);
-
-	if (statusFail == 2) // Spell cast failed
-	{
-		packet >> failProblem;
-		sprintf(l, "%s, failProblem = %d", l, failProblem);
-	}
-
-
-	//logdetail(l);
-	*/
-}
+    

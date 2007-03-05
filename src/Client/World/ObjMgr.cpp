@@ -2,6 +2,11 @@
 
 ObjMgr::~ObjMgr()
 {
+    RemoveAll();
+}
+
+void ObjMgr::RemoveAll(void)
+{
     for(ItemProtoList::iterator i = _iproto.begin(); i!=_iproto.end(); i++)
     {
         delete *i;
@@ -31,6 +36,8 @@ void ObjMgr::Add(Object *o)
 
 Object *ObjMgr::GetObj(uint64 guid)
 {
+    if(!guid)
+        return NULL;
     for(ObjectList::iterator i = _obj.begin(); i!=_obj.end(); i++)
         if((*i)->GetGUID() == guid)
             return (*i);

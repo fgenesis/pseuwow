@@ -175,6 +175,12 @@ private:
     
 };
 
+struct SpellBookEntry
+{
+    uint32 id;
+    uint16 slot;
+};
+
 class Player : public Unit
 {
 public:
@@ -197,19 +203,18 @@ public:
 
 	void SetActionButtons(WorldPacket &data);
 	void SetSpells(WorldPacket &data);
-	void CastSpell(uint32 spellId, uint64 target);
-	void HandleCastResultOpcode(WorldPacket &packet);
+    uint64 GetTarget(void) { return _target; }
+    void SetTarget(uint64 guid) { _target = guid; } // should only be called by WorldSession::SendSetSelection() !!
+    bool HasSpell(uint32 spellid) { return GetSpellSlot(spellid) != 0; }
+    uint16 GetSpellSlot(uint32 spellid);
 
 private:
-	bool _castingSpell;
+	// bool _castingSpell; // this is something we dont really need for now
 
-	typedef struct
-	{
-		uint16 spellId;
-		uint16 spellSlot;
-	} spell;
 
-	std::vector<spell> _spells;
+
+	std::vector<SpellBookEntry> _spells;
+    uint64 _target; // currently targeted object
 };
 
 

@@ -271,6 +271,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 	enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());
     notifyping=(bool)atoi(v.Get("NOTIFYPING").c_str());
     showmyopcodes=(bool)atoi(v.Get("SHOWMYOPCODES").c_str());
+    disablespellcheck=(bool)atoi(v.Get("DISABLESPELLCHECK").c_str());
 
     // clientversion is a bit more complicated to add
     {
