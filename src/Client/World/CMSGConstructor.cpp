@@ -81,6 +81,8 @@ void WorldSession::SendQueryItem(uint32 id, uint64 guid) // is it a guid? not su
 void WorldSession::SendSetSelection(uint64 guid)
 {
     ASSERT(GetMyChar()) // we need to be logged in to select something
+    if(guid==GetMyChar()->GetTarget())
+        return; // no need to select already selected target
     GetMyChar()->SetTarget(guid);
     logdebug("SetSelection GUID="I64FMT,guid);
     WorldPacket packet;
