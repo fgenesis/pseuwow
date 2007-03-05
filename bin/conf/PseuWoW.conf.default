@@ -81,4 +81,10 @@ notifyping=1
 // shows the opcodes pseuwow sends to the server
 showmyopcodes=0
 
+// disable the check for learned spells.
+// if you disable it, you can cast spells you do not have in our spellbook!
+// WARNING: most servers will consider this as CHEATING!
+// DO NOT put 1 here!
+disablespellcheck=0
+
 
