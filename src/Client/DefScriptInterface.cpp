@@ -176,10 +176,7 @@ bool DefScriptPackage::SCcastspell(CmdSet Set)
 		return false;
 	}
 
-	uint32 spellId = 0;// = atoi(Set.defaultarg.c_str());
-	uint64 spellTarget = 0;// atoi(Set.arg[0]);
-
-	spellId = atoi(Set.defaultarg.c_str());
+	uint32 spellId = atoi(Set.defaultarg.c_str());
 
 	if (spellId <= 0)
 	{
@@ -187,12 +184,7 @@ bool DefScriptPackage::SCcastspell(CmdSet Set)
 		return false;
 	}
 
-	if (spellTarget <= 0)
-	{
-		spellTarget = ((PseuInstance*)parentMethod)->GetWSession()->GetGuid();
-	}
-
-//	((PseuInstance*)parentMethod)->GetWSession()->GetPlayerSettings()->CastSpell(spellId, spellTarget);
+	((PseuInstance*)parentMethod)->GetWSession()->SendCastSpell(spellId);
 	return true;
 }
 

@@ -76,14 +76,66 @@ void WorldSession::SendQueryItem(uint32 id, uint64 guid) // is it a guid? not su
     SendWorldPacket(packet);
 }
 
+// use ONLY this function to target objects and notify the server about it.
+// (server & client need to stay synced)
 void WorldSession::SendSetSelection(uint64 guid)
 {
-    // TODO: MyCharacter.SetTarget(guid);
+    ASSERT(GetMyChar()) // we need to be logged in to select something
+    GetMyChar()->SetTarget(guid);
     logdebug("SetSelection GUID="I64FMT,guid);
     WorldPacket packet;
     packet << guid;
     packet.SetOpcode(CMSG_SET_SELECTION);
     SendWorldPacket(packet);
+}
+
+void WorldSession::SendCastSpell(uint32 spellid)
+{
+    if(!spellid)
+        return;
+    MyCharacter *my = GetMyChar();
+    bool known = my->HasSpell(spellid);
+    if( (!known) && (!GetInstance()->GetConf()->disablespellcheck) )
+    {
+        logerror("Attempt to cast not-known spell %u",spellid);
+        return;
+    }
+
+    Object *target = objmgr.GetObj(my->GetTarget());
+
+    if(!target) // this is wrong, some spells dont require a target (areaspells, self-only spells)
+        return; // but for now, this should be ok, until a db is used that provides spell info
+
+    WorldPacket packet;
+    ByteBuffer temp;
+    uint16 flags=TARGET_FLAG_SELF; // target mask. spellcast implementeation needs to be changed if TARGET_MASK_SELF is != 0
+    packet << spellid;
+    if(my->GetTarget() != GetGuid()) // self cast?
+    {
+        if(target->GetTypeId() == TYPEID_PLAYER || target->GetTypeId() == TYPEID_UNIT)
+        {
+            flags |= TARGET_FLAG_UNIT;
+            temp << (uint8)0xFF << my->GetTarget(); // need to send packed guid?
+        }     
+        if(target->GetTypeId() == TYPEID_OBJECT)
+        {
+            flags |= TARGET_FLAG_OBJECT;
+            temp << (uint8)0xFF <<my->GetTarget(); // need to send packed guid?
+        }
+        // TODO: need implementation of areaspells & item targets (enchant) here (temp << itemGUID)!
+        // TODO: append floats x,y,z according to target type srcloc & dstloc to temp
+        // TODO: append string to temp if TARGET_FLAG_STRING is set. what string for what purpose??
+        // and whats with TARGET_CORPSE?
+    }
+    packet << flags;
+    packet.append(temp);
+
+    // cast it
+    packet.SetOpcode(CMSG_CAST_SPELL);
+    SendWorldPacket(packet);
+    logdetail("Casting spell %u on target "I64FMT,spellid,my->GetTarget());
+    if(!known)
+        logerror(" - WARNING: spell is NOT known!");
 }
 
 

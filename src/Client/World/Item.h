@@ -398,13 +398,13 @@ public:
     uint8 GetSlot(void) { return _slot; }
     void SetSlot(uint8 nr) { _slot = nr; }
     uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
-    uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
+    uint32 GetCount() const { return GetUInt32Value(ITEM_FIELD_STACK_COUNT); }
     Bag *GetBag(void) { return _bag; }
     bool IsInBag() const { return _bag != NULL; }
 
 protected:
     uint8 _slot;
-    Bag *_bag; // not yet implemented
+    Bag *_bag;
 
 };
 

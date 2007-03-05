@@ -50,8 +50,7 @@ public:
     uint64 GetFollowTarget(void) { return _followGUID; }
     uint64 GetGuid(void) { return _myGUID; }
     Channel *GetChannels(void) { return _channels; }
-//	Player *GetPlayer(void) { return _player; }
-//	PlayerSettings *GetPlayerSettings(void) { return _playerSettings; }
+    MyCharacter *GetMyChar(void) { ASSERT(_myGUID > 0); return (MyCharacter*)objmgr.GetObj(_myGUID); }
 
 
     // CMSGConstructor
@@ -61,9 +60,9 @@ public:
     void SendEmote(uint32);
     void SendQueryItem(uint32, uint64);
     void SendSetSelection(uint64);
+    void SendCastSpell(uint32);
 
     PlayerNameCache plrNameCache;
-	MyCharacter *myCharacter;
     ObjMgr objmgr;
 
 private:

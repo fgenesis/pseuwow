@@ -13,6 +13,7 @@ class ObjMgr
 {
 public:
     ~ObjMgr();
+    void RemoveAll(void); // TODO: this needs to be called on SMSG_LOGOUT_COMPLETE once implemented.
 
     // Item Prototype functions
     uint32 GetItemProtoCount(void) { return _iproto.size(); }

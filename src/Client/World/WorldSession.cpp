@@ -24,10 +24,8 @@ WorldSession::WorldSession(PseuInstance *in)
     _myGUID=0; // i dont have a guid yet
     plrNameCache.ReadFromFile(); // load names/guids of known players
     ItemProtoCache_InsertDataToSession(this);
-	myCharacter = new MyCharacter();
     _deleteme = false;
     _channels = new Channel(this);
-//	_playerSettings->Init(this);
     //...
 }
 
@@ -366,13 +364,14 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 		return;
 	} else {
 		log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
-//		_player->Init(plr[i]);
+        // create the character and add it to the objmgr.
+        MyCharacter *my = new MyCharacter();
+        my->Create(_myGUID);
+        objmgr.Add(my);
 
 		WorldPacket pkt;
         pkt.SetOpcode(CMSG_PLAYER_LOGIN);
 		pkt << _myGUID;
-        _targetGUID=0;
-        _followGUID=0;
 		SendWorldPacket(pkt);
 	}
 }
@@ -632,11 +631,23 @@ void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 {
-//	_playerSettings->HandleCastResultOpcode(recvPacket);
+    uint32 spellid;
+    uint8 flag,result;
+    recvPacket >> spellid >> flag;
+    if(flag)
+    {
+        recvPacket >> result;
+        logdetail("Cast of spell %u failed. flag=%u, result=%u",spellid,flag,result);
+    }
+    else
+    {
+        logdetail("Cast of spell %u successful.",spellid);
+    }
 }
 
 void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
 {
-	myCharacter->SetSpells(recvPacket);
+    // suggestion for later: what about MyCharacter->AddSpellBookEntry() ?
+	GetMyChar()->SetSpells(recvPacket);
 }
 
