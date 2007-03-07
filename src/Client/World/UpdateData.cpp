@@ -337,6 +337,7 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
                     logdebug("Found unknown item: GUID="I64FMT" entry=%u",obj->GetGUID(),obj->GetEntry());
                     SendQueryItem(obj->GetEntry(),obj->GetGUID()); // not sure if sending GUID is correct
                 }
+                break;
             }
         case TYPEID_PLAYER:
             {
@@ -349,6 +350,7 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
                 {
                     ((WorldObject*)obj)->SetName(name);
                 }
+                break;
             }
         //case...
         }

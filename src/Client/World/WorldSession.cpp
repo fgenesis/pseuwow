@@ -459,7 +459,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),LookupName(lang,langNames),msg.c_str());
 	}
 
-    if(target_guid!=_myGUID && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
+    if(target_guid!=GetGuid() && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
         isCmd=true;
 
     // some fun code :P
@@ -500,7 +500,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         }
         
     }
-    if(type==CHAT_MSG_WHISPER && !isCmd)
+    if(type==CHAT_MSG_WHISPER && (!isCmd) && target_guid!=GetGuid())
     {
         GetInstance()->GetScripts()->variables.Set("@thiswhisper_name",plrname);
 		GetInstance()->GetScripts()->variables.Set("@thiswhisper",toString(target_guid));

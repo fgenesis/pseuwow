@@ -35,43 +35,38 @@ void WorldSocket::OnException()
 void WorldSocket::OnRead()
 {
     TcpSocket::OnRead();
-    uint32 len = ibuf.GetLength();
-    printf("WorldSocket::OnRead() %u bytes\n",len);
-    if(!len)
+    if(!ibuf.GetLength())
     {
         this->CloseAndDelete();
         return;
     }
-    // a valid header needs to have at least 4 bytes
-    if(len < 4 && (!_gothdr))
-    {
-        logerror("WorldSocket::OnRead(): Got %u bytes (header too small) - waiting for more data",len);
-        return;
-    }
-
-    uint8 *buf=new uint8[len];
-    ibuf.Read((char*)buf,len);
-
-    uint32 offset=0; // to skip data already read
-
-    
-    while(len > 0) // when all packets from the current ibuf are transformed into WorldPackets the remaining len will be zero
+    while(ibuf.GetLength() > 0) // when all packets from the current ibuf are transformed into WorldPackets the remaining len will be zero
     {
 
         if(_gothdr) // already got header, this packet has to be the data part
         {
+            ASSERT(_remaining > 0); // case pktsize==0 is handled below
+            if(ibuf.GetLength() < _remaining)
+            {
+                logerror("Delaying WorldPacket generation, bufsize is %u but should be >= %u",ibuf.GetLength(),_remaining);
+                break;
+            }
             _gothdr=false;
-            WorldPacket *wp = new WorldPacket;
-            wp->append(buf+offset,_remaining);
+            WorldPacket *wp = new WorldPacket(_remaining);
+            wp->resize(_remaining);
+            ibuf.Read((char*)wp->contents(),_remaining);
             wp->SetOpcode(_opcode);
             GetSession()->AddToPktQueue(wp);
-            offset += _remaining; // skip the data already used
-            len -= _remaining; // and adjust the length
         }
         else // no pending header stored, so this packet must be a header
         {
+            if(ibuf.GetLength() < sizeof(ServerPktHeader))
+            {
+                logerror("Delaying header reading, bufsize is %u but should be >= %u",ibuf.GetLength(),sizeof(ServerPktHeader));
+                break;
+            }
             ServerPktHeader hdr;
-            memcpy(&hdr,buf+offset,sizeof(ServerPktHeader));
+            ibuf.Read((char*)&hdr,sizeof(ServerPktHeader));
             _crypt.DecryptRecv((uint8*)&hdr,sizeof(ServerPktHeader));
             _remaining = ntohs(hdr.size)-2;
             _opcode = hdr.cmd;
@@ -82,7 +77,6 @@ void WorldSocket::OnRead()
                 // if the crypt gets messy its hardly possible to recover it, especially if we dont know
                 // the lentgh of the following data part
                 // TODO: invent some way how to recover the crypt (reconnect?)
-                delete buf; // drop the current queue content
                 return;
             }
 
@@ -92,19 +86,13 @@ void WorldSocket::OnRead()
                 WorldPacket *wp = new WorldPacket;
                 wp->SetOpcode(_opcode);
                 GetSession()->AddToPktQueue(wp);
-                offset += 4 ; // skip the data already used
-                len -= 4; // and adjust the lentgh
             }
             else // there is a data part to fetch
             {
-                _gothdr=true; // only got the header, next packet wil contain the data
-                offset += 4 ; // skip the data already used
-                len -= 4; // and adjust the lentgh
+                _gothdr=true; // only got the header, next packet will contain the data
             }
         }
     }
-        
-    delete buf;
 }
 
 void WorldSocket::SendWorldPacket(WorldPacket &pkt)
@@ -116,7 +104,8 @@ void WorldSocket::SendWorldPacket(WorldPacket &pkt)
     _crypt.EncryptSend((uint8*)&hdr, 6);
     ByteBuffer final(pkt.size()+6);
     final.append((uint8*)&hdr,sizeof(ClientPktHeader));
-    final.append(pkt);
+    if(pkt.size())
+        final.append(pkt.contents(),pkt.size());
     SendBuf((char*)final.contents(),final.size());
 }
 
