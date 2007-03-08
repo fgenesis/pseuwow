@@ -60,7 +60,7 @@ public:
     void SendEmote(uint32);
     void SendQueryItem(uint32, uint64);
     void SendSetSelection(uint64);
-    void SendCastSpell(uint32);
+    void SendCastSpell(uint32 spellid, bool nocheck=false);
 
     PlayerNameCache plrNameCache;
     ObjMgr objmgr;
