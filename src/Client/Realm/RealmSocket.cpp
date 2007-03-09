@@ -284,7 +284,17 @@ void RealmSocket::_HandleLogonChallenge(void)
         salt.SetBinary(lc.salt,32);
         unk1.SetBinary(lc.unk3,16);
 
+        logdebug("== Server Bignums ==");
+        logdebug("--> B=%s",B.AsHexStr());
+        logdebug("--> g=%s",g.AsHexStr());
+        logdebug("--> N=%s",N.AsHexStr());
+        logdebug("--> salt=%s",salt.AsHexStr());
+        logdebug("--> unk=%s",unk1.AsHexStr());
+
+        logdebug("== My Bignums ==");
 	    a.SetRand(19*8);
+        ASSERT(a.AsDword() > 0);
+        logdebug("--> a=%s",a.AsHexStr());
 	    Sha1Hash userhash,xhash,uhash;
 	    userhash.UpdateData(_authstr);
 	    userhash.Finalize();
@@ -303,6 +313,8 @@ void RealmSocket::_HandleLogonChallenge(void)
 	    logdebug("--> u=%s",u.AsHexStr());
 	    S=(B - k*g.ModExp(x,N) ).ModExp((a + u * x),N);
 	    logdebug("--> S=%s",S.AsHexStr());
+        ASSERT(S.AsDword() > 0);
+        
 
 	    // calc M1 & M2
 	    unsigned int i=0;
@@ -326,6 +338,7 @@ void RealmSocket::_HandleLogonChallenge(void)
 		    S_hash[i*2+1]=S2hash.GetDigest()[i];
 		    }
         _key.SetBinary((uint8*)S_hash,40); // used later when authing to world
+        logdebug("--> SessionKey=%s",_key.AsHexStr());
 					
 		char Ng_hash[20];
 		Sha1Hash userhash2,Nhash,ghash;
