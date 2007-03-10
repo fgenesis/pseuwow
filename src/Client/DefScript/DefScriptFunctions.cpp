@@ -6,29 +6,38 @@
 #include <sstream>
 #include <math.h>
 #include "DefScript.h"
+#include "DefScriptTools.h"
+
+using namespace DefScriptTools;
 
 
-
-bool DefScriptPackage::func_shdn(CmdSet Set){
+DefReturnResult DefScriptPackage::func_shdn(CmdSet& Set){
+    DefReturnResult r;
     //exit(0);
     // need to define own
     SCshdn(Set);
-    return true;
+    return r;
 }
 
-bool DefScriptPackage::func_eof(CmdSet Set){
-    // do nothing still
-    return true;
-}
-
-bool DefScriptPackage::func_out(CmdSet Set){
+DefReturnResult DefScriptPackage::func_out(CmdSet& Set){
+    DefReturnResult r;
     printf("%s\n",Set.defaultarg.c_str());
-    return true;
+    r.ret=Set.defaultarg;
+    return r;
 }
 
-bool DefScriptPackage::func_loaddef(CmdSet Set){
+DefReturnResult DefScriptPackage::func_loaddef(CmdSet& Set){
+    DefReturnResult r;
     if( ScriptExists(Set.defaultarg) )
-        return true;
+    {
+        r.ret="exists";
+        return r;
+    }
+    return func_reloaddef(Set);
+}
+
+DefReturnResult DefScriptPackage::func_reloaddef(CmdSet& Set){
+    DefReturnResult r;
     bool result=false;
     std::string fn;
     if(Set.arg[0].empty())
@@ -45,267 +54,282 @@ bool DefScriptPackage::func_loaddef(CmdSet Set){
             fn=Set.arg[0];
         result=LoadScriptFromFile(fn,Set.defaultarg);
     }
+    r.ret=fn;
     if(!result)
+    {
         std::cout << "Could not load script '" << Set.defaultarg << "' [" << fn << "]\n";
-    return true;
+        r.ret="";
+    }
+    return r;
 }
 
-bool DefScriptPackage::func_reloaddef(CmdSet Set){
-    bool result=false;
-    std::string fn;
-    if(Set.arg[0].empty())
-    {
-        result=LoadByName(Set.defaultarg);
-        fn=(scPath + Set.defaultarg).append(".def");
-    }
-    else
-    {
-        std::string::size_type pos = Set.arg[0].find('/');
-        if(pos == std::string::npos)
-            fn=scPath+Set.arg[0];
-        else
-            fn=Set.arg[0];
-        result=LoadScriptFromFile(fn,Set.defaultarg);
-    }
-    if(!result)
-        std::cout << "Could not load script '" << Set.defaultarg << "' [" << fn << "]\n";
-    return true;
-}
-
-bool DefScriptPackage::func_unset(CmdSet Set){
+DefReturnResult DefScriptPackage::func_unset(CmdSet& Set){
+    DefReturnResult r;
+    r.ret=Set.defaultarg;
     if(Set.defaultarg.empty()){
         //if(curIsDebug)
         //    printf("Can't unset, no variable name given.\n");
-        return false;
+        return r;
     }
     if(Set.defaultarg.at(0)=='@'){
         //if(curIsDebug)
         //    printf("Can't unset macros!\n");
-        return false;
+        return r;
     }
     std::string vn=_NormalizeVarName(Set.defaultarg, Set.caller);
     variables.Unset(vn);
     //std::cout<<"Unset var '"<<Set->defaultarg<<"'\n";
-    return true;
+    return r;
 }
 
-bool DefScriptPackage::func_set(CmdSet Set){
+DefReturnResult DefScriptPackage::func_set(CmdSet& Set){
+    DefReturnResult r;
     if(Set.arg[0].empty()){
         //if(curIsDebug)
         //   printf("Can't assign value, no variable name given.\n");
-        return false;
+        return r;
     }
     if(Set.arg[0].at(0)=='@'){
         //if(curIsDebug)
         //    printf("Can't assign value to a macro!\n");
-        return false;
+        return r;
     }
     std::string vname,vval=Set.defaultarg;
     vname=_NormalizeVarName(Set.arg[0], Set.myname);
 
-   if(!stricmp(Set.arg[1].c_str(),"onfail") && vval.find("${")!=std::string::npos)
-        vval=Set.arg[2];
+   //if(!stricmp(Set.arg[1].c_str(),"onfail") && vval.find("${")!=std::string::npos)
+   //     vval=Set.arg[2];
 
     variables.Set(vname,vval);
-
-    if(Set.owner && Set.owner->GetDebug())
+    r.ret=vval;
+    
+    DefScript *sc = GetScript(Set.myname);
+    if(sc && sc->GetDebug())
         printf("VAR: %s = '%s'\n",vname.c_str(),vval.c_str());
 
-    return true;
+    return r;
 }
 
-bool DefScriptPackage::func_default(CmdSet Set){
+DefReturnResult DefScriptPackage::func_default(CmdSet& Set){
+    DefReturnResult r;
     if(Set.arg[0].empty()){
         //if(curIsDebug)
         //   printf("Can't assign value, no variable name given.\n");
-        return false;
+        return r;
     }
     if(Set.arg[0].at(0)=='@'){
         //if(curIsDebug)
         //    printf("Can't assign value to a macro!\n");
-        return false;
+        return r;
     }
     std::string vname,vval=Set.defaultarg;
     vname=_NormalizeVarName(Set.arg[0], Set.caller);
 
     if(variables.Get(vname).empty())
-        variables.Set(vname,vval); // set only if it has no value
+    {
+        variables.Set(vname,vval); // set only if it has no value or the var doesnt exist
+        r.ret=vval;
+    }
+    else
+    {
+        r.ret=variables.Get(vname);
+    }
 
-    return true;
+    return r;
 }
 
-bool DefScriptPackage::func_setscriptpermission(CmdSet Set)
+DefReturnResult DefScriptPackage::func_setscriptpermission(CmdSet& Set)
 {
+    DefReturnResult r;
     if(Set.defaultarg.empty() || Set.arg[0].empty())
-        return false;
+        return r;
 
     scriptPermissionMap[Set.arg[0]] = atoi(Set.defaultarg.c_str());
-    return true;
+    return r;
 }
 
-bool DefScriptPackage::func_toint(CmdSet Set)
+DefReturnResult DefScriptPackage::func_toint(CmdSet& Set)
 {
-    if(Set.arg[0].empty())
-        return false;
-
-    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myint = strtol(Set.defaultarg.c_str(), NULL, 10);
-    std::stringstream ss;
-    ss << myint;
-    variables.Set(vname,ss.str());
-    return true;
-}
-
-bool DefScriptPackage::func_add(CmdSet Set)
-{
-    if(Set.arg[0].empty())
-        return false;
-
-    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    long long myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    myvar += myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
-}
-
-bool DefScriptPackage::func_sub(CmdSet Set)
-{
-    if(Set.arg[0].empty())
-        return false;
-
-    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    myvar -= myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
-}
-
-bool DefScriptPackage::func_mul(CmdSet Set)
-{
-    if(Set.arg[0].empty())
-        return false;
-
-    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    myvar *= myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
-}
-
-bool DefScriptPackage::func_div(CmdSet Set)
-{
-    if(Set.arg[0].empty())
-        return false;
-
-    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    if(myadd==0)
+    DefReturnResult r;
+    std::string num=toString(floor(toNumber(Set.defaultarg.c_str())));
+    if(!Set.arg[0].empty())
     {
-        // TODO: some error handling
-        variables.Set(vname,"0");
+        std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+        variables.Set(vname,num);
     }
-    myvar /= myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
+    r.ret=num;
+    return r;
 }
 
-bool DefScriptPackage::func_mod(CmdSet Set)
+DefReturnResult DefScriptPackage::func_add(CmdSet& Set)
 {
+    DefReturnResult r;
     if(Set.arg[0].empty())
-        return false;
+    {
+        return r;
+    }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    myvar %= myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
+    double a=toNumber(variables.Get(vname));
+    double b=toNumber(Set.defaultarg.c_str());
+    a+=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
 }
 
-bool DefScriptPackage::func_pow(CmdSet Set)
+DefReturnResult DefScriptPackage::func_sub(CmdSet& Set)
 {
+    DefReturnResult r;
     if(Set.arg[0].empty())
-        return false;
+    {
+        return r;
+    }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    long double myd=(long double)myvar,mya=(long double)myadd;
-    myd = (long double)pow(myd,mya);
-    myvar = (def_int64)myd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
+    double a=toNumber(variables.Get(vname));
+    double b=toNumber(Set.defaultarg.c_str());
+    a-=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
 }
 
-bool DefScriptPackage::func_bitor(CmdSet Set)
+DefReturnResult DefScriptPackage::func_mul(CmdSet& Set)
 {
+    DefReturnResult r;
     if(Set.arg[0].empty())
-        return false;
+    {
+        return r;
+    }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    myvar |= myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
+    double a=toNumber(variables.Get(vname));
+    double b=toNumber(Set.defaultarg.c_str());
+    a*=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
 }
 
-bool DefScriptPackage::func_bitand(CmdSet Set)
+DefReturnResult DefScriptPackage::func_div(CmdSet& Set)
 {
+    DefReturnResult r;
     if(Set.arg[0].empty())
-        return false;
+    {
+        return r;
+    }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    myvar &= myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
+    double a=toNumber(variables.Get(vname));
+    double b=toNumber(Set.defaultarg.c_str());
+    if(b==0)
+        a=0;
+    else
+        a/=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
 }
 
-bool DefScriptPackage::func_bitxor(CmdSet Set)
+DefReturnResult DefScriptPackage::func_mod(CmdSet& Set)
 {
+    DefReturnResult r;
     if(Set.arg[0].empty())
-        return false;
+    {
+        return r;
+    }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    def_int64 myvar = strtol(variables.Get(vname).c_str(), NULL, 10);
-    def_int64 myadd = strtol(Set.defaultarg.c_str(), NULL, 10);
-    myvar ^= myadd;
-    std::stringstream ss;
-    ss << myvar;
-    variables.Set(vname,ss.str());
-    return true;
+    uint64 a=(uint64)toNumber(variables.Get(vname));
+    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    if(b==0)
+        a=0;
+    else
+        a%=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
 }
 
-bool DefScriptPackage::func_addevent(CmdSet Set)
+DefReturnResult DefScriptPackage::func_pow(CmdSet& Set)
 {
+    DefReturnResult r;
+    if(Set.arg[0].empty())
+    {
+        return r;
+    }
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    double a=toNumber(variables.Get(vname));
+    double b=toNumber(Set.defaultarg.c_str());
+    a=pow(a,b);
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::func_bitor(CmdSet& Set)
+{
+    DefReturnResult r;
+    if(Set.arg[0].empty())
+    {
+        return r;
+    }
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    uint64 a=(uint64)toNumber(variables.Get(vname));
+    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    a|=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::func_bitand(CmdSet& Set)
+{
+    DefReturnResult r;
+    if(Set.arg[0].empty())
+    {
+        return r;
+    }
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    uint64 a=(uint64)toNumber(variables.Get(vname));
+    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    a&=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::func_bitxor(CmdSet& Set)
+{
+    DefReturnResult r;
+    if(Set.arg[0].empty())
+    {
+        return r;
+    }
+
+    std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
+    uint64 a=(uint64)toNumber(variables.Get(vname));
+    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    a^=b;
+    variables.Set(vname,toString(a));
+    r.ret=toString(a);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::func_addevent(CmdSet& Set)
+{
+    DefReturnResult r;
     GetEventMgr()->Add(Set.arg[0],Set.defaultarg,atoi(Set.arg[1].c_str()),Set.myname.c_str());
-    return true;
+    return r;
 }
 
-bool DefScriptPackage::func_removeevent(CmdSet Set)
+DefReturnResult DefScriptPackage::func_removeevent(CmdSet& Set)
 {
+    DefReturnResult r;
     GetEventMgr()->Remove(Set.defaultarg);
-    return true;
+    return r;
 }

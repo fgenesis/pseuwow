@@ -240,7 +240,16 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Client\DefScript\DefScriptDefines.h">
+				</File>
+				<File
 					RelativePath=".\Client\DefScript\DefScriptFunctions.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\DefScript\DefScriptTools.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\DefScript\DefScriptTools.h">
 				</File>
 				<File
 					RelativePath=".\Client\DefScript\DynamicEvent.cpp">
