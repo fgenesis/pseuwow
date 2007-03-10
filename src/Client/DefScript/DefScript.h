@@ -2,48 +2,39 @@
 #ifndef __DEFSCRIPT_H
 #define __DEFSCRIPT_H
 
-#define MAXARGS 99
-#ifdef _DEBUG
-#    define _DEFSC_DEBUG(code) code;
-#else
-#    define _DEFSC_DEBUG(code) /* code */
-#endif
-
-#if COMPILER == COMPILER_MICROSOFT
-typedef __int64            def_int64;
-#else
-typedef __int64_t   def_int64;
-#endif
-
-
-
 #include <map>
 #include <deque>
 #include "VarSet.h"
 #include "DynamicEvent.h"
 
+#include "DefScriptDefines.h"
+
 class DefScriptPackage;
 class DefScript;
+
+
+struct DefReturnResult
+{
+    DefReturnResult() { ok=true; mustreturn=false; ret="true"; }
+    DefReturnResult(bool b) { ok=b; mustreturn=false; ret=b?"true":"false"; }
+    bool ok; // true if the execution of the current statement was successful
+    bool mustreturn;
+    std::string ret; // return value used by ?{..}
+    //bool abrt; // true if ALL current script execution must be aborted.
+    //std::string err; // error string, including tracestack, etc.
+};
 
 struct DefXChgResult
 {
     DefXChgResult() { changed=false; }
     bool changed;
     std::string str;
-};
-
-struct SecReturnResult
-{
-    bool ok; // true if the execution of the current statement was successful
-    bool abrt; // true if ALL current script execution must be aborted.
-    std::string ret; // return value used by ?{..}
-    std::string err; // error string, including tracestack, etc.
-};
-    
+    DefReturnResult result;
+};    
 
 class CmdSet {
 	public:
-	CmdSet(DefScript *p);
+	CmdSet();
 	~CmdSet();
 	void Clear();
 	std::string cmd;
@@ -51,13 +42,11 @@ class CmdSet {
 	std::string defaultarg;
     std::string myname;
     std::string caller;
-    DefScript *owner;
-    void *ptr;
 };
 
 struct DefScriptFunctionTable {
     char *name;
-    bool (DefScriptPackage::*func)(CmdSet Set);
+    DefReturnResult (DefScriptPackage::*func)(CmdSet& Set);
 };
 
 class DefScript {
@@ -84,9 +73,7 @@ private:
 	unsigned char permission;
     bool debugmode;
     
-    DefScriptPackage *_parent;
-    //CmdSet _mySet;
-   	
+    DefScriptPackage *_parent;   	
 };
 
 
@@ -99,29 +86,30 @@ public:
     DefScript *GetScript(std::string);
 	unsigned int GetScripts(void);
 	bool LoadScriptFromFile(std::string,std::string);
-	bool RunScript(std::string,CmdSet*);
+	DefReturnResult RunScript(std::string,CmdSet*);
+    bool BoolRunScript(std::string,CmdSet*);
 	unsigned int GetScriptID(std::string);
-	bool RunSingleLine(std::string);
+	DefReturnResult RunSingleLine(std::string);
 	bool ScriptExists(std::string);
 	VarSet variables;
     void SetPath(std::string);
     bool LoadByName(std::string);
     void SetFunctionTable(DefScriptFunctionTable*);
     std::string _NormalizeVarName(std::string, std::string);
-    bool RunSingleLineFromScript(std::string line, DefScript *pScript);
+    DefReturnResult RunSingleLineFromScript(std::string line, DefScript *pScript);
     DefScript_DynamicEventMgr *GetEventMgr(void);
     
     std::string scPath;
 
     // Own executor functions
     void My_LoadUserPermissions(VarSet&);
-    bool My_Run(std::string line,std::string username);
+    void My_Run(std::string line,std::string username);
 
 private:
-    DefXChgResult ReplaceVars(std::string, CmdSet*, bool);
-	CmdSet SplitLine(std::string);
-    bool Interpret(CmdSet);
-    CmdSet RemoveBrackets(CmdSet);
+    DefXChgResult ReplaceVars(std::string str, CmdSet* pSet, unsigned char VarType);
+	void SplitLine(CmdSet&,std::string);
+    DefReturnResult Interpret(CmdSet&);
+    void RemoveBrackets(CmdSet&);
     std::string RemoveBracketsFromString(std::string);
     DefScriptFunctionTable *_GetFunctionTable(void) const;
     DefScriptFunctionTable *functionTable;
@@ -132,48 +120,48 @@ private:
     std::map<std::string,unsigned char> scriptPermissionMap;
 
     // Usable internal basic functions:
-    bool func_default(CmdSet);
-    bool func_set(CmdSet);
-    bool func_unset(CmdSet);
-    bool func_loaddef(CmdSet);
-    bool func_reloaddef(CmdSet);
-    bool func_out(CmdSet);
-    bool func_eof(CmdSet);
-    bool func_shdn(CmdSet);
-    bool func_setscriptpermission(CmdSet);
-    bool func_toint(CmdSet);
-    bool func_add(CmdSet);
-    bool func_sub(CmdSet);
-    bool func_mul(CmdSet);
-    bool func_div(CmdSet);
-    bool func_mod(CmdSet);
-    bool func_pow(CmdSet);
-    bool func_bitor(CmdSet);
-    bool func_bitand(CmdSet);
-    bool func_bitxor(CmdSet);
-    bool func_addevent(CmdSet);
-    bool func_removeevent(CmdSet);
+    DefReturnResult func_default(CmdSet&);
+    DefReturnResult func_set(CmdSet&);
+    DefReturnResult func_unset(CmdSet&);
+    DefReturnResult func_loaddef(CmdSet&);
+    DefReturnResult func_reloaddef(CmdSet&);
+    DefReturnResult func_out(CmdSet&);
+    DefReturnResult func_eof(CmdSet&);
+    DefReturnResult func_shdn(CmdSet&);
+    DefReturnResult func_setscriptpermission(CmdSet&);
+    DefReturnResult func_toint(CmdSet&);
+    DefReturnResult func_add(CmdSet&);
+    DefReturnResult func_sub(CmdSet&);
+    DefReturnResult func_mul(CmdSet&);
+    DefReturnResult func_div(CmdSet&);
+    DefReturnResult func_mod(CmdSet&);
+    DefReturnResult func_pow(CmdSet&);
+    DefReturnResult func_bitor(CmdSet&);
+    DefReturnResult func_bitand(CmdSet&);
+    DefReturnResult func_bitxor(CmdSet&);
+    DefReturnResult func_addevent(CmdSet&);
+    DefReturnResult func_removeevent(CmdSet&);
 
     // Useable own internal functions:
-    bool SCpause(CmdSet);
-    bool SCSendChatMessage(CmdSet);
-    bool SCsavecache(CmdSet);
-    bool SCemote(CmdSet);
-    bool SCfollow(CmdSet);
-    bool SCshdn(CmdSet);
-    bool SCjoinchannel(CmdSet);
-    bool SCleavechannel(CmdSet);
-    bool SCloadconf(CmdSet);
-    bool SCapplypermissions(CmdSet);
-    bool SCapplyconf(CmdSet);
-    bool SClog(CmdSet);
-    bool SClogdetail(CmdSet);
-    bool SClogdebug(CmdSet);
-    bool SClogerror(CmdSet);
-	bool SCcastspell(CmdSet);
-    bool SCqueryitem(CmdSet);
-    bool SCtarget(CmdSet);
-    bool SCloadscp(CmdSet);
+    DefReturnResult SCpause(CmdSet&);
+    DefReturnResult SCSendChatMessage(CmdSet&);
+    DefReturnResult SCsavecache(CmdSet&);
+    DefReturnResult SCemote(CmdSet&);
+    DefReturnResult SCfollow(CmdSet&);
+    DefReturnResult SCshdn(CmdSet&);
+    DefReturnResult SCjoinchannel(CmdSet&);
+    DefReturnResult SCleavechannel(CmdSet&);
+    DefReturnResult SCloadconf(CmdSet&);
+    DefReturnResult SCapplypermissions(CmdSet&);
+    DefReturnResult SCapplyconf(CmdSet&);
+    DefReturnResult SClog(CmdSet&);
+    DefReturnResult SClogdetail(CmdSet&);
+    DefReturnResult SClogdebug(CmdSet&);
+    DefReturnResult SClogerror(CmdSet&);
+	DefReturnResult SCcastspell(CmdSet&);
+    DefReturnResult SCqueryitem(CmdSet&);
+    DefReturnResult SCtarget(CmdSet&);
+    DefReturnResult SCloadscp(CmdSet&);
 
     // Own variable declarations
     std::map<std::string, unsigned char> my_usrPermissionMap;

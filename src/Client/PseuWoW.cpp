@@ -100,7 +100,8 @@ bool PseuInstance::Init(void) {
     _scp->variables.Set("@version",_ver);
 
     log("Loading DefScripts from folder '%s'",_scpdir.c_str());
-    if(!_scp->RunScript("_startup",NULL))
+
+    if(!_scp->BoolRunScript("_startup",NULL))
     {
         logerror("Error executing '_startup.def'");
         SetError();

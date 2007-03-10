@@ -11,18 +11,18 @@
 #include "CacheHandler.h"
 #include "SCPDatabase.h"
 
-bool DefScriptPackage::SCshdn(CmdSet Set)
+DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
 {
     ((PseuInstance*)parentMethod)->Stop();
     return true;
 }
 
-bool DefScriptPackage::SCpause(CmdSet Set){
+DefReturnResult DefScriptPackage::SCpause(CmdSet& Set){
     ((PseuInstance*)parentMethod)->Sleep(atoi(Set.defaultarg.c_str()));
     return true;
 }
 
-bool DefScriptPackage::SCSendChatMessage(CmdSet Set){
+DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
         logerror("Invalid Script call: SCSendChatMessage: WorldSession not valid");
@@ -49,7 +49,7 @@ bool DefScriptPackage::SCSendChatMessage(CmdSet Set){
     return true;
 }
 
-bool DefScriptPackage::SCsavecache(CmdSet Set){
+DefReturnResult DefScriptPackage::SCsavecache(CmdSet& Set){
    ((PseuInstance*)parentMethod)->SaveAllCache();
     std::stringstream str;
     if(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid())
@@ -66,7 +66,7 @@ bool DefScriptPackage::SCsavecache(CmdSet Set){
     return true;
 }
 
-bool DefScriptPackage::SCemote(CmdSet Set){
+DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){
     if(Set.defaultarg.empty())
         return true;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
@@ -79,7 +79,7 @@ bool DefScriptPackage::SCemote(CmdSet Set){
     return true;
 }
 
-bool DefScriptPackage::SCfollow(CmdSet Set){
+DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set){
     WorldSession *ws=((PseuInstance*)parentMethod)->GetWSession();
     if(Set.defaultarg.empty()){
         ws->SendChatMessage(CHAT_MSG_SAY,0,"Stopping! (Please give me a Playername to follow!)","");
@@ -97,7 +97,7 @@ bool DefScriptPackage::SCfollow(CmdSet Set){
 
 }
 
-bool DefScriptPackage::SCjoinchannel(CmdSet Set){
+DefReturnResult DefScriptPackage::SCjoinchannel(CmdSet& Set){
     if(Set.defaultarg.empty())
         return true;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
@@ -109,7 +109,7 @@ bool DefScriptPackage::SCjoinchannel(CmdSet Set){
     return true;
 }
 
-bool DefScriptPackage::SCleavechannel(CmdSet Set){
+DefReturnResult DefScriptPackage::SCleavechannel(CmdSet& Set){
     if(Set.defaultarg.empty())
         return true;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
@@ -121,7 +121,7 @@ bool DefScriptPackage::SCleavechannel(CmdSet Set){
     return true;
 }
 
-bool DefScriptPackage::SCloadconf(CmdSet Set){
+DefReturnResult DefScriptPackage::SCloadconf(CmdSet& Set){
     if(Set.defaultarg.empty())
         return true;
     std::string fn;
@@ -136,37 +136,37 @@ bool DefScriptPackage::SCloadconf(CmdSet Set){
     return true;
 }
 
-bool DefScriptPackage::SCapplypermissions(CmdSet Set){
+DefReturnResult DefScriptPackage::SCapplypermissions(CmdSet& Set){
     this->My_LoadUserPermissions(variables);
     return true;
 }
 
-bool DefScriptPackage::SCapplyconf(CmdSet Set){
+DefReturnResult DefScriptPackage::SCapplyconf(CmdSet& Set){
     ((PseuInstance*)parentMethod)->GetConf()->ApplyFromVarSet(variables);
     return true;
 }
 
-bool DefScriptPackage::SClog(CmdSet Set){
+DefReturnResult DefScriptPackage::SClog(CmdSet& Set){
     log(Set.defaultarg.c_str());
     return true;
 }
 
-bool DefScriptPackage::SClogdetail(CmdSet Set){
+DefReturnResult DefScriptPackage::SClogdetail(CmdSet& Set){
     logdetail(Set.defaultarg.c_str());
     return true;
 }
 
-bool DefScriptPackage::SClogdebug(CmdSet Set){
+DefReturnResult DefScriptPackage::SClogdebug(CmdSet& Set){
     logdebug(Set.defaultarg.c_str());
     return true;
 }
 
-bool DefScriptPackage::SClogerror(CmdSet Set){
+DefReturnResult DefScriptPackage::SClogerror(CmdSet& Set){
     logerror(Set.defaultarg.c_str());
     return true;
 }
 
-bool DefScriptPackage::SCcastspell(CmdSet Set)
+DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
 {
 	if(Set.defaultarg.empty())
 		return true;
@@ -188,7 +188,7 @@ bool DefScriptPackage::SCcastspell(CmdSet Set)
 	return true;
 }
 
-bool DefScriptPackage::SCqueryitem(CmdSet Set){
+DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set){
     uint32 id = atoi(Set.defaultarg.c_str());
     if(!id)
         return true;
@@ -202,7 +202,7 @@ bool DefScriptPackage::SCqueryitem(CmdSet Set){
     return true;
 }
 
-bool DefScriptPackage::SCtarget(CmdSet Set)
+DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
 {
     // TODO: special targets: _self _pet _nearest ...
 
@@ -229,7 +229,7 @@ bool DefScriptPackage::SCtarget(CmdSet Set)
     return true;
 }
 
-bool DefScriptPackage::SCloadscp(CmdSet Set)
+DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
 {
     if(Set.arg[0].empty() || Set.defaultarg.empty())
         return true;
@@ -264,13 +264,10 @@ void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
     }
 }
 
-bool DefScriptPackage::My_Run(std::string line, std::string username)
+void DefScriptPackage::My_Run(std::string line, std::string username)
 {
-    DefXChgResult final=ReplaceVars(line,NULL,false);
-	CmdSet curSet=SplitLine(final.str);
-
     uint8 scperm=0,usrperm=0;
-    
+
     for (std::map<std::string,unsigned char>::iterator i = my_usrPermissionMap.begin(); i != my_usrPermissionMap.end(); i++)
     {
         if(i->first == username)
@@ -278,6 +275,21 @@ bool DefScriptPackage::My_Run(std::string line, std::string username)
             usrperm = i->second;
         }
     }
+
+    // temp fix to prevent users from executing scripts via return values exploit. example:
+    // -out ?{say .shutdown}
+    // note that the following code can still be executed:
+    // -out ${q}?{say .shutdown}
+    // where var q = "?"
+    if(usrperm < 255 && line.find("?{")!=std::string::npos)
+    {
+        logerror("WARNING: %s wanted to exec \"%s\"",username.c_str(),line.c_str());
+        return;
+    }
+
+    DefXChgResult final=ReplaceVars(line,NULL,false);
+    CmdSet curSet;
+    SplitLine(curSet,final.str);
 
     for (std::map<std::string,unsigned char>::iterator i = scriptPermissionMap.begin(); i != scriptPermissionMap.end(); i++)
     {
@@ -289,15 +301,14 @@ bool DefScriptPackage::My_Run(std::string line, std::string username)
 
     if(usrperm < scperm)
     {
-        CmdSet Set(NULL);
+        CmdSet Set;
         Set.arg[0] = username;
         Set.arg[1] = toString(usrperm);
         Set.arg[2] = toString(scperm);
         Set.arg[3] = curSet.cmd;
         RunScript("_nopermission",&Set);
-        return false;
+        return;
     }
 
     Interpret(curSet);
-    return true;
 }
