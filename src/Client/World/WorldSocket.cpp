@@ -12,17 +12,17 @@ WorldSocket::WorldSocket(SocketHandler &h, WorldSession *s) : TcpSocket(h)
 
 void WorldSocket::OnConnect()
 {
-    printf("Connected to world server.\r\n");
+    log("Connected to world server.\r\n");
 }
 
 void WorldSocket::OnConnectFailed()
 {
-    printf("WorldSocket::OnConnectFailed()\n");
+    logerror("WorldSocket::OnConnectFailed()\n");
 }
 
 void WorldSocket::OnDelete()
 {
-    printf("Connection to world server has been closed.\n");
+    log("Connection to world server has been closed.\n");
     if(_session)
         _session->SetSocket(NULL);
 }
