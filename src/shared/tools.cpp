@@ -70,3 +70,17 @@ uint64 toInt(std::string str)
         return strtoul(str.c_str(),NULL,10);
 }
 
+std::string toHexDump(uint8* array,uint32 size,bool spaces)
+{
+    std::stringstream ss;
+    char buf[5];
+    for(uint32 i=0;i<size;i++)
+    {
+        sprintf(buf,(array[i]<0x0F)?"0%X":"%X",(uint32)array[i]);
+        ss << buf;
+        if(spaces)
+            ss << ' ';
+    }
+    return ss.str();
+}
+

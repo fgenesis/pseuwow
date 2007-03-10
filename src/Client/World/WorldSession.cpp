@@ -588,21 +588,14 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     std::string plrname;
     guid = recvPacket.GetPackedGuid();
     recvPacket >> flags >> time >> x >> y >> z >> o;
-    if(guid){
+    /*if(guid){
         plrname=plrNameCache.GetName(guid);
         if(plrname.empty())
         {
             SendQueryPlayerName(guid);
             plrname="Unknown Entity";
         }
-    }
-    // for follow:
-    //if(_followGUID==guid){
-    //    ByteBuffer bb;
-    //    bb << time << flags << x << y << z << o;
-    //    SendWorldPacket(opcode,&bb);
-    //}
-    // more to come
+    }*/
 }
 
 void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
@@ -616,7 +609,7 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 
 	recvPacket >> unk >> guid >> unk3 >> unk1 >> unk2 >> o >> x >> y >> z >> ang >> unk4;
 
-	logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: %d\n", x, y, z, o, guid);
+	logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
 	WorldPacket response;
 	response.SetOpcode(MSG_MOVE_FALL_LAND);

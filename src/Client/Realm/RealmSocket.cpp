@@ -210,7 +210,15 @@ void RealmSocket::OnRead(void)
     {
         log("RealmSocket: Got unknown packet, cmd=%u",cmd);
     }
-    ibuf.Remove(ibuf.GetLength()); // if we have data crap left on the buf, delete it
+    if(ibuf.GetLength())
+    {
+        uint32 len = ibuf.GetLength();
+        char *data = new char[len];
+        ibuf.Read(data,len); // if we have data crap left on the buf, delete it
+        logdebug("Data left on RealmSocket, Hexdump:");
+        logdebug(toHexDump((uint8*)data,len).c_str());
+        delete [] data;
+    }
 }
 
 
@@ -258,6 +266,17 @@ PseuInstance *RealmSocket::GetInstance(void)
 void RealmSocket::_HandleLogonChallenge(void)
 {
     logdebug("RealmSocket: Got AUTH_LOGON_CHALLENGE [%u of %u bytes]",ibuf.GetLength(),sizeof(sAuthLogonChallenge_S));
+    if(ibuf.GetLength() < sizeof(sAuthLogonChallenge_S))
+    {
+        logerror("AUTH_LOGON_CHALLENGE: Recieved incorrect/unknown packet. Hexdump:");
+        uint32 len = ibuf.GetLength();
+        char* data = new char[len];
+        ibuf.Read(data,len);
+        logerror(toHexDump((uint8*)data,len).c_str());
+        delete [] data;
+        return;
+    }
+    
     sAuthLogonChallenge_S lc;
     ibuf.Read((char*)&lc, sizeof(sAuthLogonChallenge_S));
 
@@ -332,7 +351,7 @@ void RealmSocket::_HandleLogonChallenge(void)
 	    S2hash.UpdateData((const uint8*)S2,16);
 	    S2hash.Finalize();
 	    // Re-combine them
-	    char S_hash[40]; // 2*Sha1Len+1 for \0
+	    char S_hash[40];
 	    for(i=0;i<20;i++){
 		    S_hash[i*2]=S1hash.GetDigest()[i];
 		    S_hash[i*2+1]=S2hash.GetDigest()[i];
@@ -368,14 +387,16 @@ void RealmSocket::_HandleLogonChallenge(void)
 		M2hash.UpdateData((const uint8*)S_hash,40);
 		M2hash.Finalize();
 
-
-	    //logdebug("--> M1=");printchex((char*)M1hash.GetDigest(),20,true);
-		//logdebug("--> M2=");printchex((char*)M2hash.GetDigest(),20,true);
+        logdebug("== Common Hashes ==");
+	    logdebug("--> M1=%s",toHexDump(M1hash.GetDigest(),M1hash.GetLength(),false).c_str());
+	    logdebug("--> M2=%s",toHexDump(M2hash.GetDigest(),M2hash.GetLength(),false).c_str());
 
 		// Calc CRC & CRC_hash
 		// i don't know yet how to calc it, so set it to zero
 		char crc_hash[20];
 		memset(crc_hash,0,20);
+
+        logdebug("--> CRC=%s",toHexDump((uint8*)crc_hash,20,false).c_str());
 
 
 		// now lets prepare the packet 
@@ -397,7 +418,7 @@ void RealmSocket::_HandleLogonChallenge(void)
         break;
 
     default:
-        log("Unknown realm server response! opcode=0x%x\n",(unsigned char)lc.error);
+        logerror("Unknown realm server response! opcode=0x%x\n",(unsigned char)lc.error);
         break;
     }
 }
@@ -406,6 +427,16 @@ void RealmSocket::_HandleLogonChallenge(void)
 void RealmSocket::_HandleLogonProof(void)
 {
     logdetail("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),26);
+    if(ibuf.GetLength() < 26)
+    {
+        logerror("AUTH_LOGON_PROOF: Recieved incorrect/unknown packet. Hexdump:");
+        uint32 len = ibuf.GetLength();
+        char* data = new char[len];
+        ibuf.Read(data,len);
+        logerror(toHexDump((uint8*)data,len).c_str());
+        delete [] data;
+        return;
+    }
     sAuthLogonProof_S lp;
     ibuf.Read((char*)&lp, 26); // the compiler didnt like 'sizeof(sAuthLogonProof_S)', said it was 28
     //printchex((char*)&lp, sizeof(sAuthLogonProof_S),true);
@@ -434,6 +465,6 @@ void RealmSocket::OnConnect()
 
 void RealmSocket::OnConnectFailed(void)
 {
-    log("Connecting to Realm failed!");
+    logerror("Connecting to Realm failed!");
 }
     
