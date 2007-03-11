@@ -162,6 +162,9 @@
 				RelativePath=".\Client\DefScriptInterface.cpp">
 			</File>
 			<File
+				RelativePath=".\Client\DefScriptInterfaceInclude.h">
+			</File>
+			<File
 				RelativePath=".\Client\HelperDefs.h">
 			</File>
 			<File

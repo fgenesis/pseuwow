@@ -151,7 +151,7 @@ DefReturnResult DefScriptPackage::func_setscriptpermission(CmdSet& Set)
 DefReturnResult DefScriptPackage::func_toint(CmdSet& Set)
 {
     DefReturnResult r;
-    std::string num=toString(floor(toNumber(Set.defaultarg.c_str())));
+    std::string num=toString(floor(toNumber(Set.defaultarg)));
     if(!Set.arg[0].empty())
     {
         std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
@@ -171,7 +171,7 @@ DefReturnResult DefScriptPackage::func_add(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     double a=toNumber(variables.Get(vname));
-    double b=toNumber(Set.defaultarg.c_str());
+    double b=toNumber(Set.defaultarg);
     a+=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -188,7 +188,7 @@ DefReturnResult DefScriptPackage::func_sub(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     double a=toNumber(variables.Get(vname));
-    double b=toNumber(Set.defaultarg.c_str());
+    double b=toNumber(Set.defaultarg);
     a-=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -205,7 +205,7 @@ DefReturnResult DefScriptPackage::func_mul(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     double a=toNumber(variables.Get(vname));
-    double b=toNumber(Set.defaultarg.c_str());
+    double b=toNumber(Set.defaultarg);
     a*=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -222,7 +222,7 @@ DefReturnResult DefScriptPackage::func_div(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     double a=toNumber(variables.Get(vname));
-    double b=toNumber(Set.defaultarg.c_str());
+    double b=toNumber(Set.defaultarg);
     if(b==0)
         a=0;
     else
@@ -242,7 +242,7 @@ DefReturnResult DefScriptPackage::func_mod(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    uint64 b=(uint64)toNumber(Set.defaultarg);
     if(b==0)
         a=0;
     else
@@ -262,7 +262,7 @@ DefReturnResult DefScriptPackage::func_pow(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     double a=toNumber(variables.Get(vname));
-    double b=toNumber(Set.defaultarg.c_str());
+    double b=toNumber(Set.defaultarg);
     a=pow(a,b);
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -279,7 +279,7 @@ DefReturnResult DefScriptPackage::func_bitor(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    uint64 b=(uint64)toNumber(Set.defaultarg);
     a|=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -296,7 +296,7 @@ DefReturnResult DefScriptPackage::func_bitand(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    uint64 b=(uint64)toNumber(Set.defaultarg);
     a&=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -313,7 +313,7 @@ DefReturnResult DefScriptPackage::func_bitxor(CmdSet& Set)
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
     uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg.c_str());
+    uint64 b=(uint64)toNumber(Set.defaultarg);
     a^=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -323,7 +323,7 @@ DefReturnResult DefScriptPackage::func_bitxor(CmdSet& Set)
 DefReturnResult DefScriptPackage::func_addevent(CmdSet& Set)
 {
     DefReturnResult r;
-    GetEventMgr()->Add(Set.arg[0],Set.defaultarg,atoi(Set.arg[1].c_str()),Set.myname.c_str());
+    GetEventMgr()->Add(Set.arg[0],Set.defaultarg,(clock_t)toNumber(Set.arg[1]),Set.myname.c_str());
     return r;
 }
 
