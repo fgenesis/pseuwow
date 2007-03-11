@@ -51,3 +51,24 @@ uint32 SCPDatabase::LoadFromFile(char *fn)
     fh.close();
     return sections;
 }
+
+bool SCPDatabase::HasField(uint32 id)
+{
+    for(SCPFieldMap::iterator i = _map.begin(); i != _map.end(); i++)
+        if(i->first == id)
+            return true;
+    return false;
+}
+
+bool SCPField::HasEntry(std::string e)
+{
+    for(SCPEntryMap::iterator i = _map.begin(); i != _map.end(); i++)
+        if(i->first == e)
+            return true;
+    return false;
+}
+
+std::string SCPField::GetString(std::string entry)
+{
+    return HasEntry(entry) ? _map[entry] : "";
+}

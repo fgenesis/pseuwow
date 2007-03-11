@@ -16,13 +16,15 @@ class DefScript;
 struct DefReturnResult
 {
     DefReturnResult() { ok=true; mustreturn=false; ret="true"; }
-    DefReturnResult(bool b) { ok=b; mustreturn=false; ret=b?"true":"false"; }
+    DefReturnResult(bool b) { ok=true; mustreturn=false; ret=b?"true":"false"; }
     bool ok; // true if the execution of the current statement was successful
     bool mustreturn;
     std::string ret; // return value used by ?{..}
     //bool abrt; // true if ALL current script execution must be aborted.
     //std::string err; // error string, including tracestack, etc.
 };
+
+#define DEF_RETURN_ERROR { DefReturnResult __defreturnresult(false); __defreturnresult.ok=false; return __defreturnresult; }
 
 struct DefXChgResult
 {
@@ -44,10 +46,17 @@ class CmdSet {
     std::string caller;
 };
 
-struct DefScriptFunctionTable {
-    char *name;
+struct DefScriptFunctionEntry {
+    DefScriptFunctionEntry(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
+    {
+        name=n;
+        func=f;
+    }
+    std::string name;
     DefReturnResult (DefScriptPackage::*func)(CmdSet& Set);
 };
+
+typedef std::deque<DefScriptFunctionEntry> DefScriptFunctionTable;
 
 class DefScript {
 public:
@@ -94,10 +103,14 @@ public:
 	VarSet variables;
     void SetPath(std::string);
     bool LoadByName(std::string);
-    void SetFunctionTable(DefScriptFunctionTable*);
     std::string _NormalizeVarName(std::string, std::string);
     DefReturnResult RunSingleLineFromScript(std::string line, DefScript *pScript);
     DefScript_DynamicEventMgr *GetEventMgr(void);
+    void AddFunc(DefScriptFunctionEntry);
+    void AddFunc(std::string n,DefReturnResult (DefScriptPackage::*)(CmdSet& Set));
+    bool HasFunc(std::string);
+    void DelFunc(std::string);
+
     
     std::string scPath;
 
@@ -106,18 +119,18 @@ public:
     void My_Run(std::string line,std::string username);
 
 private:
+    void _InitFunctions(void);
     DefXChgResult ReplaceVars(std::string str, CmdSet* pSet, unsigned char VarType);
 	void SplitLine(CmdSet&,std::string);
     DefReturnResult Interpret(CmdSet&);
     void RemoveBrackets(CmdSet&);
     std::string RemoveBracketsFromString(std::string);
-    DefScriptFunctionTable *_GetFunctionTable(void) const;
-    DefScriptFunctionTable *functionTable;
     unsigned int functions;
     void *parentMethod;
     DefScript_DynamicEventMgr *_eventmgr;
     std::map<std::string,DefScript*> Script;
     std::map<std::string,unsigned char> scriptPermissionMap;
+    DefScriptFunctionTable _functable;
 
     // Usable internal basic functions:
     DefReturnResult func_default(CmdSet&);
@@ -142,26 +155,8 @@ private:
     DefReturnResult func_addevent(CmdSet&);
     DefReturnResult func_removeevent(CmdSet&);
 
-    // Useable own internal functions:
-    DefReturnResult SCpause(CmdSet&);
-    DefReturnResult SCSendChatMessage(CmdSet&);
-    DefReturnResult SCsavecache(CmdSet&);
-    DefReturnResult SCemote(CmdSet&);
-    DefReturnResult SCfollow(CmdSet&);
-    DefReturnResult SCshdn(CmdSet&);
-    DefReturnResult SCjoinchannel(CmdSet&);
-    DefReturnResult SCleavechannel(CmdSet&);
-    DefReturnResult SCloadconf(CmdSet&);
-    DefReturnResult SCapplypermissions(CmdSet&);
-    DefReturnResult SCapplyconf(CmdSet&);
-    DefReturnResult SClog(CmdSet&);
-    DefReturnResult SClogdetail(CmdSet&);
-    DefReturnResult SClogdebug(CmdSet&);
-    DefReturnResult SClogerror(CmdSet&);
-	DefReturnResult SCcastspell(CmdSet&);
-    DefReturnResult SCqueryitem(CmdSet&);
-    DefReturnResult SCtarget(CmdSet&);
-    DefReturnResult SCloadscp(CmdSet&);
+    // setup own function declarations here
+#   include "DefScriptInterfaceInclude.h"
 
     // Own variable declarations
     std::map<std::string, unsigned char> my_usrPermissionMap;

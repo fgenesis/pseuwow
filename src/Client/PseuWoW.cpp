@@ -79,7 +79,7 @@ PseuInstance::~PseuInstance()
 
 bool PseuInstance::Init(void) {
     log_prepare("logfile.txt",this);
-    log("\n");
+    log("");
     log("--- Initializing Instance ---");
 
     if(_confdir.empty())
@@ -242,7 +242,13 @@ SCPDatabase& PseuInstance::GetSCPDatabase(std::string dbname)
     return _dbmap[dbname];
 }
 
-
+bool PseuInstance::HasSCPDatabase(std::string dbname)
+{
+    for(std::map<std::string,SCPDatabase>::iterator i = _dbmap.begin(); i != _dbmap.end(); i++)
+        if(i->first == dbname)
+            return true;
+    return false;
+}
 
 PseuInstanceConf::PseuInstanceConf()
 {

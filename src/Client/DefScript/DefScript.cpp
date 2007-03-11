@@ -11,8 +11,11 @@
 // --- SECTION FOR SCRIPT PACKAGES ---
 DefScriptPackage::DefScriptPackage()
 {
-    functionTable=_GetFunctionTable();
     _eventmgr=new DefScript_DynamicEventMgr(this);
+    _InitFunctions();
+#   ifdef USING_DEFSCRIPT_EXTENSIONS
+    _InitDefScriptInterface();
+#   endif
 }
 
 DefScriptPackage::~DefScriptPackage()
@@ -36,63 +39,58 @@ void DefScriptPackage::Clear(void)
 	Script.empty();
 }
 
-DefScriptFunctionTable *DefScriptPackage::_GetFunctionTable(void) const
+void DefScriptPackage::_InitFunctions(void)
 {
-    static DefScriptFunctionTable table[] = {
-        // basic functions:
-        {"out",&DefScriptPackage::func_out},
-        {"set",&DefScriptPackage::func_set},
-        {"default",&DefScriptPackage::func_default},
-        {"unset",&DefScriptPackage::func_unset},
-        {"shdn",&DefScriptPackage::func_shdn},
-        {"loaddef",&DefScriptPackage::func_loaddef},
-        {"reloaddef",&DefScriptPackage::func_reloaddef},
-        {"setscriptpermission",&DefScriptPackage::func_setscriptpermission},
-
-        // mathematical functions:
-        {"toint",&DefScriptPackage::func_toint},
-        {"add",&DefScriptPackage::func_add},
-        {"sub",&DefScriptPackage::func_sub},
-        {"mul",&DefScriptPackage::func_mul},
-        {"div",&DefScriptPackage::func_div},
-        {"mod",&DefScriptPackage::func_mod},
-        {"pow",&DefScriptPackage::func_pow},
-        {"bitor",&DefScriptPackage::func_bitor},
-        {"bitand",&DefScriptPackage::func_bitand},
-        {"bitxor",&DefScriptPackage::func_bitxor},
-        {"addevent",&DefScriptPackage::func_addevent},
-        {"removeevent",&DefScriptPackage::func_removeevent},
-
-        // user functions:
-        {"pause",&DefScriptPackage::SCpause},
-        {"emote",&DefScriptPackage::SCemote},
-        //{"follow",&DefScriptPackage::SCfollow},
-        {"savecache",&DefScriptPackage::SCsavecache},
-        {"sendchatmessage",&DefScriptPackage::SCSendChatMessage},
-        {"joinchannel",&DefScriptPackage::SCjoinchannel},
-        {"leavechannel",&DefScriptPackage::SCleavechannel},
-        {"loadconf",&DefScriptPackage::SCloadconf},
-        {"applyconf",&DefScriptPackage::SCapplyconf},
-        {"applypermissions",&DefScriptPackage::SCapplypermissions},
-        {"log",&DefScriptPackage::SClog},
-        {"logdetail",&DefScriptPackage::SClogdetail},
-        {"logerror",&DefScriptPackage::SClogerror},
-        {"logdebug",&DefScriptPackage::SClogdebug},
-		{"castspell", &DefScriptPackage::SCcastspell},
-        {"queryitem", &DefScriptPackage::SCqueryitem},
-        {"target", &DefScriptPackage::SCtarget},
-        {"loadscp", &DefScriptPackage::SCloadscp},
-
-        // table termination
-        {NULL,NULL}
-
-    };
-    return table;
+    AddFunc("out",&DefScriptPackage::func_out);
+    AddFunc("set",&DefScriptPackage::func_set);
+    AddFunc("default",&DefScriptPackage::func_default);
+    AddFunc("unset",&DefScriptPackage::func_unset);
+    AddFunc("shdn",&DefScriptPackage::func_shdn);
+    AddFunc("loaddef",&DefScriptPackage::func_loaddef);
+    AddFunc("reloaddef",&DefScriptPackage::func_reloaddef);
+    AddFunc("setscriptpermission",&DefScriptPackage::func_setscriptpermission);
+    AddFunc("toint",&DefScriptPackage::func_toint);
+    AddFunc("add",&DefScriptPackage::func_add);
+    AddFunc("sub",&DefScriptPackage::func_sub);
+    AddFunc("mul",&DefScriptPackage::func_mul);
+    AddFunc("div",&DefScriptPackage::func_div);
+    AddFunc("mod",&DefScriptPackage::func_mod);
+    AddFunc("pow",&DefScriptPackage::func_pow);
+    AddFunc("bitor",&DefScriptPackage::func_bitor);
+    AddFunc("bitand",&DefScriptPackage::func_bitand);
+    AddFunc("bitxor",&DefScriptPackage::func_bitxor);
+    AddFunc("addevent",&DefScriptPackage::func_addevent);
+    AddFunc("removeevent",&DefScriptPackage::func_removeevent);
 }
 
-void DefScriptPackage::SetFunctionTable(DefScriptFunctionTable *tab)
+void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
 {
-    functionTable=tab;
+    DefScriptFunctionEntry e(n,f);
+    AddFunc(e);
+}
+
+void DefScriptPackage::AddFunc(DefScriptFunctionEntry e)
+{
+    if( (!e.name.empty()) && (!HasFunc(e.name)) )
+        _functable.push_back(e);
+}
+
+bool DefScriptPackage::HasFunc(std::string n)
+{
+    for(DefScriptFunctionTable::iterator i=_functable.begin();i!=_functable.end();i++)
+        if(i->name==n)
+            return true;
+    return false;
+}
+
+void DefScriptPackage::DelFunc(std::string n)
+{
+    for(DefScriptFunctionTable::iterator i=_functable.begin();i!=_functable.end();i++)
+        if(i->name==n)
+        {
+            _functable.erase(i);
+            break;
+        }
 }
 
 void DefScriptPackage::SetPath(std::string p){
@@ -117,8 +115,8 @@ bool DefScriptPackage::ScriptExists(std::string name)
     for (std::map<std::string,DefScript*>::iterator i = Script.begin();i != Script.end();i++)
         if(i->first == name && i->second != NULL)
             return true;
-    for(unsigned int i=0;functionTable[i].func!=NULL;i++)
-        if(name == functionTable[i].name)
+    for(unsigned int i=0;i<_functable.size();i++)
+        if(name == _functable[i].name)
             return true;
     return false;
 }
@@ -647,15 +645,11 @@ DefReturnResult DefScriptPackage::Interpret(CmdSet& Set)
     DefReturnResult result;
 
     // first search if the script is defined in the internal functions
-    for(unsigned int i=0;;i++)
+    for(unsigned int i=0;i<_functable.size();i++)
     {
-        if(functionTable[i].func==NULL || functionTable[i].name==NULL) // reached the end of the table?
+        if(Set.cmd==_functable[i].name)
         {
-            break;
-        }
-        if(Set.cmd==functionTable[i].name)
-        {
-            result=(this->*functionTable[i].func)(Set);
+            result=(this->*(_functable[i].func))(Set);
             return result;
         }
     }

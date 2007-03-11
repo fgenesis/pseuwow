@@ -72,10 +72,8 @@ class PseuInstance
     void SetSessionKey(BigNumber key) { _sessionkey = key; }
     BigNumber GetSessionKey(void) { return _sessionkey; }
     void SetError(void) { _error = true; }
-    SCPDatabase& GetSCPDatabase(std::string);
-
-	
-	
+    SCPDatabase& GetSCPDatabase(std::string);	
+    bool HasSCPDatabase(std::string);
 	
 	bool Init();
 	void SaveAllCache(void);
@@ -85,7 +83,6 @@ class PseuInstance
     void Run(void);
     void Update(void);	
     void Sleep(uint32 msecs);
-	
 	
 	bool createWorldSession;
 

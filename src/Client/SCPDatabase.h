@@ -14,10 +14,11 @@ typedef std::map<std::string,std::string> SCPEntryMap;
 class SCPField
 {
 public:
-    std::string GetString(std::string entry) { return _map[entry]; }
-    uint64 GetInteger(std::string entry) { return toInt(_map[entry]); }
-    double GetDouble(std::string entry) { return strtod(_map[entry].c_str(),NULL); }
+    std::string GetString(std::string);
+    uint64 GetInteger(std::string entry) { return toInt(GetString(entry)); }
+    double GetDouble(std::string entry) { return strtod(GetString(entry).c_str(),NULL); }
     void Set(std::string entry,std::string value) { _map[entry]=value; }
+    bool HasEntry(std::string);
 
 private:
     SCPEntryMap _map;
@@ -30,6 +31,7 @@ class SCPDatabase
 {
 public:
     SCPField& GetField(uint32 id) { return _map[id]; }
+    bool HasField(uint32 id);
     uint32 LoadFromFile(char*);
 
 private:

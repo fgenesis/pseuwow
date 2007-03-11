@@ -3,6 +3,7 @@
 #include "PseuWoW.h"
 #include "NameTables.h"
 #include "DefScript/DefScript.h"
+#include "DefScript/DefScriptTools.h"
 #include "Player.h"
 #include "Opcodes.h"
 #include "SharedDefines.h"
@@ -10,6 +11,31 @@
 #include "Channel.h"
 #include "CacheHandler.h"
 #include "SCPDatabase.h"
+
+void DefScriptPackage::_InitDefScriptInterface(void)
+{
+    AddFunc("pause",&DefScriptPackage::SCpause);
+    AddFunc("emote",&DefScriptPackage::SCemote);
+    AddFunc("follow",&DefScriptPackage::SCfollow);
+    AddFunc("savecache",&DefScriptPackage::SCsavecache);
+    AddFunc("sendchatmessage",&DefScriptPackage::SCSendChatMessage);
+    AddFunc("joinchannel",&DefScriptPackage::SCjoinchannel);
+    AddFunc("loadconf",&DefScriptPackage::SCloadconf);
+    AddFunc("applyconf",&DefScriptPackage::SCapplyconf);
+    AddFunc("applypermissions",&DefScriptPackage::SCapplypermissions);
+    AddFunc("log",&DefScriptPackage::SClog);
+    AddFunc("logdetail",&DefScriptPackage::SClogdetail);
+    AddFunc("logerror",&DefScriptPackage::SClogerror);
+    AddFunc("logdebug",&DefScriptPackage::SClogdebug);
+    AddFunc("castspell",&DefScriptPackage::SCcastspell);
+    AddFunc("queryitem",&DefScriptPackage::SCqueryitem);
+    AddFunc("target",&DefScriptPackage::SCtarget);
+    AddFunc("loadscp",&DefScriptPackage::SCloadscp);
+    AddFunc("scpexists",&DefScriptPackage::SCloadscp);
+    AddFunc("scpsectionexists",&DefScriptPackage::SCloadscp);
+    AddFunc("scpentryexists",&DefScriptPackage::SCloadscp);
+    AddFunc("getscpvalue",&DefScriptPackage::SCloadscp);
+}
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
 {
@@ -26,7 +52,7 @@ DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
         logerror("Invalid Script call: SCSendChatMessage: WorldSession not valid");
-        return false;
+        DEF_RETURN_ERROR;
     }
     std::stringstream ss;
     uint32 type=atoi(Set.arg[0].c_str());
@@ -68,18 +94,20 @@ DefReturnResult DefScriptPackage::SCsavecache(CmdSet& Set){
 
 DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){
     if(Set.defaultarg.empty())
-        return true;
+        return false;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
         logerror("Invalid Script call: SCEmote: WorldSession not valid");
-        return false;
+        DEF_RETURN_ERROR;
     }
     uint32 id=atoi(Set.defaultarg.c_str());
     ((PseuInstance*)parentMethod)->GetWSession()->SendEmote(id);
     return true;
 }
 
-DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set){
+DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set)
+{
+    DEF_RETURN_ERROR; // prevent execution for now
     WorldSession *ws=((PseuInstance*)parentMethod)->GetWSession();
     if(Set.defaultarg.empty()){
         ws->SendChatMessage(CHAT_MSG_SAY,0,"Stopping! (Please give me a Playername to follow!)","");
@@ -99,11 +127,11 @@ DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set){
 
 DefReturnResult DefScriptPackage::SCjoinchannel(CmdSet& Set){
     if(Set.defaultarg.empty())
-        return true;
+        return false;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
         logerror("Invalid Script call: SCjoinchannel: WorldSession not valid");
-        return false;
+        DEF_RETURN_ERROR;
     }
     ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->Join(Set.defaultarg,Set.arg[0]);
     return true;
@@ -111,11 +139,11 @@ DefReturnResult DefScriptPackage::SCjoinchannel(CmdSet& Set){
 
 DefReturnResult DefScriptPackage::SCleavechannel(CmdSet& Set){
     if(Set.defaultarg.empty())
-        return true;
+        return false;
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
         logerror("Invalid Script call: SCleavechannel: WorldSession not valid");
-        return false;
+        DEF_RETURN_ERROR;
     }
     ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->Leave(Set.defaultarg);
     return true;
@@ -123,17 +151,20 @@ DefReturnResult DefScriptPackage::SCleavechannel(CmdSet& Set){
 
 DefReturnResult DefScriptPackage::SCloadconf(CmdSet& Set){
     if(Set.defaultarg.empty())
-        return true;
+        return false;
     std::string fn;
     if(Set.defaultarg.find('/')==std::string::npos && Set.defaultarg.find('\\')==std::string::npos)
         fn += ((PseuInstance*)parentMethod)->GetConfDir();
     fn += Set.defaultarg;
 
     if(variables.ReadVarsFromFile(fn))
+    {
         log("Loaded conf file [%s]",fn.c_str());
-    else
-        log("Error loading conf file [%s]",fn.c_str());
-    return true;
+        return true;
+    }
+
+    log("Error loading conf file [%s]",fn.c_str());
+    return false;
 }
 
 DefReturnResult DefScriptPackage::SCapplypermissions(CmdSet& Set){
@@ -169,11 +200,11 @@ DefReturnResult DefScriptPackage::SClogerror(CmdSet& Set){
 DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
 {
 	if(Set.defaultarg.empty())
-		return true;
+		return false;
 	if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
 	{
 		logerror("Invalid Script call: SCcastspell: WorldSession not valid");
-		return false;
+		DEF_RETURN_ERROR;
 	}
 
 	uint32 spellId = atoi(Set.defaultarg.c_str());
@@ -181,7 +212,7 @@ DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
 	if (spellId <= 0)
 	{
 		logerror("Invalid Script call: SCcastspell: SpellId not valid");
-		return false;
+		DEF_RETURN_ERROR;
 	}
 
 	((PseuInstance*)parentMethod)->GetWSession()->SendCastSpell(spellId);
@@ -191,12 +222,12 @@ DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
 DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set){
     uint32 id = atoi(Set.defaultarg.c_str());
     if(!id)
-        return true;
+        return false;
 
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
         logerror("Invalid Script call: SCqueryitem: WorldSession not valid");
-        return false;
+        DEF_RETURN_ERROR;
     }
     ((PseuInstance*)parentMethod)->GetWSession()->SendQueryItem(id,0);
     return true;
@@ -209,7 +240,7 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
         logerror("Invalid Script call: SCtarget: WorldSession not valid");
-        return false;
+        DEF_RETURN_ERROR;
     }
 
     if(Set.defaultarg.empty())
@@ -231,9 +262,11 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
 {
+    DefReturnResult r;
     if(Set.arg[0].empty() || Set.defaultarg.empty())
-        return true;
+        return false;
     std::string dbname = stringToLower(Set.arg[0]);
+    // TODO: remove db if loading was not successful
     uint32 sections=((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).LoadFromFile((char*)Set.defaultarg.c_str());
     if(sections)
     {
@@ -243,10 +276,68 @@ DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
     {
         logerror("Failed to load SCP: \"%s\" [%s]",dbname.c_str(),Set.defaultarg.c_str());
     }
-    return true;
+    r.ret=toString((uint64)sections);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::SCScpExists(CmdSet& Set)
+{
+    return (!Set.defaultarg.empty()) && ((PseuInstance*)parentMethod)->HasSCPDatabase(Set.defaultarg);
+}
+
+DefReturnResult DefScriptPackage::SCScpSectionExists(CmdSet& Set)
+{
+    static std::string dbname;
+    if(!Set.arg[0].empty())
+        dbname=Set.arg[0];
+    return (!Set.defaultarg.empty()) && (!dbname.empty())
+        && ((PseuInstance*)parentMethod)->HasSCPDatabase(dbname)
+        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).HasField((uint32)DefScriptTools::toNumber(Set.defaultarg));
+}
+
+DefReturnResult DefScriptPackage::SCScpEntryExists(CmdSet& Set)
+{
+    static std::string dbname;
+    static uint32 keyid;
+    if(!Set.arg[0].empty())
+        dbname=Set.arg[0];
+    if(!Set.arg[1].empty())
+        keyid=(uint32)DefScriptTools::toNumber(Set.arg[1]);
+    return (!Set.defaultarg.empty()) && (!dbname.empty())
+        && ((PseuInstance*)parentMethod)->HasSCPDatabase(dbname)
+        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).HasField(keyid)
+        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).GetField(keyid).HasEntry(Set.defaultarg);
 }
 
 
+// GetScpValue,db,key entry
+// db & key will be stored, that multiple calls like GetScpValue entryxyz are possible
+DefReturnResult DefScriptPackage::SCGetScpValue(CmdSet& Set)
+{
+    static std::string dbname;
+    static uint32 keyid;
+    std::string entry;
+    DefReturnResult r;
+
+    if(!Set.arg[0].empty())
+        dbname=Set.arg[0];
+    if(!Set.arg[1].empty())
+        keyid=(uint32)DefScriptTools::toNumber(Set.arg[1]);
+    if(!Set.defaultarg.empty())
+        entry=Set.defaultarg;
+    if( (!entry.empty()) && (!dbname.empty())
+        && ((PseuInstance*)parentMethod)->HasSCPDatabase(dbname)
+        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).HasField(keyid)
+        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).GetField(keyid).HasEntry(entry))
+    {
+        r.ret = ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).GetField(keyid).GetString(entry);
+    }
+    else
+    {
+        r.ret = "";
+    }
+    return r;
+}
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {
