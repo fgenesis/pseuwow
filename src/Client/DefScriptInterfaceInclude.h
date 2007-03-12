@@ -27,5 +27,7 @@ DefReturnResult SCScpExists(CmdSet&);
 DefReturnResult SCScpSectionExists(CmdSet&);
 DefReturnResult SCScpEntryExists(CmdSet&);
 DefReturnResult SCGetScpValue(CmdSet&);
+DefReturnResult SCGetName(CmdSet&);
+DefReturnResult SCGetPlayerGuid(CmdSet&);
 
 #endif

@@ -61,6 +61,15 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("bitxor",&DefScriptPackage::func_bitxor);
     AddFunc("addevent",&DefScriptPackage::func_addevent);
     AddFunc("removeevent",&DefScriptPackage::func_removeevent);
+    AddFunc("abs",&DefScriptPackage::func_abs);
+    AddFunc("greater",&DefScriptPackage::func_bigger);
+    AddFunc("bigger",&DefScriptPackage::func_bigger);
+    AddFunc("equal",&DefScriptPackage::func_equal);
+    AddFunc("isset",&DefScriptPackage::func_isset);
+    AddFunc("not",&DefScriptPackage::func_not);
+    AddFunc("smaller",&DefScriptPackage::func_smaller);
+    AddFunc("strlen",&DefScriptPackage::func_strlen);
+    AddFunc("tohex",&DefScriptPackage::func_tohex);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))

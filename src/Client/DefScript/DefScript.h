@@ -154,6 +154,14 @@ private:
     DefReturnResult func_bitxor(CmdSet&);
     DefReturnResult func_addevent(CmdSet&);
     DefReturnResult func_removeevent(CmdSet&);
+    DefReturnResult func_abs(CmdSet&);
+    DefReturnResult func_bigger(CmdSet&);
+    DefReturnResult func_equal(CmdSet&);
+    DefReturnResult func_isset(CmdSet&);
+    DefReturnResult func_not(CmdSet&);
+    DefReturnResult func_smaller(CmdSet&);
+    DefReturnResult func_strlen(CmdSet&);
+    DefReturnResult func_tohex(CmdSet&);
 
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"

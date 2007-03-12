@@ -354,6 +354,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         {
 			char_found=true;
 			_myGUID=plr[i]._guid;
+            GetInstance()->GetScripts()->variables.Set("@myrace",toString(plr[i]._race));
 			playerNum = i;
 		}
 

@@ -1,0 +1,130 @@
+[0]
+name=Azeroth 
+
+[1]
+name=Kalimdor 
+
+[2]
+name=UnderMine
+
+[13]
+name=Test zone
+
+[17]
+name=Kalidar
+
+[30]
+name=Alterac Valley
+
+[33]
+name=Shadowfang Keep Instance
+
+[34]
+name=The Stockade Instance
+
+[35]
+name=Stormwind Prizon
+
+[36]
+name=Deadmines Instance
+
+[37]
+name=Plains of Snow
+
+[43]
+name=Wailing Caverns Instance
+[44]
+name=Monastery Interior
+
+[47]
+name=Razorfen Kraul Instance
+
+[48]
+name=Blackfathom Deeps Instance
+
+[70]
+name=Uldaman Instance
+
+[90]
+name=Gnomeregan Instance
+
+[109]
+name=Sunken Temple Instance
+
+[129]
+name=Razorfen Downs Instance
+
+[150]
+name=Outland
+
+[169]
+name=Emerald Forest
+
+[189]
+name=Scarlet Monastery Instance
+
+[209]
+name=Zul\'Farrak Instance
+
+[229]
+name=Blackrock Spire Instance
+
+[230]
+name=Blackrock Depths Instance
+
+[249]
+name=Onyxia\'s Lair Instance
+
+[269]
+name=Caverns of Time
+
+[289]
+name=Scholomance Instance
+
+[309]
+name=Zul'Gurub Instance
+
+[329]
+name=Stratholme Instance
+
+[349]
+name=Mauradon Instance
+
+[369]
+name=Deeprun Tram
+
+[389]
+name=Ragefire Chasm Instance
+
+[409]
+name=The Molten Core Instance
+
+[429]
+name=Dire Maul Instance
+
+[449]
+name=Alliance PVP Barracks
+
+[450]
+name=Horde PVP Barracks
+
+[451]
+name=Development Land
+
+[469]
+name=Blackwing Lair Instance
+
+[489]
+name=Warsong Gulch
+
+[509]
+name=Ruins of Ahn'Qiraj Instance
+
+[529]
+name=Arathi Basin
+
+[531]
+name=Temple of Ahn'Qiraj Instance
+
+[533]
+name=Naxxramas Instance

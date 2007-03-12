@@ -3,7 +3,8 @@
 SET,lang ${@0}
 SET,msg ${@def}
 
-default,lang 0
+DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} defaultlang}
+DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Saying '${msg}' in lang ${lang}
 

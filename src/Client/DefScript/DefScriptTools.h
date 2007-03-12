@@ -5,9 +5,12 @@ namespace DefScriptTools
 {
     std::string stringToUpper(std::string);
     std::string stringToLower(std::string);
-    std::string toString(double);
+    std::string toString(ldbl);
     std::string toString(uint64);
-    double toNumber(std::string);
+    ldbl toNumber(std::string);
+    bool isTrue(std::string);
+    uint64 toUint64(std::string);
+    uint64 atoi64(const char*);
 }
 
 
