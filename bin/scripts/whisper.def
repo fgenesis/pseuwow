@@ -5,7 +5,8 @@ SET,msg ${@def}
 SET,player ${@0}
 SET,lang ${@1}
 
-DEFAULT,lang 0
+DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} defaultlang}
+DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Whisp to '{${player}}' '{${msg}}' in lang '${lang}'
 

@@ -87,4 +87,8 @@ showmyopcodes=0
 // DO NOT put 1 here!
 disablespellcheck=0
 
+// will be used for all sendchatmessage calls. remove number/leave blank
+// to use the default language for your race (defined in race.scp)
+defaultlang=0
+
 

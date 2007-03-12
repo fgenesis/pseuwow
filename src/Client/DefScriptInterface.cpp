@@ -31,10 +31,12 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("queryitem",&DefScriptPackage::SCqueryitem);
     AddFunc("target",&DefScriptPackage::SCtarget);
     AddFunc("loadscp",&DefScriptPackage::SCloadscp);
-    AddFunc("scpexists",&DefScriptPackage::SCloadscp);
-    AddFunc("scpsectionexists",&DefScriptPackage::SCloadscp);
-    AddFunc("scpentryexists",&DefScriptPackage::SCloadscp);
-    AddFunc("getscpvalue",&DefScriptPackage::SCloadscp);
+    AddFunc("scpexists",&DefScriptPackage::SCScpExists);
+    AddFunc("scpsectionexists",&DefScriptPackage::SCScpSectionExists);
+    AddFunc("scpentryexists",&DefScriptPackage::SCScpEntryExists);
+    AddFunc("getscpvalue",&DefScriptPackage::SCGetScpValue);
+    AddFunc("getplayerguid",&DefScriptPackage::SCGetPlayerGuid);
+    AddFunc("getname",&DefScriptPackage::SCGetName);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -339,6 +341,57 @@ DefReturnResult DefScriptPackage::SCGetScpValue(CmdSet& Set)
     return r;
 }
 
+DefReturnResult DefScriptPackage::SCGetPlayerGuid(CmdSet& Set)
+{
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCGetPlayerGuid: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    DefReturnResult r;
+    if(Set.defaultarg.empty())
+    {
+        r.ret="0";
+    }
+    else
+    {
+        uint64 guid=((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetGuid(Set.defaultarg);
+        r.ret=toString(guid);
+    }
+    return r;
+}
+
+DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
+{
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCGetName: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    DefReturnResult r;
+    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
+    r.ret="Unknown Entity";
+    if(!guid)
+    {
+        return r;
+    }
+    else
+    {
+        Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
+        if(o->GetTypeId()==TYPEID_ITEM || o->GetTypeId()==TYPEID_CONTAINER)
+        {
+            ItemProto *proto=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProto(o->GetEntry());
+            r.ret=proto->Name[0]; // and whats with Name[1] - Name[3]?
+        }
+        else if(o->GetTypeId()==TYPEID_UNIT || o->GetTypeId()==TYPEID_PLAYER || o->GetTypeId()==TYPEID_GAMEOBJECT || o->GetTypeId()==TYPEID_CORPSE)
+        {
+            r.ret=((WorldObject*)o)->GetName();
+        }
+        // TODO: add support for gameobjects etc.
+    }
+    return r;
+}
+
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {
     static char *prefix = "USERS::";
@@ -370,7 +423,7 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
     // temp fix to prevent users from executing scripts via return values exploit. example:
     // -out ?{say .shutdown}
     // note that the following code can still be executed:
-    // -out ${q}?{say .shutdown}
+    // -out ${q}{say .shutdown}
     // where var q = "?"
     if(usrperm < 255 && line.find("?{")!=std::string::npos)
     {

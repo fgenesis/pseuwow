@@ -1,0 +1,10 @@
+// define names of genders
+
+[0]
+name=male
+
+[1]
+name=female
+
+[2]
+name=none

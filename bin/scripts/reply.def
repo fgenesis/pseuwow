@@ -2,7 +2,7 @@
 
 SET,player ${@thiswhisper_name}
 SET,lang ${@0}
-DEFAULT,lang ${@thiswhisper_lang}
+DEFAULT,lang 0
 SET,msg ${@def}
 
 WHISPER,{${player}},{${lang}} ${msg}

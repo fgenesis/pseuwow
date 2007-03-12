@@ -2,8 +2,14 @@
 
 LOG * Loading SCP data storages...
 
-// TODO: load stuff here
 // example:
 // LOADSCP,test data/test.scp
 
+LOADSCP,class data/class.scp
+LOADSCP,gender data/gender.scp
+LOADSCP,language data/language.scp
+LOADSCP,map data/map.scp
+LOADSCP,race data/race.scp
+
 LOG * SCP loaded.
+
