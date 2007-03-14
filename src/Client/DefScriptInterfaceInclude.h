@@ -29,5 +29,7 @@ DefReturnResult SCScpEntryExists(CmdSet&);
 DefReturnResult SCGetScpValue(CmdSet&);
 DefReturnResult SCGetName(CmdSet&);
 DefReturnResult SCGetPlayerGuid(CmdSet&);
+DefReturnResult SCGetEntry(CmdSet&);
+DefReturnResult SCGetItemProtoValue(CmdSet&);
 
 #endif

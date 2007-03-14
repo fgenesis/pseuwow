@@ -211,7 +211,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->Unknown2; // Added in 1.12.x client branch
         if(proto->Id)
         {
-            logdebug("ItemProtoCache: Loaded %u [%s]",proto->Id, proto->Name[0].c_str());
+            DEBUG(logdebug("ItemProtoCache: Loaded %u [%s]",proto->Id, proto->Name[0].c_str()));
             session->objmgr.Add(proto);
             counter++;
         }
@@ -313,7 +313,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         buf << proto->Unknown1;
         buf << proto->Unknown2; // Added in 1.12.x client branch
 
-        logdebug("ItemProtoCache: Saved %u [%s]",proto->Id, proto->Name[0].c_str());
+        DEBUG(logdebug("ItemProtoCache: Saved %u [%s]",proto->Id, proto->Name[0].c_str()));
         uint32 size = buf.size();
         fh.write((char*)&size,sizeof(uint32));
         fh.write((char*)buf.contents(),buf.size());

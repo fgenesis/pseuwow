@@ -33,6 +33,7 @@ public:
     SCPField& GetField(uint32 id) { return _map[id]; }
     bool HasField(uint32 id);
     uint32 LoadFromFile(char*);
+    uint32 GetFieldByValue(std::string entry, std::string value);
 
 private:
     SCPFieldMap _map;
