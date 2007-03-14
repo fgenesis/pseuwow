@@ -72,3 +72,12 @@ std::string SCPField::GetString(std::string entry)
 {
     return HasEntry(entry) ? _map[entry] : "";
 }
+
+// note that this can take a while depending on the size of the database!
+uint32 SCPDatabase::GetFieldByValue(std::string entry, std::string value)
+{
+    for(SCPFieldMap::iterator fm = _map.begin(); fm != _map.end(); fm++)
+        if(fm->second.HasEntry(entry) && fm->second.GetString(entry)==value)
+            return fm->first;
+    return 0;
+}

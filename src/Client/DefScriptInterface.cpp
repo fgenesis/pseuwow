@@ -37,6 +37,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getscpvalue",&DefScriptPackage::SCGetScpValue);
     AddFunc("getplayerguid",&DefScriptPackage::SCGetPlayerGuid);
     AddFunc("getname",&DefScriptPackage::SCGetName);
+    AddFunc("getentry",&DefScriptPackage::SCGetName);
+    AddFunc("getitemprotovalue",&DefScriptPackage::SCGetName);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -371,13 +373,9 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
     DefReturnResult r;
     uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
     r.ret="Unknown Entity";
-    if(!guid)
+    Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
+    if(o)
     {
-        return r;
-    }
-    else
-    {
-        Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
         if(o->GetTypeId()==TYPEID_ITEM || o->GetTypeId()==TYPEID_CONTAINER)
         {
             ItemProto *proto=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProto(o->GetEntry());
@@ -388,6 +386,251 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
             r.ret=((WorldObject*)o)->GetName();
         }
         // TODO: add support for gameobjects etc.
+    }
+    else
+    {
+        logerror("SCGetName: Object "I64FMT" not known",guid);
+    }
+    return r;
+}
+
+DefReturnResult DefScriptPackage::SCGetEntry(CmdSet& Set)
+{
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCGetEntry: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    DefReturnResult r;
+    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
+    r.ret="0";
+    Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
+    if(o)
+    {
+        r.ret=DefScriptTools::toString((uint64)o->GetEntry());
+    }
+    else
+    {
+        logerror("SCGetEntry: Object "I64FMT" not known",guid);
+    }
+    return r;
+}
+
+DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
+{
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCGetItemProtoValue: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    DefReturnResult r;
+    uint32 entry=DefScriptTools::toNumber(Set.arg[0]);
+    ItemProto *proto=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProto(entry);
+    if(proto)
+    {
+        std::string t=stringToLower(Set.defaultarg);
+        uint32 tmp=0;
+        if(t=="class")     r.ret=toString(proto->Class);
+        else if(t=="subclass")  r.ret=toString(proto->SubClass);
+        else if(t=="name1" || t=="name") proto->Name[0];
+        else if(t=="name2") proto->Name[1];
+        else if(t=="name3") proto->Name[2];
+        else if(t=="name4") proto->Name[3];
+        else if(t=="model" || t=="displayid")  r.ret=toString(proto->DisplayInfoID);
+        else if(t=="quality")  r.ret=toString(proto->Quality);
+        else if(t=="flags")  r.ret=toString(proto->Flags);
+        else if(t=="buycount")  r.ret=toString(proto->BuyCount);
+        else if(t=="buyprice")  r.ret=toString(proto->BuyPrice);
+        else if(t=="sellprice")  r.ret=toString(proto->SellPrice);
+        else if(t=="inventorytype")  r.ret=toString(proto->InventoryType);
+        else if(t=="allowableclass")  r.ret=toString(proto->AllowableClass);
+        else if(t=="allowablerace")  r.ret=toString(proto->AllowableRace);
+        else if(t=="itemlevel")  r.ret=toString(proto->ItemLevel);
+        else if(t=="reqlevel")  r.ret=toString(proto->RequiredLevel);
+        else if(t=="reqskill")  r.ret=toString(proto->RequiredSkill);
+        else if(t=="reqskillrank")  r.ret=toString(proto->RequiredSkillRank);
+        else if(t=="reqspell")  r.ret=toString(proto->RequiredSpell);
+        else if(t=="reqhonorrank")  r.ret=toString(proto->RequiredHonorRank);
+        else if(t=="reqcityrank")  r.ret=toString(proto->RequiredCityRank);
+        else if(t=="reqrepfaction")  r.ret=toString(proto->RequiredReputationFaction);
+        else if(t=="reqreprank")  r.ret=toString(proto->RequiredReputationRank);
+        else if(t=="maxcount")  r.ret=toString(proto->MaxCount);
+        else if(t=="stackable")  r.ret=toString(proto->Stackable);
+        else if(t=="slots")  r.ret=toString(proto->ContainerSlots);
+        else if(t=="str")
+        {
+            for(uint32 i=0;i<10;i++)
+                if(proto->ItemStat[i].ItemStatType==ITEM_STAT_STRENGTH)
+                    tmp+=proto->ItemStat[i].ItemStatValue;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="agi")
+        {
+            for(uint32 i=0;i<10;i++)
+                if(proto->ItemStat[i].ItemStatType==ITEM_STAT_AGILITY)
+                    tmp+=proto->ItemStat[i].ItemStatValue;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="sta")
+        {
+            for(uint32 i=0;i<10;i++)
+                if(proto->ItemStat[i].ItemStatType==ITEM_STAT_STAMINA)
+                    tmp+=proto->ItemStat[i].ItemStatValue;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="int")
+        {
+            for(uint32 i=0;i<10;i++)
+                if(proto->ItemStat[i].ItemStatType==ITEM_STAT_INTELLECT)
+                    tmp+=proto->ItemStat[i].ItemStatValue;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="spi")
+        {
+            for(uint32 i=0;i<10;i++)
+                if(proto->ItemStat[i].ItemStatType==ITEM_STAT_SPIRIT)
+                    tmp+=proto->ItemStat[i].ItemStatValue;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="hp" || t=="health")
+        {
+            for(uint32 i=0;i<10;i++)
+                if(proto->ItemStat[i].ItemStatType==ITEM_STAT_HEALTH)
+                    tmp+=proto->ItemStat[i].ItemStatValue;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="mindmg")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==NORMAL_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMin;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="maxdmg")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==NORMAL_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMax;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="mindmg_holy")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==HOLY_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMin;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="maxdmg_holy")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==HOLY_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMax;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="mindmg_fire")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==FIRE_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMin;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="maxdmg_fire")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==FIRE_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMax;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="mindmg_nature")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==NATURE_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMin;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="maxdmg_nature")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==NATURE_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMax;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="mindmg_frost")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==FROST_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMin;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="maxdmg_frost")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==FROST_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMax;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="mindmg_shadow")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==SHADOW_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMin;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="maxdmg_shadow")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==SHADOW_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMax;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="mindmg_arcane")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==ARCANE_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMin;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="maxdmg_arcane")
+        {
+            for(uint32 i=0;i<5;i++)
+                if(proto->Damage[i].DamageType==ARCANE_DAMAGE)
+                    tmp+=proto->Damage[i].DamageMax;
+            r.ret = toString((uint64)tmp);
+        }
+        else if(t=="armor")  r.ret=toString(proto->Armor);
+        else if(t=="holyres")  r.ret=toString(proto->HolyRes);
+        else if(t=="fireres")  r.ret=toString(proto->FireRes);
+        else if(t=="natureres")  r.ret=toString(proto->NatureRes);
+        else if(t=="frostres")  r.ret=toString(proto->FrostRes);
+        else if(t=="shadowres")  r.ret=toString(proto->ShadowRes);
+        else if(t=="arcaneres")  r.ret=toString(proto->ArcaneRes);
+        else if(t=="delay")  r.ret=toString(proto->Delay);
+        else if(t=="ammotype")  r.ret=toString(proto->Ammo_type);
+        else if(t=="range")  r.ret=toString(proto->RangedModRange);
+        else if(t=="bonding")  r.ret=toString(proto->Bonding);
+        else if(t=="desc")  r.ret=proto->Description;
+        else if(t=="pagetext")  r.ret=toString(proto->PageText);
+        else if(t=="languageid")  r.ret=toString(proto->LanguageID);
+        else if(t=="pagematerial")  r.ret=toString(proto->PageMaterial);
+        else if(t=="startquest")  r.ret=toString(proto->StartQuest);
+        else if(t=="lockid")  r.ret=toString(proto->LockID);
+        else if(t=="material")  r.ret=toString(proto->Material);
+        else if(t=="sheath")  r.ret=toString(proto->Sheath);
+        else if(t=="extra")  r.ret=toString(proto->Extra);
+        else if(t=="block")  r.ret=toString(proto->Block);
+        else if(t=="itemset")  r.ret=toString(proto->ItemSet);
+        else if(t=="maxdur")  r.ret=toString(proto->MaxDurability);
+        else if(t=="area")  r.ret=toString(proto->Area);
+        else if(t=="bagfamily")  r.ret=toString(proto->BagFamily);
+        // TODO: add item spells
+        else
+        {
+            logerror("SCGetItemProtoValue: Unknown property \"%s\" for Item Prototype %u",t.c_str(),entry);
+        }
+    }
+    else
+    {
+        logerror("SCGetItemProtoValue: Item Prototype %u not known",entry);
     }
     return r;
 }
