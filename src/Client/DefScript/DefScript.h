@@ -13,6 +13,19 @@ class DefScriptPackage;
 class DefScript;
 
 
+enum DefScriptBlockType
+{
+    BLOCK_IF,
+    BLOCK_LOOP
+};
+// general struct for if..else..endif / loop..endloop blocks
+struct Def_Block
+{
+    unsigned char type; // stores DefScriptBlockType
+    bool istrue; // only relevant for if-statements
+    unsigned int startline; // line where loop-statement started
+};
+
 struct DefReturnResult
 {
     DefReturnResult() { ok=true; mustreturn=false; ret="true"; }
@@ -120,7 +133,7 @@ public:
 
 private:
     void _InitFunctions(void);
-    DefXChgResult ReplaceVars(std::string str, CmdSet* pSet, unsigned char VarType);
+    DefXChgResult ReplaceVars(std::string str, CmdSet* pSet, unsigned char VarType, bool run_embedded);
 	void SplitLine(CmdSet&,std::string);
     DefReturnResult Interpret(CmdSet&);
     void RemoveBrackets(CmdSet&);
