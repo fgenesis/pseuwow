@@ -674,7 +674,7 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
         return;
     }
 
-    DefXChgResult final=ReplaceVars(line,NULL,false);
+    DefXChgResult final=ReplaceVars(line,NULL,0,false);
     CmdSet curSet;
     SplitLine(curSet,final.str);
 

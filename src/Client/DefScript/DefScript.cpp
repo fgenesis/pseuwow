@@ -8,6 +8,8 @@
 #include "DefScript.h"
 #include "DefScriptTools.h"
 
+using namespace DefScriptTools;
+
 // --- SECTION FOR SCRIPT PACKAGES ---
 DefScriptPackage::DefScriptPackage()
 {
@@ -124,9 +126,10 @@ bool DefScriptPackage::ScriptExists(std::string name)
     for (std::map<std::string,DefScript*>::iterator i = Script.begin();i != Script.end();i++)
         if(i->first == name && i->second != NULL)
             return true;
-    for(unsigned int i=0;i<_functable.size();i++)
-        if(name == _functable[i].name)
-            return true;
+    // actually, this part can lead to bugs, need to fix if it gets unstable
+    //for(unsigned int i=0;i<_functable.size();i++)
+    //    if(name == _functable[i].name)
+    //        return true;
     return false;
 }
 
@@ -217,7 +220,6 @@ DefScript::DefScript(DefScriptPackage *p)
     _parent=p;
 	scriptname="{NONAME}";
     debugmode=false;
-//    printf("--> DefScript inited!\n");
 }
 
 DefScript::~DefScript()
@@ -270,12 +272,12 @@ bool DefScript::AddLine(std::string l){
 
 // --- SECTION FOR COMMAND SETS ---
 
-CmdSet::CmdSet(){
-	Clear();
+CmdSet::CmdSet()
+{
 }
 
-CmdSet::~CmdSet(){
-	Clear();
+CmdSet::~CmdSet()
+{
 }
 
 void CmdSet::Clear()
@@ -303,7 +305,7 @@ bool DefScriptPackage::BoolRunScript(std::string name, CmdSet *pSet)
 DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
 {
     DefReturnResult r;
-    if(!ScriptExists(name))
+    if( (!ScriptExists(name)) && (!HasFunc(name)) )
         if(!LoadByName(name))
         {
             r.ok=false; // doesnt exist & cant be loaded
@@ -327,12 +329,60 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
     pSet->caller=pSet->myname;
     pSet->myname=name;
 
+    std::deque<Def_Block> Blocks;
+
     for(unsigned int i=0;i<sc->GetLines();i++)
     {   
         CmdSet mySet;
-        DefXChgResult final=ReplaceVars(sc->GetLine(i),pSet,0);
+        std::string line=sc->GetLine(i);
+        if(line=="else")
+        {
+            if(!Blocks.size())
+            {
+                r.ok=false;
+                break;
+            }
+            Def_Block b=Blocks.back();
+            if(b.type==BLOCK_IF && b.istrue)
+            {
+                for(i=b.startline;sc->GetLine(i)!="endif";i++); // skip lines until "endif"
+                Blocks.pop_back();
+            }
+            if(b.type==BLOCK_IF && !b.istrue)
+            {
+                printf("DEBUG: else does not have an if-block that was false before");
+            }
+            continue;
+        }
+        else if(line=="endif")
+        {
+            if(Blocks.back().type!=BLOCK_IF)
+            {
+                printf("DEBUG: endif: closed block is not an if block! [%s:%u]\n",name.c_str(),i);
+                break;
+            }
+            Blocks.pop_back();
+            continue;
+        }
+        DefXChgResult final=ReplaceVars(line,pSet,0,true);
         _DEFSC_DEBUG(printf("DefScript: \"%s\"\n",final.str.c_str()));
 	    SplitLine(mySet,final.str);
+        if(mySet.cmd=="if")
+        {
+            Def_Block b;
+            b.startline=i;
+            b.type=BLOCK_IF;
+            b.istrue=isTrue(mySet.defaultarg);
+            Blocks.push_back(b);
+            if(!b.istrue)
+            {
+                for(i=b.startline;sc->GetLine(i)!="else" && sc->GetLine(i)!="endif";i++); // skip lines until "else"
+                if(sc->GetLine(i)!="endif")
+                    Blocks.pop_back();
+            }
+            continue; // and read line after "else"
+        }
+
         mySet.myname=name;
         mySet.caller=pSet?pSet->myname:"";
         r=Interpret(mySet);
@@ -346,7 +396,7 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
 }
 
 DefReturnResult DefScriptPackage::RunSingleLine(std::string line){
-    DefXChgResult final=ReplaceVars(line,NULL,0);
+    DefXChgResult final=ReplaceVars(line,NULL,0,true);
 	CmdSet Set;
     SplitLine(Set,final.str);
     return Interpret(Set);
@@ -355,7 +405,7 @@ DefReturnResult DefScriptPackage::RunSingleLine(std::string line){
 DefReturnResult DefScriptPackage::RunSingleLineFromScript(std::string line, DefScript *pScript){
     CmdSet Set;
     Set.myname=pScript->GetName();
-    DefXChgResult final=ReplaceVars(line,&Set,0);
+    DefXChgResult final=ReplaceVars(line,&Set,0,true);
     SplitLine(Set,final.str);
     return Interpret(Set);
 }
@@ -488,7 +538,7 @@ void DefScriptPackage::RemoveBrackets(CmdSet& Set){
 }
 
 
-DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsigned char VarType){
+DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsigned char VarType, bool run_embedded){
 
     unsigned int
         openingBracket=0, // defines the position from where the recursive call is started
@@ -545,7 +595,7 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
                     bLen=closingBracket-openingBracket-1;
                     subStr=str.substr(openingBracket+1,bLen);
                     //printf("SUBSTR: \"%s\"\n",subStr.c_str());
-                    xchg=ReplaceVars(subStr,pSet,nextVar);
+                    xchg=ReplaceVars(subStr,pSet,nextVar,true);
                     if( nextVar==DEFSCRIPT_NONE && hasVar && xchg.changed )
                     {
                         str.erase(openingBracket+1,subStr.length());
@@ -610,16 +660,25 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
         }
         else if(VarType==DEFSCRIPT_FUNC)
         {
-            DefReturnResult res;
-            if(pSet)
-                res=RunSingleLineFromScript(str,GetScript(pSet->myname));
-            else
-                res=RunSingleLine(str);
-            str=res.ret; // returns empty string on invalid function!!
-            xchg.result.ok=res.ok;
-            if(res.ok)
-                xchg.changed=true;
-            //xchg.result.err += res.err;
+            if(run_embedded)
+            {
+                DefReturnResult res;
+                if(pSet)
+                    res=RunSingleLineFromScript(str,GetScript(pSet->myname));
+                else
+                    res=RunSingleLine(str);
+                str=res.ret; // returns empty string on invalid function!!
+                xchg.result.ok=res.ok;
+                if(res.ok)
+                    xchg.changed=true;
+                //xchg.result.err += res.err;
+            }
+            else // if not allowed to run scripts via ?{...}
+            {
+                str=""; // just replace with 0
+                xchg.changed=true; // yes we have changed something
+                xchg.result.ok=true; // change ok, insert our (empty) return value
+            }
         }
     }
 
