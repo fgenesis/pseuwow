@@ -39,6 +39,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getname",&DefScriptPackage::SCGetName);
     AddFunc("getentry",&DefScriptPackage::SCGetName);
     AddFunc("getitemprotovalue",&DefScriptPackage::SCGetName);
+    AddFunc("getobjecttype",&DefScriptPackage::SCGetObjectType);
+    AddFunc("objectknown",&DefScriptPackage::SCObjectKnown);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -215,8 +217,7 @@ DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
 
 	if (spellId <= 0)
 	{
-		logerror("Invalid Script call: SCcastspell: SpellId not valid");
-		DEF_RETURN_ERROR;
+		return false;
 	}
 
 	((PseuInstance*)parentMethod)->GetWSession()->SendCastSpell(spellId);
@@ -240,6 +241,7 @@ DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set){
 DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
 {
     // TODO: special targets: _self _pet _nearest ...
+    DefReturnResult r;
 
     if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
     {
@@ -257,11 +259,17 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
     uint64 guid = (((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetGuid(Set.defaultarg));
 
     if( guid && ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid) ) // object must be near
-        ((PseuInstance*)parentMethod)->GetWSession()->SendSetSelection(guid);
+    {
+        ((PseuInstance*)parentMethod)->GetWSession()->SendSetSelection(guid); // will also set the target for myCharacter
+        r.ret=toString(guid);
+    }
     else
+    {
         logdetail("Target '%s' not found!",Set.defaultarg.c_str());
+        return false;
+    }
 
-    return true;
+    return r;
 }
 
 DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
@@ -414,6 +422,40 @@ DefReturnResult DefScriptPackage::SCGetEntry(CmdSet& Set)
         logerror("SCGetEntry: Object "I64FMT" not known",guid);
     }
     return r;
+}
+
+DefReturnResult DefScriptPackage::SCGetObjectType(CmdSet& Set)
+{
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCGetObjectType: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    DefReturnResult r;
+    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
+    r.ret="0";
+    Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
+    if(o)
+    {
+        r.ret=DefScriptTools::toString((uint64)o->GetTypeId());
+    }
+    else
+    {
+        logerror("SCGetObjectType: Object "I64FMT" not known",guid);
+    }
+    return r;
+}
+
+DefReturnResult DefScriptPackage::SCObjectKnown(CmdSet& Set)
+{
+    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    {
+        logerror("Invalid Script call: SCObjectIsKnown: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
+    Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
+    return o!=NULL;
 }
 
 DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
@@ -663,18 +705,17 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
         }
     }
 
-    // temp fix to prevent users from executing scripts via return values exploit. example:
-    // -out ?{say .shutdown}
-    // note that the following code can still be executed:
-    // -out ${q}{say .shutdown}
-    // where var q = "?"
-    if(usrperm < 255 && line.find("?{")!=std::string::npos)
+    DefXChgResult final;
+    if(usrperm < 255)
     {
-        logerror("WARNING: %s wanted to exec \"%s\"",username.c_str(),line.c_str());
-        return;
+        if(line.find("?{")!=std::string::npos)
+            logerror("WARNING: %s wanted to exec \"%s\"",username.c_str(),line.c_str());
+        final=ReplaceVars(line,NULL,0,false); // prevent execution of embedded scripts (= using return values) that could trigger dangerous stuff.
     }
+    else
+        final=ReplaceVars(line,NULL,0,true); // exec as usual
 
-    DefXChgResult final=ReplaceVars(line,NULL,0,false);
+    
     CmdSet curSet;
     SplitLine(curSet,final.str);
 

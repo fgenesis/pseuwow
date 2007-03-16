@@ -10,6 +10,12 @@
 
 using namespace DefScriptTools;
 
+enum DefScriptBlockType
+{
+    BLOCK_IF,
+    BLOCK_LOOP
+};
+
 // --- SECTION FOR SCRIPT PACKAGES ---
 DefScriptPackage::DefScriptPackage()
 {
@@ -72,6 +78,9 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("smaller",&DefScriptPackage::func_smaller);
     AddFunc("strlen",&DefScriptPackage::func_strlen);
     AddFunc("tohex",&DefScriptPackage::func_tohex);
+    AddFunc("and",&DefScriptPackage::func_and);
+    AddFunc("or",&DefScriptPackage::func_or);
+    AddFunc("xor",&DefScriptPackage::func_xor);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
@@ -339,6 +348,7 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
         {
             if(!Blocks.size())
             {
+                printf("DEBUG: else-block without any block?! [%s:%u]\n",name.c_str(),i);
                 r.ok=false;
                 break;
             }
@@ -346,26 +356,30 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
             if(b.type==BLOCK_IF && b.istrue)
             {
                 for(i=b.startline;sc->GetLine(i)!="endif";i++); // skip lines until "endif"
-                Blocks.pop_back();
-            }
-            if(b.type==BLOCK_IF && !b.istrue)
-            {
-                printf("DEBUG: else does not have an if-block that was false before");
+                i--; // next line read will be "endif"
             }
             continue;
         }
         else if(line=="endif")
         {
+            if(!Blocks.size())
+            {
+                printf("DEBUG: endif without any block [%s:%u]\n",name.c_str(),i);
+                r.ok=false;
+                break;
+            }
             if(Blocks.back().type!=BLOCK_IF)
             {
                 printf("DEBUG: endif: closed block is not an if block! [%s:%u]\n",name.c_str(),i);
+                r.ok=false;
                 break;
             }
             Blocks.pop_back();
             continue;
         }
+        _DEFSC_DEBUG(printf("DefScript before: \"%s\"\n",line.c_str()));
         DefXChgResult final=ReplaceVars(line,pSet,0,true);
-        _DEFSC_DEBUG(printf("DefScript: \"%s\"\n",final.str.c_str()));
+        _DEFSC_DEBUG(printf("DefScript parsed: \"%s\"\n",final.str.c_str()));
 	    SplitLine(mySet,final.str);
         if(mySet.cmd=="if")
         {
@@ -376,9 +390,9 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
             Blocks.push_back(b);
             if(!b.istrue)
             {
-                for(i=b.startline;sc->GetLine(i)!="else" && sc->GetLine(i)!="endif";i++); // skip lines until "else"
-                if(sc->GetLine(i)!="endif")
-                    Blocks.pop_back();
+                for(i=b.startline;sc->GetLine(i)!="else" && sc->GetLine(i)!="endif";i++);
+                i--; // next line read will be either "else" or "endif", decide then what to do
+
             }
             continue; // and read line after "else"
         }
@@ -669,8 +683,7 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
                     res=RunSingleLine(str);
                 str=res.ret; // returns empty string on invalid function!!
                 xchg.result.ok=res.ok;
-                if(res.ok)
-                    xchg.changed=true;
+                xchg.changed=true;
                 //xchg.result.err += res.err;
             }
             else // if not allowed to run scripts via ?{...}

@@ -31,5 +31,7 @@ DefReturnResult SCGetName(CmdSet&);
 DefReturnResult SCGetPlayerGuid(CmdSet&);
 DefReturnResult SCGetEntry(CmdSet&);
 DefReturnResult SCGetItemProtoValue(CmdSet&);
+DefReturnResult SCGetObjectType(CmdSet&);
+DefReturnResult SCObjectKnown(CmdSet&);
 
 #endif

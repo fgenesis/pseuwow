@@ -241,8 +241,8 @@ DefReturnResult DefScriptPackage::func_mod(CmdSet& Set)
     }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg);
+    uint64 a=toUint64(variables.Get(vname));
+    uint64 b=toUint64(Set.defaultarg);
     if(b==0)
         a=0;
     else
@@ -350,12 +350,12 @@ DefReturnResult DefScriptPackage::func_equal(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::func_smaller(CmdSet& Set)
 {
-    return toNumber(Set.defaultarg) < toNumber(Set.arg[0]);
+    return toNumber(Set.arg[0]) < toNumber(Set.defaultarg);
 }
 
 DefReturnResult DefScriptPackage::func_bigger(CmdSet& Set)
 {
-    return toNumber(Set.defaultarg) > toNumber(Set.arg[0]);
+    return toNumber(Set.arg[0]) > toNumber(Set.defaultarg);
 }
 
 DefReturnResult DefScriptPackage::func_not(CmdSet& Set)
@@ -403,3 +403,19 @@ DefReturnResult DefScriptPackage::func_abs(CmdSet& Set)
     r.ret=toString(fabs(toNumber(Set.defaultarg)));
     return r;
 }
+
+DefReturnResult DefScriptPackage::func_and(CmdSet& Set)
+{
+    return isTrue(Set.defaultarg) && isTrue(Set.arg[0]);
+}
+
+DefReturnResult DefScriptPackage::func_or(CmdSet& Set)
+{
+    return isTrue(Set.defaultarg) || isTrue(Set.arg[0]);
+}
+
+DefReturnResult DefScriptPackage::func_xor(CmdSet& Set)
+{
+    return (isTrue(Set.defaultarg) && isTrue(Set.arg[0])) || ( (!isTrue(Set.defaultarg)) && (!isTrue(Set.arg[0]) ) );
+}
+

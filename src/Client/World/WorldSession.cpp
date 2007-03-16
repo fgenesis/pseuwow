@@ -208,6 +208,7 @@ void WorldSession::_OnEnterWorld(void)
     if(!_logged)
     {
         _logged=true;
+        GetInstance()->GetScripts()->variables.Set("@inworld","true");
         GetInstance()->GetScripts()->RunScript("_enterworld",NULL);
         
     }
@@ -219,7 +220,7 @@ void WorldSession::_OnLeaveWorld(void)
     {
         _logged=false;
         GetInstance()->GetScripts()->RunScript("_leaveworld",NULL);
-
+        GetInstance()->GetScripts()->variables.Set("@inworld","false");
     }
 }
 
