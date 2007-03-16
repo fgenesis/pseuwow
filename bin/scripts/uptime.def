@@ -4,6 +4,7 @@
 // args: none
 // usage: - load the script to register the uptime counter
 //        - call the script to say the uptime formatted in hours, mins & secs
+// returns: uptime formatted as 0h 0m 0s
 
 #onload
 	set,#uptime 0
@@ -15,15 +16,23 @@ set,s ${#uptime}
 
 set,h ${s}
 div,h 3600
+toint,h ${h}
 mod,s 3600
 
 set,m ${s}
 div,m 60
+toint,m ${m}
 mod,s 60
+toint,s ${s}
+set,str ${h}h ${m}m ${s}s
+out UPTIME: ${#uptime} secs = ${str}
 
-out UPTIME: ${#uptime} secs = ${h}h ${m}m ${s}s
-say UPTIME: ${h} hours, ${m} minutes, ${s} seconds
+if ${@inworld}
+	say UPTIME: ${h} hours, ${m} minutes, ${s} seconds
+endif
 
 unset h
 unset m
 unset s
+
+return ${str}

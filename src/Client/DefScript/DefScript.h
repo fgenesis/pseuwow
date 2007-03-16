@@ -12,12 +12,6 @@
 class DefScriptPackage;
 class DefScript;
 
-
-enum DefScriptBlockType
-{
-    BLOCK_IF,
-    BLOCK_LOOP
-};
 // general struct for if..else..endif / loop..endloop blocks
 struct Def_Block
 {
@@ -175,6 +169,9 @@ private:
     DefReturnResult func_smaller(CmdSet&);
     DefReturnResult func_strlen(CmdSet&);
     DefReturnResult func_tohex(CmdSet&);
+    DefReturnResult func_and(CmdSet&);
+    DefReturnResult func_or(CmdSet&);
+    DefReturnResult func_xor(CmdSet&);
 
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"

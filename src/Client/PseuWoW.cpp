@@ -98,6 +98,7 @@ bool PseuInstance::Init(void) {
 
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);
+    _scp->variables.Set("@inworld","false");
 
     log("Loading DefScripts from folder '%s'",_scpdir.c_str());
 
