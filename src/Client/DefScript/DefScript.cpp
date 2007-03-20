@@ -202,6 +202,14 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
             //...
             continue; // line was an option, not script content
 		}
+        // help with loading lines where a space or tab have accidently been put after the cmd
+        if(memcmp(line.c_str(),"else ",5)==0 || memcmp(line.c_str(),"else\t",5)==0) line="else";
+        if(memcmp(line.c_str(),"endif ",6)==0 || memcmp(line.c_str(),"endif\t",5)==0) line="endif";
+        if(memcmp(line.c_str(),"loop ",5)==0 || memcmp(line.c_str(),"loop\t",5)==0) line="loop";
+        if(memcmp(line.c_str(),"endloop ",8)==0 || memcmp(line.c_str(),"endloop\t",8)==0) line="endloop";
+        if(line=="else" || line=="endif" || line=="loop" || line=="endloop")
+            line=stringToLower(line);
+
         if(load_debug)
             std::cout<<"~LOAD: "<<line<<"\n";
         if(!exec)
@@ -355,8 +363,19 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
             Def_Block b=Blocks.back();
             if(b.type==BLOCK_IF && b.istrue)
             {
-                for(i=b.startline;sc->GetLine(i)!="endif";i++); // skip lines until "endif"
-                i--; // next line read will be "endif"
+                unsigned int other_ifs=0;
+                for(i=b.startline;;i++)
+                {
+                    if(sc->GetLine(i).substr(0,3)=="if ")
+                        other_ifs++;
+                    if(sc->GetLine(i)=="endif")
+                    {
+                        if(!other_ifs)
+                            break;
+                        other_ifs--;
+                    }
+                }
+                i--; // next line read will be "endif", decide then what to do
             }
             continue;
         }
@@ -377,9 +396,35 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
             Blocks.pop_back();
             continue;
         }
-        _DEFSC_DEBUG(printf("DefScript before: \"%s\"\n",line.c_str()));
+        else if(line=="loop")
+        {
+            Def_Block b;
+            b.startline=i;
+            b.type=BLOCK_LOOP;
+            b.istrue=true;
+            Blocks.push_back(b);
+            continue;
+        }
+        else if(line=="endloop")
+        {
+            if(!Blocks.size())
+            {
+                printf("DEBUG: endloop without any block [%s:%u]\n",name.c_str(),i);
+                r.ok=false;
+                break;
+            }
+            if(Blocks.back().type!=BLOCK_LOOP)
+            {
+                printf("DEBUG: endloop: closed block is not a loop block! [%s:%u]\n",name.c_str(),i);
+                r.ok=false;
+                break;
+            }
+            i=Blocks.back().startline; // next line executed will be the line after "loop"
+            continue;
+        }
+        //_DEFSC_DEBUG(printf("DefScript before: \"%s\"\n",line.c_str()));
         DefXChgResult final=ReplaceVars(line,pSet,0,true);
-        _DEFSC_DEBUG(printf("DefScript parsed: \"%s\"\n",final.str.c_str()));
+        //_DEFSC_DEBUG(printf("DefScript parsed: \"%s\"\n",final.str.c_str()));
 	    SplitLine(mySet,final.str);
         if(mySet.cmd=="if")
         {
@@ -390,11 +435,45 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
             Blocks.push_back(b);
             if(!b.istrue)
             {
-                for(i=b.startline;sc->GetLine(i)!="else" && sc->GetLine(i)!="endif";i++);
+                unsigned int other_ifs=0;
+                for(i=b.startline+1;;i++)
+                {
+                    if(!memcmp(sc->GetLine(i).c_str(),"if ",3))
+                        other_ifs++;
+                    if(sc->GetLine(i)=="else" || sc->GetLine(i)=="endif")
+                    {
+                        if(!other_ifs)
+                            break;
+                        if(sc->GetLine(i)=="endif")
+                            other_ifs--;
+                    }
+                }
                 i--; // next line read will be either "else" or "endif", decide then what to do
-
             }
             continue; // and read line after "else"
+        }
+        else if(mySet.cmd=="exitloop")
+        {
+            // skip some ifs if they are present
+            while(Blocks.back().type!=BLOCK_LOOP)
+                Blocks.pop_back();
+            Blocks.pop_back();
+            unsigned int other_loops=0;
+
+            while(true)
+            {
+                if(sc->GetLine(i)=="loop")
+                    other_loops++;
+                if(sc->GetLine(i)=="endloop")
+                {
+                    if(!other_loops)
+                        break;
+                    other_loops--;
+                }
+                i++; // go until next endloop
+            }
+            // next line read will be the line after "endloop"
+            continue;
         }
 
         mySet.myname=name;
@@ -632,6 +711,13 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
     } // end for
     if(!bracketsOpen && VarType!=DEFSCRIPT_NONE)
     {
+        // fix for empty var: ${}
+        if(str.empty())
+        {
+            xchg.str="";
+            xchg.changed=true;
+            return xchg;
+        }
         if(VarType==DEFSCRIPT_VAR)
         {
             std::string vname=_NormalizeVarName(str, (pSet==NULL) ? "" : pSet->myname);
