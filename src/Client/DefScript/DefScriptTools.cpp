@@ -126,7 +126,7 @@ uint64 DefScriptTools::toUint64(std::string str)
     else
         num = atoi64(str.c_str());
     if(negative)
-        num = (uint64)(-1) - num;
+        num = (uint64)(-1) - num; // is this correct?
     return num;
 }
 

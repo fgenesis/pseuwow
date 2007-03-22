@@ -368,32 +368,22 @@ DefReturnResult DefScriptPackage::func_isset(CmdSet& Set)
     return variables.Exists(Set.defaultarg);
 }
 
-// TODO: fix this funtion to work with large values up to (0xFFFF FFFF FFFF FFFF = 2^64)
 DefReturnResult DefScriptPackage::func_tohex(CmdSet& Set)
 {
     DefReturnResult r;
     char buf[50];
-    ldbl d=toNumber(Set.defaultarg);
-    bool negative=d<0;
-    if(stringToLower(Set.arg[0])=="abs")
-    {
-        negative=false;        
-    }
-    else
-    {
-        d=fabs(d);
-    }
-    uint64 u=(uint64)floor(d);
-
+    bool full=stringToLower(Set.arg[0])=="full";
+    uint64 u=toUint64(Set.defaultarg);
 #if COMPILER == COMPILER_MICROSOFT
     sprintf(buf,"%016I64X",u);
 #else
     sprintf(buf,"%016llX",u);
 #endif
     std::string str=buf;
-    while(str.length() && str.at(0)=='0')
-        str.erase(0,1);
-    r.ret = negative ? (std::string("-0x").append(str)) : std::string("0x").append(str);
+    if(!full)
+        while(str.length() && str.at(0)=='0')
+            str.erase(0,1);
+    r.ret = std::string("0x").append(str);
     return r;
 }
 
@@ -417,5 +407,17 @@ DefReturnResult DefScriptPackage::func_or(CmdSet& Set)
 DefReturnResult DefScriptPackage::func_xor(CmdSet& Set)
 {
     return (isTrue(Set.defaultarg) && isTrue(Set.arg[0])) || ( (!isTrue(Set.defaultarg)) && (!isTrue(Set.arg[0]) ) );
+}
+
+DefReturnResult DefScriptPackage::func_substr(CmdSet& Set)
+{
+    DefReturnResult r;
+    unsigned int start,len;
+    len=(unsigned int)toNumber(Set.arg[0]);
+    start=(unsigned int)toNumber(Set.arg[1]);
+    if(start+len<Set.defaultarg.length())
+        len=Set.defaultarg.length()-start;
+    r.ret=Set.defaultarg.substr(start,len);
+    return r;
 }
 

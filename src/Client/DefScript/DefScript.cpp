@@ -81,6 +81,7 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("and",&DefScriptPackage::func_and);
     AddFunc("or",&DefScriptPackage::func_or);
     AddFunc("xor",&DefScriptPackage::func_xor);
+    AddFunc("substr",&DefScriptPackage::func_substr);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
@@ -688,7 +689,7 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
                     bLen=closingBracket-openingBracket-1;
                     subStr=str.substr(openingBracket+1,bLen);
                     //printf("SUBSTR: \"%s\"\n",subStr.c_str());
-                    xchg=ReplaceVars(subStr,pSet,nextVar,true);
+                    xchg=ReplaceVars(subStr,pSet,nextVar,run_embedded);
                     if( nextVar==DEFSCRIPT_NONE && hasVar && xchg.changed )
                     {
                         str.erase(openingBracket+1,subStr.length());
