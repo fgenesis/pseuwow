@@ -172,7 +172,7 @@ private:
     DefReturnResult func_and(CmdSet&);
     DefReturnResult func_or(CmdSet&);
     DefReturnResult func_xor(CmdSet&);
-
+    DefReturnResult func_substr(CmdSet&);
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"
 

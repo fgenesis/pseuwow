@@ -33,5 +33,7 @@ DefReturnResult SCGetEntry(CmdSet&);
 DefReturnResult SCGetItemProtoValue(CmdSet&);
 DefReturnResult SCGetObjectType(CmdSet&);
 DefReturnResult SCObjectKnown(CmdSet&);
+DefReturnResult SCGetPlayerPerm(CmdSet&);
+DefReturnResult SCGetScriptPerm(CmdSet&);
 
 #endif

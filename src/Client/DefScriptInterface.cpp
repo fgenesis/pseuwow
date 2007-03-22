@@ -41,6 +41,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getitemprotovalue",&DefScriptPackage::SCGetName);
     AddFunc("getobjecttype",&DefScriptPackage::SCGetObjectType);
     AddFunc("objectknown",&DefScriptPackage::SCObjectKnown);
+    AddFunc("getplayerperm",&DefScriptPackage::SCGetPlayerPerm);
+    AddFunc("getscriptperm",&DefScriptPackage::SCGetScriptPerm);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -456,6 +458,28 @@ DefReturnResult DefScriptPackage::SCObjectKnown(CmdSet& Set)
     uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
     Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
     return o!=NULL;
+}
+
+DefReturnResult DefScriptPackage::SCGetPlayerPerm(CmdSet& Set)
+{
+    DefReturnResult r;
+    uint8 perm=0;
+    for (std::map<std::string,unsigned char>::iterator i = my_usrPermissionMap.begin(); i != my_usrPermissionMap.end(); i++)
+        if(i->first == Set.defaultarg)
+            perm = i->second;
+    r.ret = toString(perm);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::SCGetScriptPerm(CmdSet& Set)
+{
+    DefReturnResult r;
+    uint8 perm=0;
+    for (std::map<std::string,unsigned char>::iterator i = scriptPermissionMap.begin(); i != scriptPermissionMap.end(); i++)
+        if(i->first == Set.defaultarg)
+            perm = i->second;
+    r.ret = toString(perm);
+    return r;
 }
 
 DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
