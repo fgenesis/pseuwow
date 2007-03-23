@@ -32,23 +32,13 @@ void MyCharacter::SetActionButtons(WorldPacket &data)
 
 }
 
-void MyCharacter::SetSpells(WorldPacket &data)
+void MyCharacter::AddSpell(uint16 spellid, uint16 spellslot)
 {
-	uint8 unk;
-	uint16 spellid,spellslot,count;
-	data >> unk >> count;
-	logdebug("Got initial spells list, %u spells.",count);
-	for(uint16 i = 0; i < count; i++)
-	{
-		data >> spellid >> spellslot;
-		logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
+	SpellBookEntry _spell;
+	_spell.id = spellid;
+	_spell.slot = spellslot;
 
-		SpellBookEntry _spell;
-		_spell.id = spellid;
-		_spell.slot = spellslot;
-
-		_spells.push_back(_spell);
-	}
+	_spells.push_back(_spell);
 }
 
 uint16 MyCharacter::GetSpellSlot(uint32 spellid)

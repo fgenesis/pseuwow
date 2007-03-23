@@ -185,6 +185,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
         {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
+		{SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -642,7 +643,25 @@ void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
 {
-    // suggestion for later: what about MyCharacter->AddSpellBookEntry() ?
-	GetMyChar()->SetSpells(recvPacket);
+	uint8 unk;
+	uint16 spellid,spellslot,count;
+	recvPacket >> unk >> count;
+	logdebug("Got initial spells list, %u spells.",count);
+	for(uint16 i = 0; i < count; i++)
+	{
+		recvPacket >> spellid >> spellslot;
+		logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
+
+		GetMyChar()->AddSpell(spellid, spellslot);
+	}
+}
+
+void WorldSession::_HandleLearnedSpellOpcode(WorldPacket& recvPacket)
+{
+	uint16 spellid;
+	recvPacket >> spellid;
+	GetMyChar()->AddSpell(spellid, 0);
+
+	logdebug("Learned spell: id=%u",spellid);
 }
 
