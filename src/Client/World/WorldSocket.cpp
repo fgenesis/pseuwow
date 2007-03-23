@@ -48,7 +48,7 @@ void WorldSocket::OnRead()
             ASSERT(_remaining > 0); // case pktsize==0 is handled below
             if(ibuf.GetLength() < _remaining)
             {
-                logerror("Delaying WorldPacket generation, bufsize is %u but should be >= %u",ibuf.GetLength(),_remaining);
+                DEBUG(logdebug("Delaying WorldPacket generation, bufsize is %u but should be >= %u",ibuf.GetLength(),_remaining));
                 break;
             }
             _gothdr=false;
@@ -62,7 +62,7 @@ void WorldSocket::OnRead()
         {
             if(ibuf.GetLength() < sizeof(ServerPktHeader))
             {
-                logerror("Delaying header reading, bufsize is %u but should be >= %u",ibuf.GetLength(),sizeof(ServerPktHeader));
+                DEBUG(logdebug("Delaying header reading, bufsize is %u but should be >= %u",ibuf.GetLength(),sizeof(ServerPktHeader)));
                 break;
             }
             ServerPktHeader hdr;
@@ -72,8 +72,8 @@ void WorldSocket::OnRead()
             _opcode = hdr.cmd;
             if(_opcode > 800) // no opcode has yet a number over 800
             {
-                logcritical("CRYPT ERROR: opcode=%u, remain=%u",_opcode,_remaining);
-                //GetSession()->GetInstance()->SetError(); // please test if this is stable!!!
+                logcritical("CRYPT ERROR: opcode=%u, remain=%u",_opcode,_remaining); // this should never be the case!
+                GetSession()->GetInstance()->SetError(); // no way to recover the crypt, must exit
                 // if the crypt gets messy its hardly possible to recover it, especially if we dont know
                 // the lentgh of the following data part
                 // TODO: invent some way how to recover the crypt (reconnect?)

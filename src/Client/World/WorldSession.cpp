@@ -481,7 +481,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
             else if(msg.length()<15 && (msg.find("omg")!=std::string::npos || msg.find("omfg")!=std::string::npos) )
                 SendChatMessage(CHAT_MSG_SAY,lang,"OMG a bot logged in, you don't believe it :O","");
             else if(msg.find("from")!=std::string::npos || msg.find("download")!=std::string::npos)
-                SendChatMessage(CHAT_MSG_SAY,lang,"you can dl me from http://my.opera.com/PseuWoW","");
+                SendChatMessage(CHAT_MSG_SAY,lang,"http://my.opera.com/PseuWoW","");
             else if(msg.find("Genesis")!=std::string::npos || msg.find("genesis")!=std::string::npos)
                 SendChatMessage(CHAT_MSG_YELL,lang,"False.Genesis, they are calling you!! Come here, master xD","");
         }

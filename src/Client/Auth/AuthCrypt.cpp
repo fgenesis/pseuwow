@@ -35,9 +35,6 @@ void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
     if (!_initialized) return;
     if (len < CRYPTED_RECV_LEN) return;
 
-    _recv_i2=_recv_i;
-    _recv_j2=_recv_j;
-
     for (size_t t = 0; t < CRYPTED_RECV_LEN; t++)
     {
         _recv_i %= _key.size();
@@ -68,13 +65,6 @@ void AuthCrypt::SetKey(uint8 *key, size_t len)
 {
     _key.resize(len);
     std::copy(key, key + len, _key.begin());
-}
-
-void AuthCrypt::DecryptRescue(void)
-{
-    // undos the last decrypt operation
-    _recv_i=_recv_i2;
-    _recv_j=_recv_j2;
 }
 
 AuthCrypt::~AuthCrypt()
