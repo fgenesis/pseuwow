@@ -40,12 +40,9 @@ class AuthCrypt
 
         bool IsInitialized() { return _initialized; }
 
-        void DecryptRescue(void);
-
     private:
         std::vector<uint8> _key;
         uint8 _send_i, _send_j, _recv_i, _recv_j;
-        uint8 _send_i2, _send_j2, _recv_i2, _recv_j2;
         bool _initialized;
 };
 #endif

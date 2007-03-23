@@ -281,7 +281,7 @@ DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
         return false;
     std::string dbname = stringToLower(Set.arg[0]);
     // TODO: remove db if loading was not successful
-    uint32 sections=((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).LoadFromFile((char*)Set.defaultarg.c_str());
+    uint32 sections=((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).LoadFromFile((char*)Set.defaultarg.c_str());
     if(sections)
     {
         logdetail("Loaded SCP: \"%s\" [%s] (%u sections)",dbname.c_str(),Set.defaultarg.c_str(),sections);
@@ -296,7 +296,7 @@ DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCScpExists(CmdSet& Set)
 {
-    return (!Set.defaultarg.empty()) && ((PseuInstance*)parentMethod)->HasSCPDatabase(Set.defaultarg);
+    return (!Set.defaultarg.empty()) && ((PseuInstance*)parentMethod)->dbmgr.HasDB(Set.defaultarg);
 }
 
 DefReturnResult DefScriptPackage::SCScpSectionExists(CmdSet& Set)
@@ -305,8 +305,8 @@ DefReturnResult DefScriptPackage::SCScpSectionExists(CmdSet& Set)
     if(!Set.arg[0].empty())
         dbname=Set.arg[0];
     return (!Set.defaultarg.empty()) && (!dbname.empty())
-        && ((PseuInstance*)parentMethod)->HasSCPDatabase(dbname)
-        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).HasField((uint32)DefScriptTools::toNumber(Set.defaultarg));
+        && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
+        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField((uint32)DefScriptTools::toNumber(Set.defaultarg));
 }
 
 DefReturnResult DefScriptPackage::SCScpEntryExists(CmdSet& Set)
@@ -318,9 +318,9 @@ DefReturnResult DefScriptPackage::SCScpEntryExists(CmdSet& Set)
     if(!Set.arg[1].empty())
         keyid=(uint32)DefScriptTools::toNumber(Set.arg[1]);
     return (!Set.defaultarg.empty()) && (!dbname.empty())
-        && ((PseuInstance*)parentMethod)->HasSCPDatabase(dbname)
-        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).HasField(keyid)
-        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).GetField(keyid).HasEntry(Set.defaultarg);
+        && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
+        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField(keyid)
+        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).GetField(keyid).HasEntry(Set.defaultarg);
 }
 
 
@@ -340,11 +340,11 @@ DefReturnResult DefScriptPackage::SCGetScpValue(CmdSet& Set)
     if(!Set.defaultarg.empty())
         entry=Set.defaultarg;
     if( (!entry.empty()) && (!dbname.empty())
-        && ((PseuInstance*)parentMethod)->HasSCPDatabase(dbname)
-        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).HasField(keyid)
-        && ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).GetField(keyid).HasEntry(entry))
+        && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
+        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField(keyid)
+        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).GetField(keyid).HasEntry(entry))
     {
-        r.ret = ((PseuInstance*)parentMethod)->GetSCPDatabase(dbname).GetField(keyid).GetString(entry);
+        r.ret = ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).GetField(keyid).GetString(entry);
     }
     else
     {

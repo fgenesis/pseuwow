@@ -40,4 +40,16 @@ private:
 
 };
 
+typedef std::map<std::string,SCPDatabase> SCPDatabaseMap;
+
+class SCPDatabaseMgr
+{
+public:
+    bool HasDB(std::string);
+    SCPDatabase& GetDB(std::string);
+
+private:
+    SCPDatabaseMap _map;
+};
+
 #endif

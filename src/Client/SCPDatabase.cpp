@@ -81,3 +81,16 @@ uint32 SCPDatabase::GetFieldByValue(std::string entry, std::string value)
             return fm->first;
     return 0;
 }
+
+bool SCPDatabaseMgr::HasDB(std::string n)
+{
+    for(SCPDatabaseMap::iterator i = _map.begin(); i != _map.end(); i++)
+        if(i->first == n)
+            return true;
+    return false;
+}
+
+SCPDatabase& SCPDatabaseMgr::GetDB(std::string n)
+{
+    return _map[n];
+}

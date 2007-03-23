@@ -72,8 +72,7 @@ class PseuInstance
     void SetSessionKey(BigNumber key) { _sessionkey = key; }
     BigNumber GetSessionKey(void) { return _sessionkey; }
     void SetError(void) { _error = true; }
-    SCPDatabase& GetSCPDatabase(std::string);	
-    bool HasSCPDatabase(std::string);
+    SCPDatabaseMgr dbmgr;
 	
 	bool Init();
 	void SaveAllCache(void);
@@ -103,8 +102,6 @@ class PseuInstance
     SocketHandler _sh;
     CliRunnable *_cli;
     ZThread::Thread _clithread;
-    std::map<std::string,SCPDatabase> _dbmap;
-
 
 };
 

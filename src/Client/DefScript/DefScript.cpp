@@ -10,6 +10,8 @@
 
 using namespace DefScriptTools;
 
+#define SN_ONLOAD "?onload?"
+
 enum DefScriptBlockType
 {
     BLOCK_IF,
@@ -136,11 +138,16 @@ bool DefScriptPackage::ScriptExists(std::string name)
     for (std::map<std::string,DefScript*>::iterator i = Script.begin();i != Script.end();i++)
         if(i->first == name && i->second != NULL)
             return true;
-    // actually, this part can lead to bugs, need to fix if it gets unstable
-    //for(unsigned int i=0;i<_functable.size();i++)
-    //    if(name == _functable[i].name)
-    //        return true;
     return false;
+}
+
+void DefScriptPackage::DeleteScript(std::string sn)
+{
+    if(ScriptExists(sn))
+    {
+        delete GetScript(sn);
+        Script.erase(sn);
+    }
 }
 
 bool DefScriptPackage::LoadByName(std::string name){
@@ -152,18 +159,21 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 
 	std::string label, value, line;
     std::fstream f;
-    bool load_debug=false,load_notify=false, exec=false;
+    bool load_debug=false,load_notify=false, exec=false, cantload=false;
     char z;
 
     f.open(fn.c_str(),std::ios_base::in);
     if(!f.is_open())
         return false;
 
+    std::deque<unsigned int> Blocks;
+
     if(GetScript(sn))
         delete GetScript(sn);
     DefScript *newscript = new DefScript(this);
     Script[sn] = newscript;
     Script[sn]->SetName(sn); // necessary that the script knows its own name
+    DeleteScript(SN_ONLOAD);
 	while(!f.eof()){
 		line.clear();
         while (true) {
@@ -205,11 +215,68 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 		}
         // help with loading lines where a space or tab have accidently been put after the cmd
         if(memcmp(line.c_str(),"else ",5)==0 || memcmp(line.c_str(),"else\t",5)==0) line="else";
-        if(memcmp(line.c_str(),"endif ",6)==0 || memcmp(line.c_str(),"endif\t",5)==0) line="endif";
-        if(memcmp(line.c_str(),"loop ",5)==0 || memcmp(line.c_str(),"loop\t",5)==0) line="loop";
-        if(memcmp(line.c_str(),"endloop ",8)==0 || memcmp(line.c_str(),"endloop\t",8)==0) line="endloop";
+        else if(memcmp(line.c_str(),"endif ",6)==0 || memcmp(line.c_str(),"endif\t",5)==0) line="endif";
+        else if(memcmp(line.c_str(),"loop ",5)==0 || memcmp(line.c_str(),"loop\t",5)==0) line="loop";
+        else if(memcmp(line.c_str(),"endloop ",8)==0 || memcmp(line.c_str(),"endloop\t",8)==0) line="endloop";
+
         if(line=="else" || line=="endif" || line=="loop" || line=="endloop")
             line=stringToLower(line);
+
+        // check for correct block match
+        if(memcmp(line.c_str(),"if ",3)==0)
+            Blocks.push_back(BLOCK_IF);
+        else if(line=="else")
+        {
+            if(Blocks.empty() || Blocks.back()!=BLOCK_IF)
+            {
+                cantload=true;
+                break;
+            }
+        }
+        else if(line=="endif")
+        {
+            if(Blocks.empty() || Blocks.back()!=BLOCK_IF)
+            {
+                cantload=true;
+                break;
+            }
+            Blocks.pop_back();
+        }
+        else if(line=="loop")
+            Blocks.push_back(BLOCK_LOOP);
+        else if(line=="endloop")
+        {
+            if(Blocks.empty() || Blocks.back()!=BLOCK_LOOP)
+            {
+                cantload=true;
+                break;
+            }
+            Blocks.pop_back();
+        }
+
+        // check for correct bracket match
+        unsigned int bopen=0;
+        bool mismatch=false;
+        for(unsigned int bpos=0;bpos<line.length();bpos++)
+        {
+            if(line[bpos]=='{')
+                bopen++;
+            if(line[bpos]=='}')
+            {
+                if(bpos)
+                    bopen--;
+                else
+                {
+                    mismatch=true;
+                    break;
+                }
+            }
+        }
+        if(mismatch || bopen) // no bracket must be left open now
+        {
+            printf("DefScript: Bracket mismatch at line '%s'\n",line.c_str());
+            continue; // continue with next line without adding the current line to script
+        }
 
         if(load_debug)
             std::cout<<"~LOAD: "<<line<<"\n";
@@ -217,12 +284,23 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 		    Script[sn]->AddLine(line);
         else
         {
-            this->RunSingleLineFromScript(line,Script[sn]);
-        }
-		
-		
+            if(!ScriptExists(SN_ONLOAD))
+                Script[SN_ONLOAD] = new DefScript(this);
+            Script[SN_ONLOAD]->AddLine(line);
+        }		
 	}
 	f.close();
+    if(cantload)
+    {
+        printf("DefScript: Error loading script '%s'\n",sn.c_str());
+        DeleteScript(sn);
+        return false;
+    }
+    if(ScriptExists(SN_ONLOAD))
+    {
+        RunScript(SN_ONLOAD,NULL,sn);
+        DeleteScript(SN_ONLOAD);
+    }
     if(load_notify)
         std::cout << "+> Script '" << sn << "' [" << fn << "] successfully loaded.\n";
 	
@@ -320,7 +398,7 @@ bool DefScriptPackage::BoolRunScript(std::string name, CmdSet *pSet)
 }
 
 // the referred pSet is the parent from which RunScript() has been called
-DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
+DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::string override_name)
 {
     DefReturnResult r;
     if( (!ScriptExists(name)) && (!HasFunc(name)) )
@@ -338,6 +416,9 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet)
         r.ret="";
         return r;
     }
+
+    if(!override_name.empty())
+        name=override_name;
 
     CmdSet temp;
     if(!pSet)

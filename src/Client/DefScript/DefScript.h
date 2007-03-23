@@ -102,11 +102,12 @@ public:
     DefScript *GetScript(std::string);
 	unsigned int GetScripts(void);
 	bool LoadScriptFromFile(std::string,std::string);
-	DefReturnResult RunScript(std::string,CmdSet*);
+    DefReturnResult RunScript(std::string name,CmdSet* pSet,std::string override_name="");
     bool BoolRunScript(std::string,CmdSet*);
 	unsigned int GetScriptID(std::string);
 	DefReturnResult RunSingleLine(std::string);
 	bool ScriptExists(std::string);
+    void DeleteScript(std::string);
 	VarSet variables;
     void SetPath(std::string);
     bool LoadByName(std::string);

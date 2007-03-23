@@ -238,19 +238,6 @@ void PseuInstance::Sleep(uint32 msecs)
     GetRunnable()->sleep(msecs);
 }
 
-SCPDatabase& PseuInstance::GetSCPDatabase(std::string dbname)
-{
-    return _dbmap[dbname];
-}
-
-bool PseuInstance::HasSCPDatabase(std::string dbname)
-{
-    for(std::map<std::string,SCPDatabase>::iterator i = _dbmap.begin(); i != _dbmap.end(); i++)
-        if(i->first == dbname)
-            return true;
-    return false;
-}
-
 PseuInstanceConf::PseuInstanceConf()
 {
     enablecli=false;
