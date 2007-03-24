@@ -196,10 +196,10 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 
 void WorldSession::SetTarget(uint64 guid)
 {
-    _targetGUID=guid;
-    // TODO: update the UpdateFields once implemented
+    SendSetSelection(guid);
 }
 
+// redundant for now
 void WorldSession::SetFollowTarget(uint64 guid)
 {
     _followGUID=guid;
@@ -344,8 +344,13 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 	int playerNum = 0;
 
 	for(unsigned int i=0;i<num;i++){
-		logcustom(0,LGREEN,"## %s (%u) [%s/%s]",
-			plr[i]._name.c_str(),plr[i]._level,raceName[plr[i]._race],className[plr[i]._class]);
+        logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Zone: %s",
+            plr[i]._name.c_str(),
+            plr[i]._level,
+            GetDBMgr().GetRaceName(plr[i]._race).c_str(),
+            GetDBMgr().GetClassName_(plr[i]._class).c_str(),
+            GetDBMgr().GetMapName(plr[i]._mapId).c_str(),
+            GetDBMgr().GetZoneName(plr[i]._zoneId).c_str());
 		logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
 			plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
         for(unsigned int inv=0;inv<20;inv++)
@@ -401,6 +406,10 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     bool isCmd=false;
 
 	recvPacket >> type >> lang;
+
+    std::string langname = GetDBMgr().GetLangName(lang);
+    const char* ln = langname.c_str();
+
 	
 	if (type == CHAT_MSG_CHANNEL)
     {
@@ -432,35 +441,35 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 	}
     else if (type==CHAT_MSG_WHISPER )
     {
-        logcustom(0,WHITE,"WHISP: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());                
+        logcustom(0,WHITE,"WHISP: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());                
     }
     else if (type==CHAT_MSG_CHANNEL )
     {
-        logcustom(0,WHITE,"CHANNEL: [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"CHANNEL: [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),ln,msg.c_str());  
     }
     else if (type==CHAT_MSG_SAY )
     {
-        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
     }
     else if (type==CHAT_MSG_YELL )
     {
-        logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",plrname.c_str(),ln,msg.c_str());  
     }
     else if (type==CHAT_MSG_WHISPER_INFORM )
     {
-        logcustom(0,WHITE,"TO %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"TO %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
     }
     else if (type==CHAT_MSG_GUILD )
     {
-        logcustom(0,WHITE,"GUILD: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"GUILD: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
     }
     else if (type==CHAT_MSG_PARTY )
     {
-        logcustom(0,WHITE,"PARTY: %s [%s]: %s",plrname.c_str(),LookupName(lang,langNames),msg.c_str());  
+        logcustom(0,WHITE,"PARTY: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
     }
     else
     {
-        logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),LookupName(lang,langNames),msg.c_str());
+        logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),ln,msg.c_str());
 	}
 
     if(target_guid!=GetGuid() && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
