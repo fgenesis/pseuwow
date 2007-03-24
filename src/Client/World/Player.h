@@ -202,7 +202,8 @@ public:
     MyCharacter();
 
 	void SetActionButtons(WorldPacket &data);
-	void AddSpell(uint16 spellid, uint16 spellslot);
+	void AddSpell(uint32 spellid, uint16 spellslot);
+    void RemoveSpell(uint32 spellid);
     uint64 GetTarget(void) { return _target; }
     void SetTarget(uint64 guid) { _target = guid; } // should only be called by WorldSession::SendSetSelection() !!
     bool HasSpell(uint32 spellid) { return GetSpellSlot(spellid) != 0; }

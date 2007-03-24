@@ -32,13 +32,23 @@ void MyCharacter::SetActionButtons(WorldPacket &data)
 
 }
 
-void MyCharacter::AddSpell(uint16 spellid, uint16 spellslot)
+void MyCharacter::AddSpell(uint32 spellid, uint16 spellslot)
 {
 	SpellBookEntry _spell;
 	_spell.id = spellid;
 	_spell.slot = spellslot;
 
 	_spells.push_back(_spell);
+}
+
+void MyCharacter::RemoveSpell(uint32 spellid)
+{
+    for(std::vector<SpellBookEntry>::iterator i=_spells.begin(); i != _spells.end(); i++)
+        if(i->id == spellid)
+        {
+            _spells.erase(i);
+            break;
+        }
 }
 
 uint16 MyCharacter::GetSpellSlot(uint32 spellid)

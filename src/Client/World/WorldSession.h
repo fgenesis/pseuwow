@@ -92,7 +92,8 @@ private:
     void _HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket);
     void _HandleDestroyObjectOpcode(WorldPacket& recvPacket);
     void _HandleInitialSpellsOpcode(WorldPacket& recvPacket);
-	void _HandleLearnedSpellOpcode(WorldPacket& recvPacket);
+    void _HandleLearnedSpellOpcode(WorldPacket& recvPacket);	
+    void _HandleRemovedSpellOpcode(WorldPacket& recvPacket);
 
 	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
     void _ValuesUpdate(uint64 uguid, WorldPacket& recvPacket); // ...
