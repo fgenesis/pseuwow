@@ -214,16 +214,16 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
             continue; // line was an option, not script content
 		}
         // help with loading lines where a space or tab have accidently been put after the cmd
-        if(memcmp(line.c_str(),"else ",5)==0 || memcmp(line.c_str(),"else\t",5)==0) line="else";
-        else if(memcmp(line.c_str(),"endif ",6)==0 || memcmp(line.c_str(),"endif\t",5)==0) line="endif";
-        else if(memcmp(line.c_str(),"loop ",5)==0 || memcmp(line.c_str(),"loop\t",5)==0) line="loop";
-        else if(memcmp(line.c_str(),"endloop ",8)==0 || memcmp(line.c_str(),"endloop\t",8)==0) line="endloop";
-
-        if(line=="else" || line=="endif" || line=="loop" || line=="endloop")
-            line=stringToLower(line);
+        std::string tline=stringToLower(line);
+        if(memcmp(tline.c_str(),"else ",5)==0 || memcmp(tline.c_str(),"else\t",5)==0) tline="else";
+        else if(memcmp(tline.c_str(),"endif ",6)==0 || memcmp(tline.c_str(),"endif\t",5)==0) tline="endif";
+        else if(memcmp(tline.c_str(),"loop ",5)==0 || memcmp(tline.c_str(),"loop\t",5)==0) tline="loop";
+        else if(memcmp(tline.c_str(),"endloop ",8)==0 || memcmp(tline.c_str(),"endloop\t",8)==0) tline="endloop";
+        if(tline=="else" || tline=="endif" || tline=="loop" || tline=="endloop")
+            line=tline;
 
         // check for correct block match
-        if(memcmp(line.c_str(),"if ",3)==0)
+        if(memcmp(tline.c_str(),"if ",3)==0) // need to check lowercased line! (IF may be uppercased)
             Blocks.push_back(BLOCK_IF);
         else if(line=="else")
         {
@@ -290,7 +290,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
         }		
 	}
 	f.close();
-    if(cantload)
+    if(cantload || Blocks.size())
     {
         printf("DefScript: Error loading script '%s'\n",sn.c_str());
         DeleteScript(sn);
@@ -446,11 +446,11 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
             if(b.type==BLOCK_IF && b.istrue)
             {
                 unsigned int other_ifs=0;
-                for(i=b.startline;;i++)
+                for(i=b.startline+1;;i++)
                 {
-                    if(sc->GetLine(i).substr(0,3)=="if ")
+                    if(memcmp(sc->GetLine(i).c_str(),"if ",3)==0)
                         other_ifs++;
-                    if(sc->GetLine(i)=="endif")
+                    else if(sc->GetLine(i)=="endif")
                     {
                         if(!other_ifs)
                             break;

@@ -1,2 +1,20 @@
 #permission=0
-SAY,{${@0}}  ${@def}
+
+// purpose: easy way for any player to make pseuwow say text.
+// if it thinks the player is trying to use a server command it will not say it.
+// args are the same as say.def
+// only players whose permission is = 255 can use this script to say commands
+
+// first find out the first char of the message string
+SET,c ?{SUBSTR,1 ${@def}}
+
+// is the char equal to the char we use for commands? does the player have a permission lvl below 255?
+IF ?{AND,?{EQUAL,${c} {${#CMDCHAR}}} ?{SMALLER,?{GETPLAYERPERM ${@thiscmd_name}} 255}}
+	// yes: say a warning and the command the player wanted to use
+	SAY ${@thiscmd_name}: no permission to use commands [${@def}]
+	RETURN false
+ELSE
+	// no: say the text as usual.
+	SAY,{${@0}} ${@def}
+	RETURN true
+ENDIF

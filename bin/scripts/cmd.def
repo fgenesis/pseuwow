@@ -1,0 +1,7 @@
+#permission=255
+
+// purpose: send a server command.
+// args:
+// @def: command to send
+
+SAY ${#CMDCHAR}${@def}

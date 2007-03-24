@@ -8,8 +8,8 @@
 
     // --- CONFIG ---
     
-    // your command you use to broadcast
-    set,cmd .announce
+    // your command you use to broadcast (without trailing "." or whatever!)
+    set,cmd announce
     
     // set the broadcast interval (in seconds!)
     // here we set it to 20 mins
@@ -51,7 +51,7 @@
 add,x 1
 
 // broadcast the text number x
-say ${cmd} ${text${x}}
+CMD ${cmd} ${text${x}}
 
 // if x = textcount: reset text counter x to 0 (using the modulo operator)
 mod,x ${textcount}

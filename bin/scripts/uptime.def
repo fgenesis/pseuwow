@@ -7,7 +7,9 @@
 // returns: uptime formatted as 0h 0m 0s
 
 #onload
-	set,#uptime 0
+	if ?{not ?{isset #uptime}}
+		set,#uptime 0
+	endif
 	removeevent event_{${@myname}}
 	addevent,event_{${@myname}},1000 add,#uptime 1
 #endonload
