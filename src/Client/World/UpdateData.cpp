@@ -60,7 +60,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 if(obj)
 				    this->_MovementUpdate(obj->GetTypeId(),uguid,recvPacket);
                 else
-                    logerror("Got UpdateObject_Movement for unknown object "I64FMT,uguid);
+                    logcustom(2,RED,"Got UpdateObject_Movement for unknown object "I64FMT,uguid);
 			}
 			break;
 
@@ -205,7 +205,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         }
         else
         {
-            logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+            logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
         }
 	}
 	if(objtypeid==TYPEID_UNIT)
@@ -235,7 +235,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         }
         else
         {
-            logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+            logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
         }
 	}
 	if( (objtypeid==TYPEID_CORPSE) || (objtypeid==TYPEID_GAMEOBJECT) || (objtypeid==TYPEID_DYNAMICOBJECT))
@@ -247,7 +247,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
             if(u)
                 u->SetPosition(x,y,z,u->GetO());
             else
-                logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+                logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
         }
         else
         {
@@ -257,7 +257,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         if(u)
             u->SetPosition(u->GetX(),u->GetY(),u->GetZ(),o);
         else
-            logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+            logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
 	}
 
     recvPacket >> unk32; // (uint32)0x1
@@ -316,7 +316,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
     }
     else
     {
-        logerror("Got UpdateObject_Values for unknown object "I64FMT,uguid);
+        logcustom(2,RED,"Got UpdateObject_Values for unknown object "I64FMT,uguid);
     }
 
 }
