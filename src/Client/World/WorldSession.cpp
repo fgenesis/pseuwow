@@ -186,6 +186,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
         {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
 		{SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
+		{SMSG_REMOVED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -658,10 +659,18 @@ void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleLearnedSpellOpcode(WorldPacket& recvPacket)
 {
-	uint16 spellid;
+	uint32 spellid;
 	recvPacket >> spellid;
-	GetMyChar()->AddSpell(spellid, 0);
+	GetMyChar()->AddSpell(spellid, 0); // other spells must be moved by +1 in slot?
 
 	logdebug("Learned spell: id=%u",spellid);
+}
+
+void WorldSession::_HandleRemovedSpellOpcode(WorldPacket& recvPacket)
+{
+    uint32 spellid;
+    recvPacket >> spellid;
+    GetMyChar()->RemoveSpell(spellid);
+    logdebug("Unlearned spell: id=%u",spellid);
 }
 
