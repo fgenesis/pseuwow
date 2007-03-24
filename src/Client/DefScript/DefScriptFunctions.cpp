@@ -144,7 +144,7 @@ DefReturnResult DefScriptPackage::func_setscriptpermission(CmdSet& Set)
     if(Set.defaultarg.empty() || Set.arg[0].empty())
         return r;
 
-    scriptPermissionMap[Set.arg[0]] = atoi(Set.defaultarg.c_str());
+    scriptPermissionMap[Set.arg[0]] = (unsigned char)toUint64(Set.defaultarg.c_str());
     return r;
 }
 
@@ -365,7 +365,8 @@ DefReturnResult DefScriptPackage::func_not(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::func_isset(CmdSet& Set)
 {
-    return variables.Exists(Set.defaultarg);
+    std::string vname=_NormalizeVarName(Set.defaultarg,Set.myname);
+    return variables.Exists(vname);
 }
 
 DefReturnResult DefScriptPackage::func_tohex(CmdSet& Set)
@@ -415,7 +416,7 @@ DefReturnResult DefScriptPackage::func_substr(CmdSet& Set)
     unsigned int start,len;
     len=(unsigned int)toNumber(Set.arg[0]);
     start=(unsigned int)toNumber(Set.arg[1]);
-    if(start+len<Set.defaultarg.length())
+    if(start+len>Set.defaultarg.length())
         len=Set.defaultarg.length()-start;
     r.ret=Set.defaultarg.substr(start,len);
     return r;

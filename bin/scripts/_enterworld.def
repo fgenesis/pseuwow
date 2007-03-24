@@ -5,13 +5,13 @@
 LOG * World entered, executing appropriate script...
 
 // MaNGOS: make PseuWoW invincible
-// SAY .gmon
+// CMD gmon
 
 // you can also teleport on every startup to a certain player...
 // simple: use the .goname command as usual.
 // SAY .goname Gamemaster
 // or teleport to a specific loacation...
-// .tele gmisland
+// CMD tele gmisland
 
 // to know everything worked fine, etc
 SAY [${@version_short}] login successful.

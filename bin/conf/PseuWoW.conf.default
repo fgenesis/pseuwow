@@ -91,4 +91,9 @@ disablespellcheck=0
 // to use the default language for your race (defined in race.scp)
 defaultlang=0
 
+// special char that is used to trigger server commands (for example ".goname Player")
+// (WoWEmu="." MaNGOS="." or "!")
+// other servers might be different 
+cmdchar=.
+
 

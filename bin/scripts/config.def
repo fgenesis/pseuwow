@@ -11,3 +11,6 @@ APPLYPERMISSIONS
 
 // remove dangerous variables
 CLEANUPVARS
+
+// if its not set in the conf file, default it to "." (WoWEmu & MaNGOS style)
+DEFAULT,#CMDCHAR .
