@@ -31,6 +31,7 @@ public:
     void Init(void);
 
     PseuInstance *GetInstance(void) { return _instance; }
+    SCPDatabaseMgr& GetDBMgr(void) { return GetInstance()->dbmgr; }
 
     OpcodeHandler *_GetOpcodeHandlerTable(void) const;
 

@@ -48,8 +48,21 @@ public:
     bool HasDB(std::string);
     SCPDatabase& GetDB(std::string);
 
+    //////////////////////
+    // helper functions //
+    //////////////////////
+    std::string GetZoneName(uint32 id);
+    std::string GetRaceName(uint32 id);
+    std::string GetClassName_(uint32 id);
+    std::string GetGenderName(uint32 id);
+    std::string GetMapName(uint32 id);
+    std::string GetLangName(uint32 id);
+
 private:
     SCPDatabaseMap _map;
 };
+
+
+
 
 #endif
