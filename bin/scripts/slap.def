@@ -11,13 +11,9 @@ endif
 
 // normalize player name. first char uppercased, rest lowercased.
 set,name ?{uppercase ?{substr,1 ${@def}}}
-out name1: ${name}
 set,len ?{strlen ${@def}}
-out strlen: ${len}
 sub,len 1
-out len: ${len}
 append,name ?{lowercase ?{substr,${len},1 ${@def}}}
-out name2: ${name}
 
 
 // target the player. if targeting was successful, cast spell "Knockback 500". 
@@ -25,7 +21,7 @@ set,t ?{target ${name}}
 if ${t}
 	logdebug slapping player '${name}'
 	castspell 11027
-	target 0	
+	target
 else
 	logerror Can't target player '${name}'
 endif

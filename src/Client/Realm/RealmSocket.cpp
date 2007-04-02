@@ -426,7 +426,7 @@ void RealmSocket::_HandleLogonChallenge(void)
 
 void RealmSocket::_HandleLogonProof(void)
 {
-    logdetail("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),26);
+    logdebug("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",ibuf.GetLength(),26);
     if(ibuf.GetLength() < 26)
     {
         logerror("AUTH_LOGON_PROOF: Recieved incorrect/unknown packet. Hexdump:");
