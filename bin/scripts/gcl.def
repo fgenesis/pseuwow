@@ -1,0 +1,3 @@
+// write leetspeak to channel generalchat (see gc.def)
+#permission=0
+gc ?{toleet ${@def}}

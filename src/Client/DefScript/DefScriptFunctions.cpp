@@ -413,12 +413,45 @@ DefReturnResult DefScriptPackage::func_xor(CmdSet& Set)
 DefReturnResult DefScriptPackage::func_substr(CmdSet& Set)
 {
     DefReturnResult r;
-    unsigned int start,len;
-    len=(unsigned int)toNumber(Set.arg[0]);
-    start=(unsigned int)toNumber(Set.arg[1]);
-    if(start+len>Set.defaultarg.length())
-        len=Set.defaultarg.length()-start;
-    r.ret=Set.defaultarg.substr(start,len);
+    if(Set.defaultarg.empty())
+    {
+        r.ret="";
+    }
+    else
+    {
+        unsigned int start,len;
+        len=(unsigned int)toNumber(Set.arg[0]);
+        start=(unsigned int)toNumber(Set.arg[1]);
+        if(start+len>Set.defaultarg.length())
+            len=Set.defaultarg.length()-start;
+        r.ret=Set.defaultarg.substr(start,len);
+    }
     return r;
 }
+
+DefReturnResult DefScriptPackage::func_uppercase(CmdSet& Set)
+{
+    DefReturnResult r;
+    r.ret=stringToUpper(Set.defaultarg);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::func_lowercase(CmdSet& Set)
+{
+    DefReturnResult r;
+    r.ret=stringToLower(Set.defaultarg);
+    return r;
+}
+
+DefReturnResult DefScriptPackage::func_random(CmdSet& Set)
+{
+    DefReturnResult r;
+    int min,max;
+    min=(int)toUint64(Set.arg[0]);
+    max=(int)toUint64(Set.defaultarg);
+    r.ret=toString(ldbl( min + ( rand() % (max - min + 1)) ));
+    return r;
+}
+
+
 
