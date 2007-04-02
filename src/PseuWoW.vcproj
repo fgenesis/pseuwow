@@ -26,6 +26,7 @@
 				Optimization="3"
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
+				ImproveFloatingPointConsistency="FALSE"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="shared;Client;Client/World;Client/Realm;dep/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
@@ -93,6 +94,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				ImproveFloatingPointConsistency="FALSE"
 				OptimizeForProcessor="0"
 				AdditionalIncludeDirectories="shared;Client;Client/World;Client/Realm;dep/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"

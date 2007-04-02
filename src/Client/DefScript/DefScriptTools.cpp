@@ -6,6 +6,7 @@
 #include <string.h>
 #include <algorithm>
 #include <cctype>
+#include <math.h>
 #include "DefScriptDefines.h"
 #include "DefScriptTools.h"
 
@@ -25,8 +26,15 @@ std::string DefScriptTools::stringToUpper(std::string s)
 std::string DefScriptTools::toString(ldbl num)
 {
     std::stringstream ss;
-    ss << num;
-    return ss.str();
+    ss.setf(std::ios_base::fixed);
+    ss.precision(15);
+    ss << Round(num,15);
+    std::string s(ss.str());
+    while(s[s.length()-1]=='0')
+        s.erase(s.length()-1,1);
+    if(s[s.length()-1]=='.')
+        s.erase(s.length()-1,1);
+    return s;
 }
 
 std::string DefScriptTools::toString(uint64 num)
@@ -72,16 +80,19 @@ ldbl DefScriptTools::toNumber(std::string str)
         u<<=32;
         u|=lobits;
     }
-    else
-        u = atoi64(str.c_str());
+	else
+		u = atoi64(str.c_str());
 
     if(ppos!=std::string::npos)
     {
-        std::string mantissa("0.");
-        mantissa+=str.c_str()+ppos;
-        num=(ldbl)strtod(mantissa.c_str(),NULL);
+		std::string mantissa("0");
+		mantissa+=str.c_str()+ppos;
+		num=(ldbl)atof(mantissa.c_str());		
     }
+   
     num=(unsigned long double)num + u;
+	num=Round(num,10);
+	
 
     if(negative)
         num = -num;
@@ -139,4 +150,10 @@ uint64 DefScriptTools::atoi64(const char *str)
 #error "Fix Me!"
     //return _atoi64(str);
 #endif
+}
+
+inline long double DefScriptTools::Round(long double z,unsigned int n)
+{
+	static long double v[] = { 1, 10, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16 };
+	return floor(z * v[n] + 0.5) / v[n];
 }
