@@ -11,6 +11,7 @@ namespace DefScriptTools
     bool isTrue(std::string);
     uint64 toUint64(std::string);
     uint64 atoi64(const char*);
+	inline long double Round(long double z,unsigned int n);
 }
 
 
