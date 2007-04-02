@@ -7,13 +7,6 @@ LOG * DefScript StartUp [${@version_short}]...
 // loads & applies the configuration
 CONFIG
 
-// preload the scripts, however its not important to load them now.
-//they will get loaded automatically if needed
-LOADALL
-
-// RELOADDEF myscript
-// ...
-
 // set permissions for internal functions
 INTERNAL_PERM
 

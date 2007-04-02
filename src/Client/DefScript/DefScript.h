@@ -174,6 +174,9 @@ private:
     DefReturnResult func_or(CmdSet&);
     DefReturnResult func_xor(CmdSet&);
     DefReturnResult func_substr(CmdSet&);
+    DefReturnResult func_uppercase(CmdSet&);
+    DefReturnResult func_lowercase(CmdSet&);
+    DefReturnResult func_random(CmdSet&);
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"
 

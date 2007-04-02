@@ -84,6 +84,9 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("or",&DefScriptPackage::func_or);
     AddFunc("xor",&DefScriptPackage::func_xor);
     AddFunc("substr",&DefScriptPackage::func_substr);
+    AddFunc("uppercase",&DefScriptPackage::func_uppercase);
+    AddFunc("lowercase",&DefScriptPackage::func_lowercase);
+    AddFunc("random",&DefScriptPackage::func_random);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
@@ -155,12 +158,14 @@ bool DefScriptPackage::LoadByName(std::string name){
 }
 
 bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
-	if(fn.empty() || sn.empty()) return false;
+	if(fn.empty() || sn.empty())
+        return false;
 
 	std::string label, value, line;
     std::fstream f;
     bool load_debug=false,load_notify=false, exec=false, cantload=false;
     char z;
+    unsigned int absline=0;
 
     f.open(fn.c_str(),std::ios_base::in);
     if(!f.is_open())
@@ -182,6 +187,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
                 break;
             line+=z;
         }
+        absline++;
 		if(line.empty())
 			continue; // line is empty, proceed with next line
 
@@ -274,7 +280,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
         }
         if(mismatch || bopen) // no bracket must be left open now
         {
-            printf("DefScript: Bracket mismatch at line '%s'\n",line.c_str());
+            printf("DefScript [%s:%u]: Bracket mismatch at line '%s'\n",sn.c_str(),absline,line.c_str());
             continue; // continue with next line without adding the current line to script
         }
 
@@ -292,7 +298,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 	f.close();
     if(cantload || Blocks.size())
     {
-        printf("DefScript: Error loading script '%s'\n",sn.c_str());
+        printf("DefScript: Error loading script '%s'. block mismatch?\n",sn.c_str());
         DeleteScript(sn);
         return false;
     }

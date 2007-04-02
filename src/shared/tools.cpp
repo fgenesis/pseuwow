@@ -5,6 +5,13 @@
 #include <time.h>
 #include "tools.h"
 
+#ifndef _WIN32
+#   include <sys/dir.h>
+#   include <errno.h>
+#else
+#   include <windows.h>
+#endif
+
 void printchex(std::string in, bool spaces=true){
 	unsigned int len=0,i;
     len=in.length();
@@ -82,5 +89,48 @@ std::string toHexDump(uint8* array,uint32 size,bool spaces)
             ss << ' ';
     }
     return ss.str();
+}
+
+std::deque<std::string> GetFileList(std::string path)
+{
+    std::deque<std::string> files;
+
+# ifndef _WIN32 // TODO: fix this function for linux if needed
+        const char *p = path.c_str();
+    DIR * dirp;
+    struct dirent * dp;
+    dirp = opendir(p);
+    while (dirp)
+    {
+        errno = 0;
+        if ((dp = readdir(dirp)) != NULL)
+            files.push_back(std::string(dp->d_name));
+        else
+            break;
+    }
+    if(dirp)
+        closedir(dirp);
+
+# else
+
+    if(path.at(path.length()-1)!='/')
+        path += "/";
+    path += "*.*";
+    const char *p = path.c_str();
+    WIN32_FIND_DATA fil;
+    HANDLE hFil=FindFirstFile(p,&fil);
+    if(hFil!=INVALID_HANDLE_VALUE)
+    {
+        files.push_back(std::string(fil.cFileName));
+        while(FindNextFile(hFil,&fil))
+            files.push_back(std::string(fil.cFileName));
+    }
+
+# endif
+
+    while(files.front()=="." || files.front()=="..")
+        files.pop_front();
+
+    return files;
 }
 

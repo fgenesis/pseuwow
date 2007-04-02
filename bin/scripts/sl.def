@@ -1,0 +1,3 @@
+// say leetspeak text. gmcommands can't be executed this way
+#permission=0
+s,{${@0}} ?{toleet ${@def}}
