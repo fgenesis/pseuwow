@@ -48,6 +48,10 @@ class PseuInstanceConf
     bool notifyping;
     bool showmyopcodes;
     bool disablespellcheck;
+
+    // gui related
+    bool enablegui;
+    // need more here
 	
 	
 };
@@ -108,7 +112,7 @@ class PseuInstance
 class PseuInstanceRunnable : public ZThread::Runnable
 {
 public:
-    PseuInstanceRunnable::PseuInstanceRunnable();
+    PseuInstanceRunnable();
     void run(void);
     void sleep(uint32);
     PseuInstance *GetInstance(void) { return _i; }

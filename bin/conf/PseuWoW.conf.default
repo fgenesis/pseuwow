@@ -96,4 +96,11 @@ defaultlang=0
 // other servers might be different 
 cmdchar=.
 
+// set this to 1 if you want to have a 3D-window showing stuff
+// NOTE: this is only to activate the window for now, 3D-stuff will come later!!
+// until some frame-limiter is implemented, it will always use 100% CPU usage when
+// the GUI is enabled and activated. (if its in background - 0% CPU load.)
+enablegui=0
+
+
 
