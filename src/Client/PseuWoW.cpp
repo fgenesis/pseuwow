@@ -12,6 +12,7 @@
 #include "Realm/RealmSocket.h"
 #include "World/WorldSession.h"
 #include "CacheHandler.h"
+#include "GUI/PseuGUI.h"
 
 #include "Cli.h"
 
@@ -136,6 +137,16 @@ bool PseuInstance::Init(void) {
         log("Starting CLI...");
         _cli = new CliRunnable(this);
         ZThread::Thread t(_cli);
+    }
+
+    // TODO: find a better loaction where to place this block!
+    if(GetConf()->enablegui)
+    {
+        PseuGUIRunnable *rgui = new PseuGUIRunnable();
+        PseuGUI *gui = rgui->GetGUI();
+        gui->SetInstance(this);
+        // TODO: set resolution, shadows(on/off) and more here...
+        ZThread::Thread *t = new ZThread::Thread(rgui);
     }
 
     if(_error)
@@ -290,6 +301,10 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     notifyping=(bool)atoi(v.Get("NOTIFYPING").c_str());
     showmyopcodes=(bool)atoi(v.Get("SHOWMYOPCODES").c_str());
     disablespellcheck=(bool)atoi(v.Get("DISABLESPELLCHECK").c_str());
+
+    // gui related
+    enablegui=(bool)atoi(v.Get("ENABLEGUI").c_str());
+    // TODO: add configs for resolution, fullscreen, etc. see PseuGUI::... for a list of functions.
 
     // clientversion is a bit more complicated to add
     {
