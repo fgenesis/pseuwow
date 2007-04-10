@@ -102,7 +102,7 @@ void PseuGUI::UseShadows(bool b)
     _shadows = b;
 }
 
-// if this fuction is called fom another thread the device will not work correctly. o_O
+// if this fuction is called from another thread the device will not work correctly. o_O
 void PseuGUI::_Init(void)
 {
     _device = createDevice(_driverType,dimension2d<s32>(_xres,_yres),_colordepth,!_windowed,_shadows,_vsync);
@@ -116,6 +116,7 @@ void PseuGUI::_Init(void)
 
 void PseuGUI::Shutdown(void)
 {
+    DEBUG(logdebug("PseuGUI::Shutdown()"));
     _mustdie = true;
     if(_device)
     {
@@ -135,36 +136,31 @@ void PseuGUI::Run(void)
 
     while(_device && _device->run() && !_mustdie)
     {
-        if (_device->isWindowActive())
+        if (!_device->isWindowActive())
         {
-            _driver->beginScene(true, true, 0);
-
-            _smgr->drawAll();
-
-            _driver->endScene();
-
-            fps = _driver->getFPS();
-
-            if (lastFPS != fps)
-            {
-                core::stringw str = L"PseuWoW [";
-                str += _driver->getName();
-                str += "] FPS:";
-                str += fps;
-
-                // this call does actually lock up the whole window, and i just dont know why; but definitely a threading issue.
-                _device->setWindowCaption(str.c_str());
-
-                lastFPS = fps;
-                DEBUG(logdebug("PseuGUI: Current FPS: %u",fps));
-            }
-            
+            _device->sleep(10); // save cpu & gpu power if not focused
         }
-        else
+        _driver->beginScene(true, true, 0);
+
+        _smgr->drawAll();
+
+        _driver->endScene();
+
+        fps = _driver->getFPS();
+
+        if (lastFPS != fps)
         {
-            _device->setWindowCaption(L"PseuWoW - Halted");
-            _device->yield();
+            core::stringw str = L"PseuWoW [";
+            str += _driver->getName();
+            str += "] FPS:";
+            str += fps;
+
+            _device->setWindowCaption(str.c_str());
+
+            lastFPS = fps;
+            DEBUG(logdebug("PseuGUI: Current FPS: %u",fps));
         }
+
     }
     DEBUG(logdebug("PseuGUI::Run() finished"));
     Shutdown();

@@ -87,6 +87,7 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("uppercase",&DefScriptPackage::func_uppercase);
     AddFunc("lowercase",&DefScriptPackage::func_lowercase);
     AddFunc("random",&DefScriptPackage::func_random);
+    AddFunc("fileexists",&DefScriptPackage::func_fileexists);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))

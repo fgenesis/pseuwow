@@ -3,11 +3,10 @@
 #include <time.h>
 #include <openssl/rand.h>
 
-#include "Auth/ByteBuffer.h"
+#include "ByteBuffer.h"
 #include "DefScript/DefScript.h"
 #include "DefScriptInterface.h"
 #include "Auth/BigNumber.h"
-#include "Auth/ByteBuffer.h"
 #include "DefScript/DefScript.h"
 #include "Realm/RealmSocket.h"
 #include "World/WorldSession.h"
@@ -132,21 +131,41 @@ bool PseuInstance::Init(void) {
         }
     }
 
+    // TODO: find a better loaction where to place this block!
+    if(GetConf()->enablegui)
+    {
+        uint16 x,y,depth;
+        uint8 driver;
+        bool shadows,vsync,win;
+
+        driver=(uint8)atoi(GetScripts()->variables.Get("GUI::DRIVER").c_str());
+        vsync=(bool)atoi(GetScripts()->variables.Get("GUI::VSYNC").c_str());
+        depth=(uint8)atoi(GetScripts()->variables.Get("GUI::DEPTH").c_str());
+        x=(uint16)atoi(GetScripts()->variables.Get("GUI::RESX").c_str());
+        y=(uint16)atoi(GetScripts()->variables.Get("GUI::RESY").c_str());
+        win=(bool)atoi(GetScripts()->variables.Get("GUI::WINDOWED").c_str());
+        shadows=(bool)atoi(GetScripts()->variables.Get("GUI::SHADOWS").c_str());
+        log("GUI settings: driver=%u, depth=%u, res=%ux%u, windowed=%u, shadows=%u",driver,depth,x,y,win,shadows);
+        if(x>0 && y>0 && (depth==16 || depth==32) && driver>0 && driver<=5)
+        {
+            PseuGUIRunnable *rgui = new PseuGUIRunnable();
+            PseuGUI *gui = rgui->GetGUI();
+            gui->SetInstance(this);
+            gui->SetDriver(driver);
+            gui->SetResolution(x,y,depth);
+            gui->SetVSync(vsync);
+            gui->UseShadows(shadows);
+            ZThread::Thread *t = new ZThread::Thread(rgui);
+        }
+        else
+            logerror("GUI: incorrect settings!");
+    }
+
     if(GetConf()->enablecli)
     {
         log("Starting CLI...");
         _cli = new CliRunnable(this);
         ZThread::Thread t(_cli);
-    }
-
-    // TODO: find a better loaction where to place this block!
-    if(GetConf()->enablegui)
-    {
-        PseuGUIRunnable *rgui = new PseuGUIRunnable();
-        PseuGUI *gui = rgui->GetGUI();
-        gui->SetInstance(this);
-        // TODO: set resolution, shadows(on/off) and more here...
-        ZThread::Thread *t = new ZThread::Thread(rgui);
     }
 
     if(_error)
@@ -220,7 +239,14 @@ void PseuInstance::Run(void)
 void PseuInstance::Update()
 {
     if(_sh.GetCount())
+    {
         _sh.Select(0,0); // update the realmsocket
+        if(deleterealm)
+        {
+            deleterealm=false;
+            _rsession = NULL; // was deleted by SocketHandler already!
+        }
+    }
 
     if(createWorldSession && (!_wsession))
     {
@@ -301,10 +327,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     notifyping=(bool)atoi(v.Get("NOTIFYPING").c_str());
     showmyopcodes=(bool)atoi(v.Get("SHOWMYOPCODES").c_str());
     disablespellcheck=(bool)atoi(v.Get("DISABLESPELLCHECK").c_str());
-
-    // gui related
     enablegui=(bool)atoi(v.Get("ENABLEGUI").c_str());
-    // TODO: add configs for resolution, fullscreen, etc. see PseuGUI::... for a list of functions.
 
     // clientversion is a bit more complicated to add
     {

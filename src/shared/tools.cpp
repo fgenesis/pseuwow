@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <time.h>
+#include <fstream>
 #include "tools.h"
 
 #ifndef _WIN32
@@ -128,9 +129,22 @@ std::deque<std::string> GetFileList(std::string path)
 
 # endif
 
-    while(files.front()=="." || files.front()=="..")
+    while(files.size() && (files.front()=="." || files.front()==".."))
         files.pop_front();
 
     return files;
 }
+
+bool FileExists(char *fn)
+{
+    std::fstream f;
+    f.open(fn,std::ios_base::in);
+    if (f.is_open())
+    {
+        f.close();
+        return true;
+    }
+    return false;
+}
+
 

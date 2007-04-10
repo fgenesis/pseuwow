@@ -48,7 +48,11 @@ void WorldSession::Start(void)
 {
     log("Connecting to '%s' on port %u",GetInstance()->GetConf()->worldhost.c_str(),GetInstance()->GetConf()->worldport);
     _socket->Open(GetInstance()->GetConf()->worldhost,GetInstance()->GetConf()->worldport);
-    GetInstance()->GetRSession()->SetCloseAndDelete(); // realm socket is no longer needed
+    if(GetInstance()->GetRSession())
+    {
+        GetInstance()->GetRSession()->SetCloseAndDelete(); // realm socket is no longer needed
+        GetInstance()->deleterealm=true;
+    }
     _valid=true;
     _sh.Add(_socket);
     _socket->SetDeleteByHandler();
@@ -85,7 +89,7 @@ void WorldSession::Update(void)
     if( _socket && _sh.GetCount() )
         _sh.Select(0,0);
 
-    if(!_socket)
+    /*if(!_socket)
     {
         if(_valid)
         {
@@ -93,8 +97,17 @@ void WorldSession::Update(void)
         }
         _logged=_authed=_valid=false;
         return;
-    }
+    }*/
 
+    if(!_socket)
+    {
+        if(_valid)
+        {
+            this->Start();
+        }
+        _logged=_authed=_valid=false;
+        return;
+    }
 
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     bool known=false;

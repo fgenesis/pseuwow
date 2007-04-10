@@ -1,0 +1,35 @@
+// note that the faction is equal to the default language id:
+// 1: Horde, Orcish
+// 7: Alliance, Common
+
+[1]
+faction=7
+name=Human
+
+[2]
+faction=1
+name=Orc
+
+[3]
+faction=7
+name=Dwarf
+
+[4]
+faction=7
+name=Night Elf
+
+[5]
+faction=1
+name=Undead
+
+[6]
+faction=1
+name=Tauren
+
+[7]
+faction=7
+name=Gnome
+
+[8]
+faction=1
+name=Troll

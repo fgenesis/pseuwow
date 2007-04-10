@@ -5,11 +5,16 @@ LOG * Loading SCP data storages...
 // example:
 // LOADSCP,test data/test.scp
 
-LOADSCP,class data/class.scp
-LOADSCP,gender data/gender.scp
-LOADSCP,language data/language.scp
-LOADSCP,map data/map.scp
-LOADSCP,race data/race.scp
+// load default databases
+LOADSCP,class data/scp/class.scp
+LOADSCP,gender data/scp/gender.scp
+LOADSCP,language data/scp/language.scp
+LOADSCP,map data/scp/map.scp
+LOADSCP,race data/scp/race.scp
+
+// load extended databases if present.
+EXLOADSCP,sound data/scp/sound.scp
+EXLOADSCP,emote data/scp/emote.scp
 
 LOG * SCP loaded.
 

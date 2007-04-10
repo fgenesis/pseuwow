@@ -2,7 +2,7 @@
 #define _WORLDPACKET_H
 
 #include "SysDefs.h"
-#include "Auth/ByteBuffer.h"
+#include "ByteBuffer.h"
 
 class WorldPacket : public ByteBuffer
 {

@@ -453,5 +453,17 @@ DefReturnResult DefScriptPackage::func_random(CmdSet& Set)
     return r;
 }
 
+DefReturnResult DefScriptPackage::func_fileexists(CmdSet& Set)
+{
+    std::fstream f;
+    f.open(Set.defaultarg.c_str(),std::ios_base::in);
+    if (f.is_open())
+    {
+        f.close();
+        return true;
+    }
+    return false;
+}
+
 
 

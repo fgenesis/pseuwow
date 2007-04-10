@@ -1,6 +1,6 @@
 #include "common.h"
 #include "PseuWoW.h"
-#include "Auth/ByteBuffer.h"
+#include "ByteBuffer.h"
 #include "Auth/Sha1.h"
 #include "Auth/BigNumber.h"
 #include "RealmSocket.h"

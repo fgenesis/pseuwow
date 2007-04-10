@@ -3,7 +3,7 @@
 SET,lang ${@0}
 SET,msg ${@def}
 
-DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} defaultlang}
+DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} faction}
 DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Yelling '${msg}' in lang ${lang}
