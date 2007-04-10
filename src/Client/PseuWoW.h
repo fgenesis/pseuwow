@@ -3,6 +3,7 @@
 #define _PSEUWOW_H
 
 #include "common.h"
+#include "HelperDefs.h"
 #include "log.h"
 #include "Auth/BigNumber.h"
 #include "DefScript/DefScript.h"
@@ -88,6 +89,7 @@ class PseuInstance
     void Sleep(uint32 msecs);
 	
 	bool createWorldSession;
+    bool deleterealm;
 
 	private:
 

@@ -16,5 +16,6 @@ std::string getDateString(void);
 uint64 toInt(std::string);
 std::string toHexDump(uint8* array,uint32 size,bool spaces=true);
 std::deque<std::string> GetFileList(std::string);
+bool FileExists(char*);
 
 #endif

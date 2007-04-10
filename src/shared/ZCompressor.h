@@ -2,7 +2,7 @@
 #ifndef _ZCOMPRESSOR_H
 #define _ZCOMPRESSOR_H
 
-#include "Auth/ByteBuffer.h"
+#include "ByteBuffer.h"
 
 
 class ZCompressor : public ByteBuffer

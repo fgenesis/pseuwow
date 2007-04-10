@@ -26,6 +26,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Irrlicht", "src\dep\src\irr
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StuffExtract", "src\tools\stuffextract.vcproj", "{EFFE60F4-DA39-41E8-9E53-E462000A2D91}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
+		{F548FC51-24A4-45FF-A381-BEBC39F18270} = {F548FC51-24A4-45FF-A381-BEBC39F18270}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -74,6 +80,14 @@ Global
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release.Build.0 = Release|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - Fast FPU DebugInfo.ActiveCfg = Release - Fast FPU DebugInfo|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - Fast FPU DebugInfo.Build.0 = Release - Fast FPU DebugInfo|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Debug.ActiveCfg = Debug|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Debug.Build.0 = Debug|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Relase - Fast FPU.ActiveCfg = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Relase - Fast FPU.Build.0 = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release.ActiveCfg = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release.Build.0 = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU DebugInfo.ActiveCfg = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU DebugInfo.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

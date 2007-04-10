@@ -18,6 +18,8 @@ void WorldSocket::OnConnect()
 void WorldSocket::OnConnectFailed()
 {
     logerror("WorldSocket::OnConnectFailed()\n");
+    if(_session)
+        _session->SetSocket(NULL);
 }
 
 void WorldSocket::OnDelete()
@@ -29,6 +31,7 @@ void WorldSocket::OnDelete()
 
 void WorldSocket::OnException()
 {
+    DEBUG(logdebug("WorldSocket::OnException()"));
     this->SetCloseAndDelete();
 }
 

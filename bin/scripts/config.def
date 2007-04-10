@@ -3,11 +3,15 @@
 LOADCONF PseuWoW.conf
 LOADCONF users.conf
 
-// Apply the configureation
+// Apply the configuration
 APPLYCONF
 
 // Apply user permissions
 APPLYPERMISSIONS
+
+IF ${#ENABLEGUI}
+	LOADCONF gui.conf
+ENDIF
 
 // remove dangerous variables
 CLEANUPVARS

@@ -16,18 +16,19 @@
 #include <deque>
 #include <vector>
 
-#define SDL_THREADS_DISABLED true
-
-//#include "SDL/SDL.h" // disabled for now until needed
-#include "zthread/FastMutex.h"
-#include "zthread/LockedQueue.h"
-#include "zthread/Runnable.h"
-#include "zthread/Thread.h"
+#ifndef _COMMON_SKIP_THREADS
+# include "zthread/FastMutex.h"
+# include "zthread/LockedQueue.h"
+# include "zthread/Runnable.h"
+# include "zthread/Thread.h"
+#endif
 
 #include "SysDefs.h"
 #include "DebugStuff.h"
-#include "HelperDefs.h"
 #include "tools.h"
+
+#include "ByteBuffer.h"
+
 
 #endif
 

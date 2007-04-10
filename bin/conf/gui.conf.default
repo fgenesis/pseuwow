@@ -1,0 +1,24 @@
+[#uppercase]
+[GUI]
+
+// drivers:
+// 0: Nulldevice (no graphics)
+// 1: fast but crappy software driver
+// 2: good software driver, but slower
+// 3: OpenGL
+// 4: DirectX 8.1
+// 5: DirectX 9.0c
+driver=5
+
+// resolution and more
+resx=1024
+resy=768
+windowed=1
+vsync=0
+
+// use realtime shadows?
+// works only with DirectX or OpenGL
+shadows=1
+
+// color depth; 16 or 32 bit
+depth=32

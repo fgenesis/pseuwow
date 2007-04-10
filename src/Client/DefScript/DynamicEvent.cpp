@@ -44,9 +44,12 @@ void DefScript_DynamicEventMgr::Remove(std::string name)
         return;
     for(DefDynamicEventList::iterator i = _storage.begin(); i != _storage.end(); i++)
     {
-        delete *i;
-        _storage.erase(i);
-        break;
+        if((*i)->name == name)
+        {
+            delete *i;
+            _storage.erase(i);
+            break;
+        }
     }
     return;
 }
