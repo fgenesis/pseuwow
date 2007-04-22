@@ -1,7 +1,6 @@
 
 #include "common.h"
 #include "PseuWoW.h"
-#include "NameTables.h"
 #include "DefScript/DefScript.h"
 #include "DefScript/DefScriptTools.h"
 #include "Player.h"
@@ -65,18 +64,21 @@ DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
     std::stringstream ss;
     uint32 type=atoi(Set.arg[0].c_str());
     uint32 lang=atoi(Set.arg[1].c_str());
-    ss << lang;
+    // TODO: need better database support to get the lang id from a given name
+    /*ss << lang;
     if(ss.str()!=Set.arg[1]) // given lang is NOT a number
     {
+        
         for(uint32 i=0;i<=33;i++)
         {
+            ((PseuInstance*)parentMethod)->dbmgr.GetDB("language").GetFieldByValue("name"
             if(!stricmp(Set.arg[1].c_str(),LookupName(i,langNames)))
             {
                 lang=i;
                 break;
             }
         }
-    }
+    }*/
     std::string msg=Set.arg[2];
     std::string to=Set.arg[3];
     ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(type,lang,msg,to);

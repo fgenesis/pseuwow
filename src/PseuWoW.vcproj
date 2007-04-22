@@ -184,9 +184,6 @@
 				RelativePath=".\Client\main.h">
 			</File>
 			<File
-				RelativePath=".\Client\NameTables.h">
-			</File>
-			<File
 				RelativePath=".\Client\PseuWoW.cpp">
 			</File>
 			<File

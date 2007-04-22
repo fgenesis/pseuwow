@@ -6,7 +6,6 @@
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSocket.h"
-#include "NameTables.h"
 #include "RealmSocket.h"
 #include "Channel.h"
 
@@ -77,7 +76,7 @@ void WorldSession::AddToPktQueue(WorldPacket *pkt)
 void WorldSession::SendWorldPacket(WorldPacket &pkt)
 {
     if(GetInstance()->GetConf()->showmyopcodes)
-        logcustom(0,BROWN,"<< Opcode %u [%s]", pkt.GetOpcode(), LookupName(pkt.GetOpcode(),g_worldOpcodeNames));
+        logcustom(0,BROWN,"<< Opcode %u [%s]", pkt.GetOpcode(), GetOpcodeName(pkt.GetOpcode()));
     _socket->SendWorldPacket(pkt);
 }
 
@@ -147,7 +146,7 @@ void WorldSession::Update(void)
 			|| (GetInstance()->GetConf()->showopcodes==3) )
 		{
             if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode)) 
-			    logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), LookupName(packet->GetOpcode(),g_worldOpcodeNames), known ? "Known" : "UNKNOWN");
+			    logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN");
 		}
 		delete packet;
         known=false;
