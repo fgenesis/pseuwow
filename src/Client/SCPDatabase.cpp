@@ -2,9 +2,6 @@
 #include "common.h"
 #include "SCPDatabase.h"
 
-// for helper functions
-#include "NameTables.h"
-
 uint32 SCPDatabase::LoadFromFile(char *fn)
 {
     std::fstream fh;
@@ -107,8 +104,8 @@ std::string SCPDatabaseMgr::GetZoneName(uint32 id)
 std::string SCPDatabaseMgr::GetRaceName(uint32 id)
 {
     std::string r = GetDB("race").GetField(id).GetString("name");
-    if(r.empty())
-        r = raceName[id];
+    //if(r.empty())
+    //    r = raceName[id];
     return r;
 }
 
@@ -120,8 +117,8 @@ std::string SCPDatabaseMgr::GetMapName(uint32 id)
 std::string SCPDatabaseMgr::GetClassName_(uint32 id)
 {
     std::string r = GetDB("class").GetField(id).GetString("name");
-    if(r.empty())
-        r = className[id];
+    //if(r.empty())
+    //    r = className[id];
     return r;
 }
 
@@ -133,7 +130,7 @@ std::string SCPDatabaseMgr::GetGenderName(uint32 id)
 std::string SCPDatabaseMgr::GetLangName(uint32 id)
 {
     std::string r = GetDB("language").GetField(id).GetString("name");
-    if(r.empty())
-        r = LookupName(id,langNames);
+    //if(r.empty())
+    //    r = LookupName(id,langNames);
     return r;
 }

@@ -73,7 +73,7 @@ void WorldSocket::OnRead()
             _crypt.DecryptRecv((uint8*)&hdr,sizeof(ServerPktHeader));
             _remaining = ntohs(hdr.size)-2;
             _opcode = hdr.cmd;
-            if(_opcode > 800) // no opcode has yet a number over 800
+            if(_opcode > 1000) // no opcode has yet a number over 1000
             {
                 logcritical("CRYPT ERROR: opcode=%u, remain=%u",_opcode,_remaining); // this should never be the case!
                 GetSession()->GetInstance()->SetError(); // no way to recover the crypt, must exit

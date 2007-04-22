@@ -25,7 +25,8 @@ struct SRealmHeader
 
 struct SRealmInfo
 {
-	uint32	icon;			// icon near realm
+	uint8	icon;			// icon near realm
+    uint8   locked;         // added in 2.0.x
 	uint8	color;			// color of record
 	std::string	name;			// Text zero terminated name of Realm
 	std::string	addr_port;		// Text zero terminated address of Realm ("ip:port")
@@ -130,8 +131,8 @@ void RealmSocket::_HandleRealmList(void)
     ibuf.Read((char*)realmbuf.contents(), ibuf.GetLength());
 
     uint32 unk;
-    uint16 len;
-    uint8 cmd,count;
+    uint16 len,count;
+    uint8 cmd;
     realmbuf >> cmd >> len >> unk >> count;
 	
     // no realm?
@@ -145,6 +146,7 @@ void RealmSocket::_HandleRealmList(void)
 	for(uint8 i=0;i<count;i++)
     {
         realmbuf >> realms[i].icon;
+        realmbuf >> realms[i].locked;
         realmbuf >> realms[i].color;
         realmbuf >> realms[i].name;
         realmbuf >> realms[i].addr_port;
@@ -165,6 +167,7 @@ void RealmSocket::_HandleRealmList(void)
 		logcustom(0,LGREEN,"Realm: %s (%s)",realms[i].name.c_str(),realms[i].addr_port.c_str());
         logdetail(" [chars:%d][population:%f][timezone:%d]",realms[i].chars_here,realms[i].population,realms[i].timezone);
     }
+    delete [] realms;
 
 	// now setup where the woldserver is and how to login there
     if(realmAddr.empty()){
