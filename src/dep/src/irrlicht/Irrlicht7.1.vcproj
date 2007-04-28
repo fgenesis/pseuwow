@@ -23,7 +23,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include"
+				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
 				PreprocessorDefinitions="WIN32"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -40,6 +40,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile="dep/lib/debug/irrlicht.lib"
+				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames="libci.lib"/>
 			<Tool
 				Name="VCMIDLTool"
