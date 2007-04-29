@@ -297,7 +297,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
                 recvPacket >> value;
 
                 // TODO: which values are float and which values are uin32 ??!
-                if( obj->isType(TYPE_UNIT) && (
+                /*if( obj->isType(TYPE_UNIT) && (
                     i >= UNIT_FIELD_POWER1         && i <= UNIT_FIELD_MAXPOWER5 ||
                     i >= UNIT_FIELD_BASEATTACKTIME && i <= UNIT_FIELD_RANGEDATTACKTIME ||
                     i >= UNIT_FIELD_STR            && i <= UNIT_FIELD_RESISTANCES + 6 )
@@ -307,10 +307,10 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
                     obj->SetFloatValue(i, (float)value);
                 }
                 else
-                {
+                {*/
 
                     obj->SetUInt32Value(i, value);
-                }
+                //}
             }
         }
     }
