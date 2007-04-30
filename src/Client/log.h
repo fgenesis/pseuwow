@@ -26,6 +26,7 @@ void log_prepare(char *fn, PseuInstance* p); // instance reference needed for lo
 void log(const char *str, ...);
 void logdetail(const char *str, ...);
 void logdebug(const char *str, ...);
+void logdev(const char *str, ...);
 void logerror(const char *str, ...);
 void logcritical(const char *str, ...);
 void logcustom(uint8 loglevel, Color color, const char *str, ...);

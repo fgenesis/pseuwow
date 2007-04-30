@@ -89,6 +89,32 @@ void logdebug(const char *str, ...)
     fflush(stdout);
 }
 
+void logdev(const char *str, ...)
+{
+	if(!str || instance->GetConf()->debug < 3)
+		return;
+	va_list ap;
+	_log_setcolor(true,LMAGENTA);
+	va_start(ap, str);
+	vprintf( str, ap );
+	va_end(ap);
+	_log_resetcolor(true);
+
+
+	printf("\n");
+
+	if(logfile)
+	{
+		fprintf(logfile, getDateString().c_str());
+		va_start(ap, str);
+		vfprintf(logfile, str, ap);
+		fprintf(logfile, "\n" );
+		va_end(ap);
+		fflush(logfile);
+	}
+	fflush(stdout);
+}
+
 void logerror(const char *str, ...)
 {
     va_list ap;

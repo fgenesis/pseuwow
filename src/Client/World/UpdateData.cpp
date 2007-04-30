@@ -72,8 +72,6 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				recvPacket >> objtypeid;
 				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
 
-                
-
                 switch(objtypeid)
                 {
                 case TYPEID_OBJECT: // no data to read
@@ -161,114 +159,91 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& recvPacket)
 {
     uint8 flags;
-    uint32 unk32,flags2,time,posCount,transtime;
+    uint32 unk32,flags2,time,transtime,higuid;
     float unkf,x,y,z,o,tx,ty,tz,to;
     uint64 transguid;
-    float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn;
+	// uint64 fullguid; // see below
+    float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack;
+
+	Object *obj = (Object*)objmgr.GetObj(uguid);
+	Unit *u = (Unit*)obj; // only use for Unit:: functions!!
 
     recvPacket >> flags;
+	flags2 = 0; // not sure if its correct to set it to 0 (needs some starting flag?)
 
-	if(objtypeid==TYPEID_PLAYER)
+	if(flags & UPDATEFLAG_LIVING)
 	{
-        Unit *u = (Unit*)objmgr.GetObj(uguid);
-		recvPacket >> flags2 >> time;
+			recvPacket >> flags2 >> time;
+	}
 
-		if (flags2 & 0x02000000) // On a transport
+	logdev("MovementUpdate TypeID=%u GUID="I64FMT" pObj=%X flags=%u flags2=%u",objtypeid,uguid,obj,flags,flags2);
+
+	if(flags & UPDATEFLAG_HASPOSITION)
+	{
+		if(flags & UPDATEFLAG_TRANSPORT)
 		{
-			recvPacket >> x >> y >> z >> o >> transguid >> tx >> ty >> tz >> to; 
+			recvPacket >> unkf >> unkf >> unkf >> o; // 3x (float)0 followed by orientation
 		}
 		else
 		{
 			recvPacket >> x >> y >> z >> o;
 		}
-
-		recvPacket >> unkf;
-
-		if(flags2 & 0x2000) // Self update
+		
+		if(flags2 & FLAGS2_TRANSPORT)
 		{
-			// What is this data used for?
-			recvPacket >> unkf;
-			recvPacket >> unkf;
-			recvPacket >> unkf;
-			recvPacket >> unkf;
+			recvPacket >> transguid >> tx >> ty >> tz >> to;
+			recvPacket >> unk32; // added in 2.0.3
 		}
-		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim >> speedWalkBack >> speedTurn;
-        if(u)
-        {
-            u->SetPosition(x,y,z,o);
-            u->SetSpeed(MOVE_WALK,speedWalk);
-            u->SetSpeed(MOVE_RUN,speedRun);
-            u->SetSpeed(MOVE_SWIMBACK,speedSwimBack);
-            u->SetSpeed(MOVE_SWIM,speedSwim);
-            u->SetSpeed(MOVE_WALKBACK,speedWalkBack);
-            u->SetSpeed(MOVE_TURN,speedTurn);
-        }
-        else
-        {
-            logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
-        }
 	}
-	if(objtypeid==TYPEID_UNIT)
+	if(flags & UPDATEFLAG_LIVING)
 	{
-        Unit *u = (Unit*)objmgr.GetObj(uguid);
-		recvPacket >> flags2 >> unk32 >> x >> y >> z >> o >> unkf;
-		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim >> speedWalkBack >> speedTurn;
-
-		if (flags2 & 0x400000)
+		recvPacket >> unk32;
+		if(flags2 & 0x2000) // 0x2000 = ??
 		{
-			recvPacket >> unk32 >> unk32 >> unk32 >> unk32 >> posCount;
-
-			for (uint8 i = 0; i < posCount + 1; i++)
-			{
-				recvPacket >> unkf >> unkf >> unkf; // Some x, y, z value
-			}
+			recvPacket >> unkf >> unkf >> unkf >> unkf;
 		}
-        if(u)
-        {
-            u->SetPosition(x,y,z,o);
-            u->SetSpeed(MOVE_WALK,speedWalk);
-            u->SetSpeed(MOVE_RUN,speedRun);
-            u->SetSpeed(MOVE_SWIMBACK,speedSwimBack);
-            u->SetSpeed(MOVE_SWIM,speedSwim);
-            u->SetSpeed(MOVE_WALKBACK,speedWalkBack);
-            u->SetSpeed(MOVE_TURN,speedTurn);
-        }
-        else
-        {
-            logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
-        }
+		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim;
+		recvPacket >> speedWalkBack >> speedFly >> speedFlyBack >> speedTurn; // fly added in 2.0.x
+		if(u)
+		{
+			u->SetPosition(x,y,z,o);
+			u->SetSpeed(MOVE_WALK,speedWalk);
+			u->SetSpeed(MOVE_RUN,speedRun);
+			u->SetSpeed(MOVE_SWIMBACK,speedSwimBack);
+			u->SetSpeed(MOVE_SWIM,speedSwim);
+			u->SetSpeed(MOVE_WALKBACK,speedWalkBack);
+			u->SetSpeed(MOVE_TURN,speedTurn);
+			u->SetSpeed(MOVE_FLY,speedFly);
+			u->SetSpeed(MOVE_FLYBACK,speedFlyBack);
+		}
+		else
+		{
+			logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+		}
 	}
-	if( (objtypeid==TYPEID_CORPSE) || (objtypeid==TYPEID_GAMEOBJECT) || (objtypeid==TYPEID_DYNAMICOBJECT))
+
+	if(flags & UPDATEFLAG_ALL)
 	{
-        Unit *u = (Unit*)objmgr.GetObj(uguid);
-        if(GUID_HIPART(uguid) != HIGHGUID_TRANSPORT)
-        {
-            recvPacket >> x >> y >> z;
-            if(u)
-                u->SetPosition(x,y,z,u->GetO());
-            else
-                logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
-        }
-        else
-        {
-            recvPacket >> unk32 >> unk32 >> unk32; // should be 0?
-        }
-		recvPacket >> o;
-        if(u)
-            u->SetPosition(u->GetX(),u->GetY(),u->GetZ(),o);
-        else
-            logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+		recvPacket >> unk32;
 	}
 
-    recvPacket >> unk32; // (uint32)0x1
+	if(flags & UPDATEFLAG_HIGHGUID)
+	{
+		recvPacket >>  higuid;             // 2.0.6 - high guid was there, unk for 2.0.12
+		// not sure if this is correct
+		obj->SetUInt32Value(OBJECT_FIELD_GUID+1,higuid); // note that this sets only the high part of the guid
+	}
 
-    if ((GUID_HIPART(uguid) == HIGHGUID_TRANSPORT))
-    {
-        recvPacket >> transtime;
-    }
+	if(flags & UPDATEFLAG_FULLGUID)
+	{
+		// unused in mangos? but what if its needed?
+		// recvPacket >> fullguid;
+	}
 
-    if(  GUID_HIPART(uguid) == HIGHGUID_PLAYER_CORPSE)
-        recvPacket >> unk32; // ??
+	if(flags & UPDATEFLAG_TRANSPORT)
+	{
+		recvPacket >>  transtime; // whats this used for?
+	}
 
 }
 
@@ -289,6 +264,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
         recvPacket.read((uint8*)updateMask, masksize);
         umask.SetMask(updateMask);
         //delete [] updateMask; // will be deleted at ~UpdateMask() !!!!
+		logdev("ValuesUpdate TypeId=%u GUID="I64FMT" pObj=%X Blocks=%u Masksize=%u",obj->GetTypeId(),uguid,obj,blockcount,masksize);
 
         for (uint32 i = 0; i < valuesCount; i++)
         {
@@ -296,7 +272,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
             {
                 recvPacket >> value;
 
-                // TODO: which values are float and which values are uin32 ??!
+                // TODO: what to do here?!
                 /*if( obj->isType(TYPE_UNIT) && (
                     i >= UNIT_FIELD_POWER1         && i <= UNIT_FIELD_MAXPOWER5 ||
                     i >= UNIT_FIELD_BASEATTACKTIME && i <= UNIT_FIELD_RANGEDATTACKTIME ||
@@ -311,6 +287,8 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
 
                     obj->SetUInt32Value(i, value);
                 //}
+					// still nee to find out which values to interpret as floats
+					logdev("-> Field[%u] = %u",i,value);
             }
         }
     }
