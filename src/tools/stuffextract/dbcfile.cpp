@@ -59,6 +59,11 @@ bool DBCFile::open()
 
 bool DBCFile::openmem(ByteBuffer bb)
 {
+	if(bb.size() < 4+4+4+4+4)
+	{
+		printf("DBCFile::openmem(): ByteBuffer too small!");
+		return false;
+	}
 
     uint32 hdr;
     bb >> hdr;

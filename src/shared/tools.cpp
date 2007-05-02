@@ -135,16 +135,29 @@ std::deque<std::string> GetFileList(std::string path)
     return files;
 }
 
-bool FileExists(char *fn)
+bool FileExists(std::string fn)
 {
-    std::fstream f;
-    f.open(fn,std::ios_base::in);
-    if (f.is_open())
-    {
-        f.close();
-        return true;
-    }
-    return false;
+	std::fstream f;
+	f.open(fn.c_str(),std::ios_base::in);
+	if (f.is_open())
+	{
+		f.close();
+		return true;
+	}
+	return false;
+}
+
+bool CreateDir(const char *dir)
+{
+	bool result;
+# ifdef _WIN32
+	result = ::CreateDirectory(dir,NULL);
+# else
+	// NOT tested for Linux!! whats the return value on success?
+	// TODO: fix me!
+	result = mkdir(dir);
+#endif
+	return result;
 }
 
 

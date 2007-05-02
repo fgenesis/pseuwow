@@ -5,15 +5,31 @@
 #include "dbcfile.h"
 #include "StuffExtract.h"
 #include "DBCFieldData.h"
+#include "Locale.h"
+
+
 int main(int argc, char *argv[])
 {
-    printf("StuffExtract [version %u]\n",SE_VERSION);
-    ConvertDBC();
+    char input[200];
+    printf("StuffExtract [version %u]\n\n",SE_VERSION);
+	printf("Enter your locale (enUS, enGB, deDE, ...): ");
+	fgets(input,sizeof(input),stdin);
+	char loc[5];
+	memcpy(loc,input,4); loc[4]=0;	
+	SetLocale(loc);
+	if(FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
+	{
+		printf("Locale seems valid, starting conversion...\n");
+		ConvertDBC();
+		//...
+		printf("\n -- finished, press enter to exit --\n");
+	}
+	else
+	{
+		printf("ERROR: Invalid locale! Press Enter to exit...\n");
+	}
 
-
-    printf("\n -- finished --\n");
-    char crap[200];
-    fgets(crap,sizeof(crap),stdin);
+    fgets(input,sizeof(input),stdin);
 
     //while(true);
     return 0;
@@ -54,7 +70,6 @@ void OutSCP(char *fn, SCPStorageMap& scp)
     }
 }
 
-
 bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
@@ -62,7 +77,7 @@ bool ConvertDBC(void)
     DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries;
     printf("Opening DBC archive...\n");
     MPQHelper mpq;
-    if(!mpq.AssignArchive("Data/dbc.MPQ"))
+    if(!mpq.AssignArchive("dbc"))
     {
         printf("ConvertDBC: Could not open 'Data/dbc.MPQ'\n");
         return false;
@@ -86,7 +101,8 @@ bool ConvertDBC(void)
             if(strlen(ChrRacesFieldNames[field]))
             {
                 std::string value = AutoGetDataString(it,ChrRacesFormat,field);
-                RaceDataStorage[id].push_back(std::string(ChrRacesFieldNames[field]).append("=").append(value));
+				if(!value.empty())
+					RaceDataStorage[id].push_back(std::string(ChrRacesFieldNames[field]).append("=").append(value));
             }
         }
     }
@@ -109,11 +125,17 @@ bool ConvertDBC(void)
                     if(textid == (*it).getInt(field))
                     {
                         fname = EmotesTextFieldNames[field];
-                        EmoteDataStorage[em].push_back( fname + "=" + (*ix).getString(EMOTESTEXTDATA_STRING) );
-                        break;
+						for(uint8 stringpos=EMOTESTEXTDATA_STRING1; stringpos<=EMOTESTEXTDATA_STRING8; stringpos++) // we have 8 locales, so...
+						{
+							if((*ix).getInt(stringpos)) // find out which field is used, 0 if not used
+							{
+								EmoteDataStorage[em].push_back( fname + "=" + (*ix).getString(stringpos) );
+								break;
+							}
+						}
+						break;
                     }
                 }
-                
             }
         }
         for(DBCFile::Iterator is = EmotesTextSound.begin(); is != EmotesTextSound.end(); ++is)
@@ -148,6 +170,9 @@ bool ConvertDBC(void)
     //...
     printf("DONE!\n");
     //...
+	CreateDir("stuffextract");
+	CreateDir("stuffextract/scp");
+
     printf("Writing SCP files:\n");    
     printf("emote.."); OutSCP(SCPDIR "/emote.scp",EmoteDataStorage);
     printf("race.."); OutSCP(SCPDIR "/race.scp",RaceDataStorage);
@@ -155,9 +180,8 @@ bool ConvertDBC(void)
     //...
     printf("DONE!\n");
 
-    
-
-
+	// wait for all container destructors to finish
+	printf("DBC files converted, cleaning up...\n");
 
     return true;
 }

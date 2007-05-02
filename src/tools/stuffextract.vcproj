@@ -164,6 +164,12 @@
 				RelativePath=".\stuffextract\dbcfile.h">
 			</File>
 			<File
+				RelativePath=".\stuffextract\Locale.cpp">
+			</File>
+			<File
+				RelativePath=".\stuffextract\Locale.h">
+			</File>
+			<File
 				RelativePath=".\stuffextract\MPQFile.cpp">
 			</File>
 			<File

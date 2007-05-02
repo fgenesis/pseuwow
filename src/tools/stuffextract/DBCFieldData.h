@@ -1,8 +1,6 @@
 #ifndef DBCFIELDDATA_H
 #define DBCFIELDDATA_H
 
-// NOTE: fields checked for 1.12.2 deDE
-
 // defines fields numbers in EmotesText.dbc
 // unk fields are always 0, EMOTESTEXT_EMOTE_STRING is string and the rest is uint32.
 enum EmotesTextEnum
@@ -56,7 +54,15 @@ static const char *EmotesTextFieldNames[] =
 enum EmotesTextDataEnum
 {
     EMOTESTEXTDATA_TEXTID = 0,
-    EMOTESTEXTDATA_STRING = 4
+    EMOTESTEXTDATA_STRING1,
+	EMOTESTEXTDATA_STRING2,
+	EMOTESTEXTDATA_STRING3,
+	EMOTESTEXTDATA_STRING4,
+	EMOTESTEXTDATA_STRING5,
+	EMOTESTEXTDATA_STRING6,
+	EMOTESTEXTDATA_STRING7,
+	EMOTESTEXTDATA_STRING8,
+	EMOTESTEXTDATA_UNK,
     // rest of the fields is 0 always
 };
 
@@ -129,30 +135,29 @@ enum ChrRacesEnum
     CHRRACES_NAME_SHORT, // 2 chars name abbrev (Hu,Or,Tr, etc)
     CHRRACES_UNK_4,
     CHRRACES_FACTION, // 1=Alliance, 7=Horde
-    CHRRACES_UNK_5,
-    CHRRACES_UNK_6,
+    CHRRACES_UNK_5, // always 7?
+    CHRRACES_UNK_6, // SpellID? was always 836 in 1.12.x, since 2.0.x its 15007
     CHRRACES_UNK_7,
-    CHRRACES_UNK_8,
-    CHRRACES_UNK_9,
-    CHRRACES_UNK_10,
     CHRRACES_NAME_GENERAL, // always the english(?) name (without spaces). used in texture names etc.
+    CHRRACES_UNK_9,
+	// the following 8 fields contain either 0 or the race name, depending on the locale. 
+    CHRRACES_NAME1, // english
+    CHRRACES_NAME2, // <need info here>
+    CHRRACES_NAME3, // <need info here>
+    CHRRACES_NAME4, // german
+    CHRRACES_NAME5, // <need info here>
+    CHRRACES_NAME6, // <need info here>
+    CHRRACES_NAME7, // <need info here>
+    CHRRACES_NAME8, // <need info here>
+    CHRRACES_UNK_10,
     CHRRACES_UNK_11,
-    CHRRACES_UNK_12,
-    CHRRACES_UNK_13,
-    CHRRACES_UNK_14,
-    CHRRACES_NAME_LOCAL, // localized(?) name (spanish,german or whatever)
-    CHRRACES_UNK_15,
-    CHRRACES_UNK_16,
-    CHRRACES_UNK_17,
-    CHRRACES_UNK_18,
     CHRRACES_UNK_19,
     CHRRACES_UNK_20,
-    CHRRACES_TRAITS, // string that defines the face decorations on char create
     CHRRACES_UNK_21,
     CHARRACES_END
 };
 
-static const char *ChrRacesFormat = "ixxxiisxixxxxxxsxxxxsxxxxxxsx";
+static const char *ChrRacesFormat = "ixxxiisxixxxsxssssssssxxxxx";
 
 static const char *ChrRacesFieldNames[] =
 {
@@ -168,24 +173,22 @@ static const char *ChrRacesFieldNames[] =
     "",
     "",
     "",
-    "",
-    "",
-    "",
     "name_general",
     "",
-    "",
-    "",
-    "",
+    "name",
+    "name",
+    "name",
+    "name",
+    "name",
+    "name",
+    "name",
     "name",
     "",
     "",
     "",
     "",
     "",
-    "",
-    "traits",
-    "",
-    ""
+	""
 };
 
 #endif

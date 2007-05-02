@@ -7,6 +7,11 @@ MPQFile::MPQFile(const char *fn)
     _isopen = SFileOpenArchive(fn,0,0,&_mpq);
 }
 
+MPQFile::~MPQFile()
+{
+	Close();
+}
+
 bool MPQFile::HasFile(char *fn)
 {
     return SFileHasFile(_mpq,fn);
@@ -22,6 +27,7 @@ ByteBuffer MPQFile::ReadFile(char *fn)
     uint32 size = SFileGetFileSize(fh);
     bb.resize(size);
     SFileReadFile(fh, (void*)bb.contents(), size, NULL, NULL);
+	SFileCloseFile(fh);
     return bb;
 }
 
@@ -34,3 +40,10 @@ uint32 MPQFile::GetFileSize(char *fn)
     SFileCloseFile(fh);
     return size;
 }
+
+void MPQFile::Close(void)
+{
+	if(_isopen)
+		SFileCloseArchive(_mpq);
+}
+

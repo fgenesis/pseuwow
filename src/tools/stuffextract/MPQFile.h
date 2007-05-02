@@ -10,10 +10,12 @@ class MPQFile
 {
 public:
     MPQFile(const char*);
+	~MPQFile();
     inline bool IsOpen(void) { return _isopen; }
     ByteBuffer ReadFile(char*);
     uint32 GetFileSize(char*);
     bool HasFile(char*);
+	void Close(void);
 
 private:
     HANDLE _mpq;
