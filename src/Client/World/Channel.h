@@ -19,6 +19,8 @@ public:
 	void Say(std::string channel, std::string text, uint32 lang);
 	bool IsOnChannel(std::string channel);
 	void HandleNotifyOpcode(WorldPacket &packet);
+	void HandleListRequest(WorldPacket &packet);
+	void RequestList(std::string);
 	
 	// TODO: Add Kick/Ban/Mode/Owner/Mute/Invite and all that stuff
 
