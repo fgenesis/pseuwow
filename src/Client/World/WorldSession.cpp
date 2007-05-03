@@ -199,6 +199,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
 		{SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
 		{SMSG_REMOVED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
+		{SMSG_CHANNEL_LIST, &WorldSession::_HandleChannelListOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -426,7 +427,6 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 	if (type == CHAT_MSG_CHANNEL)
     {
 		recvPacket >> channel; // extract channel name
-        recvPacket >> unk;
     }
 		
 	recvPacket >> target_guid;
@@ -693,5 +693,10 @@ void WorldSession::_HandleRemovedSpellOpcode(WorldPacket& recvPacket)
     recvPacket >> spellid;
     GetMyChar()->RemoveSpell(spellid);
     logdebug("Unlearned spell: id=%u",spellid);
+}
+
+void WorldSession::_HandleChannelListOpcode(WorldPacket& recvPacket)
+{
+	_channels->HandleListRequest(recvPacket);
 }
 
