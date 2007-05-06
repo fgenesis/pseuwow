@@ -316,11 +316,17 @@ struct _ItemSpell
 {
     uint32 SpellId;
     uint32 SpellTrigger;
-    uint32  SpellCharges;
-    uint32  SpellCooldown;
+    uint32 SpellCharges;
+    uint32 SpellCooldown;
     uint32 SpellCategory;
-    uint32  SpellCategoryCooldown;
+    uint32 SpellCategoryCooldown;
 
+};
+
+struct _ItemSocket
+{
+	uint32 Color;
+	uint32 Content;
 };
 
 struct _ItemDamage
@@ -381,13 +387,19 @@ struct ItemProto
     uint32 Material;
     uint32 Sheath;
     uint32 Extra;
+	uint32 Unk1;
     uint32 Block;
     uint32 ItemSet;
     uint32 MaxDurability;
-    uint32 Area;
-    uint32 BagFamily;
-    uint32 Unknown1;
-    uint32 Unknown2;
+	uint32 Area;
+	uint32 Map;
+	uint32 BagFamily;
+	uint32 TotemCategory;
+	_ItemSocket Socket[3];
+	uint32 socketBonus;
+	uint32 GemProperties;
+	uint32 ExtendedCost;
+	uint32 RequiredDisenchantSkill;
 };
 
 class Item : public Object

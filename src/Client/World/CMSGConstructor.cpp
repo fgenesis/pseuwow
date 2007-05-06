@@ -57,7 +57,7 @@ void WorldSession::SendEmote(uint32 id){
     if(!_logged)
         return;
     WorldPacket packet;
-    packet << id << id << _targetGUID; // TODO: correct this!
+    packet << id << id << GetMyChar()->GetTarget();
     packet.SetOpcode(CMSG_TEXT_EMOTE);
     SendWorldPacket(packet);
 }

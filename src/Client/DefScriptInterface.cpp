@@ -115,9 +115,11 @@ DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){
     return true;
 }
 
+
 DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set)
 {
     DEF_RETURN_ERROR; // prevent execution for now
+	/*
     WorldSession *ws=((PseuInstance*)parentMethod)->GetWSession();
     if(Set.defaultarg.empty()){
         ws->SendChatMessage(CHAT_MSG_SAY,0,"Stopping! (Please give me a Playername to follow!)","");
@@ -131,6 +133,7 @@ DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set)
     else
         ss << "Can't follow player '"<<Set.defaultarg<<"' (not known)";
     ws->SendChatMessage(CHAT_MSG_SAY,0,ss.str(),"");
+	*/
     return true;
 
 }

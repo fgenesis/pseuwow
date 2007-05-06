@@ -10,6 +10,9 @@
 #include "CacheHandler.h"
 #include "Item.h"
 
+// increase this number whenever you change something that makes old files unusable
+uint32 ITEMPROTOTYPES_CACHE_VERSION = 0x00000000;
+
 bool PlayerNameCache::AddInfo(uint64 guid, std::string name){
     PlayerNameCacheItem *cacheItem=new PlayerNameCacheItem;
     cacheItem->_name=name;
@@ -127,7 +130,16 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         return;
     }
 
-    uint32 datasize,counter=0;
+	uint32 cacheversion;
+	fh.read((char*)&cacheversion,4);
+	if(cacheversion != ITEMPROTOTYPES_CACHE_VERSION)
+	{
+		logerror("ItemProtoCache is outdated! Creating new cache.");
+		fh.close();
+		return;
+	}
+
+    uint32 datasize,counter=0,unk;
     ByteBuffer buf;
     while(!fh.eof())
     {
@@ -139,6 +151,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->Id;
         buf >> proto->Class;
         buf >> proto->SubClass;
+		buf >> unk;
         for(uint8 i=0;i<4;i++)
             buf >> proto->Name[i];
         buf >> proto->DisplayInfoID;
@@ -202,12 +215,23 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->Material;
         buf >> proto->Sheath;
         buf >> proto->Extra;
+		buf >> proto->Unk1; // added in 2.0.3
         buf >> proto->Block;
         buf >> proto->ItemSet;
         buf >> proto->MaxDurability;
-        buf >> proto->Area;
-        buf >> proto->Unknown1;
-        buf >> proto->Unknown2; // Added in 1.12.x client branch
+		buf >> proto->Area;
+        buf >> proto->Map;
+        buf >> proto->BagFamily;
+        buf >> proto->TotemCategory; // Added in 1.12.x client branch
+		for(uint32 s = 0; s < 3; s++)
+		{
+			buf >> proto->Socket[s].Color;
+			buf >> proto->Socket[s].Content;
+		}
+		buf >> proto->socketBonus;
+		buf >> proto->GemProperties;
+		buf >> proto->ExtendedCost;
+		buf >> proto->RequiredDisenchantSkill;
         if(proto->Id)
         {
             //DEBUG(logdebug("ItemProtoCache: Loaded %u [%s]",proto->Id, proto->Name[0].c_str()));
@@ -232,7 +256,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         logerror("ItemProtoCache: Could not write to file '%s'!",fn);
         return;
     }
-
+	fh.write((char*)&(uint32)ITEMPROTOTYPES_CACHE_VERSION,4);
     uint32 counter=0;
     ByteBuffer buf;
     for(uint32 i=0;i<session->objmgr.GetItemProtoCount();i++)
@@ -304,13 +328,24 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         buf << proto->LockID;
         buf << proto->Material;
         buf << proto->Sheath;
-        buf << proto->Extra;
-        buf << proto->Block;
-        buf << proto->ItemSet;
-        buf << proto->MaxDurability;
-        buf << proto->Area;
-        buf << proto->Unknown1;
-        buf << proto->Unknown2; // Added in 1.12.x client branch
+		buf << proto->Extra;
+		buf << proto->Unk1; // added in 2.0.3
+		buf << proto->Block;
+		buf << proto->ItemSet;
+		buf << proto->MaxDurability;
+		buf << proto->Area;
+		buf << proto->Map;
+		buf << proto->BagFamily;
+		buf << proto->TotemCategory; // Added in 1.12.x client branch
+		for(uint32 s = 0; s < 3; s++)
+		{
+			buf << proto->Socket[s].Color;
+			buf << proto->Socket[s].Content;
+		}
+		buf << proto->socketBonus;
+		buf << proto->GemProperties;
+		buf << proto->ExtendedCost;
+		buf << proto->RequiredDisenchantSkill;
 
         //DEBUG(logdebug("ItemProtoCache: Saved %u [%s]",proto->Id, proto->Name[0].c_str()));
         uint32 size = buf.size();

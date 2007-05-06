@@ -62,19 +62,26 @@ void DefScript_DynamicEventMgr::Update(void)
     for(DefDynamicEventList::iterator i = _storage.begin(); i != _storage.end(); i++)
     {
         sc = NULL;
-        (*i)->counter += diff;
-        if((*i)->counter >= (*i)->interval)
-        {
-            (*i)->counter %= (*i)->interval;
+		try
+		{
+			(*i)->counter += diff;
+			if((*i)->counter >= (*i)->interval)
+			{
+				(*i)->counter %= (*i)->interval;
 
-            if(!(*i)->parent.empty())
-                sc = _pack->GetScript((*i)->parent);
+				if(!(*i)->parent.empty())
+					sc = _pack->GetScript((*i)->parent);
 
-            if(sc)
-                _pack->RunSingleLineFromScript((*i)->cmd,sc);
-            else
-                _pack->RunSingleLine((*i)->cmd);
-        }
+				if(sc)
+					_pack->RunSingleLineFromScript((*i)->cmd,sc);
+				else
+					_pack->RunSingleLine((*i)->cmd);
+			}
+		}
+		catch (...)
+		{
+			printf("Error in DefScript_DynamicEventMgr::Update()\n");
+		}
     }
 }
 	

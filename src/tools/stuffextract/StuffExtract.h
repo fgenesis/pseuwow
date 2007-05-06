@@ -7,7 +7,7 @@
 #define SE_VERSION 1
 #define MAPS_VERSION ((uint32)0)
 #define OUTDIR "stuffextract"
-#define SCPDIR OUTDIR "/scp"
+#define SCPDIR OUTDIR "/data/scp"
 
 typedef std::map< uint32,std::list<std::string> > SCPStorageMap;
 
