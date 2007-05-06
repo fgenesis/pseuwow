@@ -191,4 +191,71 @@ static const char *ChrRacesFieldNames[] =
 	""
 };
 
+enum MapEnum
+{
+    MAP_ID = 0,
+    MAP_NAME_GENERAL = 1,
+    MAP_NAME1 = 4,
+    MAP_NAME2,
+    MAP_NAME3,
+    MAP_NAME4,
+    MAP_NAME5,
+    MAP_NAME6,
+    MAP_NAME7,
+    MAP_NAME8,
+    MAP_END = 75
+};
+
+static const char *MapFieldNames[] = 
+{
+    "","name_general","","","name","name","name","name","name","name",
+    "name","name","","","","","","","","",
+    "","","","","","","","","","",
+    "","","","","","","","","","",
+    "","","","","","","","","","",
+    "","","","","","","","","","",
+    "","","","","","","","","","",
+    "","","","",
+    ""
+};
+
+static const char *MapFormat = 
+{
+    "isxxssssss"
+    "ssxxxxxxxx"
+    "xxxxxxxxxx"
+    "xxxxxxxxxx"
+    "xxxxxxxxxx"
+    "xxxxxxxxxx"
+    "xxxxxxxxxx"
+    "xxxxx"
+};
+
+enum AreaTableEnum
+{
+    AREATABLE_ID = 0,
+    AREATABLE_NAME1 = 11,
+    AREATABLE_NAME2,
+    AREATABLE_NAME3,
+    AREATABLE_NAME4,
+    AREATABLE_NAME5,
+    AREATABLE_NAME6,
+    AREATABLE_NAME7,
+    AREATABLE_NAME8,
+    AREATABLE_END = 27,
+};
+
+static const char *AreaTableFieldNames[] = {
+    "","","","","","","","","","",
+    "name","name","name","name","name","name","name","name","","",
+    "","","","","","",
+    ""
+};
+
+static const char *AreaTableFormat = {
+    "ixxxxxxxxx"
+    "xssssssssx"
+    "xxxxxxx"
+};
+
 #endif

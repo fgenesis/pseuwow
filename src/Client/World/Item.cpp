@@ -9,11 +9,13 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
     ItemProto *proto = new ItemProto;
     recvPacket >> proto->Id;
     uint8 field[64];
+	uint32 unk;
     memset(field,0,64);
     if(memcmp(recvPacket.contents()+sizeof(uint32),field,64))
     {
         recvPacket >> proto->Class;
         recvPacket >> proto->SubClass;
+		recvPacket >> unk; // dont need that value?
         for(uint8 i=0;i<4;i++)
             recvPacket >> proto->Name[i];
         recvPacket >> proto->DisplayInfoID;
@@ -81,8 +83,18 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->ItemSet;
         recvPacket >> proto->MaxDurability;
         recvPacket >> proto->Area;
-        recvPacket >> proto->Unknown1;
-        recvPacket >> proto->Unknown2; // Added in 1.12.x client branch
+		recvPacket >> proto->Map;
+		recvPacket >> proto->BagFamily;
+		recvPacket >> proto->TotemCategory; // Added in 1.12.x client branch
+		for(uint32 s = 0; s < 3; s++)
+		{
+			recvPacket >> proto->Socket[s].Color;
+			recvPacket >> proto->Socket[s].Content;
+		}
+		recvPacket >> proto->socketBonus;
+		recvPacket >> proto->GemProperties;
+		recvPacket >> proto->ExtendedCost;
+		recvPacket >> proto->RequiredDisenchantSkill;
 
         logdetail("Got Item Info: Id=%u Name='%s' ReqLevel=%u Armor=%u Desc='%s'",
             proto->Id, proto->Name[0].c_str(), proto->RequiredLevel, proto->Armor, proto->Description.c_str());

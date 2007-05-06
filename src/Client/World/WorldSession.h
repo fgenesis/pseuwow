@@ -46,9 +46,7 @@ public:
     void SendWorldPacket(WorldPacket&);
 
     void SetTarget(uint64 guid);
-    uint64 GetTarget(void) { return _targetGUID; }
-    void SetFollowTarget(uint64 guid);
-    uint64 GetFollowTarget(void) { return _followGUID; }
+    uint64 GetTarget(void) { return GetMyChar()->GetTarget(); }
     uint64 GetGuid(void) { return _myGUID; }
     Channel *GetChannels(void) { return _channels; }
     MyCharacter *GetMyChar(void) { ASSERT(_myGUID > 0); return (MyCharacter*)objmgr.GetObj(_myGUID); }
@@ -107,7 +105,7 @@ private:
     bool _valid,_authed,_logged,_deleteme; // world status
     SocketHandler _sh; // handles the WorldSocket
     Channel *_channels;
-    uint64 _targetGUID,_followGUID,_myGUID;
+    uint64 _myGUID;
 };
 
 #endif

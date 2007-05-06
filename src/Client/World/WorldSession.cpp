@@ -18,8 +18,6 @@ WorldSession::WorldSession(PseuInstance *in)
     _instance = in;
     _valid=_authed=_logged=false;
     _socket=new WorldSocket(_sh,this);
-    _targetGUID=0; // no target
-    _followGUID=0; // dont follow anything
     _myGUID=0; // i dont have a guid yet
     plrNameCache.ReadFromFile(); // load names/guids of known players
     ItemProtoCache_InsertDataToSession(this);
@@ -210,12 +208,6 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 void WorldSession::SetTarget(uint64 guid)
 {
     SendSetSelection(guid);
-}
-
-// redundant for now
-void WorldSession::SetFollowTarget(uint64 guid)
-{
-    _followGUID=guid;
 }
 
 void WorldSession::_OnEnterWorld(void)
@@ -414,7 +406,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     uint8 type=0;
 	uint32 lang=0;
 	uint64 target_guid=0;
-	uint32 msglen=0,unk;
+	uint32 msglen=0;
 	std::string msg,channel="";
     bool isCmd=false;
 

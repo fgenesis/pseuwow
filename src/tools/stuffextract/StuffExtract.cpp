@@ -40,7 +40,7 @@ std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 
 {
     if(format[field]=='i' || format[field]=='f')
         return toString( (*it).getInt(field) );
-    if(format[field]=='s')
+    if(format[field]=='s' && (*it).getUInt(field))
         return (*it).getString(field);
     return "";
 }
@@ -73,8 +73,8 @@ void OutSCP(char *fn, SCPStorageMap& scp)
 bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
-    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage; // will store the converted data from dbc files
-    DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries;
+    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,AreaDataStorage; // will store the converted data from dbc files
+    DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable;
     printf("Opening DBC archive...\n");
     MPQHelper mpq;
     if(!mpq.AssignArchive("dbc"))
@@ -88,6 +88,8 @@ bool ConvertDBC(void)
     EmotesTextSound.openmem(mpq.ExtractFile("DBFilesClient\\EmotesTextSound.dbc"));
     ChrRaces.openmem(mpq.ExtractFile("DBFilesClient\\ChrRaces.dbc"));
     SoundEntries.openmem(mpq.ExtractFile("DBFilesClient\\SoundEntries.dbc"));
+    Map.openmem(mpq.ExtractFile("DBFilesClient\\Map.dbc"));
+    AreaTable.openmem(mpq.ExtractFile("DBFilesClient\\AreaTable.dbc"));
     //...
     printf("DBC files opened.\n");
     //...
@@ -167,16 +169,51 @@ bool ConvertDBC(void)
         }
     }
 
+    printf("map info..");
+    for(DBCFile::Iterator it = Map.begin(); it != Map.end(); ++it)
+    {
+        uint32 id = it->getUInt(MAP_ID);
+        for(uint32 field=MAP_ID; field < MAP_END; field++)
+        {
+            if(strlen(MapFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,MapFormat,field);
+                if(value.size()) // only store if not null
+                    MapDataStorage[id].push_back(std::string(MapFieldNames[field]) + "=" + value);
+            }
+        }
+    }
+
+    printf("area..");
+    for(DBCFile::Iterator it = AreaTable.begin(); it != AreaTable.end(); ++it)
+    {
+        uint32 id = it->getUInt(MAP_ID);
+        for(uint32 field=AREATABLE_ID; field < AREATABLE_END; field++)
+        {
+            if(strlen(AreaTableFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,AreaTableFormat,field);
+                if(value.size()) // only store if not null
+                    AreaDataStorage[id].push_back(std::string(AreaTableFieldNames[field]) + "=" + value);
+            }
+        }
+    }
+
+
+
     //...
     printf("DONE!\n");
     //...
 	CreateDir("stuffextract");
-	CreateDir("stuffextract/scp");
+	CreateDir("stuffextract/data");
+    CreateDir("stuffextract/data/scp");
 
     printf("Writing SCP files:\n");    
     printf("emote.."); OutSCP(SCPDIR "/emote.scp",EmoteDataStorage);
     printf("race.."); OutSCP(SCPDIR "/race.scp",RaceDataStorage);
     printf("sound.."); OutSCP(SCPDIR "/sound.scp",SoundDataStorage);
+    printf("map.."); OutSCP(SCPDIR "/map.scp",MapDataStorage);
+    printf("area.."); OutSCP(SCPDIR "/area.scp",AreaDataStorage);
     //...
     printf("DONE!\n");
 
