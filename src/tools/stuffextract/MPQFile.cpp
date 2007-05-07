@@ -44,6 +44,6 @@ uint32 MPQFile::GetFileSize(char *fn)
 void MPQFile::Close(void)
 {
 	if(_isopen)
-		SFileCloseArchive(_mpq);
+		FreeMPQArchive((TMPQArchive*&)_mpq);
 }
 

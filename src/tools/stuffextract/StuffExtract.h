@@ -8,12 +8,14 @@
 #define MAPS_VERSION ((uint32)0)
 #define OUTDIR "stuffextract"
 #define SCPDIR OUTDIR "/data/scp"
+#define MAPSDIR OUTDIR "/data/maps"
 
 typedef std::map< uint32,std::list<std::string> > SCPStorageMap;
 
 int main(int argc, char *argv[]);
 void OutSCP(char*, SCPStorageMap&);
 bool ConvertDBC(void);
+void ExtractMaps(void);
 
 
 #endif
