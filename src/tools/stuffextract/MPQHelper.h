@@ -3,15 +3,18 @@
 
 #define MAX_PATCH_NUMBER 9
 
+class MPQFile;
+
 class MPQHelper
 {
 public:
-    MPQHelper();
-    bool AssignArchive(char*);
+    MPQHelper(char*);
+    ~MPQHelper();
     ByteBuffer ExtractFile(char*);
+    bool FileExists(char*);
 private:
-    std::list<std::string> _patches; // patch.mpq - patch-9.mpq
-    std::string _archive;
+    std::list<MPQFile*> _files;
+    std::list<std::string> _patches;
 };
 
 #endif

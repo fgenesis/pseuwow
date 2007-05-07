@@ -7,6 +7,8 @@
 #include "DBCFieldData.h"
 #include "Locale.h"
 
+std::vector<std::string> mapNames;
+
 
 int main(int argc, char *argv[])
 {
@@ -20,7 +22,10 @@ int main(int argc, char *argv[])
 	if(FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
 	{
 		printf("Locale seems valid, starting conversion...\n");
+        CreateDir("stuffextract");
+        CreateDir("stuffextract/data");
 		ConvertDBC();
+        ExtractMaps();
 		//...
 		printf("\n -- finished, press enter to exit --\n");
 	}
@@ -76,12 +81,8 @@ bool ConvertDBC(void)
     SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,AreaDataStorage; // will store the converted data from dbc files
     DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable;
     printf("Opening DBC archive...\n");
-    MPQHelper mpq;
-    if(!mpq.AssignArchive("dbc"))
-    {
-        printf("ConvertDBC: Could not open 'Data/dbc.MPQ'\n");
-        return false;
-    }
+    MPQHelper mpq("dbc");
+
     printf("Opening DBC files...\n");
     EmotesText.openmem(mpq.ExtractFile("DBFilesClient\\EmotesText.dbc"));
     EmotesTextData.openmem(mpq.ExtractFile("DBFilesClient\\EmotesTextData.dbc"));
@@ -172,6 +173,7 @@ bool ConvertDBC(void)
     printf("map info..");
     for(DBCFile::Iterator it = Map.begin(); it != Map.end(); ++it)
     {
+        mapNames.push_back(it->getString(MAP_NAME_GENERAL));
         uint32 id = it->getUInt(MAP_ID);
         for(uint32 field=MAP_ID; field < MAP_END; field++)
         {
@@ -204,8 +206,7 @@ bool ConvertDBC(void)
     //...
     printf("DONE!\n");
     //...
-	CreateDir("stuffextract");
-	CreateDir("stuffextract/data");
+
     CreateDir("stuffextract/data/scp");
 
     printf("Writing SCP files:\n");    
@@ -221,4 +222,50 @@ bool ConvertDBC(void)
 	printf("DBC files converted, cleaning up...\n");
 
     return true;
+}
+
+void ExtractMaps(void)
+{
+    printf("\nExtracting maps...\n");
+    char namebuf[200];
+    char outbuf[2000];
+    uint32 extr,extrtotal=0;
+    MPQHelper mpq("terrain");
+    CreateDir("stuffextract/data/maps");
+    for(uint32 it=0; it < mapNames.size(); it++)
+    {
+        extr=0;
+        for(uint32 x=0; x<64; x++)
+        {
+            for(uint32 y=0;y<64; y++)
+            {
+                sprintf(namebuf,"World\\Maps\\%s\\%s_%u_%u.adt",mapNames[it].c_str(),mapNames[it].c_str(),x,y);
+                sprintf(outbuf,MAPSDIR"/%s_%u_%u.adt",mapNames[it].c_str(),x,y);
+                if(mpq.FileExists(namebuf))
+                {
+                    ByteBuffer& bb = mpq.ExtractFile(namebuf);
+                    if(bb.size())
+                    {
+                        std::fstream fh;
+                        //printf("Extracting map [ %s ]\n",outbuf);
+                        fh.open(outbuf, std::ios_base::out|std::ios_base::binary);
+                        if(!fh.is_open())
+                        {
+                            printf("\nERROR: Map extraction failed: could not save file %s\n",outbuf);
+                            return;
+                        }
+                        fh.write((char*)bb.contents(),bb.size());
+                        fh.close();
+                        extr++;
+                        printf("Map [%u/%u]: %s: %u\r",it+1,mapNames.size(),mapNames[it].c_str(),extr);
+                    }
+                }
+ 
+            }
+        }
+        extrtotal+=extr;
+        printf("\n");
+    }
+
+    printf("\nDONE - %u maps extracted.\n",extrtotal);
 }
