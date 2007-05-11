@@ -257,10 +257,9 @@ void ExtractMaps(void)
                         fh.write((char*)bb.contents(),bb.size());
                         fh.close();
                         extr++;
-                        printf("Map [%u/%u]: %s: %u\r",it+1,mapNames.size(),mapNames[it].c_str(),extr);
                     }
                 }
- 
+                printf("Map [%u/%u]: %s: %u\r",it+1,mapNames.size(),mapNames[it].c_str(),extr);
             }
         }
         extrtotal+=extr;

@@ -13,14 +13,8 @@
 class WorldSocket;
 class WorldPacket;
 class Channel;
-
-
-
-struct OpcodeHandler
-{
-    uint16 opcode;
-    void (WorldSession::*handler)(WorldPacket& recvPacket);
-};
+class RealmSession;
+struct OpcodeHandler;
 
 
 class WorldSession
@@ -33,17 +27,13 @@ public:
     PseuInstance *GetInstance(void) { return _instance; }
     SCPDatabaseMgr& GetDBMgr(void) { return GetInstance()->dbmgr; }
 
-    OpcodeHandler *_GetOpcodeHandlerTable(void) const;
-
-    void SetSocket(WorldSocket *sock);
-
     void AddToPktQueue(WorldPacket *pkt);
-    void Connect(std::string addr,uint16 port);
     void Update(void);
     void Start(void);
-    bool IsValid(void) { return _valid; }
-    bool DeleteMe(void);
+    bool MustDie(void) { return _mustdie; }
+    void SetMustDie(void) { _mustdie = true; }
     void SendWorldPacket(WorldPacket&);
+    bool InWorld(void) { return _logged; }
 
     void SetTarget(uint64 guid);
     uint64 GetTarget(void) { return GetMyChar()->GetTarget(); }
@@ -65,6 +55,7 @@ public:
     ObjMgr objmgr;
 
 private:
+    OpcodeHandler *_GetOpcodeHandlerTable(void) const;
 
     // Helpers
     void _OnEnterWorld(void); // = login
@@ -99,10 +90,12 @@ private:
     void _ValuesUpdate(uint64 uguid, WorldPacket& recvPacket); // ...
     void _QueryObjectInfo(uint64 guid);
 
+    void _LoadCache(void);
+
     PseuInstance *_instance;
     WorldSocket *_socket;
     ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
-    bool _valid,_authed,_logged,_deleteme; // world status
+    bool _logged,_mustdie; // world status
     SocketHandler _sh; // handles the WorldSocket
     Channel *_channels;
     uint64 _myGUID;

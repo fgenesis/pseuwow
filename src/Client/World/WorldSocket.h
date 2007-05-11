@@ -1,7 +1,7 @@
 #ifndef _WORLDSOCKET_H
 #define _WORLDSOCKET_H
 
-#include "Network/ResolvSocket.h"
+#include "Network/TcpSocket.h"
 #include "SysDefs.h"
 
 class WorldSession;
@@ -24,6 +24,7 @@ class WorldSocket : public TcpSocket
 public:
     WorldSocket(SocketHandler &h, WorldSession *s);
     WorldSession *GetSession(void) { return _session; }
+    bool IsOk();
     
     void OnRead();
     void OnConnect();
@@ -40,6 +41,7 @@ private:
     bool _gothdr; // true if only the header was recieved yet
     uint16 _opcode; // stores the last recieved opcode
     uint16 _remaining; // bytes amount of the next data packet
+    bool _ok;
 
 };
 

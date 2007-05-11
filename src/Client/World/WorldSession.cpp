@@ -8,21 +8,26 @@
 #include "WorldSocket.h"
 #include "RealmSocket.h"
 #include "Channel.h"
-
+#include "RealmSession.h"
 #include "WorldSession.h"
+
+struct OpcodeHandler
+{
+    uint16 opcode;
+    void (WorldSession::*handler)(WorldPacket& recvPacket);
+};
 
 
 WorldSession::WorldSession(PseuInstance *in)
 {
     logdebug("-> Starting WorldSession from instance 0x%X",in); // should never output a null ptr
     _instance = in;
-    _valid=_authed=_logged=false;
-    _socket=new WorldSocket(_sh,this);
+    _mustdie=false;
+    _logged=false;
+    _socket=NULL;
     _myGUID=0; // i dont have a guid yet
-    plrNameCache.ReadFromFile(); // load names/guids of known players
-    ItemProtoCache_InsertDataToSession(this);
-    _deleteme = false;
     _channels = new Channel(this);
+    _sh.SetAutoCloseSockets(false);
     //...
 }
 
@@ -30,40 +35,43 @@ WorldSession::~WorldSession()
 {
     WorldPacket *packet;
     // clear the queue
-    while(!pktQueue.empty())
+    while(pktQueue.size())
     {
         packet = pktQueue.next();
         delete packet;
     }
-    _OnLeaveWorld();
 
-    delete _channels;
-    //delete _socket; the socket will be deleted by its handler!!
+    if(_channels)
+        delete _channels;
+    if(_socket)
+        delete _socket;
 }
 
 void WorldSession::Start(void)
 {
     log("Connecting to '%s' on port %u",GetInstance()->GetConf()->worldhost.c_str(),GetInstance()->GetConf()->worldport);
+    _socket=new WorldSocket(_sh,this);
     _socket->Open(GetInstance()->GetConf()->worldhost,GetInstance()->GetConf()->worldport);
     if(GetInstance()->GetRSession())
     {
-        GetInstance()->GetRSession()->SetCloseAndDelete(); // realm socket is no longer needed
-        GetInstance()->deleterealm=true;
+        GetInstance()->GetRSession()->SetMustDie(); // realm session is no longer needed
     }
-    _valid=true;
     _sh.Add(_socket);
-    _socket->SetDeleteByHandler();
-    _sh.Select(1,0);
+
+    // if we cant connect, wait until the socket gives up (after 5 secs)
+    while( (!MustDie()) && (!_socket->IsOk()) && (!GetInstance()->Stopped()) )
+    {
+        _sh.Select(3,0);
+        GetInstance()->Sleep(100);
+    }
 }
 
-bool WorldSession::DeleteMe(void)
+void WorldSession::_LoadCache(void)
 {
-    return _deleteme;
-}
-
-void WorldSession::SetSocket(WorldSocket *sock)
-{
-    _socket = sock;
+    logdetail("Loading Cache...");
+    plrNameCache.ReadFromFile(); // load names/guids of known players
+    ItemProtoCache_InsertDataToSession(this);
+    //...
 }
 
 void WorldSession::AddToPktQueue(WorldPacket *pkt)
@@ -75,36 +83,24 @@ void WorldSession::SendWorldPacket(WorldPacket &pkt)
 {
     if(GetInstance()->GetConf()->showmyopcodes)
         logcustom(0,BROWN,"<< Opcode %u [%s]", pkt.GetOpcode(), GetOpcodeName(pkt.GetOpcode()));
-    _socket->SendWorldPacket(pkt);
+    if(_socket && _socket->IsOk())
+        _socket->SendWorldPacket(pkt);
+    else
+    {
+        logerror("WorldSession: Can't send WorldPacket, socket doesn't exist or is not ready.");
+    }
 }
 
 void WorldSession::Update(void)
 {
-    if (!IsValid())
-        return;
-
-    if( _socket && _sh.GetCount() )
+    if( _sh.GetCount() ) // the socketwil remove itself from the handler if it got closed
         _sh.Select(0,0);
-
-    /*if(!_socket)
-    {
-        if(_valid)
-        {
-            _deleteme = true;
-        }
-        _logged=_authed=_valid=false;
-        return;
-    }*/
-
-    if(!_socket)
-    {
-        if(_valid)
-        {
-            this->Start();
-        }
-        _logged=_authed=_valid=false;
-        return;
+    else // so we just need to check if the socket doesnt exist or if it exists but isnt valid anymore.
+    {    // if thats the case, we dont need the session anymore either
+        if(!_socket || (_socket && !_socket->IsOk()))
+            SetMustDie();
     }
+
 
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     bool known=false;
@@ -212,7 +208,7 @@ void WorldSession::SetTarget(uint64 guid)
 
 void WorldSession::_OnEnterWorld(void)
 {
-    if(!_logged)
+    if(!InWorld())
     {
         _logged=true;
         GetInstance()->GetScripts()->variables.Set("@inworld","true");
@@ -223,7 +219,7 @@ void WorldSession::_OnEnterWorld(void)
 
 void WorldSession::_OnLeaveWorld(void)
 {
-    if(_logged)
+    if(InWorld())
     {
         _logged=false;
         GetInstance()->GetScripts()->RunScript("_leaveworld",NULL);
@@ -234,7 +230,7 @@ void WorldSession::_OnLeaveWorld(void)
 void WorldSession::_DoTimedActions(void)
 {
     static clock_t pingtime=0;
-    if(_logged)
+    if(InWorld())
     {
         if(pingtime < clock())
         {
@@ -283,8 +279,6 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
     // so its not 100% correct to init the crypt here, but it should do the job if authing was correct
 	_socket->InitCrypt(GetInstance()->GetSessionKey().AsByteArray(), 40); 
 
-    _authed=true;
-
 }
 
 void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
@@ -314,6 +308,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 		GetInstance()->SetError();
 		return;
 	}
+    _LoadCache(); // we are about to login, so we need cache data
 	logdetail("W: Chars in list: %u\n",num);
 	for(unsigned int i=0;i<num;i++){
 		recvPacket >> plr[i]._guid;

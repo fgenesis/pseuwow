@@ -7,32 +7,40 @@ WorldSocket::WorldSocket(SocketHandler &h, WorldSession *s) : TcpSocket(h)
 {
     _session = s;
     _gothdr = false;
+    _ok=false;
 }
-    
+
+bool WorldSocket::IsOk(void)
+{
+    return _ok;
+}
 
 void WorldSocket::OnConnect()
 {
-    log("Connected to world server.\r\n");
+    log("Connected to world server.");
+    _ok = true;
 }
 
 void WorldSocket::OnConnectFailed()
 {
-    logerror("WorldSocket::OnConnectFailed()\n");
-    if(_session)
-        _session->SetSocket(NULL);
+    logerror("Connecting to World Server failed!");
+    _ok = false;
 }
 
 void WorldSocket::OnDelete()
 {
-    log("Connection to world server has been closed.\n");
-    if(_session)
-        _session->SetSocket(NULL);
+    log("Connection to world server has been closed.");
+    _ok = false;
+    _session->SetMustDie(); // recreate the session if needed
 }
 
 void WorldSocket::OnException()
 {
-    DEBUG(logdebug("WorldSocket::OnException()"));
-    this->SetCloseAndDelete();
+    if(_ok)
+    {
+        logerror("WorldSocket::OnException()");
+        _ok = false;
+    }
 }
 
 void WorldSocket::OnRead()
@@ -100,6 +108,8 @@ void WorldSocket::OnRead()
 
 void WorldSocket::SendWorldPacket(WorldPacket &pkt)
 {
+    if(!_ok)
+        return;
     ClientPktHeader hdr;
     memset(&hdr,0,sizeof(ClientPktHeader));
     hdr.size = ntohs(pkt.size()+4);
