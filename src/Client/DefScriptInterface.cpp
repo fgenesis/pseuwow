@@ -724,7 +724,8 @@ void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 
 void DefScriptPackage::My_Run(std::string line, std::string username)
 {
-    uint8 scperm=0,usrperm=0;
+    uint8 scperm=255; // builtin functions that have no explicit req. permission level assigned should be secure from beeing called
+    uint8 usrperm=0; // users/players that have no explicit permission assigned should have minimal permission
 
     for (std::map<std::string,unsigned char>::iterator i = my_usrPermissionMap.begin(); i != my_usrPermissionMap.end(); i++)
     {
