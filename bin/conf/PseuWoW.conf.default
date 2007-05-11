@@ -17,7 +17,10 @@ debug=0
 exitonerror=0
 
 // reconnect on failure/disconnect
-reconnect=0
+// 0 = dont't reconnect
+// everything else: delay (in ms) until the next connection attempt.
+// default: 5000 ms (5 secs)
+reconnect=5000
 
 // 0 - show none
 // 1 - show only known/handled
@@ -33,13 +36,14 @@ showopcodes=3
 hidefreqopcodes=1
 
 
-// the IP or hostname the wow server is running on
+// the IP or hostname the realm server is running on
 realmlist=localhost
 
 // port on which the realm server is listening (default=3724)
 realmport=3724
 
 // PseuWoW will login on this realm
+// Case sensitive!
 realmname=My WoW Realm
 
 // your account name
@@ -48,8 +52,9 @@ accname=test
 // your account password
 accpass=test
 
-// the character name PseuWoW should choose to enter the world
-charname=PseuWoW
+// the character name PseuWoW should choose to enter the world.
+// case sensitive!
+charname=Pseuwow
 
 
 // Client emulation configuration
@@ -101,6 +106,7 @@ cmdchar=.
 // until some frame-limiter is implemented, it will always use 100% CPU usage when
 // the GUI is enabled and activated. (if its in background - way less CPU load.)
 enablegui=0
+
 
 
 

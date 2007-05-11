@@ -30,7 +30,8 @@ DefScriptPackage::DefScriptPackage()
 
 DefScriptPackage::~DefScriptPackage()
 {
-    delete _eventmgr;
+    if(_eventmgr)
+        delete _eventmgr;
 	Clear();	
 }
 

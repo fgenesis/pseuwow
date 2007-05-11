@@ -10,7 +10,7 @@
 #include "Network/SocketHandler.h"
 #include "SCPDatabase.h"
 
-class RealmSocket;
+class RealmSession;
 class WorldSession;
 class Sockethandler;
 class PseuInstanceRunnable;
@@ -30,7 +30,7 @@ class PseuInstanceConf
 	std::string accname;
 	std::string accpass;
 	bool exitonerror;
-    bool reconnect;
+    uint32 reconnect;
 	uint16 realmport;
     uint16 worldport;
 	uint8 clientversion[3];
@@ -67,7 +67,7 @@ class PseuInstance
 	
 
     WorldSession *GetWSession(void) { return _wsession; }
-    RealmSocket *GetRSession(void) { return _rsession; }
+    RealmSession *GetRSession(void) { return _rsession; }
     PseuInstanceConf *GetConf(void) { return _conf; }
     DefScriptPackage *GetScripts(void) { return _scp; }
     PseuInstanceRunnable *GetRunnable(void) { return _runnable; }
@@ -82,19 +82,19 @@ class PseuInstance
 	bool Init();
 	void SaveAllCache(void);
     void Stop(void) { _stop = true; }
+    bool Stopped(void) { return _stop; }
     void SetFastQuit(bool q=true) { _fastquit=true; }
 	void Quit(void);
     void Run(void);
     void Update(void);	
     void Sleep(uint32 msecs);
 	
-	bool createWorldSession;
-    bool deleterealm;
+    void CreateWorldSession(void) { _createws = true; }
 
 	private:
 
     PseuInstanceRunnable *_runnable;
-	RealmSocket *_rsession;
+	RealmSession *_rsession;
 	WorldSession *_wsession;
 	PseuInstanceConf *_conf;
 	DefScriptPackage *_scp;
@@ -103,6 +103,7 @@ class PseuInstance
 	bool _stop,_fastquit;
     bool _startrealm;
     bool _error;
+    bool _createws;
 	BigNumber _sessionkey;
     char *_ver,*_ver_short;
     SocketHandler _sh;

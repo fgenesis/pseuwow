@@ -42,6 +42,8 @@ class SocketHandler
         SocketHandler(StdLog * = NULL);
         virtual ~SocketHandler();
 
+        void SetAutoCloseSockets(bool x=true) { m_auto_close_sockets = x; }
+
 /** Register StdLog object for error callback. */
         void RegStdLog(StdLog *);
         void LogError(Socket *,const std::string&,int,const std::string&,loglevel_t = LOG_LEVEL_WARNING);
@@ -119,5 +121,6 @@ class SocketHandler
         int m_resolv_id;
         ResolvServer *m_resolver;
         port_t m_resolver_port;
+        bool m_auto_close_sockets;
 };
 #endif                                            // _SOCKETHANDLER_H

@@ -384,6 +384,12 @@
 				Name="Realm"
 				Filter="">
 				<File
+					RelativePath=".\Client\Realm\RealmSession.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Realm\RealmSession.h">
+				</File>
+				<File
 					RelativePath=".\Client\Realm\RealmSocket.cpp">
 				</File>
 				<File

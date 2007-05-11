@@ -8,8 +8,8 @@
 #include "DefScriptInterface.h"
 #include "Auth/BigNumber.h"
 #include "DefScript/DefScript.h"
-#include "Realm/RealmSocket.h"
-#include "World/WorldSession.h"
+#include "RealmSession.h"
+#include "WorldSession.h"
 #include "CacheHandler.h"
 #include "GUI/PseuGUI.h"
 
@@ -56,7 +56,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _stop=false;
     _fastquit=false;
     _startrealm=true;
-    createWorldSession=false;
+    _createws=false;
     _error=false;
     _initialized=false;
 
@@ -65,15 +65,20 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
 
 PseuInstance::~PseuInstance()
 {
-	delete _wsession;
-    if(GetConf()->enablecli && _cli)
+    if(_cli)
     {
         _cli->stop();
     }
+
+    if(_rsession)
+        delete _rsession;
+    if(_wsession)
+        delete _wsession;
+
     delete _scp;
-	delete _conf;
-	//delete _rsession; // deleted by SocketHandler!!!!!
-	log_close();
+    delete _conf;
+
+    log_close();
     
 }
 
@@ -181,50 +186,50 @@ bool PseuInstance::Init(void) {
 
 void PseuInstance::Run(void)
 {
-    do
+
+    if(!_initialized)
+        return;
+
+    if(GetConf()->realmlist.empty() || GetConf()->realmport==0)
     {
-        if(!_initialized)
-            return;
+        logcritical("Realmlist address not set, can't connect.");
+        SetError();
+    }
+    else
+    {
+        // for now: create the realmsession only on startup.
+        // may be extended to a script command later on.
+        // then try to connect
+        _rsession = new RealmSession(this);
+        _rsession->Connect();
+        _rsession->SendLogonChallenge();
 
-        if(GetConf()->realmlist.empty() || GetConf()->realmport==0)
-        {
-            logcritical("Realmlist address not set, can't connect.");
-            SetError();
-            break;
-        }
-
-
-        _rsession=new RealmSocket(_sh);
-        _rsession->SetDeleteByHandler();
-        _rsession->SetHost(GetConf()->realmlist);
-        _rsession->SetPort(GetConf()->realmport);
-        _rsession->SetInstance(this);
-        _rsession->Start();
-        
-        if(_rsession->IsValid())
-        {
-            _sh.Add(_rsession);
-            _sh.Select(1,0);
-        }
-        _startrealm=false; // the realm is started now
-
-        while( (!_stop) && (!_startrealm) )
+        // this is the mainloop
+        while(!_stop)
         {
             Update();
             if(_error)
                 _stop=true;
         }
-    }
-    while(GetConf()->reconnect && (!_stop));
 
+
+    }
+
+    // fastquit is defined if we clicked [X] (on windows)
     if(_fastquit)
     {
         log("Aborting Instance...");
         return;
     }
+
     log("Shutting down instance...");
 
-    SaveAllCache();
+    // if there was an error, better dont save, as the data might be damaged
+    if(!_error)
+    {
+        SaveAllCache();
+        //...
+    }
 
     if(GetConf()->exitonerror == false && _error)
     {
@@ -238,45 +243,49 @@ void PseuInstance::Run(void)
 
 void PseuInstance::Update()
 {
-    if(_sh.GetCount())
+    // delete sessions if they are no longer needed
+    if(_rsession && _rsession->MustDie())
     {
-        _sh.Select(0,0); // update the realmsocket
-        if(deleterealm)
-        {
-            deleterealm=false;
-            _rsession = NULL; // was deleted by SocketHandler already!
-        }
+        delete _rsession;
+        _rsession = NULL;
     }
 
-    if(createWorldSession && (!_wsession))
+    if(_wsession && _wsession->MustDie())
     {
-        createWorldSession=false;
-        _wsession=new WorldSession(this);
+        delete _wsession;
+        _wsession = NULL;
     }
-    if(_wsession && !_wsession->IsValid())
+
+    if(_createws)
     {
+        _createws = false;
+        if(_wsession)
+            delete _wsession;
+        _wsession = new WorldSession(this);
         _wsession->Start();
     }
-    if(_wsession && _wsession->IsValid())
+
+    // if we have no active sessions, we may reconnect
+    if((!_rsession) && (!_wsession) && GetConf()->reconnect)
     {
-        try
-        {
-            _wsession->Update(); // update the worldSESSION, which will update the worldsocket itself
-        }
-        catch (...)
+        logdetail("Waiting %u ms before reconnecting.",GetConf()->reconnect);
+        for(uint32 t = 0; t < GetConf()->reconnect && !this->Stopped(); t+=100) Sleep(100);
+        this->Sleep(1000); // wait 1 sec before reconnecting
+        _rsession = new RealmSession(this);
+        _rsession->Connect();
+        _rsession->SendLogonChallenge(); // and login again
+    }
+    
+    // update currently existing/active sessions
+    if(_rsession)
+        _rsession->Update();
+    if(_wsession)
+        try { _wsession->Update(); } catch (...)
         {
             logerror("Unhandled exception in WorldSession::Update()");
         }
-        
-    }
-    if(_wsession && _wsession->DeleteMe())
-    {
-        delete _wsession;
-        _wsession=NULL;
-        _startrealm=true;
-        this->Sleep(1000); // wait 1 sec before reconnecting
-        return;
-    }
+
+ 
     GetScripts()->GetEventMgr()->Update();
 
     this->Sleep(GetConf()->networksleeptime);
@@ -285,7 +294,7 @@ void PseuInstance::Update()
 void PseuInstance::SaveAllCache(void)
 {
     //...
-    if(GetWSession() && GetWSession()->IsValid())
+    if(GetWSession())
     {
         GetWSession()->plrNameCache.SaveToFile();
         ItemProtoCache_WriteDataToCache(GetWSession());
@@ -311,7 +320,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 	accname=v.Get("ACCNAME");
 	accpass=v.Get("ACCPASS");
 	exitonerror=(bool)atoi(v.Get("EXITONERROR").c_str());
-    reconnect=(bool)atoi(v.Get("RECONNECT").c_str());
+    reconnect=atoi(v.Get("RECONNECT").c_str());
 	realmport=atoi(v.Get("REALMPORT").c_str());
     clientversion_string=v.Get("CLIENTVERSION");
 	clientbuild=atoi(v.Get("CLIENTBUILD").c_str());

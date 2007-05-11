@@ -56,7 +56,7 @@ DefReturnResult DefScriptPackage::SCpause(CmdSet& Set){
 }
 
 DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCSendChatMessage: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -88,7 +88,7 @@ DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
 DefReturnResult DefScriptPackage::SCsavecache(CmdSet& Set){
    ((PseuInstance*)parentMethod)->SaveAllCache();
     std::stringstream str;
-    if(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid())
+    if(((PseuInstance*)parentMethod)->GetWSession())
     {
         str << "Cache saved. [ ";
         str << ((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetSize();
@@ -105,7 +105,7 @@ DefReturnResult DefScriptPackage::SCsavecache(CmdSet& Set){
 DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){
     if(Set.defaultarg.empty())
         return false;
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCEmote: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -141,7 +141,7 @@ DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set)
 DefReturnResult DefScriptPackage::SCjoinchannel(CmdSet& Set){
     if(Set.defaultarg.empty())
         return false;
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCjoinchannel: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -153,7 +153,7 @@ DefReturnResult DefScriptPackage::SCjoinchannel(CmdSet& Set){
 DefReturnResult DefScriptPackage::SCleavechannel(CmdSet& Set){
     if(Set.defaultarg.empty())
         return false;
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCleavechannel: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -214,7 +214,7 @@ DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
 {
 	if(Set.defaultarg.empty())
 		return false;
-	if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+	if(!(((PseuInstance*)parentMethod)->GetWSession()))
 	{
 		logerror("Invalid Script call: SCcastspell: WorldSession not valid");
 		DEF_RETURN_ERROR;
@@ -236,7 +236,7 @@ DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set){
     if(!id)
         return false;
 
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCqueryitem: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -250,7 +250,7 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
     // TODO: special targets: _self _pet _nearest ...
     DefReturnResult r;
 
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCtarget: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -360,7 +360,7 @@ DefReturnResult DefScriptPackage::SCGetScpValue(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCGetPlayerGuid(CmdSet& Set)
 {
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCGetPlayerGuid: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -380,7 +380,7 @@ DefReturnResult DefScriptPackage::SCGetPlayerGuid(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
 {
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCGetName: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -411,7 +411,7 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCGetEntry(CmdSet& Set)
 {
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCGetEntry: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -433,7 +433,7 @@ DefReturnResult DefScriptPackage::SCGetEntry(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCGetObjectType(CmdSet& Set)
 {
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCGetObjectType: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -455,7 +455,7 @@ DefReturnResult DefScriptPackage::SCGetObjectType(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCObjectKnown(CmdSet& Set)
 {
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCObjectIsKnown: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -489,7 +489,7 @@ DefReturnResult DefScriptPackage::SCGetScriptPerm(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
 {
-    if(!(((PseuInstance*)parentMethod)->GetWSession() && ((PseuInstance*)parentMethod)->GetWSession()->IsValid()))
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCGetItemProtoValue: WorldSession not valid");
         DEF_RETURN_ERROR;

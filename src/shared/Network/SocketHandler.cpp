@@ -55,6 +55,7 @@ SocketHandler::SocketHandler(StdLog *p)
 ,m_bTryDirect(false)
 ,m_resolv_id(0)
 ,m_resolver(NULL)
+,m_auto_close_sockets(true)
 {
     FD_ZERO(&m_rfds);
     FD_ZERO(&m_wfds);
@@ -68,16 +69,20 @@ SocketHandler::~SocketHandler()
         m_resolver -> Quit();
     if (!m_slave)
     {
-        for (socket_m::iterator it = m_sockets.begin(); it != m_sockets.end(); it++)
+        if(m_auto_close_sockets)
         {
-            Socket *p = (*it).second;
-            p -> Close();
-//			p -> OnDelete(); // hey, I turn this back on. what's the worst that could happen??!!
-// MinionSocket breaks, calling MinderHandler methods in OnDelete -
-// MinderHandler is already gone when that happens...
-            if (p -> DeleteByHandler())
+            for (socket_m::iterator it = m_sockets.begin(); it != m_sockets.end(); it++)
             {
-                delete p;
+                Socket *p = (*it).second;
+                if(p)
+                {
+                    p -> Close();
+			        p -> OnDelete();
+                    if (p -> DeleteByHandler())
+                    {
+                        delete p;
+                    }
+                }
             }
         }
     }

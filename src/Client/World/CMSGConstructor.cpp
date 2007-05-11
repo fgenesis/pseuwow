@@ -7,7 +7,7 @@
 #include "Channel.h"
 
 void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, std::string to){
-    if((!_valid) || (!_logged) || msg.empty())
+    if((!_logged) || msg.empty())
         return;
 	WorldPacket packet;
 	packet<<type<<lang;
