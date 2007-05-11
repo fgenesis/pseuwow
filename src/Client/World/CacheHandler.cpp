@@ -95,8 +95,8 @@ bool PlayerNameCache::ReadFromFile(void){
         fh.read((char*)&(cacheItem->_guid),sizeof(uint64));
         fh.read((char*)&len,sizeof(uint8));
         if(len>12 || len<2){
-            logerror("\nPlayerNameCache data seem corrupt [namelength=%d, should be <=12]",len);
-            log("-> Clearing cache, creating new.\n");
+            logerror("PlayerNameCache data seem corrupt [namelength=%d, should be <=12]",len);
+            log("-> Clearing cache, creating new.");
             _cache.clear();
             success=false;
             break;
