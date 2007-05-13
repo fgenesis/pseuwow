@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-#define SETBIT(var,bit) ( (var)|=(1<<(bit)) )
-#define UNSETBIT(var,bit) ( (var)&=(~(1<<(bit))) )
-#define HASBIT(var,bit) ( (var)&(1<<(bit)) )
+#define M_SETBIT(var,bit) ( (var)|=(1<<(bit)) )
+#define M_UNSETBIT(var,bit) ( (var)&=(~(1<<(bit))) )
+#define M_HASBIT(var,bit) ( (var)&(1<<(bit)) )
 
 void printchex(std::string,bool);
 void printchex(char *in, uint32 len, bool);

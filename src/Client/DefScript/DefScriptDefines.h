@@ -13,7 +13,7 @@ typedef __int64 int64;
 typedef unsigned __int64 uint64;
 #else
 typedef __int64_t int64;
-typedef unsigned __int64_t uint64;
+typedef __uint64_t uint64;
 // TODO: correct ATOI64 for linux if necessary
 #endif
 
