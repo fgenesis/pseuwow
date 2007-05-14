@@ -62,14 +62,21 @@ bool SCPDatabase::HasField(uint32 id)
 bool SCPField::HasEntry(std::string e)
 {
     for(SCPEntryMap::iterator i = _map.begin(); i != _map.end(); i++)
-        if(i->first == e)
+    {
+        std::string ch = i->first;
+        if(ch == e)
             return true;
+    }
     return false;
 }
 
 std::string SCPField::GetString(std::string entry)
 {
-    return HasEntry(entry) ? _map[entry] : "";
+    //return HasEntry(entry) ? _map[entry] : "";
+    if(HasEntry(entry))
+        return _map[entry];
+    else
+        return "";
 }
 
 // note that this can take a while depending on the size of the database!
@@ -78,7 +85,7 @@ uint32 SCPDatabase::GetFieldByValue(std::string entry, std::string value)
     for(SCPFieldMap::iterator fm = _map.begin(); fm != _map.end(); fm++)
         if(fm->second.HasEntry(entry) && fm->second.GetString(entry)==value)
             return fm->first;
-    return 0;
+    return uint32(-1);
 }
 
 bool SCPDatabaseMgr::HasDB(std::string n)

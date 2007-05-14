@@ -20,7 +20,16 @@ bool PlayerNameCache::AddInfo(uint64 guid, std::string name){
     return AddInfo(cacheItem);
 }
 
-bool PlayerNameCache::AddInfo(PlayerNameCacheItem* cacheItem){
+bool PlayerNameCache::IsKnown(uint64 guid)
+{
+    for(std::vector<PlayerNameCacheItem*>::iterator i=_cache.begin(); i!=_cache.end(); i++)
+        if(guid==(*i)->_guid)
+            return true;
+    return false;
+}
+
+bool PlayerNameCache::AddInfo(PlayerNameCacheItem* cacheItem)
+{
     for(std::vector<PlayerNameCacheItem*>::iterator i=_cache.begin(); i!=_cache.end(); i++)
         if(cacheItem->_guid==(*i)->_guid)
             return false;
@@ -28,21 +37,24 @@ bool PlayerNameCache::AddInfo(PlayerNameCacheItem* cacheItem){
     return true;
 }
 
-std::string PlayerNameCache::GetName(uint64 guid){
+std::string PlayerNameCache::GetName(uint64 guid)
+{
     for(std::vector<PlayerNameCacheItem*>::iterator i=_cache.begin(); i!=_cache.end(); i++)
         if(guid==(*i)->_guid)
             return (*i)->_name;
     return "";
 }
 
-uint64 PlayerNameCache::GetGuid(std::string name){
+uint64 PlayerNameCache::GetGuid(std::string name)
+{
     for(std::vector<PlayerNameCacheItem*>::iterator i=_cache.begin(); i!=_cache.end(); i++)
         if(name==(*i)->_name)
             return (*i)->_guid;
     return 0;
 }
 
-bool PlayerNameCache::SaveToFile(void){
+bool PlayerNameCache::SaveToFile(void)
+{
     log("Saving PlayerNameCache...");
     char *fn="./cache/playernames.cache";
     std::fstream fh;
@@ -71,7 +83,8 @@ bool PlayerNameCache::SaveToFile(void){
     return true;
 }
 
-bool PlayerNameCache::ReadFromFile(void){
+bool PlayerNameCache::ReadFromFile(void)
+{
     char *fn="./cache/playernames.cache";
     log("Loading PlayerNameCache...");
     bool success=true;
@@ -115,7 +128,8 @@ bool PlayerNameCache::ReadFromFile(void){
     return success;
 }
 
-uint32 PlayerNameCache::GetSize(void){
+uint32 PlayerNameCache::GetSize(void)
+{
     return _cache.size();
 }
 

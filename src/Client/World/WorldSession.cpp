@@ -103,25 +103,17 @@ void WorldSession::Update(void)
 
 
     OpcodeHandler *table = _GetOpcodeHandlerTable();
+
+    uint16 hpos;
     bool known=false;
 	while(pktQueue.size())
 	{
 		WorldPacket *packet = pktQueue.next();
 
-		for (uint16 i = 0; table[i].handler != NULL; i++)
+		for (hpos = 0; table[hpos].handler != NULL; hpos++)
 		{
-			if (table[i].opcode == packet->GetOpcode())
+			if (table[hpos].opcode == packet->GetOpcode())
 			{
-                try
-                {
-    				(this->*table[i].handler)(*packet);
-                }
-                catch (...)
-                {
-                    logerror("Exception while handling opcode %u!",packet->GetOpcode());
-                    logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[i].handler,pktQueue.size());
-                }
-
 				known=true;
 				break;
 			}
@@ -140,8 +132,22 @@ void WorldSession::Update(void)
 			|| (GetInstance()->GetConf()->showopcodes==3) )
 		{
             if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode)) 
-			    logcustom(1,YELLOW,">> Opcode %u [%s] (%s)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN");
+			    logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
 		}
+
+        if(known)
+        {
+            try
+            {
+                (this->*table[hpos].handler)(*packet);
+            }
+            catch (...)
+            {
+                logerror("Exception while handling opcode %u!",packet->GetOpcode());
+                logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
+            }
+        }
+
 		delete packet;
         known=false;
 	}
@@ -194,6 +200,8 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 		{SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
 		{SMSG_REMOVED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
 		{SMSG_CHANNEL_LIST, &WorldSession::_HandleChannelListOpcode},
+        {SMSG_EMOTE, &WorldSession::_HandleEmoteOpcode},
+        {SMSG_TEXT_EMOTE, &WorldSession::_HandleTextEmoteOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -685,5 +693,125 @@ void WorldSession::_HandleRemovedSpellOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleChannelListOpcode(WorldPacket& recvPacket)
 {
 	_channels->HandleListRequest(recvPacket);
+}
+
+void WorldSession::_HandleEmoteOpcode(WorldPacket& recvPacket)
+{
+    std::string plrname;
+    uint32 anim; // animation id?
+    uint64 guid; // guid of the unit performing the emote
+    recvPacket >> anim >> guid;
+
+    // TODO: check if the emote came from a player or a mob, and query mob name if it was a mob
+    if(guid)
+    {
+        plrname=plrNameCache.GetName(guid);
+        if(plrname.empty())
+        {
+            SendQueryPlayerName(guid);
+            plrname="Unknown Entity";
+        }
+    }
+
+    // TODO: check for mobs
+    logdebug(I64FMT " / %s performing emote; anim=%u",guid,plrname.c_str(),anim);
+
+    // TODO: show emote in GUI :P
+}
+
+void WorldSession::_HandleTextEmoteOpcode(WorldPacket& recvPacket)
+{
+    std::string name; // name of emote target
+    std::string name_from; // name of the unit performing the emote
+    uint32 emotetext; // emote id
+    int32 emotev; // variation (like different texts on /flirt and so on)
+    uint32 namelen; // length of name of emote target (without '\0' )
+    uint64 guid; // guid of the unit performing the emote
+    uint8 c; // temp
+
+    recvPacket >> guid >> emotetext >> *((uint32*)&emotev) >> namelen;
+
+    // get the target name, which is NOT null-terminated
+    for(uint32 i = 0; i < namelen; i++)
+    {
+        recvPacket >> c;
+        if(c)
+            name += c;
+    }
+
+    logdebug(I64FMT " Emote: name=%s text=%u variation=%i len=%u",guid,name.c_str(),emotetext,emotev,namelen);
+    SCPDatabaseMgr& dbmgr = GetInstance()->dbmgr;
+    if(dbmgr.HasDB("emote"))
+    {
+        SCPDatabase& db = dbmgr.GetDB("emote");
+        std::string target,target2;
+        bool targeted=false; // if the emote is directed to anyone around or a specific target
+        bool targeted_me=false; // if the emote was targeted to us if it was targeted
+        bool from_me=false; // if we did the emote
+        bool female=false; // if emote causer is female
+
+        if(GetMyChar()->GetGUID() == guid) // we caused the emote
+            from_me=true;
+
+        if(name.length()) // is it directed to someone?
+        {
+            targeted=true; // if yes, we have a target
+            if(GetMyChar()->GetName() == name) // if the name is ours, its directed to us
+                targeted_me=true;
+        }
+
+        Unit *u = (Unit*)objmgr.GetObj(guid);
+        if(u)
+        {
+            if(u->GetGender() != 0) // female
+                female=true;
+            name_from = u->GetName();
+        }
+
+        // if we targeted ourself, the general emote is used!
+        if(targeted && from_me && targeted_me)
+            targeted_me=false;
+
+        // now build the string that is used to lookup the text in the database
+        if(from_me)
+            target += "me";
+        else
+            target += "one";
+        
+        if(targeted)
+        {
+            target += "to";
+            if(targeted_me)
+                target += "me";
+            else
+                target += "one";
+        }
+        else
+            target += "general";
+
+        // not all emotes have a female version, so check if there is one in the database
+        if(female && db.GetField(emotetext).HasEntry(target + "female"))
+                target += "female";
+
+        logdebug("Looking up 'emote' SCP field %u entry '%s'",emotetext,target.c_str());
+
+        std::string etext;
+        etext = db.GetField(emotetext).GetString(target);
+
+        char out[300]; // should be enough
+
+        if(from_me)
+            sprintf(out,etext.c_str(),name.c_str());
+        else
+            sprintf(out,etext.c_str(),name_from.c_str(),name.c_str());
+
+        logcustom(0,WHITE,"EMOTE: %s",out);
+
+    }
+    else
+    {
+        logerror("Can't display emote text %u, SCP database \"emote\" not loaded.",emotetext);
+    }
+
 }
 

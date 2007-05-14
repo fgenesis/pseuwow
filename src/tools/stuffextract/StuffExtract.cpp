@@ -132,7 +132,19 @@ bool ConvertDBC(void)
 						{
 							if((*ix).getInt(stringpos)) // find out which field is used, 0 if not used
 							{
-								EmoteDataStorage[em].push_back( fname + "=" + (*ix).getString(stringpos) );
+                                std::string tx = (*ix).getString(stringpos);
+                                uint32 fpos=0;
+                                // the following block replaces %x$s (where x is a number) with %s
+                                do 
+                                {
+                                    if(fpos+4 < tx.length() && tx[fpos]=='%' && tx[fpos+2]=='$' && tx[fpos+3]=='s' && isdigit(tx[fpos+1]))
+                                    {
+                                        tx.erase(fpos,4);
+                                        tx.insert(fpos,"%s");
+                                    }
+                                    fpos++;
+                                } while(fpos < tx.length());
+								EmoteDataStorage[em].push_back( fname + "=" + tx );
 								break;
 							}
 						}
