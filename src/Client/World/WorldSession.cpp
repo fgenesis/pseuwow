@@ -474,6 +474,10 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     {
         logcustom(0,WHITE,"PARTY: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
     }
+    else if (type==CHAT_MSG_EMOTE )
+    {
+        logcustom(0,WHITE,"EMOTE: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
+    }
     else
     {
         logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),ln,msg.c_str());
