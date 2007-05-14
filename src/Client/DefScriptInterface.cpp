@@ -110,7 +110,25 @@ DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){
         logerror("Invalid Script call: SCEmote: WorldSession not valid");
         DEF_RETURN_ERROR;
     }
-    uint32 id=atoi(Set.defaultarg.c_str());
+
+    // check if the given name exists in the database, if it does, use its record id; if not, convert emote name into a number.
+    // this supports calls like "emote 126" and "emote ready"
+    uint32 id = uint32(-1);
+    SCPDatabaseMgr& dbmgr = ((PseuInstance*)parentMethod)->dbmgr;
+    if(dbmgr.HasDB("emote"))
+    {
+        SCPDatabase& db = dbmgr.GetDB("emote");
+        id = db.GetFieldByValue("name",DefScriptTools::stringToUpper(Set.defaultarg)); // emote names are always uppercased
+    }
+    if(id == uint32(-1))
+    {
+        id=atoi(Set.defaultarg.c_str());
+        if(!id)
+        {
+            logerror("SCEmote: Invalid emote!");
+            return true;
+        }
+    }
     ((PseuInstance*)parentMethod)->GetWSession()->SendEmote(id);
     return true;
 }

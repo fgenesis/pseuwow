@@ -6,7 +6,8 @@
 #include "WorldSession.h"
 #include "Channel.h"
 
-void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, std::string to){
+void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, std::string to)
+{
     if((!_logged) || msg.empty())
         return;
 	WorldPacket packet;
@@ -34,7 +35,8 @@ void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, st
 	SendWorldPacket(packet);
 }
 
-void WorldSession::SendQueryPlayerName(uint64 guid){
+void WorldSession::SendQueryPlayerName(uint64 guid)
+{
     if((!_logged) || guid==0)
         return;
     WorldPacket packet;
@@ -44,7 +46,8 @@ void WorldSession::SendQueryPlayerName(uint64 guid){
     // to prevent opcode spam, we need to make a list with already requested names
 }
 
-void WorldSession::SendPing(uint32 ping){
+void WorldSession::SendPing(uint32 ping)
+{
     if(!_logged)
         return;
     WorldPacket packet;
@@ -53,11 +56,13 @@ void WorldSession::SendPing(uint32 ping){
     SendWorldPacket(packet);
 }
 
-void WorldSession::SendEmote(uint32 id){
+void WorldSession::SendEmote(uint32 id)
+{
     if(!_logged)
         return;
     WorldPacket packet;
-    packet << id << id << GetMyChar()->GetTarget();
+    int32 variation = 0; // randomized usually
+    packet << id << (uint32)variation << GetMyChar()->GetTarget();
     packet.SetOpcode(CMSG_TEXT_EMOTE);
     SendWorldPacket(packet);
 }

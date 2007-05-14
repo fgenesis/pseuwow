@@ -9,6 +9,7 @@ struct PlayerNameCacheItem {
 class PlayerNameCache {
 public:
     std::string GetName(uint64);
+    bool IsKnown(uint64);
     uint64 GetGuid(std::string);
     bool AddInfo(uint64 guid, std::string name);
     bool AddInfo(PlayerNameCacheItem*);
