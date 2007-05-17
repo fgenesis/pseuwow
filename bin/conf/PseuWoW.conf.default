@@ -58,8 +58,8 @@ charname=Pseuwow
 
 
 // Client emulation configuration
-ClientVersion=1.12.1
-ClientBuild=5875
+ClientVersion=2.0.12
+ClientBuild=6546
 ClientLanguage=enUS
 // or change to enGB, deDE, ...
 
@@ -101,7 +101,4 @@ defaultlang=0
 // until some frame-limiter is implemented, it will always use 100% CPU usage when
 // the GUI is enabled and activated. (if its in background - way less CPU load.)
 enablegui=0
-
-
-
 
