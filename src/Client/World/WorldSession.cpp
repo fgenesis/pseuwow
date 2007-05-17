@@ -93,12 +93,15 @@ void WorldSession::SendWorldPacket(WorldPacket &pkt)
 
 void WorldSession::Update(void)
 {
-    if( _sh.GetCount() ) // the socketwil remove itself from the handler if it got closed
+    if( _sh.GetCount() ) // the socket will remove itself from the handler if it got closed
         _sh.Select(0,0);
     else // so we just need to check if the socket doesnt exist or if it exists but isnt valid anymore.
     {    // if thats the case, we dont need the session anymore either
         if(!_socket || (_socket && !_socket->IsOk()))
+        {
+            _OnLeaveWorld();
             SetMustDie();
+        }
     }
 
 
@@ -202,6 +205,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
 		{SMSG_CHANNEL_LIST, &WorldSession::_HandleChannelListOpcode},
         {SMSG_EMOTE, &WorldSession::_HandleEmoteOpcode},
         {SMSG_TEXT_EMOTE, &WorldSession::_HandleTextEmoteOpcode},
+        {SMSG_NEW_WORLD, &WorldSession::_HandleNewWorldOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -624,21 +628,34 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 {
-	uint8 unk;
-	uint16 unk1, unk2;
-	uint32 unk3, unk4;
+	uint32 unk32,time;
 	uint64 guid;
 
-	float x, y, z, o, ang;
+	float x, y, z, o;
 
-	recvPacket >> unk >> guid >> unk3 >> unk1 >> unk2 >> o >> x >> y >> z >> ang >> unk4;
+    guid = recvPacket.GetPackedGuid();
+	recvPacket >> unk32 >> unk32 >> time >> x >> y >> z >> o >> unk32;
 
 	logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
+    // TODO: put this into a capsule class later, that autodetects movement flags etc.
 	WorldPacket response;
 	response.SetOpcode(MSG_MOVE_FALL_LAND);
-	response << uint32(0) << uint32(0) << x << y << z << o << uint32(0);
+	response << uint32(0) << (uint32)getMSTime(); // no flags; time correct?
+    response << x << y << z << o << uint32(0);
 	SendWorldPacket(response);
+}
+
+void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
+{
+    uint32 mapid;
+    float x,y,z,o;
+    // we assume we are NOT on a transport!
+    // else we had to do the following before:
+    // recvPacket >> tmapid >> tx >> ty >> tz >> to;
+    recvPacket >> mapid >> x >> y >> z >> o;
+    GetMyChar()->ClearSpells(); // will be resent by server
+    // clear action buttons
 }
 
 void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)

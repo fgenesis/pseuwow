@@ -137,9 +137,14 @@ void RealmSession::Update(void)
     ByteBuffer *pkt;
     uint8 cmd;
 
-    if( _sh.GetCount() )
-    {
+    if( _sh.GetCount() ) // the socket will remove itself from the handler if it got closed
         _sh.Select(0,0);
+    else // so we just need to check if the socket doesnt exist or if it exists but isnt valid anymore.
+    {    // if thats the case, we dont need the session anymore either
+        if(!_socket || (_socket && !_socket->IsOk()))
+        {
+            SetMustDie();
+        }
     }
 
     while(pktQueue.size())
