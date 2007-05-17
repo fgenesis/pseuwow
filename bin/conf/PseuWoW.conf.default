@@ -96,11 +96,6 @@ disablespellcheck=0
 // to use the default language for your race (defined in race.scp)
 defaultlang=0
 
-// special char that is used to trigger server commands (for example ".goname Player")
-// (WoWEmu="." MaNGOS="." or "!")
-// other servers might be different 
-cmdchar=.
-
 // set this to 1 if you want to have a 3D-window showing stuff
 // NOTE: this is only to activate the window for now, 3D-stuff will come later!!
 // until some frame-limiter is implemented, it will always use 100% CPU usage when

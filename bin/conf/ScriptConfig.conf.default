@@ -1,0 +1,28 @@
+
+// this config file has no effect on the core.
+// store variable definitions for scripts only!
+
+
+// options common for all scripts:
+[#uppercase]
+[#noprefix]
+// special char that is used to trigger server commands (for example ".goname Player")
+// (WoWEmu="." MaNGOS="." or "!")
+// other servers might be different 
+cmdchar=.
+
+
+[autobroadcast]
+enable=0
+// 20 mins by default
+secs=1200
+// the command the server uses to broadcast (.broadcast, .announce, .bc or whatever)
+// do NOT put a trailing "." or "!" , only the plain command name!
+cmd=announce
+// configure your texts here
+textcount=3
+text1=This is PseuWoW autobroadcast #1
+text2=And another one! Autobroadcast #2
+text3=The world is round, and so am I!
+
+

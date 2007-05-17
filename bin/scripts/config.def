@@ -2,6 +2,7 @@
 // Load required conf files.
 LOADCONF PseuWoW.conf
 LOADCONF users.conf
+LOADCONF ScriptConfig.conf
 
 // Apply the configuration
 APPLYCONF
