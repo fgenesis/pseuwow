@@ -1,29 +1,16 @@
+// -- using conf/ScriptConfig.conf
 
-// load this file to register an autobroadcast
 // run this file to broadcast immediately (the timer will not change if you do!)
 
 #permission=255
 
 #onload
 
-    // --- CONFIG ---
-    
-    // your command you use to broadcast (without trailing "." or whatever!)
-    set,cmd announce
-    
-    // set the broadcast interval (in seconds!)
-    // here we set it to 20 mins
-    set,secs 1200
-    
-    // configure the amount of texts we have
-    set,textcount 3
-    // configure the texts to broadcast (must begin with text1)
-    set,text1 This is PseuWoW autobroadcast #1
-    set,text2 And another one! Autobroadcast #2
-    set,text3 The world is round, and so am I!
-    //... Add more texts here...
-    
-    // --- END CONFIG --
+	// check if this script should be loaded.
+	if ?{or,?{not ?{isset enable}} ?{not ${enable}}}
+		log ** AutoBroadcast: skipped loading.	
+		return
+	endif
     
     // convert secs into msecs
     set,timer ${secs}
