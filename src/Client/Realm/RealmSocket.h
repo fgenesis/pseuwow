@@ -23,6 +23,7 @@ public:
     void OnConnectFailed(void);
     void OnException(void);
     void OnAccept(void);
+    void OnDelete(void);
     int Close(void);
 
 

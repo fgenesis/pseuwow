@@ -75,8 +75,17 @@ void RealmSocket::OnConnectFailed(void)
 
 void RealmSocket::OnException(void)
 {
-    logerror("RealmSocket: Exception!");
+    if(_ok)
+    {
+        logerror("RealmSocket: Exception!");
+        _ok = false;
+    }
+}
+
+void RealmSocket::OnDelete(void)
+{
     _ok = false;
+    _session->SetMustDie();
 }
 
     
