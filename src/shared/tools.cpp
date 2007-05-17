@@ -2,18 +2,25 @@
 #include <cctype>
 #include <sstream>
 #include <string>
-#include <time.h>
 #include <fstream>
+#include <errno.h>
 #include "tools.h"
 
-#ifndef _WIN32
-#   include <sys/dir.h>
-#   include <errno.h>
-#else
+#if PLATFORM == PLATFORM_WIN32
 #   include <windows.h>
+#   include <mmsystem.h>
+#   include <time.h>
+#else
+#   include <sys/dir.h>
+#   if defined(__FreeBSD__) || defined(__APPLE_CC__)
+#       include <time.h>
+#   endif
+#   include <sys/timeb.h>
 #endif
 
-void printchex(std::string in, bool spaces=true){
+
+void printchex(std::string in, bool spaces=true)
+{
 	unsigned int len=0,i;
     len=in.length();
 	printf("[");
@@ -24,7 +31,8 @@ void printchex(std::string in, bool spaces=true){
 	printf("]\n");
 }
 
-void printchex(char *in, uint32 len, bool spaces=true){
+void printchex(char *in, uint32 len, bool spaces=true)
+{
 	unsigned int i;
 	printf("[");
 	if(spaces)
@@ -147,6 +155,7 @@ bool FileExists(std::string fn)
 	return false;
 }
 
+// must return true if creating the directory was successful
 bool CreateDir(const char *dir)
 {
 	bool result;
@@ -158,6 +167,22 @@ bool CreateDir(const char *dir)
 	result = mkdir(dir);
 #endif
 	return result;
+}
+
+// current system time in ms
+uint32 getMSTime(void)
+{
+    uint32 time_in_ms = 0;
+#if PLATFORM == PLATFORM_WIN32
+    time_in_ms = timeGetTime();
+#else
+    struct timeb tp;
+    ftime(&tp);
+
+    time_in_ms = tp.time * 1000 + tp.millitm;
+#endif
+
+    return time_in_ms;
 }
 
 

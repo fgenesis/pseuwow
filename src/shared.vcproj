@@ -38,7 +38,8 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"/>
+				Name="VCLibrarianTool"
+				AdditionalDependencies="winmm.lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\Debug/PseuWoW_Controller.tlb"

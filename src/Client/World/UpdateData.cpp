@@ -71,6 +71,13 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 				uint8 objtypeid;
 				recvPacket >> objtypeid;
 				logdebug("Create Object type %u with guid "I64FMT,objtypeid,uguid);
+                // dont create objects if already present in memory.
+                // recreate every object except ourself!
+                if( uguid != GetGuid() && objmgr.GetObj(uguid))
+                {
+                    logdev("- already exists, deleting old , creating new object");
+                    objmgr.Remove(uguid);
+                }
 
                 switch(objtypeid)
                 {

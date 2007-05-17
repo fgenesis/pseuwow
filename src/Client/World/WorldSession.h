@@ -87,6 +87,7 @@ private:
 	void _HandleChannelListOpcode(WorldPacket& recvPacket);
     void _HandleEmoteOpcode(WorldPacket& recvPacket);
     void _HandleTextEmoteOpcode(WorldPacket& recvPacket);
+    void _HandleNewWorldOpcode(WorldPacket& recvPacket);
 
 	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
     void _ValuesUpdate(uint64 uguid, WorldPacket& recvPacket); // ...
