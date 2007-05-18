@@ -185,4 +185,15 @@ uint32 getMSTime(void)
     return time_in_ms;
 }
 
+uint32 GetFileSize(const char* sFileName)
+{
+    std::ifstream f;
+    f.open(sFileName, std::ios_base::binary | std::ios_base::in);
+    if (!f.good() || f.eof() || !f.is_open()) { return 0; }
+    f.seekg(0, std::ios_base::beg);
+    std::ifstream::pos_type begin_pos = f.tellg();
+    f.seekg(0, std::ios_base::end);
+    return f.tellg() - begin_pos;
+}
+
 
