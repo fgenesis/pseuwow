@@ -19,5 +19,6 @@ std::deque<std::string> GetFileList(std::string);
 bool FileExists(std::string);
 bool CreateDir(const char*);
 uint32 getMSTime(void);
+uint32 GetFileSize(const char*);
 
 #endif

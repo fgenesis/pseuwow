@@ -379,6 +379,28 @@
 				<File
 					RelativePath=".\Client\World\WorldSocket.h">
 				</File>
+				<Filter
+					Name="MapSystem"
+					Filter="">
+					<File
+						RelativePath=".\Client\World\MapTile.cpp">
+						<FileConfiguration
+							Name="Release|Win32"
+							ExcludedFromBuild="TRUE">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|Win32"
+							ExcludedFromBuild="TRUE">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Client\World\MapTile.h">
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Realm"

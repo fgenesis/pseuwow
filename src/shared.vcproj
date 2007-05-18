@@ -261,6 +261,19 @@
 					RelativePath=".\shared\Network\Utility.h">
 				</File>
 			</Filter>
+			<Filter
+				Name="Map File Classes"
+				Filter="">
+				<File
+					RelativePath=".\shared\ADTFile.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\ADTFile.h">
+				</File>
+				<File
+					RelativePath=".\shared\ADTFileStructs.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

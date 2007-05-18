@@ -3,6 +3,7 @@
 #include "common.h"
 #include "MPQHelper.h"
 #include "dbcfile.h"
+#include "ADTFile.h"
 #include "StuffExtract.h"
 #include "DBCFieldData.h"
 #include "Locale.h"
@@ -268,6 +269,9 @@ void ExtractMaps(void)
                         }
                         fh.write((char*)bb.contents(),bb.size());
                         fh.close();
+                        ADTFile *adt = new ADTFile();
+                        adt->LoadMem(bb);
+                        delete adt;
                         extr++;
                     }
                 }
@@ -279,4 +283,9 @@ void ExtractMaps(void)
     }
 
     printf("\nDONE - %u maps extracted.\n",extrtotal);
+}
+
+void DoNothingDummy(void)
+{
+    delete [] new uint8[50];
 }
