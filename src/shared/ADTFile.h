@@ -1,6 +1,8 @@
 #ifndef ADTFILE_H
 #define ADTFILE_H
 
+#include <set>
+
 #define CHUNKS_PER_TILE 256
 
 #include "ADTFileStructs.h"
@@ -26,5 +28,9 @@ public:
     bool m_loaded;
 };
 
+void ADT_ExportStringSetByOffset(const uint8*, uint32, std::set<std::string>&, char*);
+void ADT_FillTextureData(const uint8*,std::set<std::string>&);
+void ADT_FillWMOData(const uint8*,std::set<std::string>&);
+void ADT_FillModelData(const uint8*,std::set<std::string>&);
 
 #endif

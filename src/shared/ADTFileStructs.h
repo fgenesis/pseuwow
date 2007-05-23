@@ -3,6 +3,10 @@
 #ifndef ADTFILESTRUCTS_H
 #define ADTFILESTRUCTS_H
 
+#define OFFSET_TEXTURES 7
+#define OFFSET_MODELS 8
+#define OFFSET_WMOS 10
+
 struct MHDR_chunk
 {
     uint32 pad;
@@ -10,8 +14,8 @@ struct MHDR_chunk
     uint32 offsTex;		
     uint32 offsModels;		
     uint32 offsModelsIds;		
-    uint32 offsMapObejcts;		
-    uint32 offsMapObejctsIds;		
+    uint32 offsMapObjects;		
+    uint32 offsMapObjectsIds;		
     uint32 offsDoodsDef;		
     uint32 offsObjectsDef;	
     uint32 pad1;	

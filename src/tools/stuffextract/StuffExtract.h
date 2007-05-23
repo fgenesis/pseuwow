@@ -16,6 +16,9 @@ int main(int argc, char *argv[]);
 void OutSCP(char*, SCPStorageMap&);
 bool ConvertDBC(void);
 void ExtractMaps(void);
+void ExtractMapDependencies(void);
+void _FixFileName(std::string&);
+std::string _PathToFileName(std::string);
 
 
 #endif
