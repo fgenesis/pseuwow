@@ -257,7 +257,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 else
                 {
                     DEBUG(printf("ADT: MCNK: '%s' block unhandled, skipping %u bytes\n",mfcc,msize));
-                    if(strcmp((char*)mfcc,"MCRF"))
+                    if(!(isalnum(mfcc[0]) && isalnum(mfcc[1]) && isalnum(mfcc[2]) && isalnum(mfcc[3])))
                     {
                         printf("Error loading ADT file (chunk %u error).\n",mcnkid);
                         return false; // dont care about those few mem leaks
@@ -271,9 +271,9 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
             mcnkid++;
         }
         else
-        {            
+        {
             DEBUG(printf("ADT: '%s' block unhandled, skipping %u bytes\n",fourcc,size));
-            if(strcmp((char*)fourcc,"MWID") && strcmp((char*)fourcc,"MMID"))
+            if(!(isalnum(fourcc[0]) && isalnum(fourcc[1]) && isalnum(fourcc[2]) && isalnum(fourcc[3])))
             {
                 printf("Error loading ADT file.\n");
                 return false; // dont care about those few mem leaks
@@ -287,4 +287,49 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
 
     m_loaded = true;
     return true;
+}
+
+
+
+
+
+
+void ADT_ExportStringSetByOffset(const uint8* data, uint32 off, std::set<std::string>& st, char* stop)
+{
+    data += ((uint32*)data)[off]; // seek to correct absolute offset
+    data += 28; // move ptr to real start of data
+    uint32 offset=0;
+    std::string s;
+    char c;
+    while(memcmp(data+offset,stop,4))
+    {
+        c = data[offset];
+        if(!c)
+        {
+            if(s.length())
+            {
+                DEBUG(printf("DEP: %s\n",s.c_str()));
+                st.insert(s);
+                s.clear();
+            }
+        }
+        else
+            s += c;
+        offset++;
+    }
+}
+
+void ADT_FillTextureData(const uint8* data,std::set<std::string>& st)
+{
+    ADT_ExportStringSetByOffset(data,OFFSET_TEXTURES,st,"XDMM");
+}
+
+void ADT_FillWMOData(const uint8* data,std::set<std::string>& st)
+{
+    ADT_ExportStringSetByOffset(data,OFFSET_WMOS,st,"DIWM");
+}
+
+void ADT_FillModelData(const uint8* data,std::set<std::string>& st)
+{
+    ADT_ExportStringSetByOffset(data,OFFSET_MODELS,st,"DIMM");
 }

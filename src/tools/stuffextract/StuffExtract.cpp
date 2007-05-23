@@ -1,4 +1,5 @@
 #include <fstream>
+#include <set>
 #define _COMMON_NO_THREADS
 #include "common.h"
 #include "MPQHelper.h"
@@ -9,6 +10,9 @@
 #include "Locale.h"
 
 std::vector<std::string> mapNames;
+std::set<std::string> texNames;
+std::set<std::string> modelNames;
+std::set<std::string> wmoNames;
 
 
 int main(int argc, char *argv[])
@@ -27,6 +31,7 @@ int main(int argc, char *argv[])
         CreateDir("stuffextract/data");
 		ConvertDBC();
         ExtractMaps();
+        ExtractMapDependencies();
 		//...
 		printf("\n -- finished, press enter to exit --\n");
 	}
@@ -252,6 +257,8 @@ void ExtractMaps(void)
         {
             for(uint32 y=0;y<64; y++)
             {
+                uint32 olddeps;
+                uint32 depdiff;
                 sprintf(namebuf,"World\\Maps\\%s\\%s_%u_%u.adt",mapNames[it].c_str(),mapNames[it].c_str(),x,y);
                 sprintf(outbuf,MAPSDIR"/%s_%u_%u.adt",mapNames[it].c_str(),x,y);
                 if(mpq.FileExists(namebuf))
@@ -269,23 +276,140 @@ void ExtractMaps(void)
                         }
                         fh.write((char*)bb.contents(),bb.size());
                         fh.close();
-                        ADTFile *adt = new ADTFile();
-                        adt->LoadMem(bb);
-                        delete adt;
+                        olddeps = texNames.size() + modelNames.size() + wmoNames.size();
+                        ADT_FillTextureData(bb.contents(),texNames);
+                        ADT_FillModelData(bb.contents(),modelNames); 
+                        ADT_FillWMOData(bb.contents(),wmoNames); 
+                        depdiff = texNames.size() + modelNames.size() + wmoNames.size() - olddeps;
                         extr++;
+                        printf("[%u/%u]: %s; %u new deps.\n",it+1,mapNames.size(),namebuf,depdiff);
                     }
                 }
-                printf("Map [%u/%u]: %s: %u\r",it+1,mapNames.size(),mapNames[it].c_str(),extr);
             }
         }
         extrtotal+=extr;
         printf("\n");
     }
 
-    printf("\nDONE - %u maps extracted.\n",extrtotal);
+    printf("\nDONE - %u maps extracted, %u total dependencies.\n",extrtotal, texNames.size() + modelNames.size() + wmoNames.size());
 }
 
-void DoNothingDummy(void)
+void ExtractMapDependencies(void)
 {
-    delete [] new uint8[50];
+    printf("\nExtracting map dependencies...\n\n");
+    printf("- Preparing to read MPQ arcives...\n");
+    MPQHelper mpqmodel("model");
+    MPQHelper mpqtex("texture");
+    MPQHelper mpqwmo("wmo");
+    std::string path = "stuffextract/data";
+    std::string pathtex = path + "/texture";
+    std::string pathmodel = path + "/model";
+    std::string pathwmo = path + "/wmo";
+    std::string mpqfn,realfn;
+    CreateDir(pathtex.c_str());
+    CreateDir(pathmodel.c_str());
+    CreateDir(pathwmo.c_str());
+    uint32 wmosdone=0,texdone=0,mdone=0;
+
+    for(std::set<std::string>::iterator i = texNames.begin(); i != texNames.end(); i++)
+    {
+        mpqfn = *i;
+        if(!mpqtex.FileExists((char*)mpqfn.c_str()))
+            continue;
+        realfn = pathtex + "/" + _PathToFileName(mpqfn);
+        std::fstream fh;
+        fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+        if(fh.is_open())
+        {
+            ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
+            fh.write((const char*)bb.contents(),bb.size());
+            texdone++;
+            printf("- textures... %u\r",texdone);
+        }
+        else
+            printf("Could not write texture %s\n",realfn.c_str());
+        fh.close();
+    }
+    printf("\n");
+
+    for(std::set<std::string>::iterator i = modelNames.begin(); i != modelNames.end(); i++)
+    {
+        mpqfn = *i;
+        // no idea what bliz intended by this. the ADT files refer to .mdx models,
+        // however there are only .m2 files in the MPQ archives.
+        // so we just need to check if there is a .m2 file instead of the .mdx file, and load that one.
+        if(!mpqmodel.FileExists((char*)mpqfn.c_str()))
+        {
+            std::string alt = i->substr(0,i->length()-3) + "m2";
+            DEBUG(printf("MDX model not found, trying M2 file."));
+            if(!mpqmodel.FileExists((char*)alt.c_str()))
+            {
+                DEBUG(printf(" fail.\n"));
+                continue;
+            }
+            else
+            {
+                mpqfn = alt;
+                DEBUG(printf(" success.\n"));
+            }
+        }
+        realfn = pathmodel + "/" + _PathToFileName(mpqfn);
+        std::fstream fh;
+        fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+        if(fh.is_open())
+        {
+            ByteBuffer& bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
+            fh.write((const char*)bb.contents(),bb.size());
+            mdone++;
+            printf("- models... %u\r",mdone);
+        }
+        else
+            printf("Could not write model %s\n",realfn.c_str());
+        fh.close();
+    }
+    printf("\n");
+
+    for(std::set<std::string>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
+    {
+        mpqfn = *i;
+        if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
+            continue;
+        realfn = pathwmo + "/" + _PathToFileName(mpqfn);
+        std::fstream fh;
+        fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+        if(fh.is_open())
+        {
+            ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
+            fh.write((const char*)bb.contents(),bb.size());
+            wmosdone++;
+            printf("- WMOs... %u\r",wmosdone);
+        }
+        else
+            printf("Could not write WMO %s\n",realfn.c_str());
+        fh.close();
+    }
+    printf("\n");
+
 }
+
+// fix filenames for linux ( '/' instead of windows '\')
+void _FixFileName(std::string& str)
+{
+    for(uint32 i = 0; i < str.length(); i++)
+        if(str[i]=='\\')
+            str[i]='/';
+}
+
+std::string _PathToFileName(std::string str)
+{
+    uint32 pathend = str.find_last_of("/\\");
+    if(pathend != std::string::npos)
+    {
+        return str.substr(pathend+1);
+    }
+    return str;
+}
+
+
+
+
