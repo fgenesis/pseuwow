@@ -11,6 +11,7 @@
 #include "CacheHandler.h"
 #include "SCPDatabase.h"
 
+
 void DefScriptPackage::_InitDefScriptInterface(void)
 {
     AddFunc("pause",&DefScriptPackage::SCpause);
@@ -64,21 +65,17 @@ DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
     std::stringstream ss;
     uint32 type=atoi(Set.arg[0].c_str());
     uint32 lang=atoi(Set.arg[1].c_str());
-    // TODO: need better database support to get the lang id from a given name
-    /*ss << lang;
+
+    ss << lang;
     if(ss.str()!=Set.arg[1]) // given lang is NOT a number
     {
-        
-        for(uint32 i=0;i<=33;i++)
-        {
-            ((PseuInstance*)parentMethod)->dbmgr.GetDB("language").GetFieldByValue("name"
-            if(!stricmp(Set.arg[1].c_str(),LookupName(i,langNames)))
-            {
-                lang=i;
-                break;
-            }
-        }
-    }*/
+        uint32 dblang;
+        dblang = ((PseuInstance*)parentMethod)->dbmgr.GetDB("language").GetFieldByValue("name",Set.arg[1]);
+        logdev("looking up language id for lang '%s', found %i",Set.arg[1].c_str(),dblang);
+        if(dblang != -1)
+            lang = dblang;
+    }
+
     std::string msg=Set.arg[2];
     std::string to=Set.arg[3];
     ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(type,lang,msg,to);
