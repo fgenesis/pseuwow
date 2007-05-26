@@ -167,7 +167,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 {
     uint8 flags;
     uint32 unk32,flags2,time,transtime,higuid;
-    float unkf,x,y,z,o,tx,ty,tz,to;
+    float unkfx,unkfy,unkfz,x,y,z,o,tx,ty,tz,to;
     uint64 transguid;
 	// uint64 fullguid; // see below
     float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack;
@@ -189,26 +189,35 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 	{
 		if(flags & UPDATEFLAG_TRANSPORT)
 		{
-			recvPacket >> unkf >> unkf >> unkf >> o; // 3x (float)0 followed by orientation
+			recvPacket >> unkfx >> unkfy >> unkfz >> o; // 3x (float)0 followed by orientation
+            logdev("TRANSPORT_FLOATS @ flags: x=%f y=%f z=%f o=%f",unkfx,unkfy,unkfz,o);
 		}
 		else
 		{
 			recvPacket >> x >> y >> z >> o;
+            logdev("FLOATS: x=%f y=%f z=%f o=%f",x,y,z,o);
 		}
-		
+    }
+
+    if(flags & UPDATEFLAG_LIVING)
+    {		
 		if(flags2 & FLAGS2_TRANSPORT)
 		{
 			recvPacket >> transguid >> tx >> ty >> tz >> to;
 			recvPacket >> unk32; // added in 2.0.3
+            logdev("TRANSPORT_FLOATS @ flags2: x=%f y=%f z=%f o=%f",tx,ty,tz,to);
 		}
-	}
-	if(flags & UPDATEFLAG_LIVING)
-	{
+
 		recvPacket >> unk32;
+
+        /*
+        // not sure if this is/was correct, MaNGOS doesnt use it anymore
 		if(flags2 & 0x2000) // 0x2000 = ??
 		{
 			recvPacket >> unkf >> unkf >> unkf >> unkf;
 		}
+        */
+
 		recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim;
 		recvPacket >> speedWalkBack >> speedFly >> speedFlyBack >> speedTurn; // fly added in 2.0.x
 		if(u)
@@ -237,8 +246,8 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 	if(flags & UPDATEFLAG_HIGHGUID)
 	{
 		recvPacket >>  higuid;             // 2.0.6 - high guid was there, unk for 2.0.12
-		// not sure if this is correct
-		obj->SetUInt32Value(OBJECT_FIELD_GUID+1,higuid); // note that this sets only the high part of the guid
+		// not sure if this is correct, MaNGOS sends 0 always.
+		//obj->SetUInt32Value(OBJECT_FIELD_GUID+1,higuid); // note that this sets only the high part of the guid
 	}
 
 	if(flags & UPDATEFLAG_FULLGUID)

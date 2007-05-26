@@ -2,7 +2,7 @@
 #define DEFSCRIPTINTERFACEINCLUDE_H
 #define USING_DEFSCRIPT_EXTENSIONS true
 
-void _InitDefScriptInterface();
+void _InitDefScriptInterface(void);
 // Useable own internal functions:
 DefReturnResult SCpause(CmdSet&);
 DefReturnResult SCSendChatMessage(CmdSet&);
