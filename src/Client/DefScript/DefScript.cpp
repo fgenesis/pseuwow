@@ -878,12 +878,15 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
 }
 
 std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string sn){
+    if(vn_in.empty())
+        return vn_in;
     std::string vn=vn_in;
     bool global=false;
+    if(sn.empty())
+        global = true;
     while(true)
     {
-        if(sn.empty())
-            return vn;
+
         if(vn.at(0)=='#')
             global = true;
         if(vn.at(0)=='#' || vn.at(0)==':')

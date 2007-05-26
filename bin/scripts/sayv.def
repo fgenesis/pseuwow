@@ -1,10 +1,16 @@
 #permission=0
 
-SET,vn ${@def}
+SET,vn #${@caller}::${@def}
 SET,vl ${@0}
 DEFAULT,vl 0
-SET,vv,onfail,{<value not set>} ${#${@caller}::${@def}}
-SAY,{${vl}} * Var '${vn}' = '${vv}'
+
+IF ?{NOT ?{ISSET ${vn}}}
+	SAY,{${vl}} * Var '${@def}' not defined.
+	RETURN
+ENDIF
+
+SET,vv ${${vn}}
+SAY,{${vl}} * Var '${@def}' = '${vv}'
 
 UNSET vv
 UNSET vn
