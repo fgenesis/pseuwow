@@ -3,7 +3,8 @@
 // store variable definitions for scripts only!
 
 
-// options common for all scripts:
+// ## GLOBAL SECTION ##
+
 [#uppercase]
 [#noprefix]
 // special char that is used to trigger server commands (for example ".goname Player")
@@ -11,6 +12,15 @@
 // other servers might be different 
 cmdchar=.
 
+
+
+[#normal]
+// ## END OF GLOBAL SECTION ##
+
+
+
+
+// -- section for individual scripts --
 
 [autobroadcast]
 enable=0
