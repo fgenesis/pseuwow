@@ -43,6 +43,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("objectknown",&DefScriptPackage::SCObjectKnown);
     AddFunc("getplayerperm",&DefScriptPackage::SCGetPlayerPerm);
     AddFunc("getscriptperm",&DefScriptPackage::SCGetScriptPerm);
+    AddFunc("lgetfiles",&DefScriptPackage::SCGetFileList);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -187,7 +188,7 @@ DefReturnResult DefScriptPackage::SCloadconf(CmdSet& Set){
 
     if(variables.ReadVarsFromFile(fn))
     {
-        log("Loaded conf file [%s]",fn.c_str());
+        logdev("Loaded conf file [%s]",fn.c_str());
         return true;
     }
 
@@ -720,6 +721,32 @@ DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
     }
     return r;
 }
+
+DefReturnResult DefScriptPackage::SCGetFileList(CmdSet& Set)
+{
+    DefList *l = lists.Get(_NormalizeVarName(Set.arg[0],Set.myname));
+    l->clear();
+    *l = (DefList)GetFileList(Set.defaultarg);
+    if(Set.arg[1].length())
+    {
+        std::string ext = ".";
+        ext += Set.arg[1];
+        ext = stringToLower(ext);
+        for(DefList::iterator i = l->begin(); i != l->end(); )
+        {
+            std::string tmp = stringToLower(i->c_str() + (i->length() - ext.length()));
+            if( stringToLower(i->c_str() + (i->length() - ext.length())) != ext )
+            {
+                l->erase(i);
+                continue;
+            }
+            i++;
+        }
+    }
+    return toString((uint64)l->size());
+}
+
+
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {

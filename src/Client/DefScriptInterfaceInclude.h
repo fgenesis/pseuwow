@@ -35,5 +35,6 @@ DefReturnResult SCGetObjectType(CmdSet&);
 DefReturnResult SCObjectKnown(CmdSet&);
 DefReturnResult SCGetPlayerPerm(CmdSet&);
 DefReturnResult SCGetScriptPerm(CmdSet&);
+DefReturnResult SCGetFileList(CmdSet&);
 
 #endif
