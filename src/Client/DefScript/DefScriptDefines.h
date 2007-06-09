@@ -1,7 +1,6 @@
 #ifndef DEFSCRIPTDEFINES_H
 #define DEFSCRIPTDEFINES_H
 
-#define MAXARGS 99
 #ifdef _DEBUG
 #    define _DEFSC_DEBUG(code) code;
 #else

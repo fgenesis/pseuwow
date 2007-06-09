@@ -6,6 +6,7 @@
 #include <deque>
 #include "VarSet.h"
 #include "DynamicEvent.h"
+#include "ListStorage.h"
 
 #include "DefScriptDefines.h"
 
@@ -24,6 +25,8 @@ struct DefReturnResult
 {
     DefReturnResult() { ok=true; mustreturn=false; ret="true"; }
     DefReturnResult(bool b) { ok=true; mustreturn=false; ret=b?"true":"false"; }
+	DefReturnResult(std::string s) { ok=true; mustreturn=false; ret=s; }
+    DefReturnResult(const char *s) { DefReturnResult(std::string(s)); }
     bool ok; // true if the execution of the current statement was successful
     bool mustreturn;
     std::string ret; // return value used by ?{..}
@@ -39,7 +42,9 @@ struct DefXChgResult
     bool changed;
     std::string str;
     DefReturnResult result;
-};    
+}; 
+
+typedef std::map<unsigned int,std::string> _CmdSetArgMap;
 
 class CmdSet {
 	public:
@@ -47,7 +52,7 @@ class CmdSet {
 	~CmdSet();
 	void Clear();
 	std::string cmd;
-	std::string arg[MAXARGS];
+	_CmdSetArgMap arg;
 	std::string defaultarg;
     std::string myname;
     std::string caller;
@@ -118,6 +123,7 @@ public:
     void AddFunc(std::string n,DefReturnResult (DefScriptPackage::*)(CmdSet& Set));
     bool HasFunc(std::string);
     void DelFunc(std::string);
+	ListStorage lists;
 
     
     std::string scPath;
@@ -178,6 +184,24 @@ private:
     DefReturnResult func_lowercase(CmdSet&);
     DefReturnResult func_random(CmdSet&);
     DefReturnResult func_fileexists(CmdSet&);
+
+    // list functions
+    DefReturnResult func_lpushback(CmdSet&);
+    DefReturnResult func_lpushfront(CmdSet&);
+    DefReturnResult func_lpopback(CmdSet&);
+    DefReturnResult func_lpopfront(CmdSet&);
+    DefReturnResult func_ldelete(CmdSet&);
+    DefReturnResult func_lexists(CmdSet&);
+    DefReturnResult func_llen(CmdSet&);
+    DefReturnResult func_linsert(CmdSet&);
+    DefReturnResult func_lsplit(CmdSet&);
+    DefReturnResult func_lcsplit(CmdSet&);
+    DefReturnResult func_ljoin(CmdSet&);
+    DefReturnResult func_lindex(CmdSet&);
+    DefReturnResult func_lclean(CmdSet&);
+    DefReturnResult func_lmclean(CmdSet&);
+    DefReturnResult func_lerase(CmdSet&);
+
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"
 

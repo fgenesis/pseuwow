@@ -89,6 +89,24 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("lowercase",&DefScriptPackage::func_lowercase);
     AddFunc("random",&DefScriptPackage::func_random);
     AddFunc("fileexists",&DefScriptPackage::func_fileexists);
+
+    // list functions
+    AddFunc("lpushback",&DefScriptPackage::func_lpushback);
+    AddFunc("lappend",&DefScriptPackage::func_lpushback); // alias for lpushback
+    AddFunc("lpushfront",&DefScriptPackage::func_lpushfront);
+    AddFunc("lpopback",&DefScriptPackage::func_lpopback);
+    AddFunc("lpopfront",&DefScriptPackage::func_lpopfront);
+    AddFunc("ldelete",&DefScriptPackage::func_ldelete);
+    AddFunc("lexists",&DefScriptPackage::func_lexists);
+    AddFunc("llen",&DefScriptPackage::func_llen);
+    AddFunc("linsert",&DefScriptPackage::func_linsert);
+    AddFunc("lsplit",&DefScriptPackage::func_lsplit);
+    AddFunc("lcsplit",&DefScriptPackage::func_lcsplit);
+    AddFunc("ljoin",&DefScriptPackage::func_ljoin);
+    AddFunc("lindex",&DefScriptPackage::func_lindex);
+    AddFunc("lclean",&DefScriptPackage::func_lclean);
+    AddFunc("lmclean",&DefScriptPackage::func_lmclean);
+    AddFunc("lerase",&DefScriptPackage::func_lerase);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
@@ -386,12 +404,11 @@ CmdSet::~CmdSet()
 
 void CmdSet::Clear()
 {
-    for(unsigned int i=0;i<MAXARGS;i++){
-		arg[i]="";
-	}
-	cmd="";
+    arg.clear();
+    cmd="";
     defaultarg="";
     caller="";
+    myname="";
 }
 
 
@@ -696,27 +713,13 @@ std::string DefScriptPackage::RemoveBracketsFromString(std::string t){
     return t;
 }
 
-void DefScriptPackage::RemoveBrackets(CmdSet& Set){
-    std::string t;
-    for(unsigned int a=0;a<MAXARGS+2;a++){
-        if(a==0)
-            t=Set.defaultarg;
-        else if(a==1)
-            t=Set.cmd;
-        else
-            t=Set.arg[a-2];
-
-        if(t.empty()) // skip empty args
-            continue;        
-        
-        t=RemoveBracketsFromString(t);
-        
-        if(a==0)
-            Set.defaultarg=t;
-        else if(a==1)
-            Set.cmd=t;
-        else
-            Set.arg[a-2]=t;
+void DefScriptPackage::RemoveBrackets(CmdSet& Set)
+{
+    Set.defaultarg=RemoveBracketsFromString(Set.defaultarg);
+    Set.cmd=RemoveBracketsFromString(Set.cmd);
+    for(_CmdSetArgMap::iterator i=Set.arg.begin(); i!=Set.arg.end(); i++)
+    {
+        i->second=RemoveBracketsFromString(i->second);
     }
 }
 
