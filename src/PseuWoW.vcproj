@@ -247,6 +247,9 @@
 					RelativePath=".\Client\DefScript\DefScriptFunctions.cpp">
 				</File>
 				<File
+					RelativePath=".\Client\DefScript\DefScriptListFunctions.cpp">
+				</File>
+				<File
 					RelativePath=".\Client\DefScript\DefScriptTools.cpp">
 				</File>
 				<File
@@ -257,6 +260,12 @@
 				</File>
 				<File
 					RelativePath=".\Client\DefScript\DynamicEvent.h">
+				</File>
+				<File
+					RelativePath=".\Client\DefScript\ListStorage.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\DefScript\ListStorage.h">
 				</File>
 				<File
 					RelativePath=".\Client\DefScript\VarSet.cpp">
