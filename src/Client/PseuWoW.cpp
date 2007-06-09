@@ -311,6 +311,7 @@ PseuInstanceConf::PseuInstanceConf()
 {
     enablecli=false;
     exitonerror=false;
+    debug=0;
 }
 
 void PseuInstanceConf::ApplyFromVarSet(VarSet &v)

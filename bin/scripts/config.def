@@ -1,18 +1,32 @@
 #permission=255
-// Load required conf files.
-LOADCONF PseuWoW.conf
-LOADCONF users.conf
-LOADCONF ScriptConfig.conf
+
+// Load all conf files from directory /conf/
+// get all *.conf file names from /conf/ directory, store the names in list 'fl' and the amount in 'fcount'
+SET,fcount ?{LGETFILES,fl,conf conf}
+LOGDETAIL * Loading ${fcount} conf files.
+// iterate over all files and load them; if counter i is equal to the amount of files we are done.
+SET,i 0
+LOOP
+	IF ?{EQUAL,${i} ${fcount}}
+		EXITLOOP
+	ENDIF
+	SET,fn ?{LINDEX,fl ${i}}
+	LOG * Loading conf file [ ${fn} ]
+	LOADCONF ${fn}
+	ADD,i 1
+ENDLOOP
+
+UNSET fcount
+UNSET i
+UNSET fn
+LDELETE fl
 
 // Apply the configuration
 APPLYCONF
+LOG * Configuration applied.
 
 // Apply user permissions
 APPLYPERMISSIONS
-
-IF ${#ENABLEGUI}
-	LOADCONF gui.conf
-ENDIF
 
 // remove dangerous variables
 CLEANUPVARS
