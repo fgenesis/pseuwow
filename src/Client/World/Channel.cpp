@@ -121,11 +121,11 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 				}
 			}
 
-			log("%s joined channel %s", channel.c_str());
+			log("%s joined channel %s",name.c_str(),channel.c_str());
 			break;
 
 		// Player leaved channel you are on
-		case 0x01:
+		case LEFT:
 			packet >> guid;
 			if(guid){
 				name = _worldSession->plrNameCache.GetName(guid);
@@ -140,13 +140,13 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 			break;
 
 		// You joined channel successfully
-		case 0x02:
+		case YOUJOINED:
 			log("Joined channel %s", channel.c_str());
             channels.push_back(channel);
 			break;
 
 		// You leaved channel successfully
-		case 0x03:
+		case YOULEFT:
             for(std::vector<std::string>::iterator i = channels.begin(); i != channels.end(); i++)
             {
                 if(*i == channel)
@@ -159,12 +159,12 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 			break;
 
 		// Wrong password while trying to join channel
-		case 0x04:
+		case WRONGPASS:
 			log("Could not join channel %s (Wrong password)", channel.c_str());
 			break;
 
 		// Not on channel while trying to write to channel etc.
-		case 0x05:
+		case NOTON1:
 			log("You are not on channel %s", channel.c_str());
 			break;
 	}
