@@ -102,3 +102,9 @@ defaultlang=0
 // the GUI is enabled and activated. (if its in background - way less CPU load.)
 enablegui=0
 
+// options for remote control:
+// port beeing listened on. set to 0 do disable.
+rmcontrolport=8101
+// IP or hostname that is allowed to connect. leave blank to allow connections from everywhere (dangerous!)
+rmcontrolhost=localhost
+

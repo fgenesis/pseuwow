@@ -163,6 +163,12 @@
 				RelativePath=".\Client\Cli.h">
 			</File>
 			<File
+				RelativePath=".\Client\ControlSocket.cpp">
+			</File>
+			<File
+				RelativePath=".\Client\ControlSocket.h">
+			</File>
+			<File
 				RelativePath=".\Client\DefScriptInterface.cpp">
 			</File>
 			<File
@@ -188,6 +194,12 @@
 			</File>
 			<File
 				RelativePath=".\Client\PseuWoW.h">
+			</File>
+			<File
+				RelativePath=".\Client\RemoteController.cpp">
+			</File>
+			<File
+				RelativePath=".\Client\RemoteController.h">
 			</File>
 			<File
 				RelativePath=".\Client\SCPDatabase.cpp">

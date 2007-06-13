@@ -243,6 +243,11 @@ void RealmSession::_HandleRealmList(ByteBuffer& pkt)
 
 void RealmSession::SendLogonChallenge(void)
 {
+    if(!_socket)
+    {
+        logerror("Can't send logon challenge, socket doesn't exist");
+        return;
+    }
     if( GetInstance()->GetConf()->accname.empty() || GetInstance()->GetConf()->clientversion_string.empty()
         || GetInstance()->GetConf()->clientbuild==0 || GetInstance()->GetConf()->clientlang.empty() )
     {
@@ -264,7 +269,7 @@ void RealmSession::SendLogonChallenge(void)
     for(uint8 i=0;i<4;i++)
         packet << (uint8)(GetInstance()->GetConf()->clientlang[3-i]); // "enUS" -> "SUne" : reversed and NOT zero terminated
     packet << (uint32)0x3c; // timezone
-    packet << (uint32)_socket->GetClientRemoteAddr(); // my IP address
+    packet << (uint32)_socket->GetMyIP(); // my IP address
     packet << (uint8)acc.length(); // length of acc name without \0
     packet.append(acc.c_str(),acc.length()); // append accname, skip \0
 

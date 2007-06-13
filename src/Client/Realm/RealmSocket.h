@@ -14,6 +14,7 @@ public:
 	RealmSession *GetSession(void);
     bool IsOk(void);
     void SetSession(RealmSession*);
+    uint32 GetMyIP(void);
 
     void Update(void);
     void SendLogonChallenge(void);
@@ -25,6 +26,7 @@ public:
     void OnAccept(void);
     void OnDelete(void);
     int Close(void);
+
 
 
 private:
