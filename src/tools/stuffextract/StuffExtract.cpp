@@ -19,9 +19,10 @@ int main(int argc, char *argv[])
 {
     char input[200];
     printf("StuffExtract [version %u]\n\n",SE_VERSION);
-	printf("Enter your locale (enUS, enGB, deDE, ...): ");
+	printf("Enter your locale (enUS, enGB, deDE, ...) or leave blank to autodetect: ");
 	fgets(input,sizeof(input),stdin);
 	char loc[5];
+    input[strlen(input)-1] = 0;
 	memcpy(loc,input,4); loc[4]=0;	
 	SetLocale(loc);
 	if(FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
@@ -49,10 +50,23 @@ int main(int argc, char *argv[])
 // be careful using this, that you supply correct format string
 std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 field)
 {
-    if(format[field]=='i' || format[field]=='f')
-        return toString( (*it).getInt(field) );
-    if(format[field]=='s' && (*it).getUInt(field))
+    if(format[field]=='i')
+    {
+        std::stringstream s;
+        s << (*it).getInt(field);
+        return s.str();
+    }
+    else if(format[field]=='f')
+    {
+        std::stringstream s;
+        s << (*it).getFloat(field);
+        return s.str();
+    }
+    else if(format[field]=='s' && (*it).getUInt(field))
+    {
         return (*it).getString(field);
+    }
+
     return "";
 }
 
