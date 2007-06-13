@@ -15,6 +15,7 @@ class WorldSession;
 class Sockethandler;
 class PseuInstanceRunnable;
 class CliRunnable;
+class RemoteController;
 
 class PseuInstanceConf
 {
@@ -49,6 +50,8 @@ class PseuInstanceConf
     bool notifyping;
     bool showmyopcodes;
     bool disablespellcheck;
+    uint32 rmcontrolport;
+    std::string rmcontrolhost;
 
     // gui related
     bool enablegui;
@@ -109,6 +112,7 @@ class PseuInstance
     SocketHandler _sh;
     CliRunnable *_cli;
     ZThread::Thread _clithread;
+    RemoteController *_rmcontrol;
 
 };
 

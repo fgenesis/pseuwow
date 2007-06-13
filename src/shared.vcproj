@@ -28,6 +28,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				RuntimeTypeInfo="FALSE"
 				PrecompiledHeaderFile=".\Debug/PseuWoW_Controller.pch"
 				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
@@ -84,6 +85,7 @@
 				BufferSecurityCheck="FALSE"
 				EnableFunctionLevelLinking="FALSE"
 				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="FALSE"
 				PrecompiledHeaderFile=".\Release/PseuWoW_Controller.pch"
 				AssemblerListingLocation="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
 				ObjectFile="$(SolutionDir)temp/$(ProjectName)/$(ConfigurationName)/"
@@ -160,18 +162,6 @@
 				</File>
 				<File
 					RelativePath=".\shared\Network\CircularBuffer.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\shared\Network\CircularBuffer.h">

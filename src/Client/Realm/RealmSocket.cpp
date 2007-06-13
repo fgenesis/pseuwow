@@ -3,6 +3,7 @@
 #include "ByteBuffer.h"
 #include "RealmSession.h"
 #include "RealmSocket.h"
+#include "Network/Utility.h"
 
 
 
@@ -10,7 +11,7 @@
 RealmSocket::RealmSocket(SocketHandler& h) : TcpSocket(h)
 {
     _session = NULL;
-    _ok = false;    
+    _ok = false;
 }
 
 RealmSocket::~RealmSocket()
@@ -88,4 +89,8 @@ void RealmSocket::OnDelete(void)
     _session->SetMustDie();
 }
 
+uint32 RealmSocket::GetMyIP(void)
+{
+    return GetRemoteIP4();
+}
     

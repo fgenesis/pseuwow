@@ -12,7 +12,7 @@
 #include "WorldSession.h"
 #include "CacheHandler.h"
 #include "GUI/PseuGUI.h"
-
+#include "RemoteController.h"
 #include "Cli.h"
 
 
@@ -53,6 +53,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _scp=NULL;
     _conf=NULL;
     _cli=NULL;
+    _rmcontrol=NULL;
     _stop=false;
     _fastquit=false;
     _startrealm=true;
@@ -70,6 +71,8 @@ PseuInstance::~PseuInstance()
         _cli->stop();
     }
 
+    if(_rmcontrol)
+        delete _rmcontrol;
     if(_rsession)
         delete _rsession;
     if(_wsession)
@@ -164,6 +167,11 @@ bool PseuInstance::Init(void) {
         }
         else
             logerror("GUI: incorrect settings!");
+    }
+
+    if(GetConf()->rmcontrolport)
+    {
+        _rmcontrol = new RemoteController(this,GetConf()->rmcontrolport);
     }
 
     if(GetConf()->enablecli)
@@ -286,6 +294,16 @@ void PseuInstance::Update()
         }
 
  
+    if(_rmcontrol)
+    {
+        _rmcontrol->Update();
+        if(_rmcontrol->MustDie())
+        {
+            delete _rmcontrol;
+            _rmcontrol = NULL;
+        }
+    }
+
     GetScripts()->GetEventMgr()->Update();
 
     this->Sleep(GetConf()->networksleeptime);
@@ -338,6 +356,8 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     showmyopcodes=(bool)atoi(v.Get("SHOWMYOPCODES").c_str());
     disablespellcheck=(bool)atoi(v.Get("DISABLESPELLCHECK").c_str());
     enablegui=(bool)atoi(v.Get("ENABLEGUI").c_str());
+    rmcontrolport=atoi(v.Get("RMCONTROLPORT").c_str());
+    rmcontrolhost=v.Get("RMCONTROLHOST");
 
     // clientversion is a bit more complicated to add
     {
