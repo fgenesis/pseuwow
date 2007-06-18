@@ -258,12 +258,11 @@ void RealmSession::SendLogonChallenge(void)
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
     ByteBuffer packet;
     packet << (uint8)AUTH_LOGON_CHALLENGE;
-    packet << (uint8)2;
+    packet << (uint8)6;
     packet << (uint8)(acc.length()+30); // length of the rest of the packet
     packet << (uint8)0;
-    packet.append("WOW",3);
+    packet << "WoW";
     packet.append(GetInstance()->GetConf()->clientversion,3); // 1.12.2 etc
-    packet << (uint8)0;
     packet << (uint16)(GetInstance()->GetConf()->clientbuild); // (uint16) 5875
     packet << "68x" << "niW"; // "x86" - platform; "Win" - Operating system; both reversed and zero terminated
     for(uint8 i=0;i<4;i++)
