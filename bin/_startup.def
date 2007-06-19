@@ -1,0 +1,43 @@
+#permission=255
+
+// PSEUWOW DEF_SCRIPT STARTUP FILE
+
+LOG * DefScript StartUp [${@version_short}]...
+
+// first, load all scripts in patch 'scripts' with extension .def
+SET,fcount ?{LGETFILES,scriptlist,def scripts}
+LOGDETAIL * Loading ${fcount} scripts.
+// iterate over all files and load them; if counter i is equal to the amount of files we are done.
+SET,i 0
+LOOP
+	IF ?{EQUAL,${i} ${fcount}}
+		EXITLOOP
+	ENDIF
+	SET,fn ./scripts/?{LINDEX,scriptlist ${i}}
+	LOGDEBUG * Loading script file [${fn}]
+	IF ?{NOT ?{LOADDEF ${fn}}}
+		LOGERROR Can't load script [${fn}]
+	ENDIF
+	ADD,i 1
+ENDLOOP
+
+UNSET tmp
+UNSET fcount
+UNSET i
+UNSET fn
+LDELETE scriptlist
+
+// loads & applies the configuration
+CONFIG
+
+// set permissions for internal functions
+INTERNAL_PERM
+
+// Load some SCP files 
+LOADALLSCP
+
+// do more stuff here in future...
+
+LOG * StartUp complete!
+
+

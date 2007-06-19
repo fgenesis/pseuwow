@@ -174,18 +174,19 @@ void DefScriptPackage::DeleteScript(std::string sn)
 }
 
 bool DefScriptPackage::LoadByName(std::string name){
-    return LoadScriptFromFile((scPath+name).append(".def"),name);
+    return LoadScriptFromFile((scPath+name).append(".def"));
 }
 
-bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
-	if(fn.empty() || sn.empty())
+bool DefScriptPackage::LoadScriptFromFile(std::string fn){
+	if(fn.empty())
         return false;
 
-	std::string label, value, line;
+	std::string label, value, line, sn;
     std::fstream f;
-    bool load_debug=false,load_notify=false, exec=false, cantload=false;
+    bool load_debug=false,load_notify=false,cantload=false;
     char z;
     unsigned int absline=0;
+    DefScript *curScript = NULL;
 
     f.open(fn.c_str(),std::ios_base::in);
     if(!f.is_open())
@@ -193,15 +194,24 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 
     std::deque<unsigned int> Blocks;
 
-    if(GetScript(sn))
-        delete GetScript(sn);
-    DefScript *newscript = new DefScript(this);
-    Script[sn] = newscript;
-    Script[sn]->SetName(sn); // necessary that the script knows its own name
+    // auto-assign the scriptname as the plain filename without extension. can be changed while loading
+    unsigned int slashpos = fn.find_last_of("\\/");
+    if(slashpos == std::string::npos)
+        slashpos = 0;
+    unsigned int ppos = fn.find_last_of(".");
+    if(ppos == std::string::npos)
+    ppos = fn.length();
+    sn = fn.substr(slashpos+1,(ppos-slashpos-1));
+    _UpdateOrCreateScriptByName(sn);
+    curScript=Script[sn];
+
     DeleteScript(SN_ONLOAD);
-	while(!f.eof()){
+
+	while(!f.eof())
+    {
 		line.clear();
-        while (true) {
+        while (true)
+        {
             f.get(z);
             if(z=='\n' || f.eof())
                 break;
@@ -225,20 +235,33 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
 			if(label=="permission")
             {
                 scriptPermissionMap[sn] = atoi(value.c_str());
-			}
-            if(line=="load_debug")
-                load_debug=true;
-            if(line=="load_notify")
-                load_notify=true;
-            if(line=="debug")
-                Script[sn]->SetDebug(true);
-            if(line=="onload")
-                exec=true;
-            if(line=="endonload" || line=="/onload")
-                exec=false;
+            }
+            else if(label=="script")
+            {
+                if(!curScript->GetLines()) // delete script if unused
+                    DeleteScript(curScript->GetName());
+                sn = value;
+                _UpdateOrCreateScriptByName(sn);
+                curScript=Script[sn];
+            }
+            else if(line=="debug")
+            {
+                if(curScript)
+                    curScript->SetDebug(true);
+            }
+            else if(line=="onload")
+                Script[SN_ONLOAD] = curScript = new DefScript(this);
+            else if(line=="endonload" || line=="/onload")
+            {
+                RunScript(SN_ONLOAD,NULL,sn);
+                DeleteScript(SN_ONLOAD);
+                curScript=Script[sn];
+            }
+
             //...
             continue; // line was an option, not script content
 		}
+
         // help with loading lines where a space or tab have accidently been put after the cmd
         std::string tline=stringToLower(line);
         if(memcmp(tline.c_str(),"else ",5)==0 || memcmp(tline.c_str(),"else\t",5)==0) tline="else";
@@ -304,31 +327,15 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn, std::string sn){
             continue; // continue with next line without adding the current line to script
         }
 
-        if(load_debug)
-            std::cout<<"~LOAD: "<<line<<"\n";
-        if(!exec)
-		    Script[sn]->AddLine(line);
-        else
-        {
-            if(!ScriptExists(SN_ONLOAD))
-                Script[SN_ONLOAD] = new DefScript(this);
-            Script[SN_ONLOAD]->AddLine(line);
-        }		
+        curScript->AddLine(line);
 	}
 	f.close();
     if(cantload || Blocks.size())
     {
-        printf("DefScript: Error loading script '%s'. block mismatch?\n",sn.c_str());
+        printf("DefScript: Error loading file '%s'. block mismatch?\n",fn.c_str());
         DeleteScript(sn);
         return false;
     }
-    if(ScriptExists(SN_ONLOAD))
-    {
-        RunScript(SN_ONLOAD,NULL,sn);
-        DeleteScript(SN_ONLOAD);
-    }
-    if(load_notify)
-        std::cout << "+> Script '" << sn << "' [" << fn << "] successfully loaded.\n";
 	
 	// ...
     return true;
@@ -346,7 +353,7 @@ DefScript::DefScript(DefScriptPackage *p)
 
 DefScript::~DefScript()
 {
-	Clear();
+    Clear();
 }
 
 void DefScript::Clear(void)
@@ -387,7 +394,7 @@ std::string DefScript::GetLine(unsigned int id)
 bool DefScript::AddLine(std::string l){
 	if(l.empty())
 		return false;
-    Line.insert(Line.end(),l);
+    Line.push_back(l);
 	return true;
 }
 
@@ -427,12 +434,11 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
 {
     DefReturnResult r;
     if( (!ScriptExists(name)) && (!HasFunc(name)) )
-        if(!LoadByName(name))
-        {
-            r.ok=false; // doesnt exist & cant be loaded
-            r.ret="";
-            return r;
-        }
+    {
+        r.ok=false; // doesnt exist
+        r.ret="";
+        return r;
+    }
 
     DefScript *sc = GetScript(name);
     if(!sc)
@@ -933,4 +939,11 @@ DefReturnResult DefScriptPackage::Interpret(CmdSet& Set)
     return result;
 }
 
-
+void DefScriptPackage::_UpdateOrCreateScriptByName(std::string sn)
+{
+    if(GetScript(sn))
+        DeleteScript(sn);
+    DefScript *newscript = new DefScript(this);
+    newscript->SetName(sn); // necessary that the script knows its own name
+    Script[sn] = newscript;
+}
