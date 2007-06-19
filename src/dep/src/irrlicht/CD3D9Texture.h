@@ -10,7 +10,7 @@
 
 #include "ITexture.h"
 #include "IImage.h"
-#include <d3d9.h>
+#include "d3d9.h"
 
 namespace irr
 {

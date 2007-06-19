@@ -19,7 +19,7 @@
 //#define _IRR_USE_D3DXFilterTexture_
 #endif // _IRR_COMPILE_WITH_DIRECT3D_9_
 
-#include <d3dx8tex.h>
+#include "d3dx8tex.h"
 
 #ifdef _IRR_USE_D3DXFilterTexture_
 #pragma comment (lib, "d3dx8.lib")

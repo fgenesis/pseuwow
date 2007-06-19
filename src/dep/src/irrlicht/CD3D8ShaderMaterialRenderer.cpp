@@ -6,8 +6,8 @@
 
 #include "IrrCompileConfig.h"
 #ifdef _IRR_COMPILE_WITH_DIRECT3D_8_
-#include <d3d8.h>
-#include <d3dx8core.h>
+#include "d3d8.h"
+#include "d3dx8core.h"
 #pragma comment (lib, "d3dx8.lib")
 
 #include "IShaderConstantSetCallBack.h"

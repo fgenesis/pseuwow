@@ -15,7 +15,7 @@
 #endif
 
 #ifdef _IRR_COMPILE_WITH_DIRECT3D_9_
-#include <d3d9.h>
+#include "d3d9.h"
 
 namespace irr
 {
