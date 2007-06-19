@@ -10,7 +10,7 @@
 #include "CD3D9Driver.h"
 #include "os.h"
 
-#include <d3dx9tex.h>
+#include "d3dx9tex.h"
 
 #ifndef _IRR_COMPILE_WITH_DIRECT3D_8_
 // The D3DXFilterTexture function seems to get linked wrong when

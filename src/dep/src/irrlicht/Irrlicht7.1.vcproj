@@ -39,8 +39,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="dep/lib/debug/irrlicht.lib"
-				AdditionalLibraryDirectories=""
+				OutputFile="$(SolutionDir)/src/dep/lib/debug/irrlicht.lib"
+				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
 				IgnoreDefaultLibraryNames="libci.lib"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -104,7 +104,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(SolutionDir)\src\dep\lib\debug\irrlicht.lib"
+				OutputFile="$(SolutionDir)/src/dep/lib/release/irrlicht.lib"
+				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
 				IgnoreDefaultLibraryNames="libci.lib"/>
 			<Tool
 				Name="VCMIDLTool"

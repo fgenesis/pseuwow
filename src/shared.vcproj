@@ -24,7 +24,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="dep/include;Client"
+				AdditionalIncludeDirectories="dep/include;Client;shared"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -78,7 +78,7 @@
 				Optimization="3"
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="dep/include;Client"
+				AdditionalIncludeDirectories="dep/include;Client;shared"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -262,6 +262,33 @@
 				</File>
 				<File
 					RelativePath=".\shared\ADTFileStructs.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="Auth">
+				<File
+					RelativePath=".\shared\Auth\AuthCrypt.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\AuthCrypt.h">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\BigNumber.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\BigNumber.h">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\md5.c">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\md5.h">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\Sha1.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\Sha1.h">
 				</File>
 			</Filter>
 		</Filter>

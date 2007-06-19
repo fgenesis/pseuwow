@@ -9,7 +9,7 @@
 #ifdef _IRR_WINDOWS_
 
 #ifdef _IRR_COMPILE_WITH_DIRECT3D_8_
-#include <d3d8.h>
+#include "d3d8.h"
 
 #include "CD3D8ShaderMaterialRenderer.h"
 #include "IShaderConstantSetCallBack.h"

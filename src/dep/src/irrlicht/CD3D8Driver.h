@@ -22,7 +22,7 @@
 
 
 #ifdef _IRR_COMPILE_WITH_DIRECT3D_8_
-#include <d3d8.h>
+#include "d3d8.h"
 
 namespace irr
 {

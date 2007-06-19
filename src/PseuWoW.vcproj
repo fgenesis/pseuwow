@@ -211,34 +211,6 @@
 				RelativePath=".\Client\SysDefs.h">
 			</File>
 			<Filter
-				Name="Auth"
-				Filter="">
-				<File
-					RelativePath=".\Client\Auth\AuthCrypt.cpp">
-				</File>
-				<File
-					RelativePath=".\Client\Auth\AuthCrypt.h">
-				</File>
-				<File
-					RelativePath=".\Client\Auth\BigNumber.cpp">
-				</File>
-				<File
-					RelativePath=".\Client\Auth\BigNumber.h">
-				</File>
-				<File
-					RelativePath=".\Client\Auth\md5.c">
-				</File>
-				<File
-					RelativePath=".\Client\Auth\md5.h">
-				</File>
-				<File
-					RelativePath=".\Client\Auth\Sha1.cpp">
-				</File>
-				<File
-					RelativePath=".\Client\Auth\Sha1.h">
-				</File>
-			</Filter>
-			<Filter
 				Name="DefScript"
 				Filter="">
 				<File
