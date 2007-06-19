@@ -108,35 +108,15 @@ bool PseuInstance::Init(void) {
     _scp->variables.Set("@version",_ver);
     _scp->variables.Set("@inworld","false");
 
-    if(!_scp->BoolRunScript("_startup",NULL))
+    if(!_scp->LoadScriptFromFile("./_startup.def"))
+    {
+        logerror("Error loading '_startup.def'");
+        SetError();
+    }
+    else if(!_scp->BoolRunScript("_startup",NULL))
     {
         logerror("Error executing '_startup.def'");
         SetError();
-    }
-
-    // load all .def files in scripts directory
-    log("Loading DefScripts from folder '%s'",_scpdir.c_str());
-    std::deque<std::string> fl = GetFileList(_scpdir);
-    for(uint32 i = 0; i < fl.size(); i++)
-    {
-        std::string fn = fl[i]; // do not lowercase filename because of linux case sensitivity
-        if(fn.length() <= 4) // must be at least "x.def"
-            continue;
-        std::string ext = stringToLower(fn.substr(fn.length()-4,4));
-        std::string sn;
-        if(ext==".def")
-            sn = stringToLower(fn.substr(0,fn.length()-ext.length()));
-        if(sn.length())
-        {
-            if(!_scp->ScriptExists(sn))
-            {
-                std::string ffn = _scpdir + fn;
-                if(_scp->LoadScriptFromFile(ffn,sn))
-                    logdebug("-> Auto-loaded script [ %s ]",ffn.c_str());  
-                else
-                    logerror("-> Can't auto-load script [ %s ]",ffn.c_str());
-            }
-        }
     }
 
     // TODO: find a better loaction where to place this block!

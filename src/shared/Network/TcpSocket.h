@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Socket.h"
 #include "CircularBuffer.h"
 #ifdef HAVE_OPENSSL
-#include <openssl/ssl.h>
+#include "openssl/ssl.h"
 #ifdef _WIN32
 // TODO: systray.exe??
 #define RANDOM "systray.exe"

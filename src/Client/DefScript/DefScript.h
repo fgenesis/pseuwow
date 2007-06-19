@@ -106,7 +106,7 @@ public:
 	void Clear(void);
     DefScript *GetScript(std::string);
 	unsigned int GetScripts(void);
-	bool LoadScriptFromFile(std::string,std::string);
+	bool LoadScriptFromFile(std::string);
     DefReturnResult RunScript(std::string name,CmdSet* pSet,std::string override_name="");
     bool BoolRunScript(std::string,CmdSet*);
 	unsigned int GetScriptID(std::string);
@@ -133,6 +133,7 @@ public:
     void My_Run(std::string line,std::string username);
 
 private:
+    void _UpdateOrCreateScriptByName(std::string);
     void _InitFunctions(void);
     DefXChgResult ReplaceVars(std::string str, CmdSet* pSet, unsigned char VarType, bool run_embedded);
 	void SplitLine(CmdSet&,std::string);

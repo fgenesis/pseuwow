@@ -27,37 +27,40 @@ DefReturnResult DefScriptPackage::func_out(CmdSet& Set){
 }
 
 DefReturnResult DefScriptPackage::func_loaddef(CmdSet& Set){
-    DefReturnResult r;
     if( ScriptExists(Set.defaultarg) )
     {
-        r.ret="exists";
-        return r;
+        return "exists";
     }
     return func_reloaddef(Set);
 }
 
+// supply either the filename in default scripts directory, without extension,
+// OR provide the full file path WITH extension
 DefReturnResult DefScriptPackage::func_reloaddef(CmdSet& Set){
     DefReturnResult r;
     bool result=false;
     std::string fn;
-    if(Set.arg[0].empty())
+
+    // if the filename does NOT contain any path, load from default script dir
+    std::string::size_type slashpos = Set.defaultarg.find_last_of("\\/");
+    std::string::size_type ppos = Set.defaultarg.find_last_of(".");
+    if(slashpos == std::string::npos)
     {
-        result=LoadByName(Set.defaultarg);
-        fn=(scPath + Set.defaultarg).append(".def");
+        fn=scPath+Set.defaultarg;
     }
     else
     {
-        std::string::size_type pos = Set.arg[0].find('/');
-        if(pos == std::string::npos)
-            fn=scPath+Set.arg[0];
-        else
-            fn=Set.arg[0];
-        result=LoadScriptFromFile(fn,Set.defaultarg);
+        fn=Set.defaultarg;
     }
+    if(ppos==std::string::npos || ppos < slashpos) // even if there was neither / nor . they will be equal
+        fn+=".def";
+    
+    result=LoadScriptFromFile(fn);
+
     r.ret=fn;
     if(!result)
     {
-        std::cout << "Could not load script '" << Set.defaultarg << "' [" << fn << "]\n";
+        //std::cout << "Could not load script '" << Set.defaultarg << "' [" << fn << "]\n";
         r.ret="";
     }
     return r;
