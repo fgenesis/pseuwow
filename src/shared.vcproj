@@ -40,7 +40,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="winmm.lib"/>
+				AdditionalDependencies="winmm.lib libeay32MT.lib"
+				AdditionalLibraryDirectories="dep/lib/static"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\Debug/PseuWoW_Controller.tlb"
@@ -96,7 +97,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="winmm.lib"/>
+				AdditionalDependencies="winmm.lib libeay32MT.lib"
+				AdditionalLibraryDirectories="dep/lib/static"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\Release/PseuWoW_Controller.tlb"
