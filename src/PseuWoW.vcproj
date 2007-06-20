@@ -45,7 +45,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib libeay32MT.lib WS2_32.LIB"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB"
 				ShowProgress="0"
 				OutputFile="$(OutDir)/$(InputName).exe"
 				LinkIncremental="1"
@@ -113,7 +113,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib libeay32MT.lib WS2_32.LIB"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB"
 				OutputFile="$(OutDir)/$(InputName)_debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
