@@ -1,0 +1,39 @@
+// example file. wrap a few functions together.
+
+//------------------------------------------------
+#script=gc
+//------------------------------------------------
+// example script to write into channel "generalchat"
+// usage: "gc bla bla..."
+chan,generalchat ${@def}
+
+
+//------------------------------------------------
+#script=gcl
+#permission=0
+//------------------------------------------------
+// write leetspeak to channel generalchat (see "gc" script)
+// usage: "gcl moo, cow syndrome!"
+gc ?{toleet ${@def}}
+
+
+//------------------------------------------------
+#script=selfheal
+#permission=0
+//------------------------------------------------
+// purpose: heal self with full hp. GM-ONLY!!
+// be sure you have this spell in your spellbook!
+// DO NOT USE THIS SCRIPT IF YOU ARE NO GM!
+
+// target self (the name we used to login)
+TARGET ${#CHARNAME}
+// 23965 = instant heal
+CASTSPELL 23965
+
+//------------------------------------------------
+#script=sl
+#permission=0
+//------------------------------------------------
+// say leetspeak text. gm-commands can't be executed this way
+s,{${@0}} ?{toleet ${@def}}
+

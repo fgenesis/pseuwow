@@ -1,0 +1,36 @@
+
+
+//--------------------------------------------
+#script=lcontains
+#permission=255
+//--------------------------------------------
+// return true if any list element matches @def, else return false.
+// @0: list name, @def: search string
+
+set,i 0
+set,l ?{globname ${@0}}
+
+out list: ${l} - len: ?{llen ${l}}
+	
+if ?{not ?{llen ${l}}}
+	return
+endif
+
+set,result false
+loop
+	out eq:?{equal,${i} ?{llen ${l}}} i:${i} len:?{llen ${l}}
+	if ?{equal,${i} ?{llen ${l}}}
+		exitloop
+	endif
+	set,elem ?{lindex,{${l}} ${i}}
+	if ?{equal,{${elem}} ${@def}}
+		set,result true
+		exitloop
+	endif
+	add,i 1
+endloop
+unset i
+unset l
+unset elem
+return ${result}
+

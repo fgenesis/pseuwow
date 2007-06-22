@@ -1,5 +1,0 @@
-#permission=255
-IF ${@inworld}
-	SAY Terminating proc...
-ENDIF
-SHDN

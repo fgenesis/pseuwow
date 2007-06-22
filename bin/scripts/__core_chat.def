@@ -1,0 +1,210 @@
+
+//-----------------------------------------------------------
+#script=chan
+//-----------------------------------------------------------
+// Script to write on channels
+// Arguments:
+// ==========
+// @def: text to write
+// @0: channel name
+// @1: language name/number
+
+#permission=10
+SET,lang ${@1}
+DEFAULT,lang 0
+SENDCHATMESSAGE,14,{${lang}},{${@def}},{${@0}}
+UNSET lang
+
+
+//-----------------------------------------------------------
+#script=cmd
+#permission=255
+//-----------------------------------------------------------
+// purpose: send a server command.
+// args:
+// @def: command to send
+
+SAY ${#CMDCHAR}${@def}
+
+
+//-----------------------------------------------------------
+#script=reply
+#permission=255
+//-----------------------------------------------------------
+// purpose: reply to the player that whispered last
+
+SET,player ${@thiswhisper_name}
+SET,lang ${@0}
+DEFAULT,lang 0
+SET,msg ${@def}
+
+WHISPER,{${player}},{${lang}} ${msg}
+
+UNSET player
+UNSET lang
+UNSET msg
+
+
+//-----------------------------------------------------------
+#script=s
+#permission=0
+//-----------------------------------------------------------
+// is the char equal to the char we use for commands? does the player have a permission lvl below 255?
+IF ?{AND,?{string_is_command ${@def}} ?{SMALLER,?{GETPLAYERPERM ${@thiscmd_name}} 255}}
+	// yes: say a warning and the command the player wanted to use
+	SAY ${@thiscmd_name}: no permission to use commands [${@def}]
+	RETURN false
+ELSE
+	// no: say the text as usual.
+	SAY,{${@0}} ${@def}
+	RETURN true
+ENDIF
+
+
+//-----------------------------------------------------------
+#script=say
+#permission=255
+//-----------------------------------------------------------
+// purpose: say something. @0: language ID or name, @def: text to say
+// setup some default values
+SET,lang ${@0}
+SET,msg ${@def}
+
+DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} faction}
+DEFAULT,lang ${#DEFAULTLANG}
+
+LOGDEBUG * Saying '${msg}' in lang ${lang}
+
+SENDCHATMESSAGE,0,${lang},{${msg}}
+UNSET lang
+UNSET msg
+
+
+//-----------------------------------------------------------
+#script=sayguild
+#permission=255
+//-----------------------------------------------------------
+// purpose: say something to guild channel
+// setup some default values
+SET,lang ${@0}
+SET,msg ${@def}
+
+default,lang 0
+
+LOGDEBUG * Saying '${msg}' in lang ${lang} to guild
+
+SENDCHATMESSAGE,3,${lang},{${msg}}
+UNSET lang
+UNSET msg
+
+//-----------------------------------------------------------
+#script=sayitem
+#permission=0
+//-----------------------------------------------------------
+// example script to "say" a clickable item
+SAY ?{getchatitem ${@def}}
+
+
+//-----------------------------------------------------------
+#script=sayparty
+#permission=255
+//-----------------------------------------------------------
+// purpose: say something to party channel
+// setup some default values
+SET,lang ${@0}
+SET,msg ${@def}
+
+default,lang 0
+
+LOGDEBUG * Saying '${msg}' in lang ${lang} to party
+
+SENDCHATMESSAGE,1,${lang},{${msg}}
+UNSET lang
+UNSET msg
+
+//-----------------------------------------------------------
+#script=sayred
+//-----------------------------------------------------------
+// example script how to output colored text
+#permission=0
+SAY,{${@0}} |cffFF0000${@def}
+
+//-----------------------------------------------------------
+#script=sayv
+#permission=0
+//-----------------------------------------------------------
+// purpose: say the value of a variable
+// args: @0: language ID or name, @def: var name
+SET,vn #${@caller}::${@def}
+SET,vl ${@0}
+DEFAULT,vl 0
+
+IF ?{NOT ?{ISSET ${vn}}}
+	SAY,{${vl}} * Var '${@def}' not defined.
+ELSE
+	SET,vv ${${vn}}
+	SAY,{${vl}} * Var '${@def}' = '${vv}'
+ENDIF
+
+UNSET vv
+UNSET vn
+UNSET vl
+
+
+//-----------------------------------------------------------
+#script=whisper
+#permission=255
+//-----------------------------------------------------------
+// purpose: whisper text to a player.
+// args: @0: player name to whisper to; @1: language to use; @def: text
+
+// setup some default values
+SET,msg ${@def}
+SET,player ${@0}
+SET,lang ${@1}
+
+DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} faction}
+DEFAULT,lang ${#DEFAULTLANG}
+
+LOGDEBUG * Whisp to '{${player}}' '{${msg}}' in lang '${lang}'
+
+SENDCHATMESSAGE,6,{${lang}},{${msg}},{${player}}
+UNSET lang
+UNSET msg
+UNSET player
+
+
+//-------------------------------------------------------------
+#script=yell
+#permission=255
+//-------------------------------------------------------------
+// purpose: SHOUT!
+
+// setup some default values
+SET,lang ${@0}
+SET,msg ${@def}
+
+DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} faction}
+DEFAULT,lang ${#DEFAULTLANG}
+
+LOGDEBUG * Yelling '${msg}' in lang ${lang}
+
+SENDCHATMESSAGE,5,${lang},{${msg}}
+UNSET lang
+UNSET msg
+
+
+//-----------------------------------------------------------
+#script=y
+#permission=0
+//-----------------------------------------------------------
+// is the char equal to the char we use for commands? does the player have a permission lvl below 255?
+IF ?{AND,?{string_is_command ${@def}} ?{SMALLER,?{GETPLAYERPERM ${@thiscmd_name}} 255}}
+	// yes: say a warning and the command the player wanted to use
+	YELL ${@thiscmd_name}: no permission to use commands [${@def}]
+	RETURN false
+ELSE
+	// no: say the text as usual.
+	YELL,{${@0}} ${@def}
+	RETURN true
+ENDIF

@@ -1,6 +1,0 @@
-
-
-LOG * Cleaning up variables...
-UNSET #ACCPASS
-UNSET #ACCNAME
-LOG * Dangerous variables removed.

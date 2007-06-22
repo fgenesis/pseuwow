@@ -1,4 +1,0 @@
-// example script how to output colored text
-
-#permission=0
-SAY,${@0} |cffFF0000 ${@def}

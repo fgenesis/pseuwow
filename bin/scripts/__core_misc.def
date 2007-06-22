@@ -1,0 +1,57 @@
+
+
+//-----------------------------------------------
+#script=getchatitem
+#permission=255
+//-----------------------------------------------
+// expected args:
+// @def: item id
+// @0 (optional): color (in RGB hex format: 00FF00 = pure green)
+// returns: clickable item link to use it chat messages
+
+SET,i ${@def}
+SET,color ${@0}
+DEFAULT,i 0
+TOINT,i ${i}
+DEFAULT,color 6679FF
+SET,link |cff${color}|Hitem:${i}:0:0:0|h[Item ${i}]|h|r
+
+UNSET i
+UNSET color
+
+RETURN ${link}
+
+
+//-----------------------------------------------
+#script=makechatitem
+#permission=255
+//-----------------------------------------------
+// purpose: write the text of a clickable item link into a variable
+// expected args:
+// @def: item id
+// @0: variable name to write into
+// @1 (optional): color (in hex format: 00FF00 = pure green)
+SET,v #${@caller}::${target}
+SET,{${v}} ?{getchatitem,{${@1}} ${@def}}
+UNSET v
+
+
+//-----------------------------------------------
+#script=outv
+#permission=0
+//-----------------------------------------------
+// purpose: output a variable's value to the console.
+// usage: "outv x"
+
+SET,vn #${@caller}::${@def}
+
+IF ?{NOT ?{ISSET ${vn}}}
+	OUT * Var '${@def}' not defined.
+	RETURN
+ENDIF
+
+SET,vv ${${vn}}
+OUT * Var '${@def}' = '${vv}'
+
+UNSET vv
+UNSET vn

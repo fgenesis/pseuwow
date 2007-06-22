@@ -202,6 +202,7 @@ private:
     DefReturnResult func_lclean(CmdSet&);
     DefReturnResult func_lmclean(CmdSet&);
     DefReturnResult func_lerase(CmdSet&);
+    DefReturnResult func_lsort(CmdSet&);
 
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"

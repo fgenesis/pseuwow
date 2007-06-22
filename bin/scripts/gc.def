@@ -1,4 +1,0 @@
-// example script to write into channel "generalchat"
-// usage: "gc bla bla..."
-
-chan,generalchat ${@def}

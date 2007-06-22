@@ -1,0 +1,123 @@
+// core functions. required by other scripts to run!
+#onload
+	log * Loading core scripts...
+#/onload
+
+
+//--------------------------------------------------------
+#script=append
+#permission=255
+//--------------------------------------------------------
+// usage: append text to a string.
+// args:
+// @def: text to append
+// @0: variable to which the text should be appended
+
+// get the var name if the original variable
+SET,v #${@caller}::${@0}
+// if it has not been set before, init it now
+DEFAULT,${v}
+// append to the original var. inner ${..} gets the var name, outer ${..} get the value of the var name we just got.
+SET,${v} ${${v}}${@def}
+// remove the name placeholder
+UNSET v
+
+
+//--------------------------------------------------------
+#script=exloadscp
+#permission=255
+//--------------------------------------------------------
+if ?{fileexists ${@def}}
+	loadscp,{${@0}} ${@def}
+else
+	logdebug skipped loading of non-existent file '${@def}'
+endif
+
+
+//--------------------------------------------------------
+#script=loadallscp
+#permission=255
+//--------------------------------------------------------
+LOG * Loading SCP data storages...
+
+// example:
+// LOADSCP,test data/test.scp
+
+// load default databases
+LOADSCP,class data/scp/class.scp
+LOADSCP,gender data/scp/gender.scp
+LOADSCP,language data/scp/language.scp
+LOADSCP,map data/scp/map.scp
+LOADSCP,race data/scp/race.scp
+
+// load extended databases if present.
+EXLOADSCP,sound data/scp/sound.scp
+EXLOADSCP,emote data/scp/emote.scp
+
+LOG * SCP loaded.
+
+
+//-------------------------------------------------
+#script=string_is_command
+#permission=255
+//-------------------------------------------------
+// purpose: detect if @def might be a server command.
+
+// split all chars we have set in the config files to a list.
+lsplit,#CMDCHARLIST ${#OTHER_CMD_CHARS}
+
+// find out the first char of the string
+SET,c ?{SUBSTR,1 ${@def}}
+
+// does the char list contain our first char? if yes it can trigger a server command.
+if ?{lcontains,#CMDCHARLIST ${c}}
+	unset c
+	return true
+endif
+unset c
+return false
+
+
+//--------------------------------------------------------
+#script=normalize_name
+#permission=255
+//--------------------------------------------------------
+// uppercases first char, lowercases rest
+set,name ?{uppercase ?{substr,1 ${@def}}}
+set,len ?{strlen ${@def}}
+sub,len 1
+append,name ?{lowercase ?{substr,${len},1 ${@def}}}
+return ${name}
+
+//---------------------------------------------------------
+#script=globname
+#permission=255
+//---------------------------------------------------------
+// purpose: returns the global name of a variable
+// args: @def: var name, @0 (optional): name of the intended parent func
+set,c ?{substr,1 ${@def}}
+// it is a global var if the varname starts with # or there is no caller script
+if ?{or,?{equal,# ${c}} ?{not ${@caller}}}
+	return ${@def}
+endif
+set,top ${@0}
+default,top ${@caller}
+return #${top}::${@def}
+
+
+//---------------------------------------------------------
+#script=getvar
+#permission=255
+//---------------------------------------------------------
+// purpose: returns the value of a variable. if the variable hasnt been set return empty string.
+set,top ${@caller}
+default,top #
+set,v ?{globname,${top} ${@def}}
+unset top
+out getvar: v=${v} -> ${${v}}
+if ?{isset ${v}}
+	return ${${v}}
+endif
+return
+
+

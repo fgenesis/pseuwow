@@ -139,7 +139,6 @@ std::deque<std::string> GetFileList(std::string path)
 
     while(files.size() && (files.front()=="." || files.front()==".."))
         files.pop_front();
-
     return files;
 }
 
