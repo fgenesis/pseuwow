@@ -1,6 +1,0 @@
-#permission=255
-if ?{fileexists ${@def}}
-	loadscp,{${@0}} ${@def}
-else
-	logdebug skipped loading of non-existent file '${@def}'
-endif

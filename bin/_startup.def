@@ -6,6 +6,7 @@ LOG * DefScript StartUp [${@version_short}]...
 
 // first, load all scripts in patch 'scripts' with extension .def
 SET,fcount ?{LGETFILES,scriptlist,def scripts}
+LSORT scriptlist
 LOGDETAIL * Loading ${fcount} scripts.
 // iterate over all files and load them; if counter i is equal to the amount of files we are done.
 SET,i 0

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <algorithm>
 #include "DefScript.h"
 #include "DefScriptTools.h"
 
@@ -253,6 +254,16 @@ DefReturnResult DefScriptPackage::func_lerase(CmdSet& Set)
 
     return r;
 }
+
+DefReturnResult DefScriptPackage::func_lsort(CmdSet& Set)
+{
+    DefList *l = lists.GetNoCreate(_NormalizeVarName(Set.defaultarg,Set.myname));
+    if(!l)
+        return false;
+    sort(l->begin(),l->end());
+    return true;
+}
+
 
 
 

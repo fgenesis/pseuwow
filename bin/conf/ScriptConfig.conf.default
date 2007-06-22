@@ -9,8 +9,11 @@
 [#noprefix]
 // special char that is used to trigger server commands (for example ".goname Player")
 // (WoWEmu="." MaNGOS="." or "!")
-// other servers might be different 
+// other servers might be different
 cmdchar=.
+
+// MaNGOS does also accept ! as cmd identifier. put here all identifiers that can trigger a server command!
+other_cmd_chars=.!
 
 
 

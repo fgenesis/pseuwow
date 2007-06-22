@@ -107,6 +107,7 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("lclean",&DefScriptPackage::func_lclean);
     AddFunc("lmclean",&DefScriptPackage::func_lmclean);
     AddFunc("lerase",&DefScriptPackage::func_lerase);
+    AddFunc("lsort",&DefScriptPackage::func_lsort);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
@@ -895,7 +896,6 @@ std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string s
         global = true;
     while(true)
     {
-
         if(vn.at(0)=='#')
             global = true;
         if(vn.at(0)=='#' || vn.at(0)==':')
@@ -903,6 +903,7 @@ std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string s
         else
             break;
     }
+
     if( (!global) && (vn.at(0)!='@') )  
         vn=sn+"::"+vn;
 

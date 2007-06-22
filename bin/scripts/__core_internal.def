@@ -1,0 +1,94 @@
+// scripts used for configuration! DO NOT MODIFY unless you know what you do!!
+
+#onload
+	log * Loading core scripts (internal config)...
+#/onload
+
+//--------------------------------------------------------
+#script=exit
+#permission=255
+//--------------------------------------------------------
+// just a name alternative
+QUIT
+
+
+//--------------------------------------------------------
+#script=quit
+#permission=255
+//--------------------------------------------------------
+// quit PseuWoW, say goodbye when logged in
+IF ${@inworld}
+	SAY Terminating proc...
+ENDIF
+SHDN
+
+
+//-----------------------------------------------
+#script=cleanupvars
+//-----------------------------------------------
+// purpose: unset all variables that could be abused by someone
+LOGDETAIL * Cleaning up variables...
+UNSET #ACCPASS
+UNSET #ACCNAME
+LOGDETAIL * Dangerous variables removed.
+
+
+//-----------------------------------------------
+#script=config
+#permission=255
+//-----------------------------------------------
+// Load all conf files from directory /conf/
+// get all *.conf file names from /conf/ directory, store the names in list 'fl' and the amount in 'fcount'
+SET,fcount ?{LGETFILES,fl,conf conf}
+// sort the list, load conf files alphabetically.
+LSORT fl
+
+IF ?{NOT ${fcount}}
+	LOGERROR No conf file found! Can't load.
+	RETURN
+ENDIF
+
+LOG * Loading ${fcount} conf files.
+// iterate over all files and load them; if counter i is equal to the amount of files we are done.
+SET,i 0
+LOOP
+	IF ?{EQUAL,${i} ${fcount}}
+		EXITLOOP
+	ENDIF
+	SET,fn ?{LINDEX,fl ${i}}
+	LOG * Loading conf file [ ${fn} ]
+	LOADCONF ${fn}
+	ADD,i 1
+ENDLOOP
+
+UNSET fcount
+UNSET i
+UNSET fn
+LDELETE fl
+
+// Apply the configuration
+APPLYCONF
+LOG * Configuration applied.
+
+// Apply user permissions
+APPLYPERMISSIONS
+
+// remove dangerous variables
+CLEANUPVARS
+
+// if its not set in the conf file, default it to "." (WoWEmu & MaNGOS style)
+DEFAULT,#CMDCHAR .
+
+
+//--------------------------------------------------
+#script=internal_perm
+#permission=255
+//--------------------------------------------------
+// purpose: set script permissions for internal functions that cant be set otherwise.
+// if you don't set a permission for a script manually, it will have permission 255 (highest)
+
+LOG * Assigning permissions for internal functions...
+// emotes are hard to abuse, allow for everyone
+setscriptpermission,emote 0
+// ... set more permissions here ...
+
