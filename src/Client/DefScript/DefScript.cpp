@@ -202,7 +202,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
     unsigned int ppos = fn.find_last_of(".");
     if(ppos == std::string::npos)
     ppos = fn.length();
-    sn = fn.substr(slashpos+1,(ppos-slashpos-1));
+    sn = stringToLower(fn.substr(slashpos+1,(ppos-slashpos-1)));
     _UpdateOrCreateScriptByName(sn);
     curScript=Script[sn];
 
@@ -241,7 +241,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
             {
                 if(!curScript->GetLines()) // delete script if unused
                     DeleteScript(curScript->GetName());
-                sn = value;
+                sn = stringToLower(value);
                 _UpdateOrCreateScriptByName(sn);
                 curScript=Script[sn];
             }
