@@ -14,7 +14,7 @@ public:
     bool LoadMem(ByteBuffer&);
     bool Loaded(void) { return m_loaded; }
 
-    MapChunk _chunks[CHUNKS_PER_TILE]; // 16x16
+    ADTMapChunk _chunks[CHUNKS_PER_TILE]; // 16x16
     std::vector<std::string> _textures;
     std::vector<std::string> _wmos;
     std::vector<std::string> _models;

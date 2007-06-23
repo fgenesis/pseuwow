@@ -2,9 +2,11 @@
 #include <set>
 #define _COMMON_NO_THREADS
 #include "common.h"
+#include "tools.h"
 #include "MPQHelper.h"
 #include "dbcfile.h"
 #include "ADTFile.h"
+#include "WDTFile.h"
 #include "StuffExtract.h"
 #include "DBCFieldData.h"
 #include "Locale.h"
@@ -266,6 +268,24 @@ void ExtractMaps(void)
     CreateDir("stuffextract/data/maps");
     for(uint32 it=0; it < mapNames.size(); it++)
     {
+        // extract the WDT file that stores tile information
+        char wdt_name[300], wdt_out[300];
+        sprintf(wdt_name,"World\\Maps\\%s\\%s.wdt",mapNames[it].c_str(),mapNames[it].c_str());
+        sprintf(wdt_out,MAPSDIR"/%s.wdt",mapNames[it].c_str());
+        ByteBuffer& wdt_bb = mpq.ExtractFile(wdt_name);
+        std::fstream wdt_fh;
+        wdt_fh.open(wdt_out, std::ios_base::out|std::ios_base::binary);
+        if(!wdt_fh.is_open())
+        {
+            printf("\nERROR: Map extraction failed: could not save file %s\n",wdt_out);
+            return;
+        }
+        wdt_fh.write((char*)wdt_bb.contents(),wdt_bb.size());
+        wdt_fh.close();
+
+        printf("Extracted WDT '%s'\n",wdt_name);
+
+        // then extract all ADT files
         extr=0;
         for(uint32 x=0; x<64; x++)
         {
@@ -405,25 +425,5 @@ void ExtractMapDependencies(void)
     printf("\n");
 
 }
-
-// fix filenames for linux ( '/' instead of windows '\')
-void _FixFileName(std::string& str)
-{
-    for(uint32 i = 0; i < str.length(); i++)
-        if(str[i]=='\\')
-            str[i]='/';
-}
-
-std::string _PathToFileName(std::string str)
-{
-    uint32 pathend = str.find_last_of("/\\");
-    if(pathend != std::string::npos)
-    {
-        return str.substr(pathend+1);
-    }
-    return str;
-}
-
-
 
 

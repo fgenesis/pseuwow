@@ -143,7 +143,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
         }
         else if(!strcmp((char*)fourcc,"MCNK"))
         {
-            _chunks[mcnkid].hdr = buf.read<MapChunkHeader>();
+            _chunks[mcnkid].hdr = buf.read<ADTMapChunkHeader>();
             uint8 *mfcc = new uint8[5]; mfcc[4]=0;
             uint32 msize;
             while(buf.rpos()<buf.size())
