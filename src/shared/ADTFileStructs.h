@@ -81,7 +81,7 @@ struct MODF_chunk
     uint16 nameSet;
 };
 
-enum MapChunkHeaderFlags
+enum ADTMapChunkHeaderFlags
 {
     FLAG_SHADOW,
     FLAG_IMPASS,
@@ -90,7 +90,7 @@ enum MapChunkHeaderFlags
     FLAG_LQ_MAGMA,
 };
 
-struct MapChunkHeader
+struct ADTMapChunkHeader
 {
     uint32 flags;
     uint32 IndexX;
@@ -190,9 +190,9 @@ struct NormalVector
 
 // also known as MCNK block
 // 256 per adt file
-struct MapChunk
+struct ADTMapChunk
 {
-    MapChunkHeader hdr;
+    ADTMapChunkHeader hdr;
     float vertices[145];
     NormalVector normalvecs[145];
     MCLY_chunk layer[4]; // can be less

@@ -20,5 +20,7 @@ bool FileExists(std::string);
 bool CreateDir(const char*);
 uint32 getMSTime(void);
 uint32 GetFileSize(const char*);
+void _FixFileName(std::string&);
+std::string _PathToFileName(std::string);
 
 #endif

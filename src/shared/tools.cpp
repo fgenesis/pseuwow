@@ -195,4 +195,22 @@ uint32 GetFileSize(const char* sFileName)
     return f.tellg() - begin_pos;
 }
 
+// fix filenames for linux ( '/' instead of windows '\')
+void _FixFileName(std::string& str)
+{
+    for(uint32 i = 0; i < str.length(); i++)
+        if(str[i]=='\\')
+            str[i]='/';
+}
+
+std::string _PathToFileName(std::string str)
+{
+    uint32 pathend = str.find_last_of("/\\");
+    if(pathend != std::string::npos)
+    {
+        return str.substr(pathend+1);
+    }
+    return str;
+}
+
 

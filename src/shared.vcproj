@@ -265,6 +265,18 @@
 				<File
 					RelativePath=".\shared\ADTFileStructs.h">
 				</File>
+				<File
+					RelativePath=".\shared\MapTile.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\MapTile.h">
+				</File>
+				<File
+					RelativePath=".\shared\WDTFile.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\WDTFile.h">
+				</File>
 			</Filter>
 			<Filter
 				Name="Auth">
