@@ -15,7 +15,7 @@ LOOP
 		EXITLOOP
 	ENDIF
 	SET,fn ./scripts/?{LINDEX,scriptlist ${i}}
-	LOGDEBUG * Loading script file [${fn}]
+	LOG *** Loading script file [${fn}]
 	IF ?{NOT ?{LOADDEF ${fn}}}
 		LOGERROR Can't load script [${fn}]
 	ENDIF

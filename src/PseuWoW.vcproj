@@ -355,6 +355,12 @@
 					RelativePath=".\Client\World\UpdateMask.h">
 				</File>
 				<File
+					RelativePath=".\Client\World\World.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\World.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\WorldPacket.cpp">
 				</File>
 				<File
@@ -376,22 +382,10 @@
 					Name="MapSystem"
 					Filter="">
 					<File
-						RelativePath=".\Client\World\MapTile.cpp">
-						<FileConfiguration
-							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
+						RelativePath=".\Client\World\MapMgr.cpp">
 					</File>
 					<File
-						RelativePath=".\Client\World\MapTile.h">
+						RelativePath=".\Client\World\MapMgr.h">
 					</File>
 				</Filter>
 			</Filter>

@@ -20,7 +20,7 @@ bool ADTFile::Load(std::string fn)
     if(!fs)
         return false;
     std::fstream fh;
-    fh.open(fn.c_str());
+    fh.open(fn.c_str(), std::ios_base::in | std::ios_base::binary);
     if(!fh.is_open())
         return false;
 
@@ -28,9 +28,8 @@ bool ADTFile::Load(std::string fn)
     buf.resize(fs);
     fh.read((char*)buf.contents(),fs);
     fh.close();
-
-    LoadMem(buf);
-    return m_loaded;
+    buf.rpos(0);
+    return LoadMem(buf);
 }
 
 bool ADTFile::LoadMem(ByteBuffer& buf)
@@ -44,7 +43,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
     {
         buf.read(fourcc,4); flipcc(fourcc); 
         buf.read((uint8*)&size,4);
-        DEBUG(printf("ADT: reading '%s' size %u\n",fourcc,size));
+        //DEBUG(printf("ADT: reading '%s' size %u\n",fourcc,size));
 
         if(!strcmp((char*)fourcc,"MVER"))
         {
@@ -59,7 +58,12 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
             for(uint32 i = 0; i < CHUNKS_PER_TILE; i++)
             {
                 mcin[i] = buf.read<MCIN_chunk>();
-                DEBUG(printf("ADT chunk %u at offset %u, size %u flags %X async %u\n",i,mcin[i].offset,mcin[i].size,mcin[i].flags,mcin[i].async));
+                //DEBUG(printf("ADT chunk %u at offset %u, size %u flags %X async %u\n",i,mcin[i].offset,mcin[i].size,mcin[i].flags,mcin[i].async));
+                if(!mcin[i].offset)
+                {
+                    printf("ADT: ERROR: chunk offset is NULL! Not loading.\n");
+                    return false;
+                }
             }
         }
         else if(!strcmp((char*)fourcc,"MTEX"))
@@ -72,10 +76,11 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 if(!memcmp(fourcc,"MMDX",4))
                     break;
                 buf >> tex;
-                DEBUG(printf("MTEX offset %u \"%s\"\n",buf.rpos(),tex.c_str()));
+                //DEBUG(printf("MTEX offset %u \"%s\"\n",buf.rpos(),tex.c_str()));
                 _textures.push_back(tex);
                 texturecnt++;
             }
+            //DEBUG(printf("ADT: loaded %u textures\n",texturecnt));
         }
         else if(!strcmp((char*)fourcc,"MMDX"))
         {
@@ -87,10 +92,11 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 if(!memcmp(fourcc,"MMID",4))
                     break;
                 buf >> model;
-                DEBUG(printf("MMDX offset %u \"%s\"\n",buf.rpos(),model.c_str()));
+                //DEBUG(printf("MMDX offset %u \"%s\"\n",buf.rpos(),model.c_str()));
                 _models.push_back(model);
                 modelcnt++;
             }
+            //DEBUG(printf("ADT: loaded %u models\n",modelcnt));
         }
         /*else if(!strcmp((char*)fourcc,"MMID"))
         {
@@ -110,7 +116,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 if(!memcmp(fourcc,"MWID",4))
                     break;
                 buf >> wmo;
-                DEBUG(printf("MWMO offset %u \"%s\"\n",buf.rpos(),wmo.c_str()));
+                //DEBUG(printf("MWMO offset %u \"%s\"\n",buf.rpos(),wmo.c_str()));
                 _wmos.push_back(wmo);
                 wmocnt++;
             }
@@ -126,7 +132,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
         else if(!strcmp((char*)fourcc,"MDDF"))
         {
             uint32 ndoodads = size / 36;
-            DEBUG(printf("ADT: Loading %u doodads.\n",ndoodads));
+            //DEBUG(printf("ADT: Loading %u doodads.\n",ndoodads));
             for(uint32 i = 0; i<ndoodads; i++)
             {
                 _doodadsp.push_back(buf.read<MDDF_chunk>());
@@ -135,7 +141,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
         else if(!strcmp((char*)fourcc,"MODF"))
         {
             uint32 nwmos = size / 64;
-            DEBUG(printf("ADT: Loading %u wmos.\n",nwmos));
+            //DEBUG(printf("ADT: Loading %u wmos.\n",nwmos));
             for(uint32 i = 0; i<nwmos; i++)
             {
                 _wmosp.push_back(buf.read<MODF_chunk>());
@@ -157,7 +163,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 if((!msize) && !strcmp((char*)mfcc,"MCLQ"))
                     msize = _chunks[mcnkid].hdr.sizeLiquid;
 
-                DEBUG(printf("ADT: MCNK: reading '%s' size %u\n",mfcc,msize));
+                //DEBUG(printf("ADT: MCNK: reading '%s' size %u\n",mfcc,msize));
 
                 if(!strcmp((char*)mfcc,"MCVT"))
                 {
@@ -205,7 +211,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                     if (!strcmp((char*)fcc1,"MCSE"))
                     {
                         _chunks[mcnkid].haswater = false;
-                        DEBUG(printf("ADT: MCNK: MCLQ not present\n"));
+                        //DEBUG(printf("ADT: MCNK: MCLQ not present\n"));
                         buf.rpos(buf.rpos()-4);
                         delete [] fcc1;
                         continue; // next block read will be the MCSE block
@@ -219,7 +225,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                         uint32 rbytes,diffbytes;
                         buf >> _chunks[mcnkid].waterlevel;
                         buf >> tmp;
-                        DEBUG(printf("ADT: MCNK: MCLQ base floats: %f %f\n",_chunks[mcnkid].waterlevel,tmp));
+                        //DEBUG(printf("ADT: MCNK: MCLQ base floats: %f %f\n",_chunks[mcnkid].waterlevel,tmp));
                         //buf.rpos(buf.rpos()+4); // base height??
                         if(msize > 8) // just to be sure
                         {
@@ -232,16 +238,16 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                                 buf >> _chunks[mcnkid].lqflags[i];
                             }
                             rbytes = buf.rpos() - bufpos;
-                            DEBUG(printf("ADT: MCNK: MCLQ block loaded. %u / %u bytes.\n",rbytes,msize));
+                            //DEBUG(printf("ADT: MCNK: MCLQ block loaded. %u / %u bytes.\n",rbytes,msize));
                         }
                         else
                         {
-                            DEBUG(printf("ADT: MCNK: MCLQ block has only %u bytes\n",msize));
+                            //DEBUG(printf("ADT: MCNK: MCLQ block has only %u bytes\n",msize));
                         }
                         // HACK: skip some unk junk bytes
                         diffbytes = (msize-8) - rbytes; // dont forget to skip the 8 initial bytes
                         buf.rpos(buf.rpos()+diffbytes);
-                        DEBUG(printf("ADT: MCNK: MCLQ - %u junk bytes skipped\n",diffbytes));
+                        //DEBUG(printf("ADT: MCNK: MCLQ - %u junk bytes skipped\n",diffbytes));
                         delete [] fcc1;
                     }
                 }
@@ -256,7 +262,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 }
                 else
                 {
-                    DEBUG(printf("ADT: MCNK: '%s' block unhandled, skipping %u bytes\n",mfcc,msize));
+                    //DEBUG(printf("ADT: MCNK: '%s' block unhandled, skipping %u bytes\n",mfcc,msize));
                     if(!(isalnum(mfcc[0]) && isalnum(mfcc[1]) && isalnum(mfcc[2]) && isalnum(mfcc[3])))
                     {
                         printf("Error loading ADT file (chunk %u error).\n",mcnkid);
@@ -272,7 +278,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
         }
         else
         {
-            DEBUG(printf("ADT: '%s' block unhandled, skipping %u bytes\n",fourcc,size));
+            //DEBUG(printf("ADT: '%s' block unhandled, skipping %u bytes\n",fourcc,size));
             if(!(isalnum(fourcc[0]) && isalnum(fourcc[1]) && isalnum(fourcc[2]) && isalnum(fourcc[3])))
             {
                 printf("Error loading ADT file.\n");
@@ -283,9 +289,6 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
 
     }
     delete [] fourcc;
-
-
-    m_loaded = true;
     return true;
 }
 

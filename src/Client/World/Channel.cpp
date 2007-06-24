@@ -136,7 +136,7 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 				}
 			}
 
-			log("%s left channel %s", channel.c_str());
+			log("%s left channel %s", name.c_str(), channel.c_str());
 			break;
 
 		// You joined channel successfully

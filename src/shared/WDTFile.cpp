@@ -22,8 +22,10 @@ bool WDTFile::Load(std::string fn)
         return false;
     uint32 fs = GetFileSize(fn.c_str());
     ByteBuffer bb(fs);
+    bb.resize(fs);
     fh.read((char*)bb.contents(),fs);
     fh.close();
+    bb.rpos(0);
     return LoadMem(bb);
 }
 

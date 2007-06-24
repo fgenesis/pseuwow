@@ -11,7 +11,7 @@
 #include "DBCFieldData.h"
 #include "Locale.h"
 
-std::vector<std::string> mapNames;
+std::map<uint32,std::string> mapNames;
 std::set<std::string> texNames;
 std::set<std::string> modelNames;
 std::set<std::string> wmoNames;
@@ -207,7 +207,7 @@ bool ConvertDBC(void)
     printf("map info..");
     for(DBCFile::Iterator it = Map.begin(); it != Map.end(); ++it)
     {
-        mapNames.push_back(it->getString(MAP_NAME_GENERAL));
+        mapNames[it->getInt(MAP_ID)] = it->getString(MAP_NAME_GENERAL);
         uint32 id = it->getUInt(MAP_ID);
         for(uint32 field=MAP_ID; field < MAP_END; field++)
         {
@@ -266,12 +266,12 @@ void ExtractMaps(void)
     uint32 extr,extrtotal=0;
     MPQHelper mpq("terrain");
     CreateDir("stuffextract/data/maps");
-    for(uint32 it=0; it < mapNames.size(); it++)
+    for(std::map<uint32,std::string>::iterator it = mapNames.begin(); it != mapNames.end(); it++)
     {
         // extract the WDT file that stores tile information
         char wdt_name[300], wdt_out[300];
-        sprintf(wdt_name,"World\\Maps\\%s\\%s.wdt",mapNames[it].c_str(),mapNames[it].c_str());
-        sprintf(wdt_out,MAPSDIR"/%s.wdt",mapNames[it].c_str());
+        sprintf(wdt_name,"World\\Maps\\%s\\%s.wdt",it->second.c_str(),it->second.c_str());
+        sprintf(wdt_out,MAPSDIR"/%u.wdt",it->first);
         ByteBuffer& wdt_bb = mpq.ExtractFile(wdt_name);
         std::fstream wdt_fh;
         wdt_fh.open(wdt_out, std::ios_base::out|std::ios_base::binary);
@@ -293,8 +293,8 @@ void ExtractMaps(void)
             {
                 uint32 olddeps;
                 uint32 depdiff;
-                sprintf(namebuf,"World\\Maps\\%s\\%s_%u_%u.adt",mapNames[it].c_str(),mapNames[it].c_str(),x,y);
-                sprintf(outbuf,MAPSDIR"/%s_%u_%u.adt",mapNames[it].c_str(),x,y);
+                sprintf(namebuf,"World\\Maps\\%s\\%s_%u_%u.adt",it->second.c_str(),it->second.c_str(),x,y);
+                sprintf(outbuf,MAPSDIR"/%u_%u_%u.adt",it->first,x,y);
                 if(mpq.FileExists(namebuf))
                 {
                     ByteBuffer& bb = mpq.ExtractFile(namebuf);
@@ -309,6 +309,7 @@ void ExtractMaps(void)
                             return;
                         }
                         fh.write((char*)bb.contents(),bb.size());
+                        fh.flush();
                         fh.close();
                         olddeps = texNames.size() + modelNames.size() + wmoNames.size();
                         ADT_FillTextureData(bb.contents(),texNames);
@@ -316,7 +317,7 @@ void ExtractMaps(void)
                         ADT_FillWMOData(bb.contents(),wmoNames); 
                         depdiff = texNames.size() + modelNames.size() + wmoNames.size() - olddeps;
                         extr++;
-                        printf("[%u/%u]: %s; %u new deps.\n",it+1,mapNames.size(),namebuf,depdiff);
+                        printf("[%u:%u] %s; %u new deps.\n",extr,it->first,namebuf,depdiff);
                     }
                 }
             }

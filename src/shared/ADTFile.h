@@ -12,7 +12,6 @@ class ADTFile
 public:
     bool Load(std::string);
     bool LoadMem(ByteBuffer&);
-    bool Loaded(void) { return m_loaded; }
 
     ADTMapChunk _chunks[CHUNKS_PER_TILE]; // 16x16
     std::vector<std::string> _textures;
@@ -24,8 +23,6 @@ public:
     MHDR_chunk mhdr;
     MCIN_chunk mcin[CHUNKS_PER_TILE];
     uint32 _version;
-
-    bool m_loaded;
 };
 
 void ADT_ExportStringSetByOffset(const uint8*, uint32, std::set<std::string>&, char*);
