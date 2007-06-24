@@ -81,8 +81,8 @@ PseuInstance::~PseuInstance()
     delete _scp;
     delete _conf;
 
+    log("--- Instance shut down ---");
     log_close();
-    
 }
 
 bool PseuInstance::Init(void) {
@@ -338,6 +338,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     enablegui=(bool)atoi(v.Get("ENABLEGUI").c_str());
     rmcontrolport=atoi(v.Get("RMCONTROLPORT").c_str());
     rmcontrolhost=v.Get("RMCONTROLHOST");
+    useMaps=(bool)atoi(v.Get("USEMAPS").c_str());
 
     // clientversion is a bit more complicated to add
     {

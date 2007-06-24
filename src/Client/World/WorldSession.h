@@ -15,6 +15,7 @@ class WorldPacket;
 class Channel;
 class RealmSession;
 struct OpcodeHandler;
+class World;
 
 
 class WorldSession
@@ -40,6 +41,7 @@ public:
     uint64 GetGuid(void) { return _myGUID; }
     Channel *GetChannels(void) { return _channels; }
     MyCharacter *GetMyChar(void) { ASSERT(_myGUID > 0); return (MyCharacter*)objmgr.GetObj(_myGUID); }
+    World *GetWorld(void) { return _world; }
 
 
     // CMSGConstructor
@@ -88,6 +90,7 @@ private:
     void _HandleEmoteOpcode(WorldPacket& recvPacket);
     void _HandleTextEmoteOpcode(WorldPacket& recvPacket);
     void _HandleNewWorldOpcode(WorldPacket& recvPacket);
+    void _HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket);
 
 	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
     void _ValuesUpdate(uint64 uguid, WorldPacket& recvPacket); // ...
@@ -102,6 +105,7 @@ private:
     SocketHandler _sh; // handles the WorldSocket
     Channel *_channels;
     uint64 _myGUID;
+    World *_world;
 };
 
 #endif

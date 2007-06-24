@@ -108,3 +108,8 @@ rmcontrolport=8101
 // IP or hostname that is allowed to connect. leave blank to allow connections from everywhere (dangerous!)
 rmcontrolhost=localhost
 
+// if you have exported and copied data from your original client,
+// set this to 1 to enable movement and everything map related.
+// PseuWoW will need more memory with maps enabled!
+useMaps=0
+

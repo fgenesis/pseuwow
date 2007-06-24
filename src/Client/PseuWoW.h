@@ -52,6 +52,7 @@ class PseuInstanceConf
     bool disablespellcheck;
     uint32 rmcontrolport;
     std::string rmcontrolhost;
+    bool useMaps;
 
     // gui related
     bool enablegui;

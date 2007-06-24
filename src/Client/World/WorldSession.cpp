@@ -8,6 +8,8 @@
 #include "WorldSocket.h"
 #include "RealmSocket.h"
 #include "Channel.h"
+#include "ObjMgr.h"
+#include "World.h"
 #include "RealmSession.h"
 #include "WorldSession.h"
 
@@ -27,6 +29,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _socket=NULL;
     _myGUID=0; // i dont have a guid yet
     _channels = new Channel(this);
+    _world = NULL;
     _sh.SetAutoCloseSockets(false);
     //...
 }
@@ -45,6 +48,8 @@ WorldSession::~WorldSession()
         delete _channels;
     if(_socket)
         delete _socket;
+    if(_world)
+        delete _world;
 }
 
 void WorldSession::Start(void)
@@ -156,7 +161,9 @@ void WorldSession::Update(void)
 	}
 
     _DoTimedActions();
-    
+
+    if(_world)
+        _world->Update();   
 }
 
 
@@ -206,6 +213,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_EMOTE, &WorldSession::_HandleEmoteOpcode},
         {SMSG_TEXT_EMOTE, &WorldSession::_HandleTextEmoteOpcode},
         {SMSG_NEW_WORLD, &WorldSession::_HandleNewWorldOpcode},
+        {SMSG_LOGIN_VERIFY_WORLD, &WorldSession::_HandleLoginVerifyWorldOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -353,7 +361,6 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
 	}
 	bool char_found=false;
-	int playerNum = 0;
 
 	for(unsigned int i=0;i<num;i++){
         logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Zone: %s",
@@ -375,7 +382,6 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 			char_found=true;
 			_myGUID=plr[i]._guid;
             GetInstance()->GetScripts()->variables.Set("@myrace",toString(plr[i]._race));
-			playerNum = i;
 		}
 
 	}
@@ -390,8 +396,10 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         my->Create(_myGUID);
         objmgr.Add(my);
 
-		WorldPacket pkt;
-        pkt.SetOpcode(CMSG_PLAYER_LOGIN);
+        // TODO: initialize the world here, and load required maps.
+        // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!
+
+		WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
 		pkt << _myGUID;
 		SendWorldPacket(pkt);
 	}
@@ -644,6 +652,8 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 	response << uint32(0) << (uint32)getMSTime(); // no flags; time correct?
     response << x << y << z << o << uint32(0);
 	SendWorldPacket(response);
+    if(_world)
+        _world->UpdatePos(x,y);
 }
 
 void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
@@ -655,7 +665,11 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     // recvPacket >> tmapid >> tx >> ty >> tz >> to;
     recvPacket >> mapid >> x >> y >> z >> o;
     GetMyChar()->ClearSpells(); // will be resent by server
-    // clear action buttons
+    // TODO: clear action buttons
+    if(_world)
+        delete _world;
+    _world = new World(this);
+    _world->UpdatePos(x,y,mapid);
 }
 
 void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
@@ -835,4 +849,20 @@ void WorldSession::_HandleTextEmoteOpcode(WorldPacket& recvPacket)
     }
 
 }
+
+void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
+{
+    float x,y,z,o;
+    uint32 m;
+    recvPacket >> m >> x >> y >> z >> o;
+    // for now, init the world as soon as the server confirmed that we are where we are.
+    logdebug("LoginVerifyWorld: map=%u x=%f y=%f z=%f o=%f",m,x,y,z,o);
+    if(_world)
+        delete _world;
+    _world = new World(this);
+    _world->UpdatePos(x,y,m);
+}
+
+
+// TODO: delete world on LogoutComplete once implemented
 

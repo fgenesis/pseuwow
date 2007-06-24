@@ -1,6 +1,8 @@
 #ifndef MAPTILE_H
 #define MAPTILE_H
 
+#include <bitset>
+
 #include "WDTFile.h"
 #include "ADTFile.h"
 
@@ -42,12 +44,27 @@ private:
 class MapTileStorage
 {
 public:
+    inline MapTileStorage()
+    {
+        memset(_tiles,0,sizeof(MapTile*)*4096);
+    }
+    inline ~MapTileStorage()
+    {
+        for(uint32 i=0; i<4096; i++)
+            UnloadMapTile(i);
+    }
     inline void ImportTileMap(WDTFile* w)
     {
+        _hasTile.reset();
         for(uint32 i=0; i<64; i++)
+        {
             for(uint32 j=0; j<64; j++)
+            {
                 if(w->_main.tiles[i*64 + j])
-                    _hasTile[i] &= (1 << j);
+                    _hasTile[i*64 + j] = true;
+            }
+
+        }
     }
     inline void SetTile(MapTile* tile, uint32 x, uint32 y) { SetTile(tile, y*64 + x); }
     inline void SetTile(MapTile* tile, uint32 pos)
@@ -57,22 +74,26 @@ public:
     inline void UnloadMapTile(uint32 x, uint32 y) { UnloadMapTile(y*64 + x); }
     inline void UnloadMapTile(uint32 pos)
     {
-        delete _tiles[pos];
-        _tiles[pos] = NULL;
+        if(_tiles[pos])
+        {
+            delete _tiles[pos];
+            _tiles[pos] = NULL;
+        }
     }
-    inline void TileExists(uint32 x, uint32 y) { TileExists(y*64 + x); }
+    inline bool TileExists(uint32 x, uint32 y) { return TileExists(y*64 + x); }
     inline bool TileExists(uint32 pos)
     {
-        return _hasTile[pos/64] & (1<<(pos%64));
+        return _hasTile[pos];
     }
-    inline MapTile *GetTile(uint32 x, uint32 y) { GetTile(y*64 + x); }
+    inline MapTile *GetTile(uint32 x, uint32 y) { return GetTile(y*64 + x); }
     inline MapTile *GetTile(uint32 pos)
     {
         return _tiles[pos];
     }
+    void _DebugDump(void);
 private:
     MapTile *_tiles[4096]; //64x64
-    uint64 _hasTile[64]; //64 x 64 bits, this saves some mem compared to bluzz format
+    std::bitset<4096> _hasTile;
 };
 
 

@@ -243,6 +243,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                     DeleteScript(curScript->GetName());
                 sn = stringToLower(value);
                 _UpdateOrCreateScriptByName(sn);
+                _DEFSC_DEBUG(printf("DefScript: now loading '%s'\n",sn.c_str()));
                 curScript=Script[sn];
             }
             else if(line=="debug")
