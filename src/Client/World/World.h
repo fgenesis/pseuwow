@@ -11,18 +11,19 @@ public:
     World(WorldSession*);
     ~World();
 
-    uint32 GetMapId(void) { return _mapId; }
-    WorldSession *GetSession(void) { return _session; }
+    inline uint32 GetMapId(void) { return _mapId; }
+    inline WorldSession *GetSession(void) { return _session; }
     void Update(void);
     void UpdatePos(float,float,uint32);
     void UpdatePos(float,float);
-    //GetPosZ(float x, float y);
+    inline float GetPosZ(float x, float y);
 
 private:
     WorldSession *_session;
     MapMgr *_mapmgr;
     uint32 _mapId;
     float _x,_y;
+    float _lastx,_lasty;
 
 };
 

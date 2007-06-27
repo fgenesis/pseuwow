@@ -1,5 +1,6 @@
 #include "common.h"
 #include "MapTile.h"
+#include "log.h"
 
 
 MapTile::MapTile()
@@ -23,9 +24,9 @@ void MapTile::ImportFromADT(ADTFile *adt)
     // import the height map
     for(uint32 ch=0; ch<CHUNKS_PER_TILE; ch++)
     {
-        _chunks[ch].xbase = adt->_chunks[ch].hdr.xbase;
-        _chunks[ch].ybase = adt->_chunks[ch].hdr.ybase;
-        _chunks[ch].zbase = adt->_chunks[ch].hdr.zbase;
+        _chunks[ch].basex = adt->_chunks[ch].hdr.zbase; // ADT files store (x/z) as ground coords and (y) as the height!
+        _chunks[ch].basey = adt->_chunks[ch].hdr.xbase; // here converting it to (x/y) on ground and basehight as actual height.
+        _chunks[ch].baseheight = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
         uint32 fcnt=0, rcnt=0;
         while(true) //9*9 + 8*8
         {
@@ -45,7 +46,6 @@ void MapTile::ImportFromADT(ADTFile *adt)
     }
 }
 
-// seems to be somewhat buggy... wtf?
 void MapTileStorage::_DebugDump(void)
 {
     std::string out;
@@ -60,4 +60,36 @@ void MapTileStorage::_DebugDump(void)
     }
     printf("MAP TILE MAP DEBUG DUMP, 64x64 TILES:\n");
     printf(out.c_str());
+}
+
+// get approx Z position for world position (x,y).
+// TODO: use inner vertices also
+// TODO: interpolate values instead of choosing closest vertex
+// formula taken from BoogieBot, thx!
+float MapTile::GetZ(float x, float y)
+{
+    float bx,by;
+    bx = _chunks[0].basex; // world base coords of tile
+    by = _chunks[0].basey;
+    uint32 chx = (uint32)fabs((bx - x) / CHUNKSIZE); // get chunk id for given coords
+    uint32 chy = (uint32)fabs((by - y) / CHUNKSIZE);
+    if( chx > 15 || chy > 15)
+    {
+        logerror("MapTile::GetZ() wrong chunk indexes (%d, %d) for (%f, %f)",chx,chy,x,y);
+        logerror(" - These coords are NOT on this tile!");
+        return 0;
+    }
+    MapChunk& ch = _chunks[chy*16 + chx];
+    uint32 vx,vy; // get vertex position (0,0) ... (8,8);
+    vx = (uint32)floor(fabs(ch.basex - x / UNITSIZE) + 0.5f);
+    vy = (uint32)floor(fabs(ch.basey - x / UNITSIZE) + 0.5f);
+    if(vx > 8 || vy > 8)
+    {
+        logerror("MapTile::GetZ() wrong vertex indexes (%d, %d) for chunk (%d, %d) for (%f, %f)",vx,vy,chx,chy,x,y);
+        return 0;
+    }
+
+    float real_z = ch.hmap_rough[vy*9 + vx] + ch.baseheight;
+
+    return real_z;
 }

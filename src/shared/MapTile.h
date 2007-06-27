@@ -17,7 +17,7 @@ class MapChunk
 public:
     float hmap_rough[9*9];
     float hmap_fine[8*8];
-    float xbase,ybase,zbase;
+    float basex,basey,baseheight;
     //... TODO: implement the rest of this
 };
 
@@ -29,6 +29,7 @@ public:
     MapTile();
     ~MapTile();
     void ImportFromADT(ADTFile*);
+    float GetZ(float,float);
 
 private:
     MapChunk _chunks[256]; // 16x16
@@ -91,6 +92,7 @@ public:
         return _tiles[pos];
     }
     void _DebugDump(void);
+
 private:
     MapTile *_tiles[4096]; //64x64
     std::bitset<4096> _hasTile;

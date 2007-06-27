@@ -69,6 +69,7 @@ PseuInstance::~PseuInstance()
     if(_cli)
     {
         _cli->stop();
+        // delete _cli; // ok this is a little mem leak... can be fixed sometime in future
     }
 
     if(_rmcontrol)
