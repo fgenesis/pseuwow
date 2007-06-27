@@ -10,6 +10,7 @@ public:
     ~MapMgr();
     void Update(float,float,uint32);
     void Flush(void);
+    float GetZ(float,float);
 
 private:
     MapTileStorage *_tiles;

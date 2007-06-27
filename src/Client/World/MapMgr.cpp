@@ -115,4 +115,21 @@ void MapMgr::_UnloadOldTiles(void)
     }
 }
 
+float MapMgr::GetZ(float x, float y)
+{
+    uint32 xg,yg; // MapTile IDs. Range 0..64
+    xg = (uint32)( (ZEROPOINT - x) / TILESIZE);
+    yg = (uint32)( (ZEROPOINT - y) / TILESIZE);
+    MapTile *tile = _tiles->GetTile(xg,yg);
+    if(tile)
+    {
+        return tile->GetZ(x,y);
+    }
+
+    logerror("MapMgr::GetZ() called for not loaded MapTile (%u, %u) for (%f, %f)",xg,yg,x,y);
+    return 0;
+}
+
+
+
  
