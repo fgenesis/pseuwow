@@ -31,7 +31,7 @@ public:
     void ImportFromADT(ADTFile*);
     float GetZ(float,float);
 
-#ifndef _DEBUG
+#ifdef _DEBUG
     void DebugDumpToFile(void);
 #endif
 

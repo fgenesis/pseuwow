@@ -123,7 +123,7 @@ float MapMgr::GetZ(float x, float y)
     MapTile *tile = _tiles->GetTile(xg,yg);
     if(tile)
     {
-#ifndef _DEBUG
+#ifdef _DEBUG
         tile->DebugDumpToFile();
         logdebug("DEBUG: tile dumped");
 #endif

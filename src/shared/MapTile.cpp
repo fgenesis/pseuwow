@@ -93,7 +93,7 @@ float MapTile::GetZ(float x, float y)
 
     return real_z;
 }
-#ifndef _DEBUG
+#ifdef _DEBUG
 void MapTile::DebugDumpToFile(void)
 {
     const char *f = "0123456789abcdefghijklmnopqrstuvwxyz";
