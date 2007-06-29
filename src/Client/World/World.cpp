@@ -26,7 +26,7 @@ void World::Update(void)
     }
 
     // some debug code for testing...
-    if(_mapmgr && _x != _lastx && _y != _lasty)
+    if(_mapmgr && _x != _lastx || _y != _lasty)
     {
         logdetail("WORLD: relocation, to x=%f y=%f, calculated z=%f",_x,_y,this->GetPosZ(_x,_y));
         _lastx = _x;

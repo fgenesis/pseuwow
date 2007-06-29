@@ -24,9 +24,9 @@ void MapTile::ImportFromADT(ADTFile *adt)
     // import the height map
     for(uint32 ch=0; ch<CHUNKS_PER_TILE; ch++)
     {
-        _chunks[ch].basex = adt->_chunks[ch].hdr.zbase; // ADT files store (x/z) as ground coords and (y) as the height!
+        _chunks[ch].baseheight = adt->_chunks[ch].hdr.zbase; // ADT files store (x/z) as ground coords and (y) as the height!
         _chunks[ch].basey = adt->_chunks[ch].hdr.xbase; // here converting it to (x/y) on ground and basehight as actual height.
-        _chunks[ch].baseheight = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
+        _chunks[ch].basex = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
         uint32 fcnt=0, rcnt=0;
         while(true) //9*9 + 8*8
         {
@@ -81,8 +81,8 @@ float MapTile::GetZ(float x, float y)
     }
     MapChunk& ch = _chunks[chy*16 + chx];
     uint32 vx,vy; // get vertex position (0,0) ... (8,8);
-    vx = (uint32)floor(fabs(ch.basex - x / UNITSIZE) + 0.5f);
-    vy = (uint32)floor(fabs(ch.basey - x / UNITSIZE) + 0.5f);
+    vx = (uint32)floor((fabs(ch.basex - x) / UNITSIZE) + 0.5f);
+    vy = (uint32)floor((fabs(ch.basey - y) / UNITSIZE) + 0.5f);
     if(vx > 8 || vy > 8)
     {
         logerror("MapTile::GetZ() wrong vertex indexes (%d, %d) for chunk (%d, %d) for (%f, %f)",vx,vy,chx,chy,x,y);
@@ -93,3 +93,40 @@ float MapTile::GetZ(float x, float y)
 
     return real_z;
 }
+#ifndef _DEBUG
+void MapTile::DebugDumpToFile(void)
+{
+    const char *f = "0123456789abcdefghijklmnopqrstuvwxyz";
+    float z;
+    uint32 p;
+    std::string out;
+    for(uint32 cy=0;cy<16;cy++)
+    {
+        for(uint32 vy=0;vy<9;vy++)
+        {
+            for(uint32 cx=0;cx<16;cx++)
+            {
+                for(uint32 vx=0;vx<9;vx++)
+                {
+                    z = _chunks[cy*16 + cx].hmap_rough[vy*9 + vx] + _chunks[cy*16 + cx].baseheight;
+                    p = (uint32)z;
+                    uint32 pos = 17 + (p/10);
+                    if(pos > strlen(f)-1)
+                        pos=strlen(f)-1;
+                    char c = f[pos];
+                    out += c;
+                }
+            }
+            out += "\n";
+        }
+    }
+    FILE *fh;
+    fh = fopen("map_dump.txt","w");
+    fprintf(fh, out.c_str());
+    fclose(fh);
+}
+#endif
+
+
+
+
