@@ -1,0 +1,48 @@
+2007-06-06 11:25:28 
+
+2007-06-06 11:25:28 --- Initializing Instance ---
+2007-06-06 11:25:28 Loading DefScripts from folder './scripts/'
+2007-06-06 11:25:28 Error executing '_startup.def'
+2007-06-06 11:25:28 Errors while initializing!
+2007-06-06 11:26:03 
+
+2007-06-06 11:26:03 --- Initializing Instance ---
+2007-06-06 11:26:03 Loading DefScripts from folder './scripts/'
+2007-06-06 11:26:03 Error executing '_startup.def'
+2007-06-06 11:26:03 Errors while initializing!
+2007-06-06 11:26:31 
+
+2007-06-06 11:26:31 --- Initializing Instance ---
+2007-06-06 11:26:31 Loading DefScripts from folder './scripts/'
+2007-06-06 11:26:31 Error executing '_startup.def'
+2007-06-06 11:26:31 Errors while initializing!
+2007-06-06 11:27:01 
+
+2007-06-06 11:27:01 --- Initializing Instance ---
+2007-06-06 11:27:01 Loading DefScripts from folder './scripts/'
+2007-06-06 11:27:01 Error executing '_startup.def'
+2007-06-06 11:27:01 Errors while initializing!
+2007-06-06 11:28:07 
+
+2007-06-06 11:28:07 --- Initializing Instance ---
+2007-06-06 11:28:07 Loading DefScripts from folder './scripts/'
+2007-06-06 11:28:07 Error executing '_startup.def'
+2007-06-06 11:28:07 Errors while initializing!
+2007-06-06 11:28:39 
+
+2007-06-06 11:28:39 --- Initializing Instance ---
+2007-06-06 11:28:39 Loading DefScripts from folder './scripts/'
+2007-06-06 11:28:39 Error executing '_startup.def'
+2007-06-06 11:28:39 Errors while initializing!
+2007-06-06 11:30:01 
+
+2007-06-06 11:30:01 --- Initializing Instance ---
+2007-06-06 11:30:01 Loading DefScripts from folder './scripts/'
+2007-06-06 11:30:01 Error executing '_startup.def'
+2007-06-06 11:30:01 Errors while initializing!
+2007-06-06 11:30:34 
+
+2007-06-06 11:30:34 --- Initializing Instance ---
+2007-06-06 11:30:34 Loading DefScripts from folder './scripts/'
+2007-06-06 11:30:34 Error executing '_startup.def'
+2007-06-06 11:30:34 Errors while initializing!
