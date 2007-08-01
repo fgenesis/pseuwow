@@ -7,12 +7,16 @@
 #include "Item.h"
 
 typedef std::vector<ItemProto*> ItemProtoList;
-typedef std::list<Object*> ObjectList;
+typedef std::map<uint64,Object*> ObjectMap;
+
+class PseuInstance;
 
 class ObjMgr
 {
 public:
+    ObjMgr();
     ~ObjMgr();
+    void SetInstance(PseuInstance*);
     void RemoveAll(void); // TODO: this needs to be called on SMSG_LOGOUT_COMPLETE once implemented.
 
     // Item Prototype functions
@@ -29,11 +33,13 @@ public:
     void Add(Object*);
     void Remove(uint64); // remove all objects with that guid (should be only 1 object in total anyway)
     Object *GetObj(uint64 guid);
+    inline uint32 GetObjectCount(void) { return _obj.size(); }
 
 private:
     ItemProtoList _iproto;
-    ObjectList _obj;
+    ObjectMap _obj;
     std::vector<uint32> _noitem;
+    PseuInstance *_instance;
 
 };
 

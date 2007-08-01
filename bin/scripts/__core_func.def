@@ -1,12 +1,11 @@
 // core functions. required by other scripts to run!
 #onload
-	log * Loading core scripts...
+        log * Loading core scripts...
 #/onload
 
 
 //--------------------------------------------------------
 #script=append
-#permission=255
 //--------------------------------------------------------
 // usage: append text to a string.
 // args:
@@ -28,9 +27,9 @@ UNSET v
 #permission=255
 //--------------------------------------------------------
 if ?{fileexists ${@def}}
-	loadscp,{${@0}} ${@def}
+        loadscp,{${@0}} ${@def}
 else
-	logdebug skipped loading of non-existent file '${@def}'
+        logdebug skipped loading of non-existent file '${@def}'
 endif
 
 
@@ -53,13 +52,13 @@ LOADSCP,race data/scp/race.scp
 // load extended databases if present.
 EXLOADSCP,sound data/scp/sound.scp
 EXLOADSCP,emote data/scp/emote.scp
+EXLOADSCP,area data/scp/area.scp
 
 LOG * SCP loaded.
 
 
 //-------------------------------------------------
 #script=string_is_command
-#permission=255
 //-------------------------------------------------
 // purpose: detect if @def might be a server command.
 
@@ -71,8 +70,8 @@ SET,c ?{SUBSTR,1 ${@def}}
 
 // does the char list contain our first char? if yes it can trigger a server command.
 if ?{lcontains,#CMDCHARLIST ${c}}
-	unset c
-	return true
+        unset c
+        return true
 endif
 unset c
 return false
@@ -80,7 +79,6 @@ return false
 
 //--------------------------------------------------------
 #script=normalize_name
-#permission=255
 //--------------------------------------------------------
 // uppercases first char, lowercases rest
 set,name ?{uppercase ?{substr,1 ${@def}}}
@@ -91,14 +89,13 @@ return ${name}
 
 //---------------------------------------------------------
 #script=globname
-#permission=255
 //---------------------------------------------------------
 // purpose: returns the global name of a variable
 // args: @def: var name, @0 (optional): name of the intended parent func
 set,c ?{substr,1 ${@def}}
 // it is a global var if the varname starts with # or there is no caller script
 if ?{or,?{equal,# ${c}} ?{not ${@caller}}}
-	return ${@def}
+        return ${@def}
 endif
 set,top ${@0}
 default,top ${@caller}
@@ -107,7 +104,6 @@ return #${top}::${@def}
 
 //---------------------------------------------------------
 #script=getvar
-#permission=255
 //---------------------------------------------------------
 // purpose: returns the value of a variable. if the variable hasnt been set return empty string.
 set,top ${@caller}
@@ -116,8 +112,30 @@ set,v ?{globname,${top} ${@def}}
 unset top
 out getvar: v=${v} -> ${${v}}
 if ?{isset ${v}}
-	return ${${v}}
+        return ${${v}}
 endif
 return
+
+//---------------------------------------------------------
+#script=reverse
+//---------------------------------------------------------
+// purpose: reverse a srtring
+// args: @def: string to reverse
+// returns: reversed string
+
+set,outstr
+set,elems ?{lsplit,mylist ${@def}}
+set,i ${elems}
+loop
+    sub,i 1
+    if ?{equal,${i} -1}
+        exitloop
+    endif
+    append,outstr ?{lindex,mylist ${i}}
+endloop
+ldelete mylist
+return ${outstr}
+
+
 
 

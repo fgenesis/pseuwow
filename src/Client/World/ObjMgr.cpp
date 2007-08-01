@@ -1,8 +1,23 @@
+#include "common.h"
+#include "log.h"
+#include "PseuWoW.h"
 #include "ObjMgr.h"
+#include "GUI/PseuGUI.h"
+
+ObjMgr::ObjMgr()
+{
+    DEBUG(logdebug("DEBUG: ObjMgr created"));
+}
 
 ObjMgr::~ObjMgr()
 {
     RemoveAll();
+}
+
+void ObjMgr::SetInstance(PseuInstance *i)
+{
+    _instance = i;
+    DEBUG(logdebug("DEBUG: ObjMgr instance set to 0x%X",i));
 }
 
 void ObjMgr::RemoveAll(void)
@@ -11,36 +26,41 @@ void ObjMgr::RemoveAll(void)
     {
         delete *i;
     }
-    for(ObjectList::iterator i = _obj.begin(); i!=_obj.end(); i++)
+    while(_obj.size())
     {
-        delete *i;
+        Remove(_obj.begin()->first);
     }
 }
 
 void ObjMgr::Remove(uint64 guid)
 {
-    for(ObjectList::iterator i = _obj.begin(); i!=_obj.end(); i++)
-        if((*i)->GetGUID() == guid)
-        {
-            delete *i;
-            _obj.erase(i);
-            return;
-        }
-
+    Object *o = GetObj(guid);
+    if(o) 
+    {
+        PseuGUI *gui = _instance->GetGUI();
+        if(gui)
+            gui->NotifyObjectDeletion(guid); // we have a gui, which must delete linked DrawObject
+        _obj.erase(guid); // now delete the obj from the mgr
+        delete o; // and delete the obj itself
+    }
 }
 
 void ObjMgr::Add(Object *o)
 {
-    _obj.push_back(o);
+    _obj[o->GetGUID()] = o;
+
+    PseuGUI *gui = _instance->GetGUI();
+    if(gui)
+        gui->NotifyObjectCreation(o);
 }
 
 Object *ObjMgr::GetObj(uint64 guid)
 {
     if(!guid)
         return NULL;
-    for(ObjectList::iterator i = _obj.begin(); i!=_obj.end(); i++)
-        if((*i)->GetGUID() == guid)
-            return (*i);
+    for(ObjectMap::iterator i = _obj.begin(); i!=_obj.end(); i++)
+        if(i->second->GetGUID() == guid)
+            return i->second;
     return NULL;
 }
 

@@ -94,7 +94,7 @@ DefReturnResult DefScriptPackage::SCsavecache(CmdSet& Set){
         str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProtoCount();
         str << " Item Prototypes";
         str << " ]";
-        
+
         ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str.str(),"");
     }
     return true;
@@ -135,7 +135,7 @@ DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){
 DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set)
 {
     DEF_RETURN_ERROR; // prevent execution for now
-	/*
+        /*
     WorldSession *ws=((PseuInstance*)parentMethod)->GetWSession();
     if(Set.defaultarg.empty()){
         ws->SendChatMessage(CHAT_MSG_SAY,0,"Stopping! (Please give me a Playername to follow!)","");
@@ -149,7 +149,7 @@ DefReturnResult DefScriptPackage::SCfollow(CmdSet& Set)
     else
         ss << "Can't follow player '"<<Set.defaultarg<<"' (not known)";
     ws->SendChatMessage(CHAT_MSG_SAY,0,ss.str(),"");
-	*/
+        */
     return true;
 
 }
@@ -228,23 +228,23 @@ DefReturnResult DefScriptPackage::SClogerror(CmdSet& Set){
 
 DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
 {
-	if(Set.defaultarg.empty())
-		return false;
-	if(!(((PseuInstance*)parentMethod)->GetWSession()))
-	{
-		logerror("Invalid Script call: SCcastspell: WorldSession not valid");
-		DEF_RETURN_ERROR;
-	}
+        if(Set.defaultarg.empty())
+                return false;
+        if(!(((PseuInstance*)parentMethod)->GetWSession()))
+        {
+                logerror("Invalid Script call: SCcastspell: WorldSession not valid");
+                DEF_RETURN_ERROR;
+        }
 
-	uint32 spellId = atoi(Set.defaultarg.c_str());
+        uint32 spellId = atoi(Set.defaultarg.c_str());
 
-	if (spellId <= 0)
-	{
-		return false;
-	}
+        if (spellId <= 0)
+        {
+                return false;
+        }
 
-	((PseuInstance*)parentMethod)->GetWSession()->SendCastSpell(spellId);
-	return true;
+        ((PseuInstance*)parentMethod)->GetWSession()->SendCastSpell(spellId);
+        return true;
 }
 
 DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set){
@@ -297,22 +297,32 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
 {
-    DefReturnResult r;
-    if(Set.arg[0].empty() || Set.defaultarg.empty())
+    SCPDatabaseMgr& dbmgr = ((PseuInstance*)parentMethod)->dbmgr;
+    if(Set.defaultarg.empty()) // exit if no filename was given
         return false;
     std::string dbname = stringToLower(Set.arg[0]);
-    // TODO: remove db if loading was not successful
-    uint32 sections=((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).LoadFromFile((char*)Set.defaultarg.c_str());
-    if(sections)
+    uint32 sections = 0;
+    if(dbname.empty()) // if no db name was supplied, try to find it automatically in the file ("#dbname=...")
     {
-        logdetail("Loaded SCP: \"%s\" [%s] (%u sections)",dbname.c_str(),Set.defaultarg.c_str(),sections);
+        sections = dbmgr.AutoLoadFile((char*)Set.defaultarg.c_str());
+        if(!sections)
+        {
+            logerror("Tried to auto-load SCP file: \"%s\", but no name tag found. skipped.");
+        }
     }
     else
     {
-        logerror("Failed to load SCP: \"%s\" [%s]",dbname.c_str(),Set.defaultarg.c_str());
+        sections = dbmgr.GetDB(dbname).LoadFromFile((char*)Set.defaultarg.c_str());
+        if(sections)
+        {
+            logdetail("Loaded SCP: \"%s\" [%s] (%u sections)",dbname.c_str(),Set.defaultarg.c_str(),sections);
+        }
+        else
+        {
+            logerror("Failed to load SCP: \"%s\" [%s]",dbname.c_str(),Set.defaultarg.c_str());
+        }
     }
-    r.ret=toString((uint64)sections);
-    return r;
+    return toString((uint64)sections);;
 }
 
 DefReturnResult DefScriptPackage::SCScpExists(CmdSet& Set)
@@ -519,10 +529,10 @@ DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
         uint32 tmp=0;
         if(t=="class")     r.ret=toString(proto->Class);
         else if(t=="subclass")  r.ret=toString(proto->SubClass);
-        else if(t=="name1" || t=="name") proto->Name[0];
-        else if(t=="name2") proto->Name[1];
-        else if(t=="name3") proto->Name[2];
-        else if(t=="name4") proto->Name[3];
+        else if(t=="name1" || t=="name") r.ret=proto->Name[0];
+        else if(t=="name2") r.ret=proto->Name[1];
+        else if(t=="name3") r.ret=proto->Name[2];
+        else if(t=="name4") r.ret=proto->Name[3];
         else if(t=="model" || t=="displayid")  r.ret=toString(proto->DisplayInfoID);
         else if(t=="quality")  r.ret=toString(proto->Quality);
         else if(t=="flags")  r.ret=toString(proto->Flags);
@@ -756,7 +766,7 @@ void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
     {
         sub = variables[i].name.substr(0,strlen(prefix));
         if(sub == prefix)
-        {   
+        {
             usr = variables[i].name.substr(strlen(prefix), variables[i].name.length() - strlen(prefix));
             my_usrPermissionMap[usr] = atoi(variables[i].value.c_str());
             DEBUG( logdebug("Player '%s' permission = %u",usr.c_str(),atoi(variables[i].value.c_str())); )
@@ -766,7 +776,7 @@ void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 
 void DefScriptPackage::My_Run(std::string line, std::string username)
 {
-    uint8 scperm=255; // builtin functions that have no explicit req. permission level assigned should be secure from beeing called
+    int16 scperm = -1; // builtin functions that have no explicit req. permission level assigned should be secure from beeing called from ingame
     uint8 usrperm=0; // users/players that have no explicit permission assigned should have minimal permission
 
     for (std::map<std::string,unsigned char>::iterator i = my_usrPermissionMap.begin(); i != my_usrPermissionMap.end(); i++)
@@ -778,16 +788,15 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
     }
 
     DefXChgResult final;
-    if(usrperm < 255)
+    if(usrperm < 255 && line.find("?{")!=std::string::npos)
     {
-        if(line.find("?{")!=std::string::npos)
-            logerror("WARNING: %s wanted to exec \"%s\"",username.c_str(),line.c_str());
+        logerror("WARNING: %s wanted to exec \"%s\"",username.c_str(),line.c_str());
         final=ReplaceVars(line,NULL,0,false); // prevent execution of embedded scripts (= using return values) that could trigger dangerous stuff.
     }
     else
         final=ReplaceVars(line,NULL,0,true); // exec as usual
 
-    
+
     CmdSet curSet;
     SplitLine(curSet,final.str);
 
@@ -799,16 +808,21 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
         }
     }
 
-    if(usrperm < scperm)
+
+    if(scperm > 0) // skip "invisible" scripts (without any permission set) completely.
     {
-        CmdSet Set;
-        Set.arg[0] = username;
-        Set.arg[1] = toString(usrperm);
-        Set.arg[2] = toString(scperm);
-        Set.arg[3] = curSet.cmd;
-        RunScript("_nopermission",&Set);
-        return;
+        if(usrperm < scperm)
+        {
+            CmdSet Set;
+            Set.arg[0] = username;
+            Set.arg[1] = toString(usrperm);
+            Set.arg[2] = toString(scperm);
+            Set.arg[3] = curSet.cmd;
+            RunScript("_nopermission",&Set);
+            return;
+        }
     }
+
 
     Interpret(curSet);
 }

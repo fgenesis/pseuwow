@@ -1,6 +1,4 @@
-#permission=255
-
-// GETS EXECUTED IF A PLAYER TRIES TO GIVE PSEUWOW A COMMAND AND IS NOT ALLOWED TO
+// this script gets executed if a player tries to give pseuwow a command but is not allowed to
 
 // Arguments:
 // ==========

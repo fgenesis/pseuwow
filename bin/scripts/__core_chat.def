@@ -51,13 +51,13 @@ UNSET msg
 //-----------------------------------------------------------
 // is the char equal to the char we use for commands? does the player have a permission lvl below 255?
 IF ?{AND,?{string_is_command ${@def}} ?{SMALLER,?{GETPLAYERPERM ${@thiscmd_name}} 255}}
-	// yes: say a warning and the command the player wanted to use
-	SAY ${@thiscmd_name}: no permission to use commands [${@def}]
-	RETURN false
+        // yes: say a warning and the command the player wanted to use
+        SAY ${@thiscmd_name}: no permission to use commands [${@def}]
+        RETURN false
 ELSE
-	// no: say the text as usual.
-	SAY,{${@0}} ${@def}
-	RETURN true
+        // no: say the text as usual.
+        SAY,{${@0}} ${@def}
+        RETURN true
 ENDIF
 
 
@@ -140,10 +140,10 @@ SET,vl ${@0}
 DEFAULT,vl 0
 
 IF ?{NOT ?{ISSET ${vn}}}
-	SAY,{${vl}} * Var '${@def}' not defined.
+        SAY,{${vl}} * Var '${@def}' not defined.
 ELSE
-	SET,vv ${${vn}}
-	SAY,{${vl}} * Var '${@def}' = '${vv}'
+        SET,vv ${${vn}}
+        SAY,{${vl}} * Var '${@def}' = '${vv}'
 ENDIF
 
 UNSET vv
@@ -200,11 +200,30 @@ UNSET msg
 //-----------------------------------------------------------
 // is the char equal to the char we use for commands? does the player have a permission lvl below 255?
 IF ?{AND,?{string_is_command ${@def}} ?{SMALLER,?{GETPLAYERPERM ${@thiscmd_name}} 255}}
-	// yes: say a warning and the command the player wanted to use
-	YELL ${@thiscmd_name}: no permission to use commands [${@def}]
-	RETURN false
+        // yes: say a warning and the command the player wanted to use
+        YELL ${@thiscmd_name}: no permission to use commands [${@def}]
+        RETURN false
 ELSE
-	// no: say the text as usual.
-	YELL,{${@0}} ${@def}
-	RETURN true
+        // no: say the text as usual.
+        YELL,{${@0}} ${@def}
+        RETURN true
 ENDIF
+
+
+//----------------------------------------------------------
+#script=me
+#permission=0
+//----------------------------------------------------------
+// Send text emote. example: "me feels lolo" will result in "Pseuwow feels lolo" at other clients
+SET,lang ${@0}
+SET,msg ${@def}
+
+DEFAULT,#DEFAULTLANG ?{GETSCPVALUE,race,{${@myrace}} faction}
+DEFAULT,lang ${#DEFAULTLANG}
+
+LOGDEBUG * Me ${msg} (in lang ${lang})
+
+SENDCHATMESSAGE,8,${lang},{${msg}}
+UNSET lang
+UNSET msg
+

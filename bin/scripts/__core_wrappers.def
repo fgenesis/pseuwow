@@ -2,6 +2,7 @@
 
 //------------------------------------------------
 #script=gc
+#permission=0
 //------------------------------------------------
 // example script to write into channel "generalchat"
 // usage: "gc bla bla..."

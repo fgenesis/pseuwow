@@ -22,26 +22,21 @@ void CliRunnable::run(void)
         if (in == NULL)
             return;
         for(int i=0;in[i];i++)
-        if(in[i]=='\r'||in[i]=='\n')
-        {
-            in[i]=0;
-            break;
-        } 
+            if(in[i]=='\r'||in[i]=='\n')
+            {
+                in[i]=0;
+                break;
+            }
         if(in[0]==0)
             continue;
         if(in[0]=='!')
             cur = &in[1];
         else
         {
-            try 
-            {
-                out = cur.empty() ? in : (cur+" "+in);
-                _instance->GetScripts()->RunSingleLine(out);
-            }
-            catch (...)
-            {
-                printf("Exception while executing CLI command!\n");
-            }
+            out = cur.empty() ? in : (cur+" "+in);
+            _instance->AddCliCommand(out);
+            // add delay just if necessary
+            //ZThread::Thread::sleep(50);
         }
     }
 }

@@ -1,5 +1,3 @@
-#permission=255
-
 // EXECUTED EVERYTIME A WHISPER IS BEEING RECIEVED
 
 // comment out the following line if you dont need it

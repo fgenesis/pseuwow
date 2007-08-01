@@ -25,15 +25,15 @@ PseuInstanceRunnable::PseuInstanceRunnable()
 void PseuInstanceRunnable::run(void)
 {
     _i = new PseuInstance(this);
-	_i->SetConfDir("./conf/");
+    _i->SetConfDir("./conf/");
     _i->SetScpDir("./scripts/");
-	if(_i->Init())
+    if(_i->Init())
     {
-        _i->Run();  
+        _i->Run();
     }
     else
     {
-        getchar();
+        getchar(); // if init failed, wait for keypress before exit
     }
     delete _i;
 }
@@ -54,13 +54,14 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _conf=NULL;
     _cli=NULL;
     _rmcontrol=NULL;
+    _gui=NULL;
+    _guithread=NULL;
     _stop=false;
     _fastquit=false;
     _startrealm=true;
     _createws=false;
     _error=false;
     _initialized=false;
-
 
 }
 
@@ -71,6 +72,11 @@ PseuInstance::~PseuInstance()
         _cli->stop();
         // delete _cli; // ok this is a little mem leak... can be fixed sometime in future
     }
+
+    if(_gui)
+        _gui->Shutdown();
+    if(_guithread)
+        _guithread->wait();
 
     if(_rmcontrol)
         delete _rmcontrol;
@@ -94,14 +100,14 @@ bool PseuInstance::Init(void) {
     if(_confdir.empty())
         _confdir="./conf/";
     if(_scpdir.empty())
-        _scpdir="./scp/";
+        _scpdir="./scripts/";
 
-	srand((unsigned)time(NULL));
-	RAND_set_rand_method(RAND_SSLeay()); // init openssl randomizer
-	
-	_scp=new DefScriptPackage();
+    srand((unsigned)time(NULL));
+    RAND_set_rand_method(RAND_SSLeay()); // init openssl randomizer
+
+        _scp=new DefScriptPackage();
     _scp->SetParentMethod((void*)this);
-	_conf=new PseuInstanceConf();	
+        _conf=new PseuInstanceConf();
 
     _scp->SetPath(_scpdir);
 
@@ -138,13 +144,13 @@ bool PseuInstance::Init(void) {
         if(x>0 && y>0 && (depth==16 || depth==32) && driver>0 && driver<=5)
         {
             PseuGUIRunnable *rgui = new PseuGUIRunnable();
-            PseuGUI *gui = rgui->GetGUI();
-            gui->SetInstance(this);
-            gui->SetDriver(driver);
-            gui->SetResolution(x,y,depth);
-            gui->SetVSync(vsync);
-            gui->UseShadows(shadows);
-            ZThread::Thread *t = new ZThread::Thread(rgui);
+            _gui = rgui->GetGUI();
+            _gui->SetInstance(this);
+            _gui->SetDriver(driver);
+            _gui->SetResolution(x,y,depth);
+            _gui->SetVSync(vsync);
+            _gui->UseShadows(shadows);
+            _guithread = new ZThread::Thread(rgui);
         }
         else
             logerror("GUI: incorrect settings!");
@@ -164,13 +170,13 @@ bool PseuInstance::Init(void) {
 
     if(_error)
     {
-		logcritical("Errors while initializing!");
+        logcritical("Errors while initializing!");
         return false;
     }
 
     log("Init complete.\n");
-	_initialized=true; 
-	return true;
+    _initialized=true;
+    return true;
 }
 
 void PseuInstance::Run(void)
@@ -232,6 +238,10 @@ void PseuInstance::Run(void)
 
 void PseuInstance::Update()
 {
+    // if the user typed anything into the console, process it before anything else
+    if(_cli) // need to to process only if cli exists
+        ProcessCliQueue();
+
     // delete sessions if they are no longer needed
     if(_rsession && _rsession->MustDie())
     {
@@ -264,7 +274,7 @@ void PseuInstance::Update()
         _rsession->Connect();
         _rsession->SendLogonChallenge(); // and login again
     }
-    
+
     // update currently existing/active sessions
     if(_rsession)
         _rsession->Update();
@@ -274,7 +284,7 @@ void PseuInstance::Update()
             logerror("Unhandled exception in WorldSession::Update()");
         }
 
- 
+
     if(_rmcontrol)
     {
         _rmcontrol->Update();
@@ -288,6 +298,28 @@ void PseuInstance::Update()
     GetScripts()->GetEventMgr()->Update();
 
     this->Sleep(GetConf()->networksleeptime);
+}
+
+void PseuInstance::ProcessCliQueue(void)
+{
+    std::string cmd;
+    while(_cliQueue.size())
+    {
+        cmd = _cliQueue.next();
+        try
+        {
+            GetScripts()->RunSingleLine(cmd);
+        }
+        catch(...)
+        {
+            logerror("Exception while executing CLI command: \"%s\"",cmd.c_str());
+        }
+    }
+}
+
+void PseuInstance::AddCliCommand(std::string cmd)
+{
+    _cliQueue.add(cmd);
 }
 
 void PseuInstance::SaveAllCache(void)
@@ -306,6 +338,12 @@ void PseuInstance::Sleep(uint32 msecs)
     GetRunnable()->sleep(msecs);
 }
 
+void PseuInstance::DeleteGUI(void)
+{
+    _gui = NULL;
+    _guithread = NULL;
+}
+
 PseuInstanceConf::PseuInstanceConf()
 {
     enablecli=false;
@@ -317,22 +355,22 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 {
     debug=atoi(v.Get("DEBUG").c_str());
     realmlist=v.Get("REALMLIST");
-	accname=v.Get("ACCNAME");
-	accpass=v.Get("ACCPASS");
-	exitonerror=(bool)atoi(v.Get("EXITONERROR").c_str());
+    accname=v.Get("ACCNAME");
+    accpass=v.Get("ACCPASS");
+    exitonerror=(bool)atoi(v.Get("EXITONERROR").c_str());
     reconnect=atoi(v.Get("RECONNECT").c_str());
-	realmport=atoi(v.Get("REALMPORT").c_str());
+    realmport=atoi(v.Get("REALMPORT").c_str());
     clientversion_string=v.Get("CLIENTVERSION");
-	clientbuild=atoi(v.Get("CLIENTBUILD").c_str());
-	clientlang=v.Get("CLIENTLANGUAGE");
-	realmname=v.Get("REALMNAME");
-	charname=v.Get("CHARNAME");
-	networksleeptime=atoi(v.Get("NETWORKSLEEPTIME").c_str());
+    clientbuild=atoi(v.Get("CLIENTBUILD").c_str());
+    clientlang=v.Get("CLIENTLANGUAGE");
+    realmname=v.Get("REALMNAME");
+    charname=v.Get("CHARNAME");
+    networksleeptime=atoi(v.Get("NETWORKSLEEPTIME").c_str());
     showopcodes=atoi(v.Get("SHOWOPCODES").c_str());
-	hidefreqopcodes=(bool)atoi(v.Get("HIDEFREQOPCODES").c_str());
+    hidefreqopcodes=(bool)atoi(v.Get("HIDEFREQOPCODES").c_str());
     enablecli=(bool)atoi(v.Get("ENABLECLI").c_str());
     allowgamecmd=(bool)atoi(v.Get("ALLOWGAMECMD").c_str());
-	enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());
+    enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());
     notifyping=(bool)atoi(v.Get("NOTIFYPING").c_str());
     showmyopcodes=(bool)atoi(v.Get("SHOWMYOPCODES").c_str());
     disablespellcheck=(bool)atoi(v.Get("DISABLESPELLCHECK").c_str());
@@ -367,9 +405,9 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 
 PseuInstanceConf::~PseuInstanceConf()
 {
-	//...
+        //...
 }
 
 
-	
+
 

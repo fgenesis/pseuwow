@@ -1,5 +1,7 @@
 #include "common.h"
 #include "irrlicht/irrlicht.h"
+#include "Object.h"
+#include "DrawObject.h"
 #include "PseuWoW.h"
 #include "PseuGUI.h"
 
@@ -55,12 +57,8 @@ PseuGUI::PseuGUI()
 
 PseuGUI::~PseuGUI()
 {
-    this->Shutdown();
-}
-
-void PseuGUI::SetInstance(PseuInstance *i)
-{
-    _instance = i;
+    this->Cancel();
+    _instance->DeleteGUI(); // this makes the instance set its gui ptr to NULL
 }
 
 void PseuGUI::SetDriver(uint8 driverId)
@@ -114,15 +112,21 @@ void PseuGUI::_Init(void)
     _initialized = true;
 }
 
-void PseuGUI::Shutdown(void)
+void PseuGUI::Cancel(void)
 {
-    DEBUG(logdebug("PseuGUI::Shutdown()"));
+    DEBUG(logdebug("PseuGUI::Cancel()"));
     _mustdie = true;
     if(_device)
     {
         _device->drop();
         _device = NULL;
     }
+}
+
+void PseuGUI::Shutdown(void)
+{
+     DEBUG(logdebug("PseuGUI::Shutdown()"));
+    _mustdie = true;
 }
 
 void PseuGUI::Run(void)
@@ -140,11 +144,21 @@ void PseuGUI::Run(void)
         {
             _device->sleep(10); // save cpu & gpu power if not focused
         }
-        _driver->beginScene(true, true, 0);
 
-        _smgr->drawAll();
+        try
+        {
+            _driver->beginScene(true, true, 0);
 
-        _driver->endScene();
+            domgr.Update(); // iterate over DrawObjects, draw them and clean up
+
+            _smgr->drawAll();
+
+            _driver->endScene();
+        }
+        catch(...)
+        {
+            logerror("Unhandled exception in PseuGUI::Run() device=%X smgr=%X objects:%u", _device, _smgr, domgr.StorageSize());
+        }
 
         fps = _driver->getFPS();
 
@@ -163,7 +177,25 @@ void PseuGUI::Run(void)
 
     }
     DEBUG(logdebug("PseuGUI::Run() finished"));
-    Shutdown();
+    Cancel(); // already got shut down somehow, we can now safely cancel and drop the device
+}
+
+// called from ObjMgr::Remove(guid)
+void PseuGUI::NotifyObjectDeletion(uint64 guid)
+{
+    domgr.Delete(guid);
+}
+
+// called from ObjMgr::Add(Object*)
+void PseuGUI::NotifyObjectCreation(Object *o)
+{
+    DrawObject *d = new DrawObject(_smgr,o);
+    domgr.Add(o->GetGUID(),d);
+}
+
+void PseuGUI::SetInstance(PseuInstance* in)
+{
+    _instance = in;
 }
 
 

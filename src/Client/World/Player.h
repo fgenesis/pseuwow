@@ -200,6 +200,7 @@ class MyCharacter : public Player
 {
 public:
     MyCharacter();
+    ~MyCharacter();
 
 	void SetActionButtons(WorldPacket &data);
 	void AddSpell(uint32 spellid, uint16 spellslot);

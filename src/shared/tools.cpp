@@ -105,7 +105,7 @@ std::deque<std::string> GetFileList(std::string path)
     std::deque<std::string> files;
 
 # ifndef _WIN32 // TODO: fix this function for linux if needed
-        const char *p = path.c_str();
+    const char *p = path.c_str();
     DIR * dirp;
     struct dirent * dp;
     dirp = opendir(p);
@@ -130,15 +130,17 @@ std::deque<std::string> GetFileList(std::string path)
     HANDLE hFil=FindFirstFile(p,&fil);
     if(hFil!=INVALID_HANDLE_VALUE)
     {
-        files.push_back(std::string(fil.cFileName));
-        while(FindNextFile(hFil,&fil))
+        if( !(fil.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
             files.push_back(std::string(fil.cFileName));
+        while(FindNextFile(hFil,&fil))
+        {
+            if( !(fil.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
+                files.push_back(std::string(fil.cFileName));
+        }
     }
 
 # endif
 
-    while(files.size() && (files.front()=="." || files.front()==".."))
-        files.pop_front();
     return files;
 }
 
