@@ -146,7 +146,7 @@ bool VarSet::ReadVarsFromFile(std::string fn)
                 unsigned int pos=line.find("=");
                 if(pos!=std::string::npos)
                 {
-                    std::string v=line.substr(0,pos);;
+                    std::string v=line.substr(0,pos);
                     
                     if(upper)
                         v=toUpper(v);

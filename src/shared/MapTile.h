@@ -74,12 +74,13 @@ public:
     inline void SetTile(MapTile* tile, uint32 x, uint32 y) { SetTile(tile, y*64 + x); }
     inline void SetTile(MapTile* tile, uint32 pos)
     {
-        _tiles[pos] = tile;
+        if(pos < 4096)
+            _tiles[pos] = tile;
     }
     inline void UnloadMapTile(uint32 x, uint32 y) { UnloadMapTile(y*64 + x); }
     inline void UnloadMapTile(uint32 pos)
     {
-        if(_tiles[pos])
+        if(pos < 4096 && _tiles[pos])
         {
             delete _tiles[pos];
             _tiles[pos] = NULL;
@@ -88,12 +89,12 @@ public:
     inline bool TileExists(uint32 x, uint32 y) { return TileExists(y*64 + x); }
     inline bool TileExists(uint32 pos)
     {
-        return _hasTile[pos];
+        return pos < 4096 ? _hasTile[pos] : false;
     }
     inline MapTile *GetTile(uint32 x, uint32 y) { return GetTile(y*64 + x); }
     inline MapTile *GetTile(uint32 pos)
     {
-        return _tiles[pos];
+        return pos < 4096 ? _tiles[pos] : NULL;
     }
     void _DebugDump(void);
 

@@ -23,7 +23,13 @@ void Player::Create(uint64 guid)
 
 MyCharacter::MyCharacter() : Player()
 {
+    DEBUG(logdebug("MyCharacter() constructor, this=0x%x",this)); 
     SetTarget(0);
+}
+
+MyCharacter::~MyCharacter()
+{
+    DEBUG(logdebug("~MyCharacter() destructor, this=0x%X guid="I64FMT,this,GetGUID())); // this _could_ crash if Player::Create(guid) wasnt called before!
 }
 
 void MyCharacter::SetActionButtons(WorldPacket &data)

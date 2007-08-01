@@ -22,7 +22,7 @@ struct OpcodeHandler
 
 WorldSession::WorldSession(PseuInstance *in)
 {
-    logdebug("-> Starting WorldSession from instance 0x%X",in); // should never output a null ptr
+    logdebug("-> Starting WorldSession 0x%X from instance 0x%X",this,in); // should never output a null ptr
     _instance = in;
     _mustdie=false;
     _logged=false;
@@ -31,7 +31,10 @@ WorldSession::WorldSession(PseuInstance *in)
     _channels = new Channel(this);
     _world = NULL;
     _sh.SetAutoCloseSockets(false);
+    objmgr.SetInstance(in);
     //...
+
+    DEBUG(logdebug("WorldSession 0x%X constructor finished",this));
 }
 
 WorldSession::~WorldSession()
@@ -50,6 +53,7 @@ WorldSession::~WorldSession()
         delete _socket;
     if(_world)
         delete _world;
+    DEBUG(logdebug("~WorldSession() this=0x%X _instance=0x%X",this,_instance));
 }
 
 void WorldSession::Start(void)
@@ -114,34 +118,34 @@ void WorldSession::Update(void)
 
     uint16 hpos;
     bool known=false;
-	while(pktQueue.size())
-	{
-		WorldPacket *packet = pktQueue.next();
+        while(pktQueue.size())
+        {
+                WorldPacket *packet = pktQueue.next();
 
-		for (hpos = 0; table[hpos].handler != NULL; hpos++)
-		{
-			if (table[hpos].opcode == packet->GetOpcode())
-			{
-				known=true;
-				break;
-			}
-		}
+                for (hpos = 0; table[hpos].handler != NULL; hpos++)
+                {
+                        if (table[hpos].opcode == packet->GetOpcode())
+                        {
+                                known=true;
+                                break;
+                        }
+                }
 
-		bool hideOpcode = false;
+                bool hideOpcode = false;
 
-		// TODO: Maybe make table or something with all the frequently opcodes
-		if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
-		{
-			hideOpcode = true;
-		}
+                // TODO: Maybe make table or something with all the frequently opcodes
+                if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
+                {
+                        hideOpcode = true;
+                }
 
-		if( (known && GetInstance()->GetConf()->showopcodes==1)
-			|| ((!known) && GetInstance()->GetConf()->showopcodes==2)
-			|| (GetInstance()->GetConf()->showopcodes==3) )
-		{
-            if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode)) 
-			    logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
-		}
+                if( (known && GetInstance()->GetConf()->showopcodes==1)
+                        || ((!known) && GetInstance()->GetConf()->showopcodes==2)
+                        || (GetInstance()->GetConf()->showopcodes==3) )
+                {
+            if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode))
+                            logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
+                }
 
         if(known)
         {
@@ -156,14 +160,14 @@ void WorldSession::Update(void)
             }
         }
 
-		delete packet;
+                delete packet;
         known=false;
-	}
+        }
 
     _DoTimedActions();
 
     if(_world)
-        _world->Update();   
+        _world->Update();
 }
 
 
@@ -200,16 +204,16 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_HEARTBEAT, &WorldSession::_HandleMovementOpcode},
         {MSG_MOVE_FALL_LAND, &WorldSession::_HandleMovementOpcode},
 
-		{MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
+                {MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
-		{SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
-	    {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},	
+                {SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
+            {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
         {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
-		{SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
-		{SMSG_REMOVED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
-		{SMSG_CHANNEL_LIST, &WorldSession::_HandleChannelListOpcode},
+                {SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
+                {SMSG_REMOVED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
+                {SMSG_CHANNEL_LIST, &WorldSession::_HandleChannelListOpcode},
         {SMSG_EMOTE, &WorldSession::_HandleEmoteOpcode},
         {SMSG_TEXT_EMOTE, &WorldSession::_HandleTextEmoteOpcode},
         {SMSG_NEW_WORLD, &WorldSession::_HandleNewWorldOpcode},
@@ -233,7 +237,7 @@ void WorldSession::_OnEnterWorld(void)
         _logged=true;
         GetInstance()->GetScripts()->variables.Set("@inworld","true");
         GetInstance()->GetScripts()->RunScript("_enterworld",NULL);
-        
+
     }
 }
 
@@ -270,34 +274,34 @@ void WorldSession::_DoTimedActions(void)
 void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
 {
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
-	uint32 serverseed;
-	recvPacket >> serverseed;
-	logdebug("Auth: serverseed=0x%X",serverseed);
-	Sha1Hash digest;
-	digest.UpdateData(acc);
-	uint32 unk=0;
-	digest.UpdateData((uint8*)&unk,sizeof(uint32));
-	BigNumber clientseed;
-	clientseed.SetRand(8*4);
-	uint32 clientseed_uint32=clientseed.AsDword();
-	digest.UpdateData((uint8*)&clientseed_uint32,sizeof(uint32));
-	digest.UpdateData((uint8*)&serverseed,sizeof(uint32));
-	digest.UpdateBigNumbers(&(GetInstance()->GetSessionKey()),NULL);
-	digest.Finalize();
-	WorldPacket auth;
-	auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<clientseed_uint32;
-	auth.append(digest.GetDigest(),20);
-	// recvPacket << real_size
-	// recvPacket << ziped_UI_Plugins_Info
-	// TODO: add addon data, simulate no addons.
-	auth<<(uint32)0; // no addons? no idea, but seems to work. MaNGOS doesnt accept without this.
+        uint32 serverseed;
+        recvPacket >> serverseed;
+        logdebug("Auth: serverseed=0x%X",serverseed);
+        Sha1Hash digest;
+        digest.UpdateData(acc);
+        uint32 unk=0;
+        digest.UpdateData((uint8*)&unk,sizeof(uint32));
+        BigNumber clientseed;
+        clientseed.SetRand(8*4);
+        uint32 clientseed_uint32=clientseed.AsDword();
+        digest.UpdateData((uint8*)&clientseed_uint32,sizeof(uint32));
+        digest.UpdateData((uint8*)&serverseed,sizeof(uint32));
+        digest.UpdateBigNumbers(&(GetInstance()->GetSessionKey()),NULL);
+        digest.Finalize();
+        WorldPacket auth;
+        auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<clientseed_uint32;
+        auth.append(digest.GetDigest(),20);
+        // recvPacket << real_size
+        // recvPacket << ziped_UI_Plugins_Info
+        // TODO: add addon data, simulate no addons.
+        auth<<(uint32)0; // no addons? no idea, but seems to work. MaNGOS doesnt accept without this.
     auth.SetOpcode(CMSG_AUTH_SESSION);
 
-	SendWorldPacket(auth);
+        SendWorldPacket(auth);
 
     // note that if the sessionkey/auth is wrong or failed, the server sends the following packet UNENCRYPTED!
     // so its not 100% correct to init the crypt here, but it should do the job if authing was correct
-	_socket->InitCrypt(GetInstance()->GetSessionKey().AsByteArray(), 40); 
+        _socket->InitCrypt(GetInstance()->GetSessionKey().AsByteArray(), 40);
 
 }
 
@@ -306,12 +310,12 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
     uint8 errcode;
     recvPacket >> errcode;
     if(errcode==0xC){
-	    logdetail("World Authentication successful, preparing for char list request...");
+            logdetail("World Authentication successful, preparing for char list request...");
         WorldPacket pkt;
         pkt.SetOpcode(CMSG_CHAR_ENUM);
-	    SendWorldPacket(pkt);
+            SendWorldPacket(pkt);
     } else {
-	    logcritical("World Authentication failed, errcode=0x%X",(unsigned char)errcode);
+            logcritical("World Authentication failed, errcode=0x%X",(unsigned char)errcode);
         GetInstance()->SetError();
     }
 }
@@ -319,59 +323,60 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 {
     uint8 num;
-	PlayerEnum plr[10]; // max characters per realm is 10
-	uint8 dummy8;
+        PlayerEnum plr[10]; // max characters per realm is 10
+        uint8 dummy8;
 
-	recvPacket >> num;
-	if(num==0){
-		logerror("No chars found!");
-		GetInstance()->SetError();
-		return;
-	}
-    _LoadCache(); // we are about to login, so we need cache data
-	logdetail("W: Chars in list: %u\n",num);
-	for(unsigned int i=0;i<num;i++){
-		recvPacket >> plr[i]._guid;
-		recvPacket >> plr[i]._name;
-		recvPacket >> plr[i]._race;
-		recvPacket >> plr[i]._class;
-		recvPacket >> plr[i]._gender;
-		recvPacket >> plr[i]._bytes1;
-		recvPacket >> plr[i]._bytes2;
-		recvPacket >> plr[i]._bytes3;
-		recvPacket >> plr[i]._bytes4;
-		recvPacket >> plr[i]._bytesx;
-		recvPacket >> plr[i]._level;
-		recvPacket >> plr[i]._zoneId;
-		recvPacket >> plr[i]._mapId;
-		recvPacket >> plr[i]._x;
-		recvPacket >> plr[i]._y;
-		recvPacket >> plr[i]._z;
-		recvPacket >> plr[i]._guildId;
-		recvPacket >> dummy8;
-		recvPacket >> plr[i]._flags;
-		recvPacket >> dummy8 >> dummy8 >> dummy8;
-		recvPacket >> plr[i]._petInfoId;
-		recvPacket >> plr[i]._petLevel;
-		recvPacket >> plr[i]._petFamilyId;
-		for(unsigned int inv=0;inv<20;inv++)
+        recvPacket >> num;
+        if(num==0){
+                logerror("No chars found!");
+                GetInstance()->SetError();
+                return;
+        }
+    
+        logdetail("Chars in list: %u\n",num);
+        _LoadCache(); // we are about to login, so we need cache data
+        for(unsigned int i=0;i<num;i++){
+                recvPacket >> plr[i]._guid;
+                recvPacket >> plr[i]._name;
+                recvPacket >> plr[i]._race;
+                recvPacket >> plr[i]._class;
+                recvPacket >> plr[i]._gender;
+                recvPacket >> plr[i]._bytes1;
+                recvPacket >> plr[i]._bytes2;
+                recvPacket >> plr[i]._bytes3;
+                recvPacket >> plr[i]._bytes4;
+                recvPacket >> plr[i]._bytesx;
+                recvPacket >> plr[i]._level;
+                recvPacket >> plr[i]._zoneId;
+                recvPacket >> plr[i]._mapId;
+                recvPacket >> plr[i]._x;
+                recvPacket >> plr[i]._y;
+                recvPacket >> plr[i]._z;
+                recvPacket >> plr[i]._guildId;
+                recvPacket >> dummy8;
+                recvPacket >> plr[i]._flags;
+                recvPacket >> dummy8 >> dummy8 >> dummy8;
+                recvPacket >> plr[i]._petInfoId;
+                recvPacket >> plr[i]._petLevel;
+                recvPacket >> plr[i]._petFamilyId;
+                for(unsigned int inv=0;inv<20;inv++)
         {
-			recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype;
+                        recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype;
         }
         plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
-	}
-	bool char_found=false;
+        }
+        bool char_found=false;
 
-	for(unsigned int i=0;i<num;i++){
-        logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Zone: %s",
+        for(unsigned int i=0;i<num;i++){
+        logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Area: %s",
             plr[i]._name.c_str(),
             plr[i]._level,
             GetDBMgr().GetRaceName(plr[i]._race).c_str(),
             GetDBMgr().GetClassName_(plr[i]._class).c_str(),
             GetDBMgr().GetMapName(plr[i]._mapId).c_str(),
-            GetDBMgr().GetZoneName(plr[i]._zoneId).c_str());
-		logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
-			plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
+            GetDBMgr().GetAreaName(plr[i]._zoneId).c_str());
+                logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
+                        plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
         for(unsigned int inv=0;inv<20;inv++)
         {
             if(plr[i]._items[inv].displayId)
@@ -379,66 +384,76 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         }
         if(plr[i]._name==GetInstance()->GetConf()->charname)
         {
-			char_found=true;
-			_myGUID=plr[i]._guid;
+                        char_found=true;
+                        _myGUID=plr[i]._guid;
             GetInstance()->GetScripts()->variables.Set("@myrace",toString(plr[i]._race));
-		}
+                }
 
-	}
-	if(!char_found){
-		logerror("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
-		GetInstance()->SetError();
-		return;
-	} else {
-		log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
-        // create the character and add it to the objmgr.
-        MyCharacter *my = new MyCharacter();
-        my->Create(_myGUID);
-        objmgr.Add(my);
+        }
+        if(!char_found){
+                logerror("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
+                GetInstance()->SetError();
+                return;
+        } else {
+                log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
+
+                // create the character and add it to the objmgr.
+                // note: this is the only object that has to stay in memory unless its explicitly deleted by the server!
+                // that means even if the server sends create object with that guid, do NOT recreate it!!
+                MyCharacter *my = new MyCharacter();
+                my->Create(_myGUID);
+                objmgr.Add(my);
 
         // TODO: initialize the world here, and load required maps.
         // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!
 
-		WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
-		pkt << _myGUID;
-		SendWorldPacket(pkt);
-	}
+                WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
+                pkt << _myGUID;
+                SendWorldPacket(pkt);
+        }
 }
 
 
 void WorldSession::_HandleSetProficiencyOpcode(WorldPacket& recvPacket)
 {
-    _OnEnterWorld();
+    if(recvPacket.size())
+    {
+        DEBUG(
+            logdebug("SetProficiency: Hexdump:");
+            logdebug(toHexDump((uint8*)recvPacket.contents(),recvPacket.size(),true).c_str());
+            );
+    }
 }
 
 void WorldSession::_HandleAccountDataMD5Opcode(WorldPacket& recvPacket)
 {
-    _OnEnterWorld();
+    // packet structure not yet known
 }
 
 void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 {
     uint8 type=0;
-	uint32 lang=0;
-	uint64 target_guid=0;
-	uint32 msglen=0;
-	std::string msg,channel="";
+    uint32 lang=0;
+    uint64 target_guid=0;
+    uint32 msglen=0;
+    std::string msg,channel="";
     bool isCmd=false;
 
-	recvPacket >> type >> lang;
+    recvPacket >> type >> lang;
 
     std::string langname = GetDBMgr().GetLangName(lang);
     const char* ln = langname.c_str();
 
-	
-	if (type == CHAT_MSG_CHANNEL)
+
+    if (type == CHAT_MSG_CHANNEL)
     {
-		recvPacket >> channel; // extract channel name
+        recvPacket >> channel; // extract channel name
     }
-		
-	recvPacket >> target_guid;
+
+    recvPacket >> target_guid;
     std::string plrname;
-    if(target_guid){
+    if(target_guid)
+    {
         plrname=plrNameCache.GetName(target_guid);
         if(plrname.empty())
         {
@@ -446,54 +461,54 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
             plrname="Unknown Entity";
         }
     }
-	GetInstance()->GetScripts()->variables.Set("@thismsg_name",plrname);
-	GetInstance()->GetScripts()->variables.Set("@thismsg",toString(target_guid));
-	
-	
-	if(type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
-		recvPacket >> target_guid;
-	
-	recvPacket >> msglen >> msg;
-	if (type == CHAT_MSG_SYSTEM)
+    GetInstance()->GetScripts()->variables.Set("@thismsg_name",plrname);
+    GetInstance()->GetScripts()->variables.Set("@thismsg",toString(target_guid));
+
+
+    if(type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
+        recvPacket >> target_guid;
+
+    recvPacket >> msglen >> msg;
+    if (type == CHAT_MSG_SYSTEM)
     {
-		logcustom(0,WHITE,"SYSMSG: \"%s\"",msg.c_str());
-	}
+        logcustom(0,WHITE,"SYSMSG: \"%s\"",msg.c_str());
+    }
     else if (type==CHAT_MSG_WHISPER )
     {
-        logcustom(0,WHITE,"WHISP: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());                
+        logcustom(0,WHITE,"WHISP: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_CHANNEL )
     {
-        logcustom(0,WHITE,"CHANNEL: [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),ln,msg.c_str());  
+        logcustom(0,WHITE,"CHANNEL: [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_SAY )
     {
-        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
+        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_YELL )
     {
-        logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",plrname.c_str(),ln,msg.c_str());  
+        logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",plrname.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_WHISPER_INFORM )
     {
-        logcustom(0,WHITE,"TO %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
+        logcustom(0,WHITE,"TO %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_GUILD )
     {
-        logcustom(0,WHITE,"GUILD: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
+        logcustom(0,WHITE,"GUILD: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_PARTY )
     {
-        logcustom(0,WHITE,"PARTY: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
+        logcustom(0,WHITE,"PARTY: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_EMOTE )
     {
-        logcustom(0,WHITE,"EMOTE: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());  
+        logcustom(0,WHITE,"EMOTE [%s]: %s %s",ln,plrname.c_str(),msg.c_str());
     }
     else
     {
         logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),ln,msg.c_str());
-	}
+    }
 
     if(target_guid!=GetGuid() && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
         isCmd=true;
@@ -502,14 +517,14 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     if(type==CHAT_MSG_SAY && target_guid!=_myGUID && !isCmd)
     {
         // TODO: insert a good ChatAI here.
-		if (GetInstance()->GetConf()->enablechatai)
-		{
-		    if(msg=="lol")
+        if (GetInstance()->GetConf()->enablechatai)
+        {
+            if(msg=="lol")
                 SendChatMessage(CHAT_MSG_SAY,lang,"say \"lol\" if you have nothing else to say... lol xD","");
             else if(msg.length()>4 && msg.find("you?")!=std::string::npos)
                 SendChatMessage(CHAT_MSG_SAY,lang,GetInstance()->GetScripts()->variables.Get("@version").append(" -- i am a bot, made by False.Genesis, my master."),"");
             else if(msg=="hi")
-                SendChatMessage(CHAT_MSG_SAY,lang,"Hi, wadup?",""); 
+                SendChatMessage(CHAT_MSG_SAY,lang,"Hi, wadup?","");
             else if(msg.length()<12 && msg.find("wtf")!=std::string::npos)
                 SendChatMessage(CHAT_MSG_SAY,lang,"Yeah, WTF is a good way to say you dont understand anything... :P","");
             else if(msg.length()<15 && (msg.find("omg")!=std::string::npos || msg.find("omfg")!=std::string::npos) )
@@ -523,8 +538,8 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 
     if(isCmd)
     {
-		GetInstance()->GetScripts()->variables.Set("@thiscmd_name",plrname);
-		GetInstance()->GetScripts()->variables.Set("@thiscmd",toString(target_guid));
+        GetInstance()->GetScripts()->variables.Set("@thiscmd_name",plrname);
+        GetInstance()->GetScripts()->variables.Set("@thiscmd",toString(target_guid));
         std::string lin=msg.substr(1,msg.length()-1);
         try
         {
@@ -534,12 +549,12 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         {
             SendChatMessage(CHAT_MSG_SAY,0,"Exception while trying to execute: [ "+lin+" ]","");
         }
-        
+
     }
     if(type==CHAT_MSG_WHISPER && (!isCmd) && target_guid!=GetGuid())
     {
         GetInstance()->GetScripts()->variables.Set("@thiswhisper_name",plrname);
-		GetInstance()->GetScripts()->variables.Set("@thiswhisper",toString(target_guid));
+        GetInstance()->GetScripts()->variables.Set("@thiswhisper",toString(target_guid));
         GetInstance()->GetScripts()->variables.Set("@thiswhisper_lang",toString((uint64)lang));
         GetInstance()->GetScripts()->RunScript("_onwhisper",NULL);
     }
@@ -560,9 +575,12 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
                     pos++;
                 }
                 id = atoi(itemid.c_str());
-                logdebug("Found Item in chat message: %u",id);
-                if(objmgr.GetItemProto(id)==NULL)
-                    SendQueryItem(id,0);
+                if(id)
+                {
+                    logdebug("Found Item in chat message: %u",id);
+                    if(objmgr.GetItemProto(id)==NULL)
+                        SendQueryItem(id,0);
+                }
             }
         }
     }
@@ -636,35 +654,37 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 {
-	uint32 unk32,time;
-	uint64 guid;
+        uint32 unk32,time;
+        uint64 guid;
 
-	float x, y, z, o;
+        float x, y, z, o;
 
     guid = recvPacket.GetPackedGuid();
-	recvPacket >> unk32 >> unk32 >> time >> x >> y >> z >> o >> unk32;
+        recvPacket >> unk32 >> unk32 >> time >> x >> y >> z >> o >> unk32;
 
-	logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
+        logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
     // TODO: put this into a capsule class later, that autodetects movement flags etc.
-	WorldPacket response;
-	response.SetOpcode(MSG_MOVE_FALL_LAND);
-	response << uint32(0) << (uint32)getMSTime(); // no flags; time correct?
+    WorldPacket response;
+    response.SetOpcode(MSG_MOVE_FALL_LAND);
+    response << uint32(0) << (uint32)getMSTime(); // no flags; time correct?
     response << x << y << z << o << uint32(0);
-	SendWorldPacket(response);
+    SendWorldPacket(response);
     if(_world)
         _world->UpdatePos(x,y);
 }
 
 void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
 {
+    DEBUG(logdebug("DEBUG: _HandleNewWorldOpcode() objs:%u mychar: ptr=0x%X, guid="I64FMT,objmgr.GetObjectCount(),GetMyChar(),GetMyChar()->GetGUID()));
     uint32 mapid;
     float x,y,z,o;
     // we assume we are NOT on a transport!
     // else we had to do the following before:
     // recvPacket >> tmapid >> tx >> ty >> tz >> to;
     recvPacket >> mapid >> x >> y >> z >> o;
-    GetMyChar()->ClearSpells(); // will be resent by server
+    if(GetMyChar())
+        GetMyChar()->ClearSpells(); // will be resent by server
     // TODO: clear action buttons
     if(_world)
         delete _world;
@@ -674,7 +694,7 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
 {
-	_channels->HandleNotifyOpcode(recvPacket);
+        _channels->HandleNotifyOpcode(recvPacket);
 }
 
 void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
@@ -695,26 +715,26 @@ void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
 {
-	uint8 unk;
-	uint16 spellid,spellslot,count;
-	recvPacket >> unk >> count;
-	logdebug("Got initial spells list, %u spells.",count);
-	for(uint16 i = 0; i < count; i++)
-	{
-		recvPacket >> spellid >> spellslot;
-		logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
+        uint8 unk;
+        uint16 spellid,spellslot,count;
+        recvPacket >> unk >> count;
+        logdebug("Got initial spells list, %u spells.",count);
+        for(uint16 i = 0; i < count; i++)
+        {
+                recvPacket >> spellid >> spellslot;
+                logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
 
-		GetMyChar()->AddSpell(spellid, spellslot);
-	}
+                GetMyChar()->AddSpell(spellid, spellslot);
+        }
 }
 
 void WorldSession::_HandleLearnedSpellOpcode(WorldPacket& recvPacket)
 {
-	uint32 spellid;
-	recvPacket >> spellid;
-	GetMyChar()->AddSpell(spellid, 0); // other spells must be moved by +1 in slot?
+        uint32 spellid;
+        recvPacket >> spellid;
+        GetMyChar()->AddSpell(spellid, 0); // other spells must be moved by +1 in slot?
 
-	logdebug("Learned spell: id=%u",spellid);
+        logdebug("Learned spell: id=%u",spellid);
 }
 
 void WorldSession::_HandleRemovedSpellOpcode(WorldPacket& recvPacket)
@@ -727,7 +747,7 @@ void WorldSession::_HandleRemovedSpellOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleChannelListOpcode(WorldPacket& recvPacket)
 {
-	_channels->HandleListRequest(recvPacket);
+        _channels->HandleListRequest(recvPacket);
 }
 
 void WorldSession::_HandleEmoteOpcode(WorldPacket& recvPacket)
@@ -812,7 +832,7 @@ void WorldSession::_HandleTextEmoteOpcode(WorldPacket& recvPacket)
             target += "me";
         else
             target += "one";
-        
+
         if(targeted)
         {
             target += "to";
@@ -857,6 +877,7 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
     recvPacket >> m >> x >> y >> z >> o;
     // for now, init the world as soon as the server confirmed that we are where we are.
     logdebug("LoginVerifyWorld: map=%u x=%f y=%f z=%f o=%f",m,x,y,z,o);
+    _OnEnterWorld();
     if(_world)
         delete _world;
     _world = new World(this);

@@ -1,25 +1,31 @@
-#permission=255
-
 // PSEUWOW DEF_SCRIPT STARTUP FILE
 
-LOG * DefScript StartUp [${@version_short}]...
+// this is for debugging which scripts are loaded
+// set to false to disable output
+SET,LoadDebug true
 
-// first, load all scripts in patch 'scripts' with extension .def
+LOG *** DefScript StartUp [${@version_short}]...
+
+// first, load all scripts in path 'scripts' with extension .def
 SET,fcount ?{LGETFILES,scriptlist,def scripts}
 LSORT scriptlist
-LOGDETAIL * Loading ${fcount} scripts.
+LOG *** Loading ${fcount} script files.
 // iterate over all files and load them; if counter i is equal to the amount of files we are done.
 SET,i 0
+SET,errors 0
 LOOP
-	IF ?{EQUAL,${i} ${fcount}}
-		EXITLOOP
-	ENDIF
-	SET,fn ./scripts/?{LINDEX,scriptlist ${i}}
-	LOG *** Loading script file [${fn}]
-	IF ?{NOT ?{LOADDEF ${fn}}}
-		LOGERROR Can't load script [${fn}]
-	ENDIF
-	ADD,i 1
+    IF ?{EQUAL,${i} ${fcount}}
+        EXITLOOP
+    ENDIF
+    SET,fn ./scripts/?{LINDEX,scriptlist ${i}}
+    IF ?{AND,?{IsSet LoadDebug} ${LoadDebug}}
+        LOG * Loading script file [${fn}]
+    ENDIF
+    IF ?{NOT ?{LOADDEF ${fn}}}
+        LOGERROR * Error loading [${fn}]
+        ADD,errors 1
+    ENDIF
+    ADD,i 1
 ENDLOOP
 
 UNSET tmp
@@ -28,13 +34,17 @@ UNSET i
 UNSET fn
 LDELETE scriptlist
 
+IF ?{NOT ${errors}}
+    LOG *** All files loaded without errors.
+ELSE
+    LOG *** All files loaded, ${errors} errors.
+ENDIF
+UNSET errors
+
 // loads & applies the configuration
 CONFIG
 
-// set permissions for internal functions
-INTERNAL_PERM
-
-// Load some SCP files 
+// Load some SCP files
 LOADALLSCP
 
 // do more stuff here in future...

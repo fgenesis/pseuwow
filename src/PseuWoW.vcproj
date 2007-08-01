@@ -409,6 +409,18 @@
 				Name="GUI"
 				Filter="">
 				<File
+					RelativePath=".\Client\Gui\DrawObject.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\DrawObject.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\DrawObjMgr.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\DrawObjMgr.h">
+				</File>
+				<File
 					RelativePath=".\Client\Gui\PseuGUI.cpp">
 				</File>
 				<File

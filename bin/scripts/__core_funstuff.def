@@ -10,21 +10,21 @@
 
 // we can use this script only if we are in the world
 if ?{not ${@inworld}}
-	logerror Can't slap anything if i am not in the world!
-	return
+        logerror Can't slap anything if i am not in the world!
+        return
 endif
 
 // normalize player name. first char uppercased, rest lowercased.
 set,name ?{normalize_name ${@def}}
 
-// target the player. if targeting was successful, cast spell "Knockback 500". 
+// target the player. if targeting was successful, cast spell "Knockback 500".
 set,t ?{target ${name}}
 if ${t}
-	logdebug slapping player '${name}'
-	castspell 11027
-	target
+        logdebug slapping player '${name}'
+        castspell 11027
+        target
 else
-	logerror Can't target player '${name}'
+        logerror Can't target player '${name}'
 endif
 
 unset name
@@ -35,15 +35,14 @@ return ${t}
 
 //------------------------------------------------
 #script=toleet
-#permission=255
 //------------------------------------------------
 // purpose: convert any text into leetspeak [1337sp34k]
 // args: @def: the text to convert
 // returns: leetspeak^^
 
 #onload
-	// this can be used by other scripts to check if we have loaded this script
-	set,#HAVE_LEET true
+        // this can be used by other scripts to check if we have loaded this script
+        set,#HAVE_LEET true
 #endonload
 
 // empty the string where the leet will be stored
@@ -55,65 +54,65 @@ set,x 0
 
 loop
 
-	// check if we have reached the end of the string
-	if ?{bigger,${x} ${l}}
-		exitloop
-	endif
+        // check if we have reached the end of the string
+        if ?{bigger,${x} ${l}}
+                exitloop
+        endif
 
-	// c stores current char (@def at position x); c2 is the same char but always lowercased
-	set,c ?{substr,1,${x} ${@def}}
-	set,c2 ?{lowercase ${c}}
+        // c stores current char (@def at position x); c2 is the same char but always lowercased
+        set,c ?{substr,1,${x} ${@def}}
+        set,c2 ?{lowercase ${c}}
 
-	// conversion functions:
-	
-	// note that "+" is a variable name here!
-	// it will store the "new" char if c/c2 could be converted
-	
-	if ?{equal,${c2} a}
-	set,+ 4
-	endif
-	if ?{equal,${c2} e}
-	set,+ 3
-	endif
-	if ?{equal,${c2} i}
-	set,+ !
-	endif
-	if ?{equal,${c2} l}
-	set,+ 1
-	endif
-	if ?{equal,${c2} t}
-	set,+ 7
-	endif
-	if ?{equal,${c2} s}
-	set,+ 5
-	endif
-	if ?{equal,${c2} o}
-	set,+ 0
-	endif
-	if ?{equal,${c2} f}
-	set,+ ph
-	endif
-	if ?{equal,${c2} h}
-	set,+ #
-	endif
-	if ?{equal,${c} Z}
-	set,+ 7
-	endif
-	if ?{equal,${c} R}
-	set,+ 2
-	endif
-	if ?{equal,${c} B}
-	set,+ <3
-	endif
-	
-	// if var "+" is still empty, default it to our current char
-	default,+ ${c}
-	// and append it to the final output
-	append,str ${+}
-	// finally delete it again
-	unset +
-	// and increase the counter by 1
-	add,x 1
+        // conversion functions:
+
+        // note that "+" is a variable name here!
+        // it will store the "new" char if c/c2 could be converted
+
+        if ?{equal,${c2} a}
+        set,+ 4
+        endif
+        if ?{equal,${c2} e}
+        set,+ 3
+        endif
+        if ?{equal,${c2} i}
+        set,+ !
+        endif
+        if ?{equal,${c2} l}
+        set,+ 1
+        endif
+        if ?{equal,${c2} t}
+        set,+ 7
+        endif
+        if ?{equal,${c2} s}
+        set,+ 5
+        endif
+        if ?{equal,${c2} o}
+        set,+ 0
+        endif
+        if ?{equal,${c2} f}
+        set,+ ph
+        endif
+        if ?{equal,${c2} h}
+        set,+ #
+        endif
+        if ?{equal,${c} Z}
+        set,+ 7
+        endif
+        if ?{equal,${c} R}
+        set,+ 2
+        endif
+        if ?{equal,${c} B}
+        set,+ <3
+        endif
+
+        // if var "+" is still empty, default it to our current char
+        default,+ ${c}
+        // and append it to the final output
+        append,str ${+}
+        // finally delete it again
+        unset +
+        // and increase the counter by 1
+        add,x 1
 endloop
 
 unset l

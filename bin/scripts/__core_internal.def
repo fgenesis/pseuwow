@@ -39,6 +39,7 @@ LOGDETAIL * Dangerous variables removed.
 //-----------------------------------------------
 // Load all conf files from directory /conf/
 // get all *.conf file names from /conf/ directory, store the names in list 'fl' and the amount in 'fcount'
+LOG ** Configuring PseuWoW...
 SET,fcount ?{LGETFILES,fl,conf conf}
 // sort the list, load conf files alphabetically.
 LSORT fl
@@ -76,8 +77,13 @@ APPLYPERMISSIONS
 // remove dangerous variables
 CLEANUPVARS
 
+// set permissions for internal functions
+INTERNAL_PERM
+
 // if its not set in the conf file, default it to "." (WoWEmu & MaNGOS style)
 DEFAULT,#CMDCHAR .
+
+LOG ** All Config done.
 
 
 //--------------------------------------------------

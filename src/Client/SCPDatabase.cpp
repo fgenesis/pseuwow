@@ -2,30 +2,48 @@
 #include "common.h"
 #include "SCPDatabase.h"
 
+
 uint32 SCPDatabase::LoadFromFile(char *fn)
 {
     std::fstream fh;
-    std::string line,value,entry,storage;
-    uint32 id=0,sections=0;
-    char c;
+    uint32 size = GetFileSize(fn);
+    if(!size)
+        return 0;
 
-    fh.open(fn,std::ios_base::in);
+    fh.open(fn,std::ios_base::in | std::ios_base::binary);
     if( !fh.is_open() )
         return 0;
-    while(!fh.eof())
+
+    char *buf = new char[size];
+    fh.read(buf,size);
+    fh.close();
+
+    uint32 sections = LoadFromMem(buf,size);
+    delete [] buf;
+    return sections;
+}
+
+
+uint32 SCPDatabase::LoadFromMem(char *buf, uint32 size)
+{
+    std::string line,value,entry,storage;
+    uint32 id=0,sections=0;
+
+    for(uint32 pos = 0; pos < size; pos++)
     {
-        c=fh.get();
-        if(c=='\n' || fh.eof())
+        if(buf[pos] == '\n')
         {
             if(line.empty())
                 continue;
             while(line[0]==' ' || line[0]=='\t')
                 line.erase(0,1);
-            if(line.empty() || (line.length() > 1 && (line[0]=='/' && line[1]=='/')) )
+            if(line.empty() || (line.length() > 1 && (line[0]=='#' || (line[0]=='/' && line[1]=='/'))) )
             {
                 line.clear();
                 continue;
             }
+            if(line[line.size()-1] == 13) // this fixes the annoying newline problems on windows + binary mode
+                line[line.size()-1] = 0;
             if(line[0]=='[')
             {
                 id=(uint32)toInt(line.c_str()+1); // start reading after '['
@@ -45,9 +63,8 @@ uint32 SCPDatabase::LoadFromFile(char *fn)
             line.clear();
         }
         else
-            line+=c; // fill up line until a newline is reached (see above)
+            line += buf[pos]; // fill up line until a newline is reached (see above)
     }
-    fh.close();
     return sections;
 }
 
@@ -73,10 +90,7 @@ bool SCPField::HasEntry(std::string e)
 std::string SCPField::GetString(std::string entry)
 {
     //return HasEntry(entry) ? _map[entry] : "";
-    if(HasEntry(entry))
-        return _map[entry];
-    else
-        return "";
+    return _map[entry];
 }
 
 // note that this can take a while depending on the size of the database!
@@ -101,11 +115,64 @@ SCPDatabase& SCPDatabaseMgr::GetDB(std::string n)
     return _map[n];
 }
 
+uint32 SCPDatabaseMgr::AutoLoadFile(char *fn)
+{
+    std::fstream fh;
+    uint32 size = GetFileSize(fn);
+    if(!size)
+        return 0;
+
+    fh.open(fn,std::ios_base::in | std::ios_base::binary);
+    if( !fh.is_open() )
+        return 0;
+
+    char *buf = new char[size];
+
+    fh.read(buf,size);
+    fh.close();
+
+    std::string line,dbname;
+    for(uint32 pos = 0; pos < size; pos++)
+    {
+        if(buf[pos] == '\n')
+        {
+            if(line.empty())
+                continue;
+            while(line[0]==' ' || line[0]=='\t')
+                line.erase(0,1);
+            if(line[0] == '#')
+            {
+                uint32 eq = line.find("=");
+                if(eq != std::string::npos)
+                {
+                    std::string info = stringToLower(line.substr(0,pos));
+                    std::string value = stringToLower(line.substr(pos+1,line.length()-1));
+                    if(info == "#dbname")
+                    {
+                        dbname = value;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+            line += buf[pos];
+    }
+    delete [] buf;
+
+    if(dbname.empty())
+        return 0;
+
+    uint32 sections = GetDB(dbname).LoadFromMem(buf,size);
+    return sections;
+
+}
+
 // -- helper functions -- //
 
-std::string SCPDatabaseMgr::GetZoneName(uint32 id)
+std::string SCPDatabaseMgr::GetAreaName(uint32 id)
 {
-    return GetDB("zone").GetField(id).GetString("name");
+    return GetDB("area").GetField(id).GetString("name");
 }
 
 std::string SCPDatabaseMgr::GetRaceName(uint32 id)
