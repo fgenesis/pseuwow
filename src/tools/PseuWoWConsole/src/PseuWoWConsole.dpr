@@ -4,7 +4,7 @@ uses
   Forms,
   fMain in 'fMain.pas' {frmMain},
   RedirectConsole in 'RedirectConsole.pas',
-  modRichEdit in '..\..\..\Projects\Common\modRichEdit.pas';
+  modRichEdit in 'modRichEdit.pas';
 
 {$R *.RES}
 

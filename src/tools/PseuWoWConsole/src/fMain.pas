@@ -192,10 +192,12 @@ begin
     Execute(App);
 end;
 
+
 procedure TfrmMain.Log(AText: String; Color: TColor);
 begin
   AddColouredLine(Console,'CONSOLE: '+AText, Color);
 end;
+
 
 procedure TfrmMain.ConsoleResizeRequest(Sender: TObject; Rect: TRect);
 var

@@ -1,5 +1,5 @@
 =======================================================
-PseuWoWConsole - Version 1.0.0
+PseuWoWConsole - Version 1.1.0
 =======================================================
 "What ain't no country I ever heard of! They speak English in What? "
 

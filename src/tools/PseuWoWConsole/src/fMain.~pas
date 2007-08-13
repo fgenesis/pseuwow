@@ -10,18 +10,18 @@ uses
 type
   TfrmMain = class(TForm)
     Panel1: TPanel;
-    Edit1: TEdit;
-    Button2: TButton;
-    Button3: TButton;
+    txtExe: TEdit;
+    btnRun: TButton;
+    btnExit: TButton;
     servRemote: TServerSocket;
     timerStart: TTimer;
     clientSock: TClientSocket;
-    JvTrayIcon1: TJvTrayIcon;
+    TrayIcon: TJvTrayIcon;
     Console: TRichEdit;
     grpCmd: TGroupBox;
     comCommand: TComboBox;
-    procedure Button2Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure btnRunClick(Sender: TObject);
+    procedure btnExitClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure timerStartTimer(Sender: TObject);
@@ -74,18 +74,18 @@ begin
   Ready := False;
 end;
 
-procedure TfrmMain.Button2Click(Sender: TObject);
+procedure TfrmMain.btnRunClick(Sender: TObject);
 var
   IniFile : TInifile;
 begin
   IniFile := TIniFile.Create(ExtractFilePath(Application.ExeName)+'Settings.INI');
-  IniFile.WriteString('Execute','Application',Edit1.Text);
+  IniFile.WriteString('Execute','Application',txtExe.Text);
   IniFile.UpdateFile;
   IniFile.Free;
-  RC_Run(Edit1.text); // run console program
+  RC_Run(txtExe.text); // run console program
 end;
 
-procedure TfrmMain.Button3Click(Sender: TObject);
+procedure TfrmMain.btnExitClick(Sender: TObject);
 begin
   ShutDown();
 end;
@@ -121,7 +121,7 @@ begin
   timerStart.Enabled := False;
   if Ready then
   begin
-    JvTrayIcon1.HideApplication;
+    TrayIcon.HideApplication;
     Launch;
     Exit;
   end
@@ -192,10 +192,12 @@ begin
     Execute(App);
 end;
 
+
 procedure TfrmMain.Log(AText: String; Color: TColor);
 begin
   AddColouredLine(Console,'CONSOLE: '+AText, Color);
 end;
+
 
 procedure TfrmMain.ConsoleResizeRequest(Sender: TObject; Rect: TRect);
 var
