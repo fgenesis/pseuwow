@@ -3,7 +3,8 @@ program PseuWoWConsole;
 uses
   Forms,
   fMain in 'fMain.pas' {frmMain},
-  RedirectConsole in 'RedirectConsole.pas';
+  RedirectConsole in 'RedirectConsole.pas',
+  modRichEdit in 'modRichEdit.pas';
 
 {$R *.RES}
 

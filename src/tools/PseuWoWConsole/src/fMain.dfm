@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 393
-  Top = 142
+  Left = 293
+  Top = 188
   Width = 535
   Height = 390
   Caption = 'PseuWoW Console'

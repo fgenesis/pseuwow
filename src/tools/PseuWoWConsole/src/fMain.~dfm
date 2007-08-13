@@ -24,7 +24,7 @@ object frmMain: TfrmMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    object Edit1: TEdit
+    object txtExe: TEdit
       Left = 8
       Top = 10
       Width = 513
@@ -39,23 +39,23 @@ object frmMain: TfrmMain
       TabOrder = 0
       Text = '[enter path to pseuwow bin]'
     end
-    object Button2: TButton
+    object btnRun: TButton
       Left = 8
       Top = 40
       Width = 75
       Height = 25
       Caption = 'RUN'
       TabOrder = 1
-      OnClick = Button2Click
+      OnClick = btnRunClick
     end
-    object Button3: TButton
+    object btnExit: TButton
       Left = 88
       Top = 40
       Width = 75
       Height = 25
       Caption = 'Exit'
       TabOrder = 2
-      OnClick = Button3Click
+      OnClick = btnExitClick
     end
   end
   object Console: TRichEdit
@@ -134,7 +134,7 @@ object frmMain: TfrmMain
     Left = 400
     Top = 32
   end
-  object JvTrayIcon1: TJvTrayIcon
+  object TrayIcon: TJvTrayIcon
     Active = True
     IconIndex = 0
     Visibility = [tvVisibleTaskBar, tvVisibleTaskList, tvAutoHide, tvAutoHideIcon, tvRestoreClick, tvMinimizeClick]
