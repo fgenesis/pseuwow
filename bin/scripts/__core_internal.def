@@ -37,6 +37,10 @@ LOGDETAIL * Dangerous variables removed.
 #script=config
 #permission=255
 //-----------------------------------------------
+#onload
+	// create empty variable. stores if config script was already run successfully once.
+	SET,DONE
+#/onload
 // Load all conf files from directory /conf/
 // get all *.conf file names from /conf/ directory, store the names in list 'fl' and the amount in 'fcount'
 LOG ** Configuring PseuWoW...
@@ -84,6 +88,7 @@ INTERNAL_PERM
 DEFAULT,#CMDCHAR .
 
 LOG ** All Config done.
+SET,DONE true
 
 
 //--------------------------------------------------
@@ -97,4 +102,17 @@ LOG * Assigning permissions for internal functions...
 // emotes are hard to abuse, allow for everyone
 setscriptpermission,emote 0
 // ... set more permissions here ...
+
+
+// this dummy script does nothing actually but since its loaded last in this file it causes the config
+// script to be run before all .def files are loaded
+// (this is important for scripts that depend on the config already existing during load-time)
+//-------------------------------------------------
+#script=dummy
+//-------------------------------------------------
+#onload
+if ?{not ${#config::DONE}}
+	config
+endif
+#/onload
 

@@ -252,7 +252,10 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                     curScript->SetDebug(true);
             }
             else if(line=="onload")
-                Script[SN_ONLOAD] = curScript = new DefScript(this);
+            {
+                _UpdateOrCreateScriptByName(SN_ONLOAD);
+                curScript=Script[SN_ONLOAD];
+            }
             else if(line=="endonload" || line=="/onload")
             {
                 RunScript(SN_ONLOAD,NULL,sn);

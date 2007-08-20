@@ -347,8 +347,10 @@ void PseuInstance::DeleteGUI(void)
 PseuInstanceConf::PseuInstanceConf()
 {
     enablecli=false;
+    enablegui=false;
     exitonerror=false;
     debug=0;
+    rmcontrolport=0;
 }
 
 void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
