@@ -41,9 +41,6 @@ ELSE
 ENDIF
 UNSET errors
 
-// loads & applies the configuration
-CONFIG
-
 // Load some SCP files
 LOADALLSCP
 
