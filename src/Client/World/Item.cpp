@@ -95,6 +95,7 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 		recvPacket >> proto->GemProperties;
 		recvPacket >> proto->ExtendedCost;
 		recvPacket >> proto->RequiredDisenchantSkill;
+		recvPacket >> proto->ArmorDamageModifier; 
 
         logdetail("Got Item Info: Id=%u Name='%s' ReqLevel=%u Armor=%u Desc='%s'",
             proto->Id, proto->Name[0].c_str(), proto->RequiredLevel, proto->Armor, proto->Description.c_str());

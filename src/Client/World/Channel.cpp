@@ -110,7 +110,7 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 	switch (code)
 	{
 		// Player joined channel you are on
-		case 0x00:
+		case JOINED:
 			packet >> guid;
 			if(guid){
 				name = _worldSession->plrNameCache.GetName(guid);
@@ -223,6 +223,7 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 		log("%s ["I64FMT"] %s %s",pname.c_str(),i->first,muted?"(muted)":"",mod?"(moderator)":"");
 	}
 }
+
 
 
 

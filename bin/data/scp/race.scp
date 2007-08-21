@@ -1,35 +1,120 @@
-// note that the faction is equal to the default language id:
-// 1: Horde, Orcish
-// 7: Alliance, Common
-
 [1]
+model_m=49
+model_f=50
+name_short=Hu
 faction=7
+name_general=Human
 name=Human
 
 [2]
+model_m=51
+model_f=52
+name_short=Or
 faction=1
+name_general=Orc
 name=Orc
 
 [3]
+model_m=53
+model_f=54
+name_short=Dw
 faction=7
+name_general=Dwarf
 name=Dwarf
 
 [4]
+model_m=55
+model_f=56
+name_short=Ni
 faction=7
+name_general=NightElf
 name=Night Elf
 
 [5]
+model_m=57
+model_f=58
+name_short=Sc
 faction=1
+name_general=Scourge
 name=Undead
 
 [6]
+model_m=59
+model_f=60
+name_short=Ta
 faction=1
+name_general=Tauren
 name=Tauren
 
 [7]
+model_m=1563
+model_f=1564
+name_short=Gn
 faction=7
+name_general=Gnome
 name=Gnome
 
 [8]
+model_m=1478
+model_f=1479
+name_short=Tr
 faction=1
+name_general=Troll
 name=Troll
+
+[9]
+model_m=6894
+model_f=6895
+name_short=Gb
+faction=7
+name_general=Goblin
+name=Goblin
+
+[10]
+model_m=15476
+model_f=15475
+name_short=Be
+faction=1
+name_general=BloodElf
+name=Blood Elf
+
+[11]
+model_m=16125
+model_f=16126
+name_short=Dr
+faction=7
+name_general=Draenei
+name=Draenei
+
+[12]
+model_m=16981
+model_f=16980
+name_short=Fo
+faction=7
+name_general=FelOrc
+name=Fel Orc
+
+[13]
+model_m=17402
+model_f=17403
+name_short=Na
+faction=7
+name_general=Naga_
+name=Naga
+
+[14]
+model_m=17576
+model_f=17577
+name_short=Br
+faction=7
+name_general=Broken
+name=Broken
+
+[15]
+model_m=17578
+model_f=17579
+name_short=Sk
+faction=7
+name_general=Skeleton
+name=Skeleton
+

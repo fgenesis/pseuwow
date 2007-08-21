@@ -400,6 +400,7 @@ struct ItemProto
 	uint32 GemProperties;
 	uint32 ExtendedCost;
 	uint32 RequiredDisenchantSkill;
+	float  ArmorDamageModifier;
 };
 
 class Item : public Object

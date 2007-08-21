@@ -58,8 +58,8 @@ charname=Pseuwow
 
 
 // Client emulation configuration
-ClientVersion=2.0.12
-ClientBuild=6546
+ClientVersion=2.1.3
+ClientBuild=6898
 ClientLanguage=enUS
 // or change to enGB, deDE, ...
 
@@ -112,4 +112,5 @@ rmcontrolhost=localhost
 // set this to 1 to enable movement and everything map related.
 // PseuWoW will need more memory with maps enabled!
 useMaps=0
+
 

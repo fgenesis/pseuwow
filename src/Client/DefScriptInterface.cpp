@@ -745,9 +745,9 @@ DefReturnResult DefScriptPackage::SCGetFileList(CmdSet& Set)
         for(DefList::iterator i = l->begin(); i != l->end(); )
         {
             std::string tmp = stringToLower(i->c_str() + (i->length() - ext.length()));
-            if( stringToLower(i->c_str() + (i->length() - ext.length())) != ext )
+            if( tmp != ext )
             {
-                l->erase(i);
+                i = l->erase(i);
                 continue;
             }
             i++;
@@ -826,5 +826,6 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
 
     Interpret(curSet);
 }
+
 
 
