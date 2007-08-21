@@ -203,21 +203,22 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_STOP_SWIM, &WorldSession::_HandleMovementOpcode},
         {MSG_MOVE_HEARTBEAT, &WorldSession::_HandleMovementOpcode},
         {MSG_MOVE_FALL_LAND, &WorldSession::_HandleMovementOpcode},
-
-                {MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
+        {MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
-                {SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
-            {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
+        {SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
+        {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
         {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
-                {SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
-                {SMSG_REMOVED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
-                {SMSG_CHANNEL_LIST, &WorldSession::_HandleChannelListOpcode},
+        {SMSG_LEARNED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
+        {SMSG_REMOVED_SPELL, &WorldSession::_HandleLearnedSpellOpcode},
+        {SMSG_CHANNEL_LIST, &WorldSession::_HandleChannelListOpcode},
         {SMSG_EMOTE, &WorldSession::_HandleEmoteOpcode},
         {SMSG_TEXT_EMOTE, &WorldSession::_HandleTextEmoteOpcode},
         {SMSG_NEW_WORLD, &WorldSession::_HandleNewWorldOpcode},
         {SMSG_LOGIN_VERIFY_WORLD, &WorldSession::_HandleLoginVerifyWorldOpcode},
+        {SMSG_MOTD, &WorldSession::_HandleMotdOpcode},
+        {SMSG_NOTIFICATION, &WorldSession::_HandleNotificationOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -434,30 +435,31 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 {
     uint8 type=0;
     uint32 lang=0;
+    uint64 source_guid=0;
     uint64 target_guid=0;
     uint32 msglen=0;
+    uint32 unk=0;
     std::string msg,channel="";
     bool isCmd=false;
 
     recvPacket >> type >> lang;
+    recvPacket >> source_guid >> unk; // added in 2.1.0
+    if (type == CHAT_MSG_CHANNEL)
+    {	
+        recvPacket >> channel; // extract channel name
+    }
+    recvPacket >> target_guid >> msglen >> msg;
 
     std::string langname = GetDBMgr().GetLangName(lang);
     const char* ln = langname.c_str();
 
-
-    if (type == CHAT_MSG_CHANNEL)
-    {
-        recvPacket >> channel; // extract channel name
-    }
-
-    recvPacket >> target_guid;
     std::string plrname;
-    if(target_guid)
+    if(source_guid)
     {
-        plrname=plrNameCache.GetName(target_guid);
+        plrname=plrNameCache.GetName(source_guid);
         if(plrname.empty())
         {
-            SendQueryPlayerName(target_guid);
+            SendQueryPlayerName(source_guid);
             plrname="Unknown Entity";
         }
     }
@@ -465,10 +467,9 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     GetInstance()->GetScripts()->variables.Set("@thismsg",toString(target_guid));
 
 
-    if(type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
-        recvPacket >> target_guid;
+    DEBUG(logdebug("Chat packet recieved, type=%u lang=%u src="I64FMT" dst="I64FMT" chn='%s' len=%u",
+        type,lang,source_guid,target_guid,channel.c_str(),msglen));
 
-    recvPacket >> msglen >> msg;
     if (type == CHAT_MSG_SYSTEM)
     {
         logcustom(0,WHITE,"SYSMSG: \"%s\"",msg.c_str());
@@ -584,8 +585,27 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
             }
         }
     }
-
 }
+
+void WorldSession::_HandleMotdOpcode(WorldPacket& recvPacket)
+{
+    uint32 lines;
+    std::string line;
+    recvPacket >> lines;
+    for(uint32 i = 0; i < lines; i++)
+    {
+        recvPacket >> line;
+        logcustom(0,YELLOW,"MOTD: %s",line.c_str());
+    }
+}
+
+void WorldSession::_HandleNotificationOpcode(WorldPacket& recvPacket)
+{
+    std::string text;
+    recvPacket >> text;
+    logcustom(0,YELLOW,"NOTIFY: %s",text.c_str());
+}
+
 void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
 {
     uint64 pguid;
@@ -886,4 +906,5 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
 
 
 // TODO: delete world on LogoutComplete once implemented
+
 

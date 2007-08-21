@@ -3,6 +3,7 @@
 
 #include "UpdateFields.h"
 #include "ObjectDefines.h"
+#include "common.h"
 
 enum TYPE
 {

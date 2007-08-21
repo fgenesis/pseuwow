@@ -11,7 +11,7 @@
 #include "Item.h"
 
 // increase this number whenever you change something that makes old files unusable
-uint32 ITEMPROTOTYPES_CACHE_VERSION = 0x00000000;
+uint32 ITEMPROTOTYPES_CACHE_VERSION = 0x00000001;
 
 bool PlayerNameCache::AddInfo(uint64 guid, std::string name){
     PlayerNameCacheItem *cacheItem=new PlayerNameCacheItem;
@@ -246,6 +246,8 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
 		buf >> proto->GemProperties;
 		buf >> proto->ExtendedCost;
 		buf >> proto->RequiredDisenchantSkill;
+		buf >> proto->ArmorDamageModifier;
+
         if(proto->Id)
         {
             //DEBUG(logdebug("ItemProtoCache: Loaded %u [%s]",proto->Id, proto->Name[0].c_str()));
@@ -360,6 +362,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
 		buf << proto->GemProperties;
 		buf << proto->ExtendedCost;
 		buf << proto->RequiredDisenchantSkill;
+		buf << proto->ArmorDamageModifier;
 
         //DEBUG(logdebug("ItemProtoCache: Saved %u [%s]",proto->Id, proto->Name[0].c_str()));
         uint32 size = buf.size();
