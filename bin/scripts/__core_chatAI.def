@@ -1,0 +1,157 @@
+// -------------------------------------------
+#script=_onchatmessage
+// purpose: do something if specific chat messages are recieved.
+// args:
+// @def: chat message text
+// @0: message type id (check ChatMsg enum in src/Client/SharedDefines.h)
+// @1: language id (also defined in SharedDefines.h), alternatively look up bin/data/scp/language.scp
+// @2: GUID of the player or creature this msg came from
+// @3: channel name. empty string if the chat message was not sent in a channel (for example say, yell or whisper)
+//--------------------------------------------
+
+// not using this yet, still more or less bugged. add stuff manually if you relly need.
+// processchatai,{${@0}},{${@1}},{${@2}},{${@3}} ${@def}
+
+
+
+// ----------------------------------
+#script=processchatai
+// ----------------------------------
+// purpose: iterate over registered AI scripts, test if the chat message matches the condition,
+// and execute appropriate script with predefined arguments
+// TODO: get object name (player or creature) and pass it to the called scripts
+
+// filter out chat messages that came from us
+if ?{equal,${@myguid} ${@2}}
+	return false
+endif
+
+// filter out CHAT_MSG_WHISPER_INFORM ("whisper to ... : blah blah")
+if ?{equal,${@0} 7}
+	logdebug -- chat is whisper inform, skipping
+	return false
+endif
+
+// split the msg into a list containing only words. remove special characters also.
+lcsplit,wlist,{ !?,;.:-_\\/<>()[]"$=+&} ${@def}
+
+logdebug JOIN: ?{ljoin,wlist +}
+
+// remove empty entries
+lclean,wlist
+
+// obtain name of the language that was used
+set,langname ?{GetSCPValue,lang,${@1} name}
+default,langname UNK LANG
+
+set,msg ?{lowercase ${@def}}
+
+set,i 0
+set,len ?{llen pattern_list}
+
+loop
+	if ?{equal,${i} ${len}}
+		exitloop
+	endif
+	
+	set,script ?{lindex,script_list ${i}}
+	set,cond ?{lindex,cond_list ${i}}
+	set,pattern ?{lindex,pattern_list ${i}}
+	
+	set,call false
+	
+	if ?{equal,NONE ${cond}}
+		set,call true
+	else
+		if ?{equal,ALL ${cond}}
+			set,call ?{lcontains_ext,{${pattern}},{ } ${msg}}
+		else
+			if ?{equal,EXACT ${cond}}
+			out ${pattern}
+			out ${msg}
+				set,call ?{equal,{${pattern}} ${msg}}	
+			else
+				if ?{equal,EXACT_PARTIAL ${cond}}
+					set,call ?{strlen ?{strfind,{${pattern}} ${msg}}}
+				endif
+			endif
+		endif
+	endif	
+	
+	if ${call}
+		logdebug DEBUG: ChatAI: calling script ${script}, condition ${cond} matched.
+		${script},{${@0}},{${@1}},{${@2}},{${@3}},{${langname}} ${@def}
+	else
+		logdebug DEBUG: ChatAI: NOT called script ${script}, condition ${cond} not matched.
+	endif
+	
+	add,i 1
+endloop
+
+
+
+// cleanup
+ldelete wlist
+
+return true
+
+
+// ----------------------------------
+#script=RegisterChatAIScript
+// ----------------------------------
+// purpose: registers a custom script to handle an incoming chat message if a condition is matched.
+// args:
+// @def: word pattern (words are delimited with spaces)
+// @0: script name that has to be called if the condition is matched
+// @1: condition. allowed values are:
+//  ALL - the chat message must contain all words provided
+//  ANY - the chat message must contain any word provided -- NOT WORKING YET [didnt find the reason yet :( ]--
+//  ALL_ORDER - same like all, but in the order provided -- NOT YET IMPLEMENTED
+//  ALL_CONSECUTIVE - same like ALL_ORDER, but the words must follow exactly one after another -- NOT YET IMPLEMENTED
+//  EXACT - the chat message must be exactly equal to the string supplied.
+//  EXACT_PARTIAL - the chat message must contain the string supplied.
+//  NONE - the script will be always called; no testing is done. its up to the user how to deal with it. (default)
+// note that @def is not case sensitive!
+
+if ?{not ?{strlen ${@0}}}
+	logerror Script error: RegisterChatAIScript: no function defined (called by '${@caller}') 
+	return false
+endif
+
+set,pattern ?{lowercase ${@def}}
+
+set,cond ?{uppercase ${@1}}
+default,cond NONE
+
+
+if ?{isset [${@0};${pattern};${cond}]}
+	logdebug Chat AI script already registered. script: '${@0}', condition: ${cond}, pattern: '${@def}'
+	return false
+endif
+
+if ?{strlen ?{strfind,ALL ${cond}}}
+
+	set,lname ${@0}_pattern
+	lcsplit,{${lname}},{ } ${pattern}
+	if ?{not ?{llen ${lname}}}
+		logerror Script error: RegisterChatAIScript: pattern is empty, but required! (called by '${@caller}') 
+		return false
+	endif
+	lpushback,#processchatai::pattern_list ${lname}
+
+else
+
+	lpushback,#processchatai::pattern_list ${pattern}
+
+endif
+	
+lpushback,#processchatai::script_list ${@0}
+lpushback,#processchatai::cond_list ${cond}
+
+set,[${@0};${pattern};${cond}]
+
+logdetail Chat AI script registered. script: '${@0}', condition: ${cond}, pattern: '${@def}' [now ?{llen #processchatai::pattern_list} registered]
+
+return true
+
+	

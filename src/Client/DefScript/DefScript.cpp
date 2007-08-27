@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <stdarg.h>
 #include "VarSet.h"
 #include "DefScript.h"
 #include "DefScriptTools.h"
@@ -21,6 +22,9 @@ enum DefScriptBlockType
 // --- SECTION FOR SCRIPT PACKAGES ---
 DefScriptPackage::DefScriptPackage()
 {
+    SetLog(printf);
+    SetDebugLog(printf);
+    SetErrorLog(printf);
     _eventmgr=new DefScript_DynamicEventMgr(this);
     _InitFunctions();
 #   ifdef USING_DEFSCRIPT_EXTENSIONS
@@ -33,6 +37,30 @@ DefScriptPackage::~DefScriptPackage()
     if(_eventmgr)
         delete _eventmgr;
 	Clear();	
+}
+
+void DefScriptPackage::Log(const char* fmt,...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    (*_slog)(fmt,ap);
+    va_end(ap);
+}
+
+void DefScriptPackage::DebugLog(const char* fmt,...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    (*_sdebuglog)(fmt,ap);
+    va_end(ap);
+}
+
+void DefScriptPackage::ErrorLog(const char* fmt,...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    (*_serrorlog)(fmt,ap);
+    va_end(ap);
 }
 
 void DefScriptPackage::SetParentMethod(void *p)
@@ -89,6 +117,7 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("lowercase",&DefScriptPackage::func_lowercase);
     AddFunc("random",&DefScriptPackage::func_random);
     AddFunc("fileexists",&DefScriptPackage::func_fileexists);
+    AddFunc("strfind",&DefScriptPackage::func_strfind);
 
     // list functions
     AddFunc("lpushback",&DefScriptPackage::func_lpushback);
@@ -243,7 +272,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                     DeleteScript(curScript->GetName());
                 sn = stringToLower(value);
                 _UpdateOrCreateScriptByName(sn);
-                _DEFSC_DEBUG(printf("DefScript: now loading '%s'\n",sn.c_str()));
+                _DEFSC_DEBUG_LOG("DefScript: now loading '%s'\n",sn.c_str());
                 curScript=Script[sn];
             }
             else if(line=="debug")
@@ -631,12 +660,12 @@ void DefScriptPackage::SplitLine(CmdSet& Set,std::string line){
 //	extract cmd+params and txt
     for(i=0;i<line.length();i++){
 
-		if(line.at(i)=='{')
+		if(line[i]=='{')
 			bracketsOpen++;
-        if(line.at(i)=='}')
+        if(line[i]=='}')
 			bracketsOpen--;
         
-        if( line.at(i)==',' && !bracketsOpen)
+        if( line[i]==',' && !bracketsOpen)
         {
             if(!cmdDefined){
                 Set.cmd=tempLine;
@@ -648,7 +677,7 @@ void DefScriptPackage::SplitLine(CmdSet& Set,std::string line){
             tempLine.clear();
             
         } 
-        else if( line.at(i)==' ' && !bracketsOpen)
+        else if( line[i]==' ' && !bracketsOpen)
         {
             if(!cmdDefined){
                 Set.cmd=tempLine;
@@ -657,15 +686,13 @@ void DefScriptPackage::SplitLine(CmdSet& Set,std::string line){
                 Set.arg[curParam]=tempLine;
             }
 
-            Set.defaultarg=line.substr(i,line.length()-i);
-            Set.defaultarg.erase(0,1);
-            //tempLine.clear();
+            Set.defaultarg=line.substr(i+1,line.length()-i);
             break;            
             
         }
         else
         {
-            tempLine+=line.at(i);
+            tempLine+=line[i];
         }
 	}
 
@@ -916,6 +943,18 @@ std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string s
 
 DefReturnResult DefScriptPackage::Interpret(CmdSet& Set)
 {
+    // TODO: remove this debug block again as soon as the interpreter bugs are fixed.
+#   ifdef DEF_DEBUG_SCRIPT_CALLS
+        printf("DefScriptPackage::Interpret(), pSet=0x%X\n",&Set);
+        printf("cmd = '%s'\n",Set.cmd.c_str());
+        unsigned int ctr=0;
+        for(_CmdSetArgMap::iterator i=Set.arg.begin(); i!=Set.arg.end(); i++)
+        {
+            printf("arg[%u] = '%s'\n",ctr++,i->second.c_str());
+        }
+        printf("defaultarg = '%s'\n",Set.defaultarg.c_str());
+#    endif
+
     DefReturnResult result;
 
     // first search if the script is defined in the internal functions
@@ -951,4 +990,20 @@ void DefScriptPackage::_UpdateOrCreateScriptByName(std::string sn)
     DefScript *newscript = new DefScript(this);
     newscript->SetName(sn); // necessary that the script knows its own name
     Script[sn] = newscript;
+}
+
+// TODO: add support for safe brackets ( "\{" , "\}" ) and fix the string this way
+std::string DefScriptPackage::SecureString(std::string s)
+{
+    std::string out;
+    for(unsigned int i = 0; i < s.length(); i++)
+    {
+        if(s[i] == '{')
+            out += '[';
+        else if(s[i] == '}')
+            out += ']';
+        else
+            out += s[i];
+    }
+    return out;
 }

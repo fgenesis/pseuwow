@@ -7,28 +7,97 @@
 // @0: list name, @def: search string
 
 set,i 0
-set,l ?{globname ${@0}}
-
-out list: ${l} - len: ?{llen ${l}}
+set,l ?{globname,{${@caller}} ${@0}}
 
 if ?{not ?{llen ${l}}}
-        return
+	return
 endif
 
 set,result false
 loop
-        if ?{equal,${i} ?{llen ${l}}}
-                exitloop
-        endif
-        set,elem ?{lindex,{${l}} ${i}}
-        if ?{equal,{${elem}} ${@def}}
-                set,result true
-                exitloop
-        endif
-        add,i 1
+	if ?{equal,${i} ?{llen ${l}}}
+		exitloop
+	endif
+	set,elem ?{lindex,{${l}} ${i}}
+	if ?{equal,{${elem}} ${@def}}
+		set,result true
+		exitloop
+	endif
+	add,i 1
 endloop
 unset i
 unset l
 unset elem
+return ${result}
+
+
+// -----------------------------------------
+#script=lcontains_ext
+// -----------------------------------------
+// return true if any substring in @def matches any element in list @0.
+// default delimiter is space, override with @1.
+// by default, any char in @1 serves as delimiter.
+// if you set @2 to true, the exact string @1 is used as delimiter (no default is set)
+// to check for individual chars in @def, use the following: "lcontains_ex,<list>,,true string_of_chars_for_example"
+
+set,i 0
+set,j 0
+set,l ?{globname,{${@caller}} ${@0}}
+set,delim ${@1}
+
+if ${@2}
+	set,engine lsplit
+else
+	set,engine lcsplit
+	// take care of the whitespaces: we use space as delimiter!
+	default,delim { }
+endif
+
+${engine},myl,{${delim}} ${@def}
+
+// list to check must at least contain 1 element
+if ?{not ?{llen ${l}}}
+	return
+endif
+
+// and our pattern list must contain 1 element also
+if ?{not ?{llen myl}}
+	return
+endif
+
+set,result false
+
+loop
+	if ?{equal,${i} ?{llen ${l}}}
+		exitloop
+	endif
+	set,elem ?{lindex,{${l}} ${i}}
+	set,j 0
+	loop
+		if ?{equal,${j} ?{llen myl}}
+			exitloop
+		endif
+		set,myelem ?{lindex,myl ${j}}
+		if ?{equal,{${elem}} ${myelem}}
+			set,result true
+			exitloop
+		endif
+		add,j 1
+	endloop
+	if ${result}
+		exitloop
+	endif
+	add,i 1
+endloop
+
+unset i
+unset j
+unset l
+unset engine
+unset elem
+unset myelem
+ldelete myl
+unset delim
+
 return ${result}
 

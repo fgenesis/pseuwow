@@ -44,6 +44,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getplayerperm",&DefScriptPackage::SCGetPlayerPerm);
     AddFunc("getscriptperm",&DefScriptPackage::SCGetScriptPerm);
     AddFunc("lgetfiles",&DefScriptPackage::SCGetFileList);
+    AddFunc("printscript",&DefScriptPackage::SCPrintScript);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -755,6 +756,17 @@ DefReturnResult DefScriptPackage::SCGetFileList(CmdSet& Set)
     }
     return toString((uint64)l->size());
 }
+
+DefReturnResult DefScriptPackage::SCPrintScript(CmdSet &Set)
+{
+    DefScript *sc = GetScript(DefScriptTools::stringToLower(Set.defaultarg));
+    for(uint32 i = 0; i < sc->GetLines(); i++)
+    {
+        logcustom(0,GREEN,sc->GetLine(i).c_str());
+    }
+    return "";
+}
+
 
 
 

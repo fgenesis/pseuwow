@@ -344,12 +344,16 @@ DefReturnResult DefScriptPackage::func_strlen(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::func_equal(CmdSet& Set)
 {
+    bool result;
     if(stringToLower(Set.arg[1])=="ignore")
     {
-        return stringToLower(Set.defaultarg)==stringToLower(Set.arg[0]);
+        result=stringToLower(Set.defaultarg)==stringToLower(Set.arg[0]);
     }
-    return Set.defaultarg==Set.arg[0];
+    result=Set.defaultarg==Set.arg[0];
+    _DEFSC_DEBUG(printf("DEFSCRIPT: func_equal: ['%s'=='%s'] = %s\n",Set.arg[0].c_str(),Set.defaultarg.c_str(),result?"true":"false"));
+    return result;
 }
+
 
 DefReturnResult DefScriptPackage::func_smaller(CmdSet& Set)
 {
@@ -466,6 +470,14 @@ DefReturnResult DefScriptPackage::func_fileexists(CmdSet& Set)
         return true;
     }
     return false;
+}
+
+DefReturnResult DefScriptPackage::func_strfind(CmdSet& Set)
+{
+    unsigned int pos = Set.defaultarg.find(Set.arg[0],(unsigned int)toNumber(Set.arg[1]));
+    if(pos == std::string::npos)
+        return "";
+    return toString((uint64)pos);    
 }
 
 
