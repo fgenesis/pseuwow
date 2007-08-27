@@ -13,6 +13,8 @@
 class DefScriptPackage;
 class DefScript;
 
+typedef void (*_slog_func)(const char*,...);
+
 // general struct for if..else..endif / loop..endloop blocks
 struct Def_Block
 {
@@ -124,6 +126,17 @@ public:
     bool HasFunc(std::string);
     void DelFunc(std::string);
 	ListStorage lists;
+    std::string SecureString(std::string s);
+
+    // own logging functions. default is printf.
+    // DO NOT USE THEM YET! THEY DO NOT WORK CORRECTLY!
+    // need some help with this [FG]
+    inline void SetLog(void *ptr) { _slog=(_slog_func)ptr; }
+    inline void SetDebugLog(void *ptr) { _sdebuglog=(_slog_func)ptr; }
+    inline void SetErrorLog(void *ptr) { _serrorlog=(_slog_func)ptr; }
+    void Log(const char*,...);
+    void DebugLog(const char*,...);
+    void ErrorLog(const char*,...);
 
     
     std::string scPath;
@@ -146,6 +159,7 @@ private:
     std::map<std::string,DefScript*> Script;
     std::map<std::string,unsigned char> scriptPermissionMap;
     DefScriptFunctionTable _functable;
+    _slog_func _slog,_serrorlog,_sdebuglog;
 
     // Usable internal basic functions:
     DefReturnResult func_default(CmdSet&);
@@ -185,6 +199,7 @@ private:
     DefReturnResult func_lowercase(CmdSet&);
     DefReturnResult func_random(CmdSet&);
     DefReturnResult func_fileexists(CmdSet&);
+    DefReturnResult func_strfind(CmdSet&);
 
     // list functions
     DefReturnResult func_lpushback(CmdSet&);

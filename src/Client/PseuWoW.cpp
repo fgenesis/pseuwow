@@ -92,7 +92,8 @@ PseuInstance::~PseuInstance()
     log_close();
 }
 
-bool PseuInstance::Init(void) {
+bool PseuInstance::Init(void)
+{
     log_prepare("logfile.txt",this);
     log("");
     log("--- Initializing Instance ---");
@@ -105,11 +106,14 @@ bool PseuInstance::Init(void) {
     srand((unsigned)time(NULL));
     RAND_set_rand_method(RAND_SSLeay()); // init openssl randomizer
 
-        _scp=new DefScriptPackage();
+    _scp=new DefScriptPackage();
     _scp->SetParentMethod((void*)this);
-        _conf=new PseuInstanceConf();
+    _conf=new PseuInstanceConf();
 
     _scp->SetPath(_scpdir);
+    _scp->SetLog(logdetail); // does anyone have an idea why log() is not accepted here? 
+    _scp->SetDebugLog(logdebug);
+    _scp->SetErrorLog(logerror);
 
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);

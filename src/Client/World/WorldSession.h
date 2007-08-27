@@ -94,6 +94,7 @@ private:
     void _HandleMotdOpcode(WorldPacket& recvPacket);
     void _HandleNotificationOpcode(WorldPacket& recvPacket);
 
+    // helper functions to keep SMSG_(COMPRESSED_)UPDATE_OBJECT easy to handle
 	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode
     void _ValuesUpdate(uint64 uguid, WorldPacket& recvPacket); // ...
     void _QueryObjectInfo(uint64 guid);

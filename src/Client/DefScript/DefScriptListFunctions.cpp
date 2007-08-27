@@ -174,20 +174,22 @@ DefReturnResult DefScriptPackage::func_lindex(CmdSet& Set)
 }
 
 // clean list: remove every element that matches @def
-// use this function only to remove empty straings from a list
+// use _only_ this function to remove empty strings from a list
 DefReturnResult DefScriptPackage::func_lclean(CmdSet& Set)
 {
     unsigned int r=0;
     DefList *l = lists.GetNoCreate(_NormalizeVarName(Set.arg[0],Set.myname));
     if(!l)
         return "";
-    for(DefList::iterator i=l->begin(); i!=l->end(); i++)
+    for(DefList::iterator i=l->begin(); i!=l->end(); )
     {
         if(*i == Set.defaultarg)
         {
-            l->erase(i);
+            i = l->erase(i);
             r++;
+            continue;
         }
+        i++;
     }
     return toString((uint64)r);
 }

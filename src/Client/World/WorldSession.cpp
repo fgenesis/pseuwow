@@ -204,6 +204,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_HEARTBEAT, &WorldSession::_HandleMovementOpcode},
         {MSG_MOVE_FALL_LAND, &WorldSession::_HandleMovementOpcode},
         {MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
+
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
         {SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
         {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
@@ -368,16 +369,17 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         }
         bool char_found=false;
 
-        for(unsigned int i=0;i<num;i++){
-        logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Area: %s",
-            plr[i]._name.c_str(),
-            plr[i]._level,
-            GetDBMgr().GetRaceName(plr[i]._race).c_str(),
-            GetDBMgr().GetClassName_(plr[i]._class).c_str(),
-            GetDBMgr().GetMapName(plr[i]._mapId).c_str(),
-            GetDBMgr().GetAreaName(plr[i]._zoneId).c_str());
-                logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
-                        plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
+        for(unsigned int i=0;i<num;i++)
+        {
+            logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Area: %s",
+                plr[i]._name.c_str(),
+                plr[i]._level,
+                GetDBMgr().GetRaceName(plr[i]._race).c_str(),
+                GetDBMgr().GetClassName_(plr[i]._class).c_str(),
+                GetDBMgr().GetMapName(plr[i]._mapId).c_str(),
+                GetDBMgr().GetAreaName(plr[i]._zoneId).c_str());
+            logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
+            plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
         for(unsigned int inv=0;inv<20;inv++)
         {
             if(plr[i]._items[inv].displayId)
@@ -385,32 +387,36 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         }
         if(plr[i]._name==GetInstance()->GetConf()->charname)
         {
-                        char_found=true;
-                        _myGUID=plr[i]._guid;
+            char_found=true;
+            _myGUID=plr[i]._guid;
+            GetInstance()->GetScripts()->variables.Set("@myguid",toString(plr[i]._guid));
             GetInstance()->GetScripts()->variables.Set("@myrace",toString(plr[i]._race));
-                }
+        }
 
         }
-        if(!char_found){
-                logerror("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
-                GetInstance()->SetError();
-                return;
-        } else {
-                log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
+        if(!char_found)
+        {
+            logerror("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
+            GetInstance()->SetError();
+            return;
+        }
+        else
+        {
+            log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
 
-                // create the character and add it to the objmgr.
-                // note: this is the only object that has to stay in memory unless its explicitly deleted by the server!
-                // that means even if the server sends create object with that guid, do NOT recreate it!!
-                MyCharacter *my = new MyCharacter();
-                my->Create(_myGUID);
-                objmgr.Add(my);
+            // create the character and add it to the objmgr.
+            // note: this is the only object that has to stay in memory unless its explicitly deleted by the server!
+            // that means even if the server sends create object with that guid, do NOT recreate it!!
+            MyCharacter *my = new MyCharacter();
+            my->Create(_myGUID);
+            objmgr.Add(my);
 
-        // TODO: initialize the world here, and load required maps.
-        // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!
+            // TODO: initialize the world here, and load required maps.
+            // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!
 
-                WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
-                pkt << _myGUID;
-                SendWorldPacket(pkt);
+            WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
+            pkt << _myGUID;
+            SendWorldPacket(pkt);
         }
 }
 
@@ -535,6 +541,21 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
             else if(msg.find("Genesis")!=std::string::npos || msg.find("genesis")!=std::string::npos)
                 SendChatMessage(CHAT_MSG_YELL,lang,"False.Genesis, they are calling you!! Come here, master xD","");
         }
+    }
+
+    // temporaray implementation of custom script to handle recieved chat messages
+    // TODO: needs to be replaced later by script hooks
+    // TODO: also _onwhisper must be replaced by this!
+    if(!isCmd && GetInstance()->GetScripts()->GetScript("_onchatmessage"))
+    {
+        DEBUG(logdebug("DefScript chat handler found, executing _onchatmessage"));
+        CmdSet Set;
+        Set.arg[0] = toString(type);
+        Set.arg[1] = toString(lang);
+        Set.arg[2] = toString(target_guid);
+        Set.arg[3] = channel;
+        Set.defaultarg = GetInstance()->GetScripts()->SecureString(msg);
+        GetInstance()->GetScripts()->RunScript("_onchatmessage",&Set);
     }
 
     if(isCmd)
