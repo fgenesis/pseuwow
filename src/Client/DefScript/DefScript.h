@@ -4,6 +4,7 @@
 
 #include <map>
 #include <deque>
+#include <fstream>
 #include "VarSet.h"
 #include "DynamicEvent.h"
 #include "ListStorage.h"
@@ -160,6 +161,7 @@ private:
     std::map<std::string,unsigned char> scriptPermissionMap;
     DefScriptFunctionTable _functable;
     _slog_func _slog,_serrorlog,_sdebuglog;
+    std::fstream hLogfile;
 
     // Usable internal basic functions:
     DefReturnResult func_default(CmdSet&);

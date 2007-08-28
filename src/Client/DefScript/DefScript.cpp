@@ -25,6 +25,8 @@ DefScriptPackage::DefScriptPackage()
     SetLog(printf);
     SetDebugLog(printf);
     SetErrorLog(printf);
+    hLogfile.open("DefScriptLog.txt",std::ios_base::out);
+    hLogfile << "DefScript engine execution log, compilation date: " __DATE__ "  " __TIME__ "\n\n" ;
     _eventmgr=new DefScript_DynamicEventMgr(this);
     _InitFunctions();
 #   ifdef USING_DEFSCRIPT_EXTENSIONS
@@ -36,7 +38,8 @@ DefScriptPackage::~DefScriptPackage()
 {
     if(_eventmgr)
         delete _eventmgr;
-	Clear();	
+	Clear();
+    hLogfile.close();
 }
 
 void DefScriptPackage::Log(const char* fmt,...)
@@ -944,16 +947,12 @@ std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string s
 DefReturnResult DefScriptPackage::Interpret(CmdSet& Set)
 {
     // TODO: remove this debug block again as soon as the interpreter bugs are fixed.
-#   ifdef DEF_DEBUG_SCRIPT_CALLS
-        printf("DefScriptPackage::Interpret(), pSet=0x%X\n",&Set);
-        printf("cmd = '%s'\n",Set.cmd.c_str());
-        unsigned int ctr=0;
-        for(_CmdSetArgMap::iterator i=Set.arg.begin(); i!=Set.arg.end(); i++)
-        {
-            printf("arg[%u] = '%s'\n",ctr++,i->second.c_str());
-        }
-        printf("defaultarg = '%s'\n",Set.defaultarg.c_str());
-#    endif
+    hLogfile << "PARENT: '" << Set.caller << "'\n";
+    hLogfile << "cmd = '" << Set.cmd << "'\n";
+    unsigned int ctr=0;
+    for(_CmdSetArgMap::iterator i=Set.arg.begin(); i!=Set.arg.end(); i++)
+        hLogfile << "arg[" << ctr++ << "] = '" << i->second << "'\n";
+    hLogfile << "defaultarg = '" << Set.defaultarg << "'\n\n";
 
     DefReturnResult result;
 
