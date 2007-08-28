@@ -350,7 +350,11 @@ DefReturnResult DefScriptPackage::func_equal(CmdSet& Set)
         result=stringToLower(Set.defaultarg)==stringToLower(Set.arg[0]);
     }
     result=Set.defaultarg==Set.arg[0];
-    _DEFSC_DEBUG(printf("DEFSCRIPT: func_equal: ['%s'=='%s'] = %s\n",Set.arg[0].c_str(),Set.defaultarg.c_str(),result?"true":"false"));
+
+    // for debugging
+    char tmp[500];
+    sprintf(tmp,"DEFSCRIPT: func_equal: ['%s'=='%s'] = %s\n",Set.arg[0].c_str(),Set.defaultarg.c_str(),result?"true":"false");
+    hLogfile << tmp;
     return result;
 }
 
