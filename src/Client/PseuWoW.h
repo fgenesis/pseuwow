@@ -92,7 +92,6 @@ public:
     inline void Stop(void) { _stop = true; }
     inline bool Stopped(void) { return _stop; }
     inline void SetFastQuit(bool q=true) { _fastquit=true; }
-    void Quit(void);
     void Run(void);
     void Update(void);
     void Sleep(uint32 msecs);

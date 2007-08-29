@@ -7,10 +7,41 @@
 
 enum AuthCmd
 {
+    //AUTH_NO_CMD                 = 0xFF,
     AUTH_LOGON_CHALLENGE        = 0x00,
     AUTH_LOGON_PROOF            = 0x01,
+    //AUTH_RECONNECT_CHALLENGE    = 0x02,
+    //AUTH_RECONNECT_PROOF        = 0x03,
+    //update srv =4
     REALM_LIST                  = 0x10,
+    XFER_INITIATE               = 0x30,
+    XFER_DATA                   = 0x31,
+    XFER_ACCEPT                 = 0x32,
+    XFER_RESUME                 = 0x33,
+    XFER_CANCEL                 = 0x34
 };
+
+enum eAuthResults
+{
+    REALM_AUTH_SUCCESS = 0,
+    REALM_AUTH_FAILURE=0x01,                                ///< Unable to connect
+    REALM_AUTH_UNKNOWN1=0x02,                               ///< Unable to connect
+    REALM_AUTH_ACCOUNT_BANNED=0x03,                         ///< This <game> account has been closed and is no longer available for use. Please go to <site>/banned.html for further information.
+    REALM_AUTH_NO_MATCH=0x04,                               ///< The information you have entered is not valid. Please check the spelling of the account name and password. If you need help in retrieving a lost or stolen password, see <site> for more information
+    REALM_AUTH_UNKNOWN2=0x05,                               ///< The information you have entered is not valid. Please check the spelling of the account name and password. If you need help in retrieving a lost or stolen password, see <site> for more information
+    REALM_AUTH_ACCOUNT_IN_USE=0x06,                         ///< This account is already logged into <game>. Please check the spelling and try again.
+    REALM_AUTH_PREPAID_TIME_LIMIT=0x07,                     ///< You have used up your prepaid time for this account. Please purchase more to continue playing
+    REALM_AUTH_SERVER_FULL=0x08,                            ///< Could not log in to <game> at this time. Please try again later.
+    REALM_AUTH_WRONG_BUILD_NUMBER=0x09,                     ///< Unable to validate game version. This may be caused by file corruption or interference of another program. Please visit <site> for more information and possible solutions to this issue.
+    REALM_AUTH_UPDATE_CLIENT=0x0a,                          ///< Downloading
+    REALM_AUTH_UNKNOWN3=0x0b,                               ///< Unable to connect
+    REALM_AUTH_ACCOUNT_FREEZED=0x0c,                        ///< This <game> account has been temporarily suspended. Please go to <site>/banned.html for further information
+    REALM_AUTH_UNKNOWN4=0x0d,                               ///< Unable to connect
+    REALM_AUTH_UNKNOWN5=0x0e,                               ///< Connected.
+    REALM_AUTH_PARENTAL_CONTROL=0x0f                        ///< Access to this account has been blocked by parental controls. Your settings may be changed in your account preferences at <site>
+};
+
+#define ChunkSize 2048
 
 struct SRealmHeader
 {
@@ -42,8 +73,8 @@ struct AuthHandler
 struct sAuthLogonChallenge_S
 {
     uint8   cmd;
-    uint8   error;
     uint8   unk2;
+    uint8   error;
     uint8   B[32];
     uint8   g_len;
     uint8   g[1];
@@ -66,6 +97,8 @@ RealmSession::RealmSession(PseuInstance* instance)
     _instance = instance;
     _socket = NULL;
     _mustdie = false;
+    _filetransfer = false;
+    _file_size = 0;
     _sh.SetAutoCloseSockets(false);
 }
 
@@ -121,6 +154,8 @@ AuthHandler *RealmSession::_GetAuthHandlerTable(void) const
         {AUTH_LOGON_CHALLENGE,&RealmSession::_HandleLogonChallenge},
         {AUTH_LOGON_PROOF,&RealmSession::_HandleLogonProof},
         {REALM_LIST,&RealmSession::_HandleRealmList},
+        {XFER_INITIATE,&RealmSession::_HandleTransferInit},
+        {XFER_DATA,&RealmSession::_HandleTransferData},
         {0,NULL}
     };
     return table;
@@ -136,6 +171,7 @@ void RealmSession::Update(void)
     AuthHandler *table = _GetAuthHandlerTable();
     ByteBuffer *pkt;
     uint8 cmd;
+    bool valid = true;
 
     if( _sh.GetCount() ) // the socket will remove itself from the handler if it got closed
         _sh.Select(0,0);
@@ -149,26 +185,43 @@ void RealmSession::Update(void)
 
     while(pktQueue.size())
     {
+        valid = false;
         pkt = pktQueue.next();
         cmd = (*pkt)[0];
-        for(uint8 i=0;table[i].handler!=NULL;i++)
+
+        // this is a dirty hack for oversize/splitted up packets that are buffered wrongly by realmd
+        if(_filetransfer)
         {
-            if(table[i].cmd==cmd)
+            _HandleTransferData(*pkt);
+        }
+        // if we dont expect a file transfer select packets as usual
+        else
+        {
+            for(uint8 i=0;table[i].handler!=NULL;i++)
             {
-                (this->*table[i].handler)(*pkt);
-                if(pkt->rpos() < pkt->size())
+                if(table[i].cmd==cmd)
                 {
-                    uint32 len = pkt->size() - pkt->rpos();
-                    uint8 *data = new uint8[len];
-                    pkt->read(data,len); // if we have data crap left on the buf, delete it
-                    logdebug("Data left on RealmSocket, Hexdump:");
-                    logdebug(toHexDump(data,len).c_str());
-                    delete [] data;
+                    valid = true;
+                    (this->*table[i].handler)(*pkt);
+                    if(pkt->rpos() < pkt->size())
+                    {
+                        uint32 len = pkt->size() - pkt->rpos();
+                        uint8 *data = new uint8[len];
+                        pkt->read(data,len); // if we have data crap left on the buf, delete it
+                        logdebug("Data left on RealmSocket, Hexdump:");
+                        logdebug(toHexDump(data,len).c_str());
+                        delete [] data;
+                    }
+                    break;
                 }
-                delete pkt;
+            }
+            if(!valid)
+            {
+                logerror("Invalid realm packet, unknown opcode 0x%X",cmd);
+                //logerror(toHexDump((uint8*)pkt->contents(),pkt->size()).c_str());
             }
         }
-
+        delete pkt;
     }
 }
 
@@ -251,7 +304,7 @@ void RealmSession::SendLogonChallenge(void)
     if( GetInstance()->GetConf()->accname.empty() || GetInstance()->GetConf()->clientversion_string.empty()
         || GetInstance()->GetConf()->clientbuild==0 || GetInstance()->GetConf()->clientlang.empty() )
     {
-        logcritical("Missing data, can't send Login to Realm Server!");
+        logcritical("Missing data, can't send Login challenge to Realm Server! (check your conf files)");
         GetInstance()->SetError();
         return;
     }
@@ -279,7 +332,7 @@ void RealmSession::SendLogonChallenge(void)
 void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
 {
     logdebug("RealmSocket: Got AUTH_LOGON_CHALLENGE [%u of %u bytes]",pkt.size(),sizeof(sAuthLogonChallenge_S));
-    if(pkt.size() < sizeof(sAuthLogonChallenge_S))
+    if(pkt.size() < 3)
     {
         logerror("AUTH_LOGON_CHALLENGE: Recieved incorrect/unknown packet. Hexdump:");
         DumpInvalidPacket(pkt);
@@ -287,22 +340,23 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
     }
 
     sAuthLogonChallenge_S lc;
-    pkt.read((uint8*)&lc, sizeof(sAuthLogonChallenge_S));
+    lc.error = pkt[2]; // pre-set error (before copying whole challenge)
 
     switch (lc.error)
     {
     case 4:
-        log("Realm Server did not find account \"%s\"!",GetInstance()->GetConf()->accname.c_str());
+        logerror("Realm Server did not find account \"%s\"!",GetInstance()->GetConf()->accname.c_str());
         break;
     case 6:
-        log("Account \"%s\" is already logged in!",GetInstance()->GetConf()->accname.c_str());
+        logerror("Account \"%s\" is already logged in!",GetInstance()->GetConf()->accname.c_str());
         // TODO: wait a certain amount of time before reconnecting? conf option?
         break;
     case 9:
-        log("Realm Server doesn't accept this version!");
+        logerror("Realm Server doesn't accept this version!");
         break;
     case 0:
         {
+            pkt.read((uint8*)&lc, sizeof(sAuthLogonChallenge_S));
             logdetail("Login successful, now calculating proof packet...");
 
             // now lets start calculating
@@ -441,7 +495,7 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
 void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
 {
     logdebug("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",pkt.size(),26);
-    if(pkt.size() < 26)
+    if(pkt.size() < 2)
     {
         logerror("AUTH_LOGON_PROOF: Recieved incorrect/unknown packet. Hexdump:");
         DumpInvalidPacket(pkt);
@@ -449,6 +503,32 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
             SetMustDie();
         return;
     }
+    uint8 error = pkt[1];
+
+    // handle error codes
+    switch(error)
+    {
+        case REALM_AUTH_UPDATE_CLIENT:
+            log("The realm server requested client update.");
+            return;
+
+        case REALM_AUTH_NO_MATCH:
+        case REALM_AUTH_UNKNOWN2:
+            logerror("Wrong password or invalid account information or authentication error");
+            return;
+
+        // cover all other cases. continue only if success. 
+        default:
+            if(error != REALM_AUTH_SUCCESS)
+            {
+                logerror("AUTH_LOGON_PROOF: unk error = 0x%X",error);
+                pkt.rpos(2);
+                SetMustDie();
+                return;
+            }
+    }
+    
+
     sAuthLogonProof_S lp;
     pkt.read((uint8*)&lp, 26); // the compiler didnt like 'sizeof(sAuthLogonProof_S)', said it was 28
     //printchex((char*)&lp, sizeof(sAuthLogonProof_S),true);
@@ -470,6 +550,126 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
             SetMustDie();
         else
             GetInstance()->SetError();
+    }
+}
+
+void RealmSession::_HandleTransferInit(ByteBuffer& pkt)
+{
+    _filebuf.clear();
+    _transbuf.clear();
+    _file_done = 0;
+    _filetransfer = true;
+
+    uint8 cmd;
+    uint8 type_size;
+    uint8 *type_str;
+
+    pkt >> cmd >> type_size;
+    type_str = new uint8[type_size+1];
+    type_str[type_size] = 0;
+    pkt.read(type_str,type_size);
+    pkt >> _file_size;
+    pkt.read(_file_md5,MD5_DIGEST_LENGTH);
+    logcustom(0,GREEN,"TransferInit [%s]: File size: "I64FMTD" KB (MD5: %s)", (char*)type_str, _file_size / 1024L, toHexDump(&_file_md5[0],MD5_DIGEST_LENGTH,false).c_str());
+    delete [] type_str;
+    ByteBuffer bb(1);
+    bb << uint8(XFER_ACCEPT);
+    SendRealmPacket(bb);
+    logdebug("XFER_ACCEPT sent");
+}
+
+void RealmSession::_HandleTransferData(ByteBuffer& pkt)
+{
+    if(!_file_size)
+    {
+        logerror("Realm server attempted to transfer a file, but didn't init!");
+        SetMustDie();
+        return;
+    }
+
+    uint8 cmd;
+    uint16 size;
+    uint8 *data;
+
+    _transbuf.append(pkt.contents(),pkt.size()); // append everything to the transfer buffer, which may also store incomplete bytes from the packet before
+    pkt.rpos(pkt.size()); // set rpos to the end of the packet to indicate that we used all data
+    
+    logdev("transbuf size=%u rpos=%u diff=%u",_transbuf.size(),_transbuf.rpos(),_transbuf.size() - _transbuf.rpos());
+
+    while( _transbuf.size() - _transbuf.rpos() >= 3) // 3 = sizeof(uint32)+sizeof(uint8)
+    {
+        _transbuf >> cmd >> size;
+        if(_transbuf.size()-_transbuf.rpos() < size)
+        {
+            _transbuf.rpos(_transbuf.rpos()-3); // read the header next time again
+            break; // packet parts missing, continue after recieving next packet
+        }
+        data = new uint8[size];
+        _transbuf.read(data,size);
+        _filebuf.append(data,size);
+        _file_done += size;
+        delete [] data;
+        float pct = ((float)_file_done / (float)_file_size * 100.0f);
+
+        // use better output formatting in debug level
+        if(GetInstance()->GetConf()->debug >= 2)
+            logdebug("Got data packet, %u data bytes. [%.2f%% done]  cmd 0x%X",size,pct,cmd);
+        else
+        {
+            _log_setcolor(true,GREEN);
+            printf("\r[%.2f%% done]",pct);
+            _log_resetcolor(true);
+        }
+        
+    }
+
+    // finalize file
+    if(_file_done >= _file_size)
+    {
+        log("");
+        log("File transfer finished.");
+        _filetransfer = false;
+        MD5Hash md5h;
+        md5h.Update((uint8*)_filebuf.contents(),_filebuf.size());
+        md5h.Finalize();
+        std::string md5hex = toHexDump(md5h.GetDigest(),md5h.GetLength(),false);
+        logdebug("MD5 hash: %s", md5hex.c_str());
+        if(!memcmp(_file_md5, md5h.GetDigest(), md5h.GetLength()))
+        {
+            std::fstream fh;
+            char namebuf[100];
+            sprintf(namebuf,"%u_%s.mpq",GetInstance()->GetConf()->clientbuild,GetInstance()->GetConf()->clientlang.c_str());
+            fh.open(namebuf,std::ios_base::out | std::ios_base::binary);
+            if(fh.is_open())
+            {
+                fh.write((const char*)_filebuf.contents(),_filebuf.size());
+                fh.close();
+                log("File saved as \"%s\"",namebuf);
+            }
+            else
+            {
+                logerror("Could not save \"%s\"",namebuf);
+            }
+        }
+        else
+        {
+            logerror("File corruption! Transfer failed! (MD5: %s",md5hex.c_str());
+        }
+        _transbuf.clear();
+
+        // client sends cancel after successful file transfer also
+        ByteBuffer bb(1);
+        bb << uint8(XFER_CANCEL);
+        SendRealmPacket(bb);
+
+        log("Now modify your conf files and restart PseuWoW.");
+        for(int8 x = 3; x > -1; x--) // add little delay
+        {
+            printf("exiting in... [%u]\r",x);
+            GetInstance()->Sleep(1000);
+        }
+        SetMustDie();
+        GetInstance()->Stop();
     }
 }
 
