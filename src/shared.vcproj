@@ -299,6 +299,9 @@
 					RelativePath=".\shared\Auth\md5.h">
 				</File>
 				<File
+					RelativePath=".\shared\Auth\MD5Hash.h">
+				</File>
+				<File
 					RelativePath=".\shared\Auth\Sha1.cpp">
 				</File>
 				<File
