@@ -54,12 +54,16 @@ std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 
 {
     if(format[field]=='i')
     {
+        if((*it).getInt(field) == 0)
+            return ""; // do not explicitly write int fields that are 0
         std::stringstream s;
         s << (*it).getInt(field);
         return s.str();
     }
     else if(format[field]=='f')
     {
+        if((*it).getFloat(field) == 0)
+            return ""; // do not explicitly write float fields that are 0
         std::stringstream s;
         s << (*it).getFloat(field);
         return s.str();
@@ -100,8 +104,8 @@ void OutSCP(char *fn, SCPStorageMap& scp)
 bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
-    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,AreaDataStorage; // will store the converted data from dbc files
-    DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable;
+    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,AreaDataStorage,ItemDisplayInfoStorage; // will store the converted data from dbc files
+    DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo;
     printf("Opening DBC archive...\n");
     MPQHelper mpq("dbc");
 
@@ -113,6 +117,7 @@ bool ConvertDBC(void)
     SoundEntries.openmem(mpq.ExtractFile("DBFilesClient\\SoundEntries.dbc"));
     Map.openmem(mpq.ExtractFile("DBFilesClient\\Map.dbc"));
     AreaTable.openmem(mpq.ExtractFile("DBFilesClient\\AreaTable.dbc"));
+    ItemDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\ItemDisplayInfo.dbc"));
     //...
     printf("DBC files opened.\n");
     //...
@@ -235,6 +240,21 @@ bool ConvertDBC(void)
         }
     }
 
+    printf("itemdisplayinfo..");
+    for(DBCFile::Iterator it = ItemDisplayInfo.begin(); it != ItemDisplayInfo.end(); ++it)
+    {
+        uint32 id = it->getUInt(ITEMDISPLAYINFO_ID);
+        for(uint32 field=ITEMDISPLAYINFO_ID; field < ITEMDISPLAYINFO_END; field++)
+        {
+            if(strlen(ItemDisplayInfoFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,ItemDisplayInfoFormat,field);
+                if(value.size()) // only store if not null
+                    ItemDisplayInfoStorage[id].push_back(std::string(ItemDisplayInfoFieldNames[field]) + "=" + value);
+            }
+        }
+    }
+
 
 
     //...
@@ -249,6 +269,7 @@ bool ConvertDBC(void)
     printf("sound.."); OutSCP(SCPDIR "/sound.scp",SoundDataStorage);
     printf("map.."); OutSCP(SCPDIR "/map.scp",MapDataStorage);
     printf("area.."); OutSCP(SCPDIR "/area.scp",AreaDataStorage);
+    printf("itemdisplayinfo."); OutSCP(SCPDIR "/itemdisplayinfo.scp",ItemDisplayInfoStorage);
     //...
     printf("DONE!\n");
 

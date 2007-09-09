@@ -258,4 +258,46 @@ static const char *AreaTableFormat = {
     "xxxxxxx"
 };
 
+enum ItemDisplayInfoEnum
+{
+    ITEMDISPLAYINFO_ID = 0,
+    ITEMDISPLAYINFO_MODEL_L = 1, // model file (left) (default)
+    ITEMDISPLAYINFO_MODEL_R = 2, // model file (right) (for example for shoulders)
+    ITEMDISPLAYINFO_NAME_L = 3, // (internal name?)
+    ITEMDISPLAYINFO_NAME_R = 4, // (internal name?)
+    ITEMDISPLAYINFO_ICON = 5, // icon filename
+    ITEMDISPLAYINFO_FLAG1 = 6, // must be some kind of flag. 0 - 5.
+    ITEMDISPLAYINFO_FLAG2 = 7, // some flag? 0, 1 or 2.
+    ITEMDISPLAYINFO_FLAG3 = 8, // some flag? 0 or 1.
+    ITEMDISPLAYINFO_FLAG4 = 9, // some flag? 0, 1 or 2.
+    ITEMDISPLAYINFO_FLAG5 = 10, // some flag? mostly 0, sometimes other values (for ex. polearms have 4081 ?!)
+    ITEMDISPLAYINFO_FLAGS = 11, // these is NOT the inventorytype...
+    ITEMDISPLAYINFO_HELM1 = 12, // only set if model is a helm. might be related to hair/ears/traits showing on or off.
+    ITEMDISPLAYINFO_HELM2 = 13, // ^ same.
+    ITEMDISPLAYINFO_AU = 14, // the following fields contain strings that end with AU, AL, HA, TU, etc.
+    ITEMDISPLAYINFO_AL = 15, // sometimes they are set, sometimes not.
+    ITEMDISPLAYINFO_HA = 16,
+    ITEMDISPLAYINFO_TU = 17,
+    ITEMDISPLAYINFO_TL = 18,
+    ITEMDISPLAYINFO_LU = 19,
+    ITEMDISPLAYINFO_LL = 20,
+    ITEMDISPLAYINFO_FO = 21,
+    ITEMDISPLAYINFO_UNK = 22, // mostly 0. quite sure this is not a string.
+
+    ITEMDISPLAYINFO_END = 23
+};
+
+static const char *ItemDisplayInfoFieldNames[] = {
+    "","model_l","model_r","name_l","name_r","icon","flag1","flag2","flag3","flag4", // 0-9
+    "flag5","flags","helm1","helm2","AU","AL","HA","TU","TL","LU", // 10-19
+    "LL","FO","unk", // 20-22
+    ""
+};
+
+static const char *ItemDisplayInfoFormat = {
+    "isssssiiii"
+    "iiiissssss"
+    "ssi"
+};
+
 #endif
