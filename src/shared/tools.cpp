@@ -192,9 +192,11 @@ uint32 GetFileSize(const char* sFileName)
     f.open(sFileName, std::ios_base::binary | std::ios_base::in);
     if (!f.good() || f.eof() || !f.is_open()) { return 0; }
     f.seekg(0, std::ios_base::beg);
-    std::ifstream::pos_type begin_pos = f.tellg();
+    std::ifstream::pos_type begin_pos = f.tellg(), end_pos;
     f.seekg(0, std::ios_base::end);
-    return f.tellg() - begin_pos;
+    end_pos = f.tellg();
+    f.close();
+    return end_pos - begin_pos;
 }
 
 // fix filenames for linux ( '/' instead of windows '\')
@@ -205,6 +207,7 @@ void _FixFileName(std::string& str)
             str[i]='/';
 }
 
+// extracts the file name from a given path
 std::string _PathToFileName(std::string str)
 {
     uint32 pathend = str.find_last_of("/\\");
