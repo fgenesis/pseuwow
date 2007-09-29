@@ -9,6 +9,7 @@
 #define OUTDIR "stuffextract"
 #define SCPDIR OUTDIR "/data/scp"
 #define MAPSDIR OUTDIR "/data/maps"
+#define SOUNDDIR OUTDIR "/data/sound"
 
 typedef std::map< uint32,std::list<std::string> > SCPStorageMap;
 
@@ -17,5 +18,6 @@ void OutSCP(char*, SCPStorageMap&);
 bool ConvertDBC(void);
 void ExtractMaps(void);
 void ExtractMapDependencies(void);
+void ExtractSoundFiles(void);
 
 #endif
