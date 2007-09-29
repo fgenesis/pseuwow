@@ -18,7 +18,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="..\obj\IrrDebug"
 			IntermediateDirectory="..\obj\IrrDebug"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -47,7 +47,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;zlib"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src\dep\include\zlib&quot;;&quot;$(SolutionDir)\src\dep\include\irrlicht&quot;;&quot;$(SolutionDir)\src\dep\include\DXSDK\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;IRRLICHT_EXPORTS;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -72,23 +72,13 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				UseLibraryDependencyInputs="true"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib glu32.lib opengl32.lib"
-				OutputFile="..\..\bin\Win32-visualstudio\Irrlicht.dll"
-				LinkIncremental="2"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libci.lib"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\obj\IrrDebug\Irrlicht.pdb"
-				ImportLibrary="..\..\lib\Win32-visualstudio\Irrlicht.lib"
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				OutputFile="$(SolutionDir)/src/dep/lib/debug/irrlicht.lib"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)/src/dep/lib/static&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -100,12 +90,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -113,7 +97,7 @@
 			Name="Release|Win32"
 			OutputDirectory="obj\IrrRelease"
 			IntermediateDirectory="obj\IrrRelease"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -145,7 +129,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories="..\..\include;zlib"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src\dep\include\zlib&quot;;&quot;$(SolutionDir)\src\dep\include\irrlicht&quot;;&quot;$(SolutionDir)\src\dep\include\DXSDK\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;IRRLICHT_EXPORTS;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -173,22 +157,13 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib glu32.lib opengl32.lib"
-				OutputFile="..\..\bin\Win32-visualstudio\Irrlicht.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libci.lib"
-				GenerateDebugInformation="false"
-				ProgramDatabaseFile="..\obj\IrrRelease\Irrlicht.pdb"
-				ImportLibrary="..\..\lib\Win32-visualstudio\Irrlicht.lib"
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				OutputFile="$(SolutionDir)/src/dep/lib/release/irrlicht.lib"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)/src/dep/lib/static&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -200,12 +175,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -213,7 +182,7 @@
 			Name="Release - Fast FPU|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -247,7 +216,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="0"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="..\..\include;zlib"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src\dep\include\zlib&quot;;&quot;$(SolutionDir)\src\dep\include\irrlicht&quot;;&quot;$(SolutionDir)\src\dep\include\DXSDK\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;IRRLICHT_EXPORTS;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -278,22 +247,13 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="..\..\bin\Win32-visualstudio\Irrlicht.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libci.lib"
-				GenerateDebugInformation="false"
-				ProgramDatabaseFile="..\obj\IrrRelease\Irrlicht.pdb"
-				ImportLibrary="..\..\lib\Win32-visualstudio\Irrlicht.lib"
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				OutputFile="$(SolutionDir)/src/dep/lib/dd/irrlicht.lib"
+				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -303,12 +263,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2256,86 +2210,6 @@
 			<Filter
 				Name="extern"
 				>
-				<Filter
-					Name="zlib"
-					>
-					<File
-						RelativePath="zlib\adler32.c"
-						>
-					</File>
-					<File
-						RelativePath=".\zlib\compress.c"
-						>
-					</File>
-					<File
-						RelativePath=".\zlib\crc32.c"
-						>
-					</File>
-					<File
-						RelativePath=".\zlib\crc32.h"
-						>
-					</File>
-					<File
-						RelativePath=".\zlib\deflate.c"
-						>
-					</File>
-					<File
-						RelativePath="zlib\deflate.h"
-						>
-					</File>
-					<File
-						RelativePath="zlib\inffast.c"
-						>
-					</File>
-					<File
-						RelativePath="zlib\inffast.h"
-						>
-					</File>
-					<File
-						RelativePath="zlib\inffixed.h"
-						>
-					</File>
-					<File
-						RelativePath="zlib\inflate.c"
-						>
-					</File>
-					<File
-						RelativePath="zlib\inftrees.c"
-						>
-					</File>
-					<File
-						RelativePath="zlib\inftrees.h"
-						>
-					</File>
-					<File
-						RelativePath="zlib\trees.c"
-						>
-					</File>
-					<File
-						RelativePath="zlib\trees.h"
-						>
-					</File>
-					<File
-						RelativePath="zlib\uncompr.c"
-						>
-					</File>
-					<File
-						RelativePath="zlib\zconf.h"
-						>
-					</File>
-					<File
-						RelativePath="zlib\zlib.h"
-						>
-					</File>
-					<File
-						RelativePath="zlib\zutil.c"
-						>
-					</File>
-					<File
-						RelativePath="zlib\zutil.h"
-						>
-					</File>
-				</Filter>
 				<Filter
 					Name="jpeglib"
 					>

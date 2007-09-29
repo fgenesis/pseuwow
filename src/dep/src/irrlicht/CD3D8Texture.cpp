@@ -22,7 +22,7 @@
 #include "d3dx8tex.h"
 
 #ifdef _IRR_USE_D3DXFilterTexture_
-#pragma comment (lib, "d3dx8.lib")
+//#pragma comment (lib, "d3dx8.lib")
 #endif // _IRR_USE_D3DXFilterTexture_
 
 namespace irr

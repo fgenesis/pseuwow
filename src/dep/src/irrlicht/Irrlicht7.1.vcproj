@@ -1,25 +1,49 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="Irrlicht"
 	ProjectGUID="{E08E042A-6C45-411B-92BE-3CC31331019F}"
 	RootNamespace="Irrlicht"
-	SccProjectName=""
-	SccLocalPath="">
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\Debug/Irrlicht.tlb"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -32,243 +56,306 @@
 				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(SolutionDir)/src/dep/lib/debug/irrlicht.lib"
-				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
-				IgnoreDefaultLibraryNames="libci.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\Debug/Irrlicht.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
-				Culture="3079"/>
+				Culture="3079"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				OutputFile="$(SolutionDir)/src/dep/lib/debug/irrlicht.lib"
+				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
+				IgnoreDefaultLibraryNames="libci.lib"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			WholeProgramOptimization="TRUE">
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\Release/Irrlicht.tlb"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="1"
-				EnableIntrinsicFunctions="FALSE"
-				ImproveFloatingPointConsistency="FALSE"
+				EnableIntrinsicFunctions="false"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
+				OmitFramePointers="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
 				PreprocessorDefinitions="WIN32"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
+				StringPooling="true"
+				ExceptionHandling="0"
 				RuntimeLibrary="0"
-				BufferSecurityCheck="FALSE"
-				EnableFunctionLevelLinking="FALSE"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="false"
 				EnableEnhancedInstructionSet="0"
 				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="0"/>
+				SuppressStartupBanner="true"
+				DebugInformationFormat="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(SolutionDir)/src/dep/lib/release/irrlicht.lib"
-				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
-				IgnoreDefaultLibraryNames="libci.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\Release/Irrlicht.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="3079"/>
+				Culture="3079"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				OutputFile="$(SolutionDir)/src/dep/lib/release/irrlicht.lib"
+				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
+				IgnoreDefaultLibraryNames="libci.lib"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Relase - Fast FPU|Win32"
 			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			WholeProgramOptimization="TRUE">
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\Release/Irrlicht.tlb"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/QIfist /Oa
-"
+				AdditionalOptions="/QIfist /Oa&#x0D;&#x0A;"
 				Optimization="3"
-				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
-				ImproveFloatingPointConsistency="FALSE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="FALSE"
+				OmitFramePointers="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
 				PreprocessorDefinitions="WIN32"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
-				RuntimeLibrary="4"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
 				StructMemberAlignment="0"
-				BufferSecurityCheck="FALSE"
-				TreatWChar_tAsBuiltInType="TRUE"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="true"
 				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="0"
-				CallingConvention="1"/>
+				CallingConvention="1"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				IgnoreDefaultLibraryNames="libci.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\Release/Irrlicht.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="3079"/>
+				Culture="3079"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				IgnoreDefaultLibraryNames="libci.lib"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release - Fast FPU DebugInfo|Win32"
 			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			WholeProgramOptimization="TRUE">
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\Release/Irrlicht.tlb"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/QIfist"
 				Optimization="3"
-				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
-				ImproveFloatingPointConsistency="FALSE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="FALSE"
+				OmitFramePointers="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
 				PreprocessorDefinitions="WIN32"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
-				RuntimeLibrary="4"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
 				StructMemberAlignment="3"
-				BufferSecurityCheck="FALSE"
-				EnableFunctionLevelLinking="TRUE"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="0"
-				TreatWChar_tAsBuiltInType="TRUE"
+				TreatWChar_tAsBuiltInType="true"
 				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CallingConvention="1"/>
+				CallingConvention="1"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				IgnoreDefaultLibraryNames="libci.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\Release/Irrlicht.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="3079"/>
+				Culture="3079"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				IgnoreDefaultLibraryNames="libci.lib"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -276,1791 +363,2354 @@
 	<Files>
 		<Filter
 			Name="include"
-			Filter="">
+			>
 			<File
-				RelativePath=".\..\..\include\IEventReceiver.h">
+				RelativePath=".\..\..\include\IEventReceiver.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\ILogger.h">
+				RelativePath=".\..\..\include\ILogger.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\IOSOperator.h">
+				RelativePath=".\..\..\include\IOSOperator.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\IrrCompileConfig.h">
+				RelativePath=".\..\..\include\IrrCompileConfig.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\irrlicht.h">
+				RelativePath=".\..\..\include\irrlicht.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\IrrlichtDevice.h">
+				RelativePath=".\..\..\include\IrrlichtDevice.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\irrTypes.h">
+				RelativePath=".\..\..\include\irrTypes.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\ITimer.h">
+				RelativePath=".\..\..\include\ITimer.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\IUnknown.h">
+				RelativePath=".\..\..\include\IUnknown.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\Keycodes.h">
+				RelativePath=".\..\..\include\Keycodes.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\SIrrCreationParameters.h">
+				RelativePath=".\..\..\include\SIrrCreationParameters.h"
+				>
 			</File>
 			<File
-				RelativePath=".\..\..\include\SKeyMap.h">
+				RelativePath=".\..\..\include\SKeyMap.h"
+				>
 			</File>
 			<Filter
 				Name="video"
-				Filter="">
+				>
 				<File
-					RelativePath=".\..\..\include\EDriverTypes.h">
+					RelativePath=".\..\..\include\EDriverTypes.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGPUProgrammingServices.h">
+					RelativePath=".\..\..\include\IGPUProgrammingServices.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IImage.h">
+					RelativePath=".\..\..\include\IImage.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IImageLoader.h">
+					RelativePath=".\..\..\include\IImageLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMaterialRenderer.h">
+					RelativePath=".\..\..\include\IMaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMaterialRendererServices.h">
+					RelativePath=".\..\..\include\IMaterialRendererServices.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IShaderConstantSetCallBack.h">
+					RelativePath=".\..\..\include\IShaderConstantSetCallBack.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ITexture.h">
+					RelativePath=".\..\..\include\ITexture.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IVideoDriver.h">
+					RelativePath=".\..\..\include\IVideoDriver.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IVideoModeList.h">
+					RelativePath=".\..\..\include\IVideoModeList.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\S3DVertex.h">
+					RelativePath=".\..\..\include\S3DVertex.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SColor.h">
+					RelativePath=".\..\..\include\SColor.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SExposedVideoData.h">
+					RelativePath=".\..\..\include\SExposedVideoData.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SLight.h">
+					RelativePath=".\..\..\include\SLight.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SMaterial.h">
+					RelativePath=".\..\..\include\SMaterial.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="core"
-				Filter="">
+				>
 				<File
-					RelativePath=".\..\..\include\aabbox3d.h">
+					RelativePath=".\..\..\include\aabbox3d.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\coreutil.h">
+					RelativePath="..\..\include\coreutil.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\dimension2d.h">
+					RelativePath=".\..\..\include\dimension2d.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\fast_atof.h">
+					RelativePath="..\..\include\fast_atof.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\heapsort.h">
+					RelativePath=".\..\..\include\heapsort.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\irrAllocator.h">
+					RelativePath=".\..\..\include\irrAllocator.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\irrArray.h">
+					RelativePath=".\..\..\include\irrArray.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\irrList.h">
+					RelativePath=".\..\..\include\irrList.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\irrMap.h">
+					RelativePath="..\..\include\irrMap.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\irrMath.h">
+					RelativePath=".\..\..\include\irrMath.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\irrString.h">
+					RelativePath=".\..\..\include\irrString.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\line2d.h">
+					RelativePath=".\..\..\include\line2d.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\line3d.h">
+					RelativePath=".\..\..\include\line3d.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\matrix4.h">
+					RelativePath=".\..\..\include\matrix4.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\plane3d.h">
+					RelativePath=".\..\..\include\plane3d.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\position2d.h">
+					RelativePath=".\..\..\include\position2d.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\quaternion.h">
+					RelativePath=".\..\..\include\quaternion.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\rect.h">
+					RelativePath=".\..\..\include\rect.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\triangle3d.h">
+					RelativePath=".\..\..\include\triangle3d.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\vector2d.h">
+					RelativePath=".\..\..\include\vector2d.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\vector3d.h">
+					RelativePath=".\..\..\include\vector3d.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="io"
-				Filter="">
+				>
 				<File
-					RelativePath=".\..\..\include\IAttributeExchangingObject.h">
+					RelativePath=".\..\..\include\IAttributeExchangingObject.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IAttributes.h">
+					RelativePath=".\..\..\include\IAttributes.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IFileList.h">
+					RelativePath=".\..\..\include\IFileList.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IFileSystem.h">
+					RelativePath=".\..\..\include\IFileSystem.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IReadFile.H">
+					RelativePath=".\..\..\include\IReadFile.H"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\irrXML.h">
+					RelativePath=".\..\..\include\irrXML.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IWriteFile.h">
+					RelativePath=".\..\..\include\IWriteFile.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IXMLReader.h">
+					RelativePath=".\..\..\include\IXMLReader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IXMLWriter.h">
+					RelativePath=".\..\..\include\IXMLWriter.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="scene"
-				Filter="">
+				>
 				<File
-					RelativePath=".\..\..\include\ESceneNodeAnimatorTypes.h">
+					RelativePath=".\..\..\include\ESceneNodeAnimatorTypes.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ESceneNodeTypes.h">
+					RelativePath=".\..\..\include\ESceneNodeTypes.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IAnimatedMesh.h">
+					RelativePath=".\..\..\include\IAnimatedMesh.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IAnimatedMeshMD2.h">
+					RelativePath=".\..\..\include\IAnimatedMeshMD2.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\IAnimatedMeshMD3.h">
+					RelativePath="..\..\include\IAnimatedMeshMD3.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IAnimatedMeshMS3D.h">
+					RelativePath=".\..\..\include\IAnimatedMeshMS3D.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IAnimatedMeshSceneNode.h">
+					RelativePath=".\..\..\include\IAnimatedMeshSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IAnimatedMeshX.h">
+					RelativePath=".\..\..\include\IAnimatedMeshX.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IBillboardSceneNode.h">
+					RelativePath=".\..\..\include\IBillboardSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ICameraSceneNode.h">
+					RelativePath=".\..\..\include\ICameraSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IDummyTransformationSceneNode.h">
+					RelativePath=".\..\..\include\IDummyTransformationSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ILightSceneNode.h">
+					RelativePath=".\..\..\include\ILightSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMesh.h">
+					RelativePath=".\..\..\include\IMesh.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMeshBuffer.h">
+					RelativePath=".\..\..\include\IMeshBuffer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMeshCache.h">
+					RelativePath=".\..\..\include\IMeshCache.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMeshLoader.h">
+					RelativePath=".\..\..\include\IMeshLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMeshManipulator.h">
+					RelativePath=".\..\..\include\IMeshManipulator.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMeshSceneNode.h">
+					RelativePath=".\..\..\include\IMeshSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IMetaTriangleSelector.h">
+					RelativePath=".\..\..\include\IMetaTriangleSelector.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IParticleAffector.h">
+					RelativePath=".\..\..\include\IParticleAffector.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IParticleEmitter.h">
+					RelativePath=".\..\..\include\IParticleEmitter.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IParticleSystemSceneNode.h">
+					RelativePath=".\..\..\include\IParticleSystemSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IQ3LevelMesh.h">
+					RelativePath=".\..\..\include\IQ3LevelMesh.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\IQ3Shader.h">
+					RelativePath="..\..\include\IQ3Shader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneCollisionManager.h">
+					RelativePath=".\..\..\include\ISceneCollisionManager.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneManager.h">
+					RelativePath=".\..\..\include\ISceneManager.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneNode.h">
+					RelativePath=".\..\..\include\ISceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneNodeAnimator.h">
+					RelativePath=".\..\..\include\ISceneNodeAnimator.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneNodeAnimatorCollisionResponse.h">
+					RelativePath=".\..\..\include\ISceneNodeAnimatorCollisionResponse.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneNodeAnimatorFactory.h">
+					RelativePath=".\..\..\include\ISceneNodeAnimatorFactory.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneNodeFactory.h">
+					RelativePath=".\..\..\include\ISceneNodeFactory.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ISceneNodeMeshLoader.h">
+					RelativePath=".\..\..\include\ISceneNodeMeshLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IShadowVolumeSceneNode.h">
+					RelativePath=".\..\..\include\IShadowVolumeSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ITerrainSceneNode.h">
+					RelativePath=".\..\..\include\ITerrainSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ITextSceneNode.h">
+					RelativePath=".\..\..\include\ITextSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ITriangleSelector.h">
+					RelativePath=".\..\..\include\ITriangleSelector.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SAnimatedMesh.h">
+					RelativePath=".\..\..\include\SAnimatedMesh.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SceneParameters.h">
+					RelativePath=".\..\..\include\SceneParameters.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SMesh.h">
+					RelativePath=".\..\..\include\SMesh.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SMeshBuffer.h">
+					RelativePath=".\..\..\include\SMeshBuffer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SMeshBufferLightMap.h">
+					RelativePath=".\..\..\include\SMeshBufferLightMap.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SMeshBufferTangents.h">
+					RelativePath=".\..\..\include\SMeshBufferTangents.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SParticle.h">
+					RelativePath=".\..\..\include\SParticle.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\SViewFrustum.h">
+					RelativePath=".\..\..\include\SViewFrustum.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="gui"
-				Filter="">
+				>
 				<File
-					RelativePath=".\..\..\include\EGUIElementTypes.h">
+					RelativePath=".\..\..\include\EGUIElementTypes.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\ICursorControl.h">
+					RelativePath=".\..\..\include\ICursorControl.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIButton.h">
+					RelativePath=".\..\..\include\IGUIButton.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUICheckbox.h">
+					RelativePath=".\..\..\include\IGUICheckbox.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\IGUIColorSelectDialog.h">
+					RelativePath="..\..\include\IGUIColorSelectDialog.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIComboBox.h">
+					RelativePath=".\..\..\include\IGUIComboBox.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIContextMenu.h">
+					RelativePath=".\..\..\include\IGUIContextMenu.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIEditBox.h">
+					RelativePath=".\..\..\include\IGUIEditBox.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIElement.h">
+					RelativePath=".\..\..\include\IGUIElement.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIEnvironment.h">
+					RelativePath=".\..\..\include\IGUIEnvironment.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIFileOpenDialog.h">
+					RelativePath=".\..\..\include\IGUIFileOpenDialog.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIFont.h">
+					RelativePath=".\..\..\include\IGUIFont.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIImage.h">
+					RelativePath=".\..\..\include\IGUIImage.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIInOutFader.h">
+					RelativePath=".\..\..\include\IGUIInOutFader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIListBox.h">
+					RelativePath=".\..\..\include\IGUIListBox.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIMeshViewer.h">
+					RelativePath=".\..\..\include\IGUIMeshViewer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIScrollBar.h">
+					RelativePath=".\..\..\include\IGUIScrollBar.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUISkin.h">
+					RelativePath=".\..\..\include\IGUISkin.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\include\IGUISpriteBank.h">
+					RelativePath="..\..\include\IGUISpriteBank.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIStaticText.h">
+					RelativePath=".\..\..\include\IGUIStaticText.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUITabControl.h">
+					RelativePath=".\..\..\include\IGUITabControl.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIToolbar.h">
+					RelativePath=".\..\..\include\IGUIToolbar.h"
+					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IGUIWindow.h">
+					RelativePath=".\..\..\include\IGUIWindow.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="gui impl"
-			Filter="">
+			>
 			<File
-				RelativePath=".\BuiltInFont.h">
+				RelativePath=".\BuiltInFont.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CDefaultGUIElementFactory.cpp">
+				RelativePath=".\CDefaultGUIElementFactory.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CDefaultGUIElementFactory.h">
+				RelativePath=".\CDefaultGUIElementFactory.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIButton.cpp">
+				RelativePath=".\CGUIButton.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIButton.h">
+				RelativePath=".\CGUIButton.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUICheckbox.cpp">
+				RelativePath=".\CGUICheckbox.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUICheckbox.h">
+				RelativePath=".\CGUICheckbox.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIColorSelectDialog.cpp">
+				RelativePath=".\CGUIColorSelectDialog.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIColorSelectDialog.h">
+				RelativePath=".\CGUIColorSelectDialog.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUIComboBox.cpp">
+				RelativePath="CGUIComboBox.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIComboBox.h">
+				RelativePath="CGUIComboBox.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUIContextMenu.cpp">
+				RelativePath="CGUIContextMenu.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIContextMenu.h">
+				RelativePath="CGUIContextMenu.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUIEditBox.cpp">
+				RelativePath="CGUIEditBox.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIEditBox.h">
+				RelativePath="CGUIEditBox.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIEnvironment.cpp">
+				RelativePath=".\CGUIEnvironment.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIEnvironment.h">
+				RelativePath=".\CGUIEnvironment.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIFileOpenDialog.cpp">
+				RelativePath=".\CGUIFileOpenDialog.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIFileOpenDialog.h">
+				RelativePath=".\CGUIFileOpenDialog.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIFont.cpp">
+				RelativePath=".\CGUIFont.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIFont.h">
+				RelativePath=".\CGUIFont.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIImage.cpp">
+				RelativePath=".\CGUIImage.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIImage.H">
+				RelativePath=".\CGUIImage.H"
+				>
 			</File>
 			<File
-				RelativePath="CGUIInOutFader.cpp">
+				RelativePath="CGUIInOutFader.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIInOutFader.h">
+				RelativePath="CGUIInOutFader.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIListBox.cpp">
+				RelativePath=".\CGUIListBox.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIListBox.h">
+				RelativePath=".\CGUIListBox.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUIMenu.cpp">
+				RelativePath="CGUIMenu.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIMenu.h">
+				RelativePath="CGUIMenu.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIMeshViewer.cpp">
+				RelativePath=".\CGUIMeshViewer.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIMeshViewer.h">
+				RelativePath=".\CGUIMeshViewer.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUIMessageBox.cpp">
+				RelativePath="CGUIMessageBox.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIMessageBox.h">
+				RelativePath="CGUIMessageBox.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUIModalScreen.cpp">
+				RelativePath="CGUIModalScreen.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIModalScreen.h">
+				RelativePath="CGUIModalScreen.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIScrollBar.cpp">
+				RelativePath=".\CGUIScrollBar.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIScrollBar.h">
+				RelativePath=".\CGUIScrollBar.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUISkin.cpp">
+				RelativePath=".\CGUISkin.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUISkin.h">
+				RelativePath=".\CGUISkin.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUISpriteBank.cpp">
+				RelativePath=".\CGUISpriteBank.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUISpriteBank.h">
+				RelativePath=".\CGUISpriteBank.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIStaticText.cpp">
+				RelativePath=".\CGUIStaticText.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIStaticText.h">
+				RelativePath=".\CGUIStaticText.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUITabControl.cpp">
+				RelativePath="CGUITabControl.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUITabControl.h">
+				RelativePath="CGUITabControl.h"
+				>
 			</File>
 			<File
-				RelativePath="CGUIToolBar.cpp">
+				RelativePath="CGUIToolBar.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CGUIToolBar.h">
+				RelativePath="CGUIToolBar.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIWindow.cpp">
+				RelativePath=".\CGUIWindow.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGUIWindow.h">
+				RelativePath=".\CGUIWindow.h"
+				>
 			</File>
 			<File
-				RelativePath=".\GUIIcons.h">
+				RelativePath=".\GUIIcons.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="video impl"
-			Filter="">
+			>
 			<File
-				RelativePath="CVideoModeList.cpp">
+				RelativePath="CVideoModeList.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CVideoModeList.h">
+				RelativePath="CVideoModeList.h"
+				>
 			</File>
 			<Filter
 				Name="Software"
-				Filter="">
+				>
 				<File
-					RelativePath=".\CSoftwareDriver.cpp">
+					RelativePath=".\CSoftwareDriver.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftwareDriver.h">
+					RelativePath=".\CSoftwareDriver.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftwareTexture.cpp">
+					RelativePath=".\CSoftwareTexture.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftwareTexture.h">
+					RelativePath=".\CSoftwareTexture.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRFlat.cpp">
+					RelativePath=".\CTRFlat.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRFlatWire.cpp">
+					RelativePath=".\CTRFlatWire.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRGouraud.cpp">
+					RelativePath=".\CTRGouraud.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRGouraudWire.cpp">
+					RelativePath=".\CTRGouraudWire.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureFlat.cpp">
+					RelativePath=".\CTRTextureFlat.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureFlatWire.cpp">
+					RelativePath=".\CTRTextureFlatWire.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraud.cpp">
+					RelativePath=".\CTRTextureGouraud.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraud.h">
+					RelativePath=".\CTRTextureGouraud.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudAdd.cpp">
+					RelativePath=".\CTRTextureGouraudAdd.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudNoZ.cpp">
+					RelativePath=".\CTRTextureGouraudNoZ.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudWire.cpp">
+					RelativePath=".\CTRTextureGouraudWire.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CZBuffer.cpp">
+					RelativePath=".\CZBuffer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CZBuffer.h">
+					RelativePath=".\CZBuffer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\ITriangleRenderer.h">
+					RelativePath=".\ITriangleRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\IZBuffer.h">
+					RelativePath=".\IZBuffer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\S2DVertex.h">
+					RelativePath=".\S2DVertex.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="OpenGL"
-				Filter="">
+				>
 				<File
-					RelativePath=".\COpenGLDriver.cpp">
+					RelativePath=".\COpenGLDriver.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLDriver.h">
+					RelativePath=".\COpenGLDriver.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLMaterialRenderer.h">
+					RelativePath=".\COpenGLMaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLNormalMapRenderer.cpp">
+					RelativePath=".\COpenGLNormalMapRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLNormalMapRenderer.h">
+					RelativePath=".\COpenGLNormalMapRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLParallaxMapRenderer.cpp">
+					RelativePath=".\COpenGLParallaxMapRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLParallaxMapRenderer.h">
+					RelativePath=".\COpenGLParallaxMapRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLShaderMaterialRenderer.cpp">
+					RelativePath=".\COpenGLShaderMaterialRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLShaderMaterialRenderer.h">
+					RelativePath=".\COpenGLShaderMaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLSLMaterialRenderer.cpp">
+					RelativePath=".\COpenGLSLMaterialRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLSLMaterialRenderer.h">
+					RelativePath=".\COpenGLSLMaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLTexture.cpp">
+					RelativePath=".\COpenGLTexture.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COpenGLTexture.h">
+					RelativePath=".\COpenGLTexture.h"
+					>
 				</File>
 				<File
-					RelativePath=".\glext.h">
+					RelativePath=".\glext.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Direct3D8"
-				Filter="">
+				>
 				<File
-					RelativePath=".\CD3D8Driver.cpp">
+					RelativePath=".\CD3D8Driver.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8Driver.h">
+					RelativePath=".\CD3D8Driver.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8MaterialRenderer.h">
+					RelativePath=".\CD3D8MaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8NormalMapRenderer.cpp">
+					RelativePath=".\CD3D8NormalMapRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8NormalMapRenderer.h">
+					RelativePath=".\CD3D8NormalMapRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8ParallaxMapRenderer.cpp">
+					RelativePath=".\CD3D8ParallaxMapRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8ParallaxMapRenderer.h">
+					RelativePath=".\CD3D8ParallaxMapRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8ShaderMaterialRenderer.cpp">
+					RelativePath=".\CD3D8ShaderMaterialRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8ShaderMaterialRenderer.h">
+					RelativePath=".\CD3D8ShaderMaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8Texture.cpp">
+					RelativePath=".\CD3D8Texture.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D8Texture.h">
+					RelativePath=".\CD3D8Texture.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Null"
-				Filter="">
+				>
 				<File
-					RelativePath=".\CColorConverter.cpp">
+					RelativePath=".\CColorConverter.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CColorConverter.h">
+					RelativePath=".\CColorConverter.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CFPSCounter.cpp">
+					RelativePath=".\CFPSCounter.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CFPSCounter.h">
+					RelativePath=".\CFPSCounter.h"
+					>
 				</File>
 				<File
-					RelativePath="CImage.cpp">
+					RelativePath="CImage.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CImage.h">
+					RelativePath="CImage.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CNullDriver.cpp">
+					RelativePath=".\CNullDriver.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CNullDriver.h">
+					RelativePath=".\CNullDriver.h"
+					>
 				</File>
 				<File
-					RelativePath="IImagePresenter.h">
+					RelativePath="IImagePresenter.h"
+					>
 				</File>
 				<Filter
 					Name="Writer"
-					Filter="">
+					>
 					<File
-						RelativePath=".\CImageWriterBMP.cpp">
+						RelativePath=".\CImageWriterBMP.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterBMP.h">
+						RelativePath=".\CImageWriterBMP.h"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterJPG.cpp">
+						RelativePath=".\CImageWriterJPG.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterJPG.h">
+						RelativePath=".\CImageWriterJPG.h"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPCX.cpp">
+						RelativePath=".\CImageWriterPCX.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPCX.h">
+						RelativePath=".\CImageWriterPCX.h"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPNG.cpp">
+						RelativePath=".\CImageWriterPNG.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPNG.h">
+						RelativePath=".\CImageWriterPNG.h"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPPM.cpp">
+						RelativePath=".\CImageWriterPPM.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPPM.h">
+						RelativePath=".\CImageWriterPPM.h"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPSD.cpp">
+						RelativePath=".\CImageWriterPSD.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterPSD.h">
+						RelativePath=".\CImageWriterPSD.h"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterTGA.cpp">
+						RelativePath=".\CImageWriterTGA.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageWriterTGA.h">
+						RelativePath=".\CImageWriterTGA.h"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="Loader"
-					Filter="">
+					>
 					<File
-						RelativePath="CImageLoaderBMP.cpp">
+						RelativePath="CImageLoaderBMP.cpp"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderBMP.h">
+						RelativePath="CImageLoaderBMP.h"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderJPG.cpp">
+						RelativePath="CImageLoaderJPG.cpp"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderJPG.h">
+						RelativePath="CImageLoaderJPG.h"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderPCX.cpp">
+						RelativePath="CImageLoaderPCX.cpp"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderPCX.h">
+						RelativePath="CImageLoaderPCX.h"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageLoaderPNG.cpp">
+						RelativePath=".\CImageLoaderPNG.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\CImageLoaderPNG.h">
+						RelativePath=".\CImageLoaderPNG.h"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderPSD.cpp">
+						RelativePath="CImageLoaderPSD.cpp"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderPSD.h">
+						RelativePath="CImageLoaderPSD.h"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderTGA.cpp">
+						RelativePath="CImageLoaderTGA.cpp"
+						>
 					</File>
 					<File
-						RelativePath="CImageLoaderTGA.h">
+						RelativePath="CImageLoaderTGA.h"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="Direct3D9"
-				Filter="">
+				>
 				<File
-					RelativePath=".\CD3D9Driver.cpp">
+					RelativePath=".\CD3D9Driver.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9Driver.h">
+					RelativePath=".\CD3D9Driver.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9HLSLMaterialRenderer.cpp">
+					RelativePath=".\CD3D9HLSLMaterialRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9HLSLMaterialRenderer.h">
+					RelativePath=".\CD3D9HLSLMaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9MaterialRenderer.h">
+					RelativePath=".\CD3D9MaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9NormalMapRenderer.cpp">
+					RelativePath=".\CD3D9NormalMapRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9NormalMapRenderer.h">
+					RelativePath=".\CD3D9NormalMapRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9ParallaxMapRenderer.cpp">
+					RelativePath=".\CD3D9ParallaxMapRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9ParallaxMapRenderer.h">
+					RelativePath=".\CD3D9ParallaxMapRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9ShaderMaterialRenderer.cpp">
+					RelativePath=".\CD3D9ShaderMaterialRenderer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9ShaderMaterialRenderer.h">
+					RelativePath=".\CD3D9ShaderMaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9Texture.cpp">
+					RelativePath=".\CD3D9Texture.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CD3D9Texture.h">
+					RelativePath=".\CD3D9Texture.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Burning Video"
-				Filter="">
+				>
 				<File
-					RelativePath=".\CDepthBuffer.cpp">
+					RelativePath=".\CDepthBuffer.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CDepthBuffer.h">
+					RelativePath=".\CDepthBuffer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftware2MaterialRenderer.h">
+					RelativePath=".\CSoftware2MaterialRenderer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftwareDriver2.cpp">
+					RelativePath=".\CSoftwareDriver2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftwareDriver2.h">
+					RelativePath=".\CSoftwareDriver2.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftwareTexture2.cpp">
+					RelativePath=".\CSoftwareTexture2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSoftwareTexture2.h">
+					RelativePath=".\CSoftwareTexture2.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRGouraud2.cpp">
+					RelativePath=".\CTRGouraud2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRGouraudAlpha2.cpp">
+					RelativePath=".\CTRGouraudAlpha2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRGouraudAlphaNoZ2.cpp">
+					RelativePath=".\CTRGouraudAlphaNoZ2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureBlend.cpp">
+					RelativePath=".\CTRTextureBlend.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureDetailMap2.cpp">
+					RelativePath=".\CTRTextureDetailMap2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraud2.cpp">
+					RelativePath=".\CTRTextureGouraud2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudAdd2.cpp">
+					RelativePath=".\CTRTextureGouraudAdd2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudAddNoZ2.cpp">
+					RelativePath=".\CTRTextureGouraudAddNoZ2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudAlpha.cpp">
+					RelativePath=".\CTRTextureGouraudAlpha.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudAlphaNoZ.cpp">
+					RelativePath=".\CTRTextureGouraudAlphaNoZ.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudNoZ2.cpp">
+					RelativePath=".\CTRTextureGouraudNoZ2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureGouraudVertexAlpha2.cpp">
+					RelativePath=".\CTRTextureGouraudVertexAlpha2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureLightMap2_Add.cpp">
+					RelativePath=".\CTRTextureLightMap2_Add.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureLightMap2_M1.cpp">
+					RelativePath=".\CTRTextureLightMap2_M1.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureLightMap2_M2.cpp">
+					RelativePath=".\CTRTextureLightMap2_M2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureLightMap2_M4.cpp">
+					RelativePath=".\CTRTextureLightMap2_M4.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureLightMapGouraud2_M4.cpp">
+					RelativePath=".\CTRTextureLightMapGouraud2_M4.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTRTextureWire2.cpp">
+					RelativePath=".\CTRTextureWire2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\IBurningShader.cpp">
+					RelativePath=".\IBurningShader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\IBurningShader.h">
+					RelativePath=".\IBurningShader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\IDepthBuffer.h">
+					RelativePath=".\IDepthBuffer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\S4DVertex.h">
+					RelativePath=".\S4DVertex.h"
+					>
 				</File>
 				<File
-					RelativePath=".\SoftwareDriver2_compile_config.h">
+					RelativePath=".\SoftwareDriver2_compile_config.h"
+					>
 				</File>
 				<File
-					RelativePath=".\SoftwareDriver2_helper.h">
+					RelativePath=".\SoftwareDriver2_helper.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="scene impl"
-			Filter="">
+			>
 			<File
-				RelativePath=".\CDefaultSceneNodeAnimatorFactory.cpp">
+				RelativePath=".\CDefaultSceneNodeAnimatorFactory.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CDefaultSceneNodeAnimatorFactory.h">
+				RelativePath=".\CDefaultSceneNodeAnimatorFactory.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CDefaultSceneNodeFactory.cpp">
+				RelativePath=".\CDefaultSceneNodeFactory.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CDefaultSceneNodeFactory.h">
+				RelativePath=".\CDefaultSceneNodeFactory.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CGeometryCreator.cpp">
+				RelativePath=".\CGeometryCreator.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CGeometryCreator.h">
+				RelativePath=".\CGeometryCreator.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CMeshCache.cpp">
+				RelativePath=".\CMeshCache.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CMeshCache.h">
+				RelativePath=".\CMeshCache.h"
+				>
 			</File>
 			<File
-				RelativePath="CMeshManipulator.cpp">
+				RelativePath="CMeshManipulator.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CMeshManipulator.h">
+				RelativePath="CMeshManipulator.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CSceneManager.cpp">
+				RelativePath=".\CSceneManager.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CSceneManager.h">
+				RelativePath=".\CSceneManager.h"
+				>
 			</File>
 			<File
-				RelativePath=".\OctTree.h">
+				RelativePath=".\OctTree.h"
+				>
 			</File>
 			<Filter
 				Name="loaders"
-				Filter="">
+				>
 				<File
-					RelativePath=".\C3DSMeshFileLoader.cpp">
+					RelativePath=".\C3DSMeshFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\C3DSMeshFileLoader.h">
+					RelativePath=".\C3DSMeshFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshB3d.cpp">
+					RelativePath=".\CAnimatedMeshB3d.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshB3d.h">
+					RelativePath=".\CAnimatedMeshB3d.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshMD2.cpp">
+					RelativePath=".\CAnimatedMeshMD2.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshMD2.h">
+					RelativePath=".\CAnimatedMeshMD2.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshMD3.cpp">
+					RelativePath=".\CAnimatedMeshMD3.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshMD3.h">
+					RelativePath=".\CAnimatedMeshMD3.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshMS3D.cpp">
+					RelativePath=".\CAnimatedMeshMS3D.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshMS3D.h">
+					RelativePath=".\CAnimatedMeshMS3D.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CColladaFileLoader.cpp">
+					RelativePath=".\CColladaFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CColladaFileLoader.h">
+					RelativePath=".\CColladaFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CCSMLoader.cpp">
+					RelativePath=".\CCSMLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CCSMLoader.h">
+					RelativePath=".\CCSMLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CDefaultMeshFormatLoader.cpp">
+					RelativePath=".\CDefaultMeshFormatLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CDefaultMeshFormatLoader.h">
+					RelativePath=".\CDefaultMeshFormatLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CDMFLoader.cpp">
+					RelativePath=".\CDMFLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CDMFLoader.h">
+					RelativePath=".\CDMFLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CLMTSMeshFileLoader.cpp">
+					RelativePath=".\CLMTSMeshFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CLMTSMeshFileLoader.h">
+					RelativePath=".\CLMTSMeshFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CMD3MeshFileLoader.cpp">
+					RelativePath=".\CMD3MeshFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CMD3MeshFileLoader.h">
+					RelativePath=".\CMD3MeshFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CMY3DHelper.h">
+					RelativePath=".\CMY3DHelper.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CMY3DMeshFileLoader.cpp">
+					RelativePath=".\CMY3DMeshFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CMY3DMeshFileLoader.h">
+					RelativePath=".\CMY3DMeshFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CMY3DStuff.h">
+					RelativePath=".\CMY3DStuff.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COBJMeshFileLoader.cpp">
+					RelativePath=".\COBJMeshFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COBJMeshFileLoader.h">
+					RelativePath=".\COBJMeshFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COCTLoader.cpp">
+					RelativePath=".\COCTLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COCTLoader.h">
+					RelativePath=".\COCTLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COgreMeshFileLoader.cpp">
+					RelativePath=".\COgreMeshFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COgreMeshFileLoader.h">
+					RelativePath=".\COgreMeshFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CQ3LevelMesh.cpp">
+					RelativePath=".\CQ3LevelMesh.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CQ3LevelMesh.h">
+					RelativePath=".\CQ3LevelMesh.h"
+					>
 				</File>
 				<File
-					RelativePath="CXAnimationPlayer.cpp">
+					RelativePath="CXAnimationPlayer.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CXAnimationPlayer.h">
+					RelativePath="CXAnimationPlayer.h"
+					>
 				</File>
 				<File
-					RelativePath="CXFileReader.cpp">
+					RelativePath="CXFileReader.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CXFileReader.h">
+					RelativePath="CXFileReader.h"
+					>
 				</File>
 				<File
-					RelativePath="CXMeshFileLoader.cpp">
+					RelativePath="CXMeshFileLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CXMeshFileLoader.h">
+					RelativePath="CXMeshFileLoader.h"
+					>
 				</File>
 				<File
-					RelativePath=".\dmfsupport.h">
+					RelativePath=".\dmfsupport.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="sceneNodes"
-				Filter="">
+				>
 				<File
-					RelativePath=".\CAnimatedMeshSceneNode.cpp">
+					RelativePath=".\CAnimatedMeshSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CAnimatedMeshSceneNode.h">
+					RelativePath=".\CAnimatedMeshSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CBillboardSceneNode.cpp">
+					RelativePath=".\CBillboardSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CBillboardSceneNode.h">
+					RelativePath=".\CBillboardSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CCameraFPSSceneNode.cpp">
+					RelativePath=".\CCameraFPSSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CCameraFPSSceneNode.h">
+					RelativePath=".\CCameraFPSSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CCameraMayaSceneNode.cpp">
+					RelativePath=".\CCameraMayaSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CCameraMayaSceneNode.h">
+					RelativePath=".\CCameraMayaSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CCameraSceneNode.cpp">
+					RelativePath=".\CCameraSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CCameraSceneNode.h">
+					RelativePath=".\CCameraSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CCubeSceneNode.cpp">
+					RelativePath=".\CCubeSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CCubeSceneNode.h">
+					RelativePath=".\CCubeSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath="CDummyTransformationSceneNode.cpp">
+					RelativePath="CDummyTransformationSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CDummyTransformationSceneNode.h">
+					RelativePath="CDummyTransformationSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath="CEmptySceneNode.cpp">
+					RelativePath="CEmptySceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CEmptySceneNode.h">
+					RelativePath="CEmptySceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CLightSceneNode.cpp">
+					RelativePath=".\CLightSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CLightSceneNode.h">
+					RelativePath=".\CLightSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CMeshSceneNode.cpp">
+					RelativePath=".\CMeshSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CMeshSceneNode.h">
+					RelativePath=".\CMeshSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\COctTreeSceneNode.cpp">
+					RelativePath=".\COctTreeSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\COctTreeSceneNode.h">
+					RelativePath=".\COctTreeSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CQuake3ShaderSceneNode.cpp">
+					RelativePath=".\CQuake3ShaderSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CQuake3ShaderSceneNode.h">
+					RelativePath=".\CQuake3ShaderSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CShadowVolumeSceneNode.cpp">
+					RelativePath=".\CShadowVolumeSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CShadowVolumeSceneNode.h">
+					RelativePath=".\CShadowVolumeSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSkyBoxSceneNode.cpp">
+					RelativePath=".\CSkyBoxSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSkyBoxSceneNode.h">
+					RelativePath=".\CSkyBoxSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSkyDomeSceneNode.cpp">
+					RelativePath=".\CSkyDomeSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSkyDomeSceneNode.h">
+					RelativePath=".\CSkyDomeSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSphereSceneNode.cpp">
+					RelativePath=".\CSphereSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSphereSceneNode.h">
+					RelativePath=".\CSphereSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath="CTerrainSceneNode.cpp">
+					RelativePath="CTerrainSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CTerrainSceneNode.h">
+					RelativePath="CTerrainSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CTextSceneNode.cpp">
+					RelativePath=".\CTextSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTextSceneNode.h">
+					RelativePath=".\CTextSceneNode.h"
+					>
 				</File>
 				<File
-					RelativePath="CWaterSurfaceSceneNode.cpp">
+					RelativePath="CWaterSurfaceSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CWaterSurfaceSceneNode.h">
+					RelativePath="CWaterSurfaceSceneNode.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="particleSystem"
-				Filter="">
+				>
 				<File
-					RelativePath="CParticleBoxEmitter.cpp">
+					RelativePath="CParticleBoxEmitter.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CParticleBoxEmitter.h">
+					RelativePath="CParticleBoxEmitter.h"
+					>
 				</File>
 				<File
-					RelativePath="CParticleFadeOutAffector.cpp">
+					RelativePath="CParticleFadeOutAffector.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CParticleFadeOutAffector.h">
+					RelativePath="CParticleFadeOutAffector.h"
+					>
 				</File>
 				<File
-					RelativePath="CParticleGravityAffector.cpp">
+					RelativePath="CParticleGravityAffector.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CParticleGravityAffector.h">
+					RelativePath="CParticleGravityAffector.h"
+					>
 				</File>
 				<File
-					RelativePath="CParticlePointEmitter.cpp">
+					RelativePath="CParticlePointEmitter.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CParticlePointEmitter.h">
+					RelativePath="CParticlePointEmitter.h"
+					>
 				</File>
 				<File
-					RelativePath="CParticleSystemSceneNode.cpp">
+					RelativePath="CParticleSystemSceneNode.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CParticleSystemSceneNode.h">
+					RelativePath="CParticleSystemSceneNode.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="collision"
-				Filter="">
+				>
 				<File
-					RelativePath="CMetaTriangleSelector.cpp">
+					RelativePath="CMetaTriangleSelector.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CMetaTriangleSelector.h">
+					RelativePath="CMetaTriangleSelector.h"
+					>
 				</File>
 				<File
-					RelativePath="COctTreeTriangleSelector.cpp">
+					RelativePath="COctTreeTriangleSelector.cpp"
+					>
 				</File>
 				<File
-					RelativePath="COctTreeTriangleSelector.h">
+					RelativePath="COctTreeTriangleSelector.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneCollisionManager.cpp">
+					RelativePath=".\CSceneCollisionManager.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneCollisionManager.h">
+					RelativePath=".\CSceneCollisionManager.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CTerrainTriangleSelector.cpp">
+					RelativePath=".\CTerrainTriangleSelector.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CTerrainTriangleSelector.h">
+					RelativePath=".\CTerrainTriangleSelector.h"
+					>
 				</File>
 				<File
-					RelativePath="CTriangleBBSelector.cpp">
+					RelativePath="CTriangleBBSelector.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CTriangleBBSelector.h">
+					RelativePath="CTriangleBBSelector.h"
+					>
 				</File>
 				<File
-					RelativePath="CTriangleSelector.cpp">
+					RelativePath="CTriangleSelector.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CTriangleSelector.h">
+					RelativePath="CTriangleSelector.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="sceneNodes animators"
-				Filter="">
+				>
 				<File
-					RelativePath="CSceneNodeAnimatorCollisionResponse.cpp">
+					RelativePath="CSceneNodeAnimatorCollisionResponse.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CSceneNodeAnimatorCollisionResponse.h">
+					RelativePath="CSceneNodeAnimatorCollisionResponse.h"
+					>
 				</File>
 				<File
-					RelativePath="CSceneNodeAnimatorDelete.cpp">
+					RelativePath="CSceneNodeAnimatorDelete.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CSceneNodeAnimatorDelete.h">
+					RelativePath="CSceneNodeAnimatorDelete.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorFlyCircle.cpp">
+					RelativePath=".\CSceneNodeAnimatorFlyCircle.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorFlyCircle.h">
+					RelativePath=".\CSceneNodeAnimatorFlyCircle.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorFlyStraight.cpp">
+					RelativePath=".\CSceneNodeAnimatorFlyStraight.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorFlyStraight.h">
+					RelativePath=".\CSceneNodeAnimatorFlyStraight.h"
+					>
 				</File>
 				<File
-					RelativePath="CSceneNodeAnimatorFollowSpline.cpp">
+					RelativePath="CSceneNodeAnimatorFollowSpline.cpp"
+					>
 				</File>
 				<File
-					RelativePath="CSceneNodeAnimatorFollowSpline.h">
+					RelativePath="CSceneNodeAnimatorFollowSpline.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorRotation.cpp">
+					RelativePath=".\CSceneNodeAnimatorRotation.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorRotation.h">
+					RelativePath=".\CSceneNodeAnimatorRotation.h"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorTexture.cpp">
+					RelativePath=".\CSceneNodeAnimatorTexture.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\CSceneNodeAnimatorTexture.h">
+					RelativePath=".\CSceneNodeAnimatorTexture.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="io impl"
-			Filter="">
+			>
 			<File
-				RelativePath=".\CAttributeImpl.h">
+				RelativePath=".\CAttributeImpl.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CAttributes.cpp">
+				RelativePath=".\CAttributes.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CAttributes.h">
+				RelativePath=".\CAttributes.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CFileList.cpp">
+				RelativePath=".\CFileList.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CFileList.h">
+				RelativePath=".\CFileList.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CFileSystem.cpp">
+				RelativePath=".\CFileSystem.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CFileSystem.h">
+				RelativePath=".\CFileSystem.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CLimitReadFile.cpp">
+				RelativePath=".\CLimitReadFile.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CLimitReadFile.h">
+				RelativePath=".\CLimitReadFile.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CMemoryReadFile.cpp">
+				RelativePath=".\CMemoryReadFile.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CMemoryReadFile.h">
+				RelativePath=".\CMemoryReadFile.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CPakReader.cpp">
+				RelativePath=".\CPakReader.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CPakReader.h">
+				RelativePath=".\CPakReader.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CReadFile.cpp">
+				RelativePath=".\CReadFile.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CReadFile.h">
+				RelativePath=".\CReadFile.h"
+				>
 			</File>
 			<File
-				RelativePath="CWriteFile.cpp">
+				RelativePath="CWriteFile.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CWriteFile.h">
+				RelativePath="CWriteFile.h"
+				>
 			</File>
 			<File
-				RelativePath="CXMLReader.cpp">
+				RelativePath="CXMLReader.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CXMLReader.h">
+				RelativePath="CXMLReader.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CXMLReaderImpl.h">
+				RelativePath=".\CXMLReaderImpl.h"
+				>
 			</File>
 			<File
-				RelativePath="CXMLWriter.cpp">
+				RelativePath="CXMLWriter.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CXMLWriter.h">
+				RelativePath="CXMLWriter.h"
+				>
 			</File>
 			<File
-				RelativePath=".\CZipReader.cpp">
+				RelativePath=".\CZipReader.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\CZipReader.h">
+				RelativePath=".\CZipReader.h"
+				>
 			</File>
 			<File
-				RelativePath=".\irrXML.cpp">
+				RelativePath=".\irrXML.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
-			Name="irr impl">
+			Name="irr impl"
+			>
 			<File
-				RelativePath="CIrrDeviceLinux.cpp">
+				RelativePath="CIrrDeviceLinux.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CIrrDeviceLinux.h">
+				RelativePath="CIrrDeviceLinux.h"
+				>
 			</File>
 			<File
-				RelativePath="CIrrDeviceStub.cpp">
+				RelativePath="CIrrDeviceStub.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CIrrDeviceStub.h">
+				RelativePath="CIrrDeviceStub.h"
+				>
 			</File>
 			<File
-				RelativePath="CIrrDeviceWin32.cpp">
+				RelativePath="CIrrDeviceWin32.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CIrrDeviceWin32.h">
+				RelativePath="CIrrDeviceWin32.h"
+				>
 			</File>
 			<File
-				RelativePath="CLogger.cpp">
+				RelativePath="CLogger.cpp"
+				>
 			</File>
 			<File
-				RelativePath="CLogger.h">
+				RelativePath="CLogger.h"
+				>
 			</File>
 			<File
-				RelativePath="COSOperator.cpp">
+				RelativePath="COSOperator.cpp"
+				>
 			</File>
 			<File
-				RelativePath="COSOperator.h">
+				RelativePath="COSOperator.h"
+				>
 			</File>
 			<File
-				RelativePath="CTimer.h">
+				RelativePath="CTimer.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Irrlicht.cpp">
+				RelativePath=".\Irrlicht.cpp"
+				>
 			</File>
 			<File
-				RelativePath="os.cpp">
+				RelativePath="os.cpp"
+				>
 			</File>
 			<File
-				RelativePath="os.h">
+				RelativePath="os.h"
+				>
 			</File>
 			<Filter
-				Name="extern">
+				Name="extern"
+				>
 				<Filter
-					Name="jpeglib">
+					Name="jpeglib"
+					>
 					<File
-						RelativePath="jpeglib\cderror.h">
+						RelativePath="jpeglib\cderror.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\cdjpeg.c">
+						RelativePath="jpeglib\cdjpeg.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\cdjpeg.h">
+						RelativePath="jpeglib\cdjpeg.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcapimin.c">
+						RelativePath="jpeglib\jcapimin.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcapistd.c">
+						RelativePath="jpeglib\jcapistd.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jccoefct.c">
+						RelativePath="jpeglib\jccoefct.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jccolor.c">
+						RelativePath="jpeglib\jccolor.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcdctmgr.c">
+						RelativePath="jpeglib\jcdctmgr.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jchuff.c">
+						RelativePath="jpeglib\jchuff.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jchuff.h">
+						RelativePath="jpeglib\jchuff.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcinit.c">
+						RelativePath="jpeglib\jcinit.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcmainct.c">
+						RelativePath="jpeglib\jcmainct.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcmarker.c">
+						RelativePath="jpeglib\jcmarker.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcmaster.c">
+						RelativePath="jpeglib\jcmaster.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcomapi.c">
+						RelativePath="jpeglib\jcomapi.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jconfig.h">
+						RelativePath="jpeglib\jconfig.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcparam.c">
+						RelativePath="jpeglib\jcparam.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcphuff.c">
+						RelativePath="jpeglib\jcphuff.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcprepct.c">
+						RelativePath="jpeglib\jcprepct.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jcsample.c">
+						RelativePath="jpeglib\jcsample.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jctrans.c">
+						RelativePath="jpeglib\jctrans.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdapimin.c">
+						RelativePath="jpeglib\jdapimin.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdapistd.c">
+						RelativePath="jpeglib\jdapistd.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdatadst.c">
+						RelativePath="jpeglib\jdatadst.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdatasrc.c">
+						RelativePath="jpeglib\jdatasrc.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdcoefct.c">
+						RelativePath="jpeglib\jdcoefct.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdcolor.c">
+						RelativePath="jpeglib\jdcolor.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdct.h">
+						RelativePath="jpeglib\jdct.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jddctmgr.c">
+						RelativePath="jpeglib\jddctmgr.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdhuff.c">
+						RelativePath="jpeglib\jdhuff.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdhuff.h">
+						RelativePath="jpeglib\jdhuff.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdinput.c">
+						RelativePath="jpeglib\jdinput.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdmainct.c">
+						RelativePath="jpeglib\jdmainct.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdmarker.c">
+						RelativePath="jpeglib\jdmarker.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdmaster.c">
+						RelativePath="jpeglib\jdmaster.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdmerge.c">
+						RelativePath="jpeglib\jdmerge.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdphuff.c">
+						RelativePath="jpeglib\jdphuff.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdpostct.c">
+						RelativePath="jpeglib\jdpostct.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdsample.c">
+						RelativePath="jpeglib\jdsample.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jdtrans.c">
+						RelativePath="jpeglib\jdtrans.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jerror.c">
+						RelativePath="jpeglib\jerror.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jerror.h">
+						RelativePath="jpeglib\jerror.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jfdctflt.c">
+						RelativePath="jpeglib\jfdctflt.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jfdctfst.c">
+						RelativePath="jpeglib\jfdctfst.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jfdctint.c">
+						RelativePath="jpeglib\jfdctint.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jidctflt.c">
+						RelativePath="jpeglib\jidctflt.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jidctfst.c">
+						RelativePath="jpeglib\jidctfst.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jidctint.c">
+						RelativePath="jpeglib\jidctint.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jidctred.c">
+						RelativePath="jpeglib\jidctred.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jinclude.h">
+						RelativePath="jpeglib\jinclude.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jmemmgr.c">
+						RelativePath="jpeglib\jmemmgr.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jmemnobs.c">
+						RelativePath="jpeglib\jmemnobs.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jmemsys.h">
+						RelativePath="jpeglib\jmemsys.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jmorecfg.h">
+						RelativePath="jpeglib\jmorecfg.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jpegint.h">
+						RelativePath="jpeglib\jpegint.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jpeglib.h">
+						RelativePath="jpeglib\jpeglib.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jquant1.c">
+						RelativePath="jpeglib\jquant1.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jquant2.c">
+						RelativePath="jpeglib\jquant2.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jutils.c">
+						RelativePath="jpeglib\jutils.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\jversion.h">
+						RelativePath="jpeglib\jversion.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\rdbmp.c">
+						RelativePath="jpeglib\rdbmp.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\rdcolmap.c">
+						RelativePath="jpeglib\rdcolmap.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\rdgif.c">
+						RelativePath="jpeglib\rdgif.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\rdppm.c">
+						RelativePath="jpeglib\rdppm.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\rdrle.c">
+						RelativePath="jpeglib\rdrle.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\rdswitch.c">
+						RelativePath="jpeglib\rdswitch.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\rdtarga.c">
+						RelativePath="jpeglib\rdtarga.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\transupp.c">
+						RelativePath="jpeglib\transupp.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\transupp.h">
+						RelativePath="jpeglib\transupp.h"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\wrbmp.c">
+						RelativePath="jpeglib\wrbmp.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\wrgif.c">
+						RelativePath="jpeglib\wrgif.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\wrppm.c">
+						RelativePath="jpeglib\wrppm.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\wrrle.c">
+						RelativePath="jpeglib\wrrle.c"
+						>
 					</File>
 					<File
-						RelativePath="jpeglib\wrtarga.c">
+						RelativePath="jpeglib\wrtarga.c"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="libpng"
-					Filter="">
+					>
 					<File
-						RelativePath=".\libpng\png.c">
+						RelativePath=".\libpng\png.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\png.h">
+						RelativePath=".\libpng\png.h"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngconf.h">
+						RelativePath=".\libpng\pngconf.h"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngerror.c">
+						RelativePath=".\libpng\pngerror.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngget.c">
+						RelativePath=".\libpng\pngget.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngmem.c">
+						RelativePath=".\libpng\pngmem.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngpread.c">
+						RelativePath=".\libpng\pngpread.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngread.c">
+						RelativePath=".\libpng\pngread.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngrio.c">
+						RelativePath=".\libpng\pngrio.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngrtran.c">
+						RelativePath=".\libpng\pngrtran.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngrutil.c">
+						RelativePath=".\libpng\pngrutil.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngset.c">
+						RelativePath=".\libpng\pngset.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngtrans.c">
+						RelativePath=".\libpng\pngtrans.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngwio.c">
+						RelativePath=".\libpng\pngwio.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngwrite.c">
+						RelativePath=".\libpng\pngwrite.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngwtran.c">
+						RelativePath=".\libpng\pngwtran.c"
+						>
 					</File>
 					<File
-						RelativePath=".\libpng\pngwutil.c">
+						RelativePath=".\libpng\pngwutil.c"
+						>
 					</File>
 				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="doc"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\changes.txt">
+				RelativePath="..\..\changes.txt"
+				>
 			</File>
 			<File
-				RelativePath="..\..\readme.txt">
+				RelativePath="..\..\readme.txt"
+				>
 			</File>
 		</Filter>
 	</Files>
