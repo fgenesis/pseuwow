@@ -15,6 +15,7 @@ std::map<uint32,std::string> mapNames;
 std::set<std::string> texNames;
 std::set<std::string> modelNames;
 std::set<std::string> wmoNames;
+std::set<std::string> soundFileSet;
 
 
 int main(int argc, char *argv[])
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
 		ConvertDBC();
         ExtractMaps();
         ExtractMapDependencies();
+        ExtractSoundFiles();
 		//...
 		printf("\n -- finished, press enter to exit --\n");
 	}
@@ -197,6 +199,8 @@ bool ConvertDBC(void)
     printf("sound entries..");
     for(DBCFile::Iterator it = SoundEntries.begin(); it != SoundEntries.end(); ++it)
     {
+        std::string path = (*it).getString(SOUNDENTRY_PATH); // required to fill up the filename storage
+        path += "\\"; // use backslash because mpq uses backslash too
         uint32 id = (*it).getUInt(SOUNDENTRY_SOUNDID);
         for(uint32 field=SOUNDENTRY_SOUNDID; field < SOUNDENTRY_END; field++)
         {
@@ -204,7 +208,13 @@ bool ConvertDBC(void)
             {
                 std::string value = AutoGetDataString(it,SoundEntriesFormat,field);
                 if(value.size()) // only store if a file exists in that field
+                {
                     SoundDataStorage[id].push_back(std::string(SoundEntriesFieldNames[field]) + "=" + value);
+
+                    // fill up file storage
+                    if(field >= SOUNDENTRY_FILE_1 && field <= SOUNDENTRY_FILE_10)
+                        soundFileSet.insert(path + value);
+                }
             }
         }
     }
@@ -447,5 +457,41 @@ void ExtractMapDependencies(void)
     printf("\n");
 
 }
+
+void ExtractSoundFiles(void)
+{
+    uint32 done = 0;
+    printf("\nExtracting game audio files, %u total...\n",soundFileSet.size());
+    CreateDir(SOUNDDIR);
+    MPQHelper smpq("sound");
+    std::string outfn;
+    for(std::set<std::string>::iterator i = soundFileSet.begin(); i != soundFileSet.end(); i++)
+    {
+        if(!smpq.FileExists((char*)(*i).c_str()))
+            continue;
+
+        outfn = std::string(SOUNDDIR) + "/" + _PathToFileName(*i);
+        std::fstream fh;
+        fh.open(outfn.c_str(), std::ios_base::out | std::ios_base::binary);
+        if(fh.is_open())
+        {
+            ByteBuffer& bb = smpq.ExtractFile((char*)(*i).c_str());
+            if(bb.size())
+            {
+                fh.write((const char*)bb.contents(),bb.size());
+                done++;
+                printf("- %u files done.\r",done);
+            }
+        }
+        else
+        {
+            printf("Could not write sound file '%s'\n",outfn.c_str());
+        }
+        fh.close();
+    }
+    printf("\n");
+}
+
+
 
 

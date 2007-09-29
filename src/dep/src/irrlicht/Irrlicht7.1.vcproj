@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="7.10"
 	Name="Irrlicht"
 	ProjectGUID="{E08E042A-6C45-411B-92BE-3CC31331019F}"
 	RootNamespace="Irrlicht"
@@ -2158,6 +2158,85 @@
 				<File
 					RelativePath=".\CSceneNodeAnimatorTexture.h"
 					>
+				</File>
+			</Filter>
+			<Filter
+				Name="io impl"
+				Filter="">
+				<File
+					RelativePath=".\CAttributeImpl.h">
+				</File>
+				<File
+					RelativePath=".\CAttributes.cpp">
+				</File>
+				<File
+					RelativePath=".\CAttributes.h">
+				</File>
+				<File
+					RelativePath=".\CFileList.cpp">
+				</File>
+				<File
+					RelativePath=".\CFileList.h">
+				</File>
+				<File
+					RelativePath=".\CFileSystem.cpp">
+				</File>
+				<File
+					RelativePath=".\CFileSystem.h">
+				</File>
+				<File
+					RelativePath=".\CLimitReadFile.cpp">
+				</File>
+				<File
+					RelativePath=".\CLimitReadFile.h">
+				</File>
+				<File
+					RelativePath=".\CMemoryReadFile.cpp">
+				</File>
+				<File
+					RelativePath=".\CMemoryReadFile.h">
+				</File>
+				<File
+					RelativePath=".\CPakReader.cpp">
+				</File>
+				<File
+					RelativePath=".\CPakReader.h">
+				</File>
+				<File
+					RelativePath=".\CReadFile.cpp">
+				</File>
+				<File
+					RelativePath=".\CReadFile.h">
+				</File>
+				<File
+					RelativePath="CWriteFile.cpp">
+				</File>
+				<File
+					RelativePath="CWriteFile.h">
+				</File>
+				<File
+					RelativePath="CXMLReader.cpp">
+				</File>
+				<File
+					RelativePath="CXMLReader.h">
+				</File>
+				<File
+					RelativePath=".\CXMLReaderImpl.h">
+				</File>
+				<File
+					RelativePath="CXMLWriter.cpp">
+				</File>
+				<File
+					RelativePath="CXMLWriter.h">
+				</File>
+				<File
+					RelativePath=".\CZipReader.cpp">
+				</File>
+				<File
+					RelativePath=".\CZipReader.h">
+				</File>
+				<File
+					RelativePath=".\irrXML.cpp">
 				</File>
 			</Filter>
 		</Filter>
