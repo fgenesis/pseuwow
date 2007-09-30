@@ -3,6 +3,7 @@
 #include <fstream>
 #include "ByteBuffer.h"
 
+bool locale_set=false;
 char my_locale[5];
 char *cconf = "WTF/config.wtf";
 char *cconfentry = "SET locale \"";
@@ -48,9 +49,12 @@ void SetLocale(char *loc)
         }
         delete [] buf;
     }
+    locale_set = true;
 }
 
 char *GetLocale(void)
 {
-	return &my_locale[0];
+    if(locale_set)
+	    return &my_locale[0];
+    return NULL;
 }

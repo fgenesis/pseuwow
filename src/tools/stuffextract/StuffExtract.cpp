@@ -18,39 +18,150 @@ std::set<std::string> modelNames;
 std::set<std::string> wmoNames;
 std::set<std::string> soundFileSet;
 
+// default config; SCPs are dont always
+bool doMaps=true, doSounds=false, doTextures=false, doWmos=false, doModels=false, doMd5=true, doAutoclose=false;
+
+
 
 int main(int argc, char *argv[])
 {
     char input[200];
     printf("StuffExtract [version %u]\n\n",SE_VERSION);
-	printf("Enter your locale (enUS, enGB, deDE, ...) or leave blank to autodetect: ");
-	fgets(input,sizeof(input),stdin);
-	char loc[5];
-    input[strlen(input)-1] = 0;
-	memcpy(loc,input,4); loc[4]=0;	
-	SetLocale(loc);
+    ProcessCmdArgs(argc, argv);
+    PrintConfig();
+    if(!GetLocale())
+    {
+	    printf("Enter your locale (enUS, enGB, deDE, ...) or leave blank to autodetect: ");
+	    fgets(input,sizeof(input),stdin);
+	    char loc[5];
+        input[strlen(input)-1] = 0;
+	    memcpy(loc,input,4); loc[4]=0;	
+	    SetLocale(loc);
+    }
 	if(FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
 	{
-		printf("Locale seems valid, starting conversion...\n");
+		printf("Locale \"%s\" seems valid, starting conversion...\n",GetLocale());
         CreateDir("stuffextract");
         CreateDir("stuffextract/data");
 		ConvertDBC();
-        ExtractMaps();
-        ExtractMapDependencies();
-        ExtractSoundFiles();
+        if(doMaps) ExtractMaps();
+        if(doTextures || doModels || doWmos) ExtractMapDependencies();
+        if(doSounds) ExtractSoundFiles();
 		//...
-		printf("\n -- finished, press enter to exit --\n");
+		if (!doAutoclose)
+            printf("\n -- finished, press enter to exit --\n");
 	}
 	else
 	{
-		printf("ERROR: Invalid locale! Press Enter to exit...\n");
+		printf("ERROR: Invalid locale \"%s\"! Press Enter to exit...\n",GetLocale());
 	}
-
-    fgets(input,sizeof(input),stdin);
+    if (!doAutoclose)
+        fgets(input,sizeof(input),stdin);
 
     //while(true);
     return 0;
 }
+
+void ProcessCmdArgs(int argc, char *argv[])
+{
+    bool on,help=false;
+    char *what;
+    for(int i = 1; i < argc; i++)
+    {
+        if(strlen(argv[i]) > 1)
+        {
+            if(argv[i][0] == '-')
+                on = false;
+            else if(argv[i][0] == '+')
+                on = true;
+            else if(!stricmp(argv[i],"/?") || !stricmp(argv[i],"/help"))
+            {
+                help = true;
+                break;
+            }
+            else
+            {
+                printf("Incorrect cmd arg: \"%s\"\n",argv[i]);
+                continue;
+            }
+
+            what = argv[i]+1; // skip first byte (+/-)
+            if     (!stricmp(what,"maps"))        doMaps = on;
+            else if(!stricmp(what,"textures"))    doTextures = on;
+            else if(!stricmp(what,"wmos"))        doWmos = on;
+            else if(!stricmp(what,"models"))      doModels = on;
+            else if(!stricmp(what,"sounds"))      doSounds = on;
+            else if(!stricmp(what,"md5"))         doMd5 = on;
+            else if(!stricmp(what,"autoclose"))   doAutoclose = on;
+            // autodetect or use given locale.   + or - as arg start doesnt matter here
+            else if(!strnicmp(what,"locale:",7))
+            {
+                if(!stricmp(what+7,"auto"))
+                    SetLocale(NULL);
+                else 
+                    SetLocale(what+7);
+            }
+            else if(!stricmp(what,"?") || !stricmp(what,"help"))
+            {
+                help = true;
+                break;
+            }
+            else
+            {
+                printf("Unknown cmd arg: \"%s\"\n",what);
+            }
+        }
+    }
+    // fix up wrong configs. not necessary but better for display.
+    // TODO: as soon as M2 model or WMO reading is done, extract those textures to, but independent from maps!!
+    if(!doMaps)
+    {
+        doTextures = false;
+        doWmos = false;
+        doModels = false;
+    }
+    if(help)
+    {
+        PrintHelp();
+        printf("\n\n- Press any key to exit -\n");
+        getchar();
+        exit(0);
+    }
+}
+
+void PrintConfig(void)
+{
+    printf("config: Do maps:      %s\n",doMaps?"yes":"no");
+    printf("config: Do textures:  %s\n",doTextures?"yes":"no");
+    printf("config: Do wmos:      %s\n",doWmos?"yes":"no");
+    printf("config: Do models:    %s\n",doModels?"yes":"no");
+    printf("config: Do sounds:    %s\n",doSounds?"yes":"no");
+    printf("config: Calc md5:     %s\n",doMd5?"yes":"no");
+    printf("config: Autoclose:    %s\n",doAutoclose?"yes":"no");
+}
+
+void PrintHelp(void)
+{
+    printf("Usage information:\n\n");
+    printf("Use + or - to turn a feature on or off.\n");
+    printf("Features are:\n");
+    printf("maps      - map extraction\n");
+    printf("textures  - extract textures (requires maps extraction, for now)\n");
+    printf("wmos      - extract map WMOs (requires maps extraction)\n");
+    printf("models    - extract models   (required maps extraction, for now)\n");
+    printf("sounds    - extract sound files (wav/mp3)\n");
+    printf("md5       - write MD5 checksum lists of extracted files\n");
+    printf("autoclose - close program when done\n");
+    printf("\n");
+    printf("Use -locale:xxXX to set a locale. If you don't use this, you will be asked.\n");
+    printf("Use -locale:auto to autodetect currently used locale.\n");
+    printf("\n");
+    printf("Examples:\n");
+    printf("stuffextract +sounds +md5 -maps +autoclose -locale:enGB\n");
+    printf("stuffextract +md5 -wmos -sounds -locale:auto -autoclose\n");
+    printf("\nDefault is: +maps -sounds -textures -wmos -models +md5 -autoclose\n");
+}
+
 
 // be careful using this, that you supply correct format string
 std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 field)
@@ -106,7 +217,8 @@ void OutSCP(char *fn, SCPStorageMap& scp)
 
 void OutMD5(char *path, MD5FileMap& fm)
 {
-
+    if(!doMd5)
+        return;
     std::string fullname(path);
     fullname += "/md5.txt";
     printf("Writing MD5 file checksums to '%s'\n",fullname.c_str());
@@ -238,8 +350,8 @@ bool ConvertDBC(void)
                 {
                     SoundDataStorage[id].push_back(std::string(SoundEntriesFieldNames[field]) + "=" + value);
 
-                    // fill up file storage
-                    if(field >= SOUNDENTRY_FILE_1 && field <= SOUNDENTRY_FILE_10)
+                    // fill up file storage. not necessary if we dont want to extract sounds
+                    if(doSounds && field >= SOUNDENTRY_FILE_1 && field <= SOUNDENTRY_FILE_10)
                         soundFileSet.insert(path + value);
                 }
             }
@@ -371,16 +483,21 @@ void ExtractMaps(void)
                         fh.flush();
                         fh.close();
                         olddeps = texNames.size() + modelNames.size() + wmoNames.size();
-                        ADT_FillTextureData(bb.contents(),texNames);
-                        ADT_FillModelData(bb.contents(),modelNames); 
-                        ADT_FillWMOData(bb.contents(),wmoNames); 
+
+                        if(doTextures) ADT_FillTextureData(bb.contents(),texNames);
+                        if(doModels)   ADT_FillModelData(bb.contents(),modelNames); 
+                        if(doWmos)     ADT_FillWMOData(bb.contents(),wmoNames); 
+
                         depdiff = texNames.size() + modelNames.size() + wmoNames.size() - olddeps;
-                        MD5Hash h;
-                        h.Update((uint8*)bb.contents(), bb.size());
-                        h.Finalize();
-                        uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                        md5map[_PathToFileName(outbuf)] = md5ptr;
-                        memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                        if(doMd5)
+                        {
+                            MD5Hash h;
+                            h.Update((uint8*)bb.contents(), bb.size());
+                            h.Finalize();
+                            uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                            md5map[_PathToFileName(outbuf)] = md5ptr;
+                            memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                        }
                         extr++;
                         printf("[%u:%u] %s; %u new deps.\n",extr,it->first,namebuf,depdiff);
                     }
@@ -425,12 +542,15 @@ void ExtractMapDependencies(void)
         {
             ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
             fh.write((const char*)bb.contents(),bb.size());
-            MD5Hash h;
-            h.Update((uint8*)bb.contents(), bb.size());
-            h.Finalize();
-            uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-            md5Tex[_PathToFileName(realfn)] = md5ptr;
-            memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+            if(doMd5)
+            {
+                MD5Hash h;
+                h.Update((uint8*)bb.contents(), bb.size());
+                h.Finalize();
+                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                md5Tex[_PathToFileName(realfn)] = md5ptr;
+                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+            }
             texdone++;
             printf("- textures... %u\r",texdone);
         }
@@ -469,12 +589,15 @@ void ExtractMapDependencies(void)
         {
             ByteBuffer& bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
             fh.write((const char*)bb.contents(),bb.size());
-            MD5Hash h;
-            h.Update((uint8*)bb.contents(), bb.size());
-            h.Finalize();
-            uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-            md5Model[_PathToFileName(realfn)] = md5ptr;
-            memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+            if(doMd5)
+            {
+                MD5Hash h;
+                h.Update((uint8*)bb.contents(), bb.size());
+                h.Finalize();
+                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                md5Model[_PathToFileName(realfn)] = md5ptr;
+                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+            }
             mdone++;
             printf("- models... %u\r",mdone);
         }
@@ -497,12 +620,15 @@ void ExtractMapDependencies(void)
         {
             ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
             fh.write((const char*)bb.contents(),bb.size());
-            MD5Hash h;
-            h.Update((uint8*)bb.contents(), bb.size());
-            h.Finalize();
-            uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-            md5Wmo[_PathToFileName(realfn)] = md5ptr;
-            memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+            if(doMd5)
+            {
+                MD5Hash h;
+                h.Update((uint8*)bb.contents(), bb.size());
+                h.Finalize();
+                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                md5Wmo[_PathToFileName(realfn)] = md5ptr;
+                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+            }
             wmosdone++;
             printf("- WMOs... %u\r",wmosdone);
         }
@@ -519,14 +645,17 @@ void ExtractSoundFiles(void)
 {
     MD5FileMap md5data;
     uint32 done = 0;
-    printf("\nExtracting game audio files, %u total...\n",soundFileSet.size());
+    printf("\nExtracting game audio files, %u found in DBC...\n",soundFileSet.size());
     CreateDir(SOUNDDIR);
     MPQHelper smpq("sound");
     std::string outfn;
     for(std::set<std::string>::iterator i = soundFileSet.begin(); i != soundFileSet.end(); i++)
     {
         if(!smpq.FileExists((char*)(*i).c_str()))
+        {
+            DEBUG( printf("MPQ: File not found: '%s'\n",(*i).c_str()) );
             continue;
+        }
 
         outfn = std::string(SOUNDDIR) + "/" + _PathToFileName(*i);
         std::fstream fh;
@@ -537,12 +666,15 @@ void ExtractSoundFiles(void)
             if(bb.size())
             {
                 fh.write((const char*)bb.contents(),bb.size());
-                MD5Hash h;
-                h.Update((uint8*)bb.contents(), bb.size());
-                h.Finalize();
-                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                md5data[_PathToFileName(*i)] = md5ptr;
-                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                if(doMd5)
+                {
+                    MD5Hash h;
+                    h.Update((uint8*)bb.contents(), bb.size());
+                    h.Finalize();
+                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                    md5data[_PathToFileName(*i)] = md5ptr;
+                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                }
                 done++;
                 printf("- %u files done.\r",done);
             }
