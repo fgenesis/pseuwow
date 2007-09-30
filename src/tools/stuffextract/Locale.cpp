@@ -10,7 +10,7 @@ char *cconfentry = "SET locale \"";
 void SetLocale(char *loc)
 {
     my_locale[4] = 0;
-    if(strlen(loc))
+    if(loc && strlen(loc))
     {
 	    memcpy(my_locale,loc,4);
     }

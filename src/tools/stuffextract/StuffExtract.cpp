@@ -2,6 +2,7 @@
 #include <set>
 #define _COMMON_NO_THREADS
 #include "common.h"
+#include "Auth/MD5Hash.h"
 #include "tools.h"
 #include "MPQHelper.h"
 #include "dbcfile.h"
@@ -102,6 +103,32 @@ void OutSCP(char *fn, SCPStorageMap& scp)
         printf("OutSCP: unable to write '%s'\n",fn);
     }
 }
+
+void OutMD5(char *path, MD5FileMap& fm)
+{
+
+    std::string fullname(path);
+    fullname += "/md5.txt";
+    printf("Writing MD5 file checksums to '%s'\n",fullname.c_str());
+    std::fstream fh;
+    fh.open(fullname.c_str(), std::ios_base::out);
+    if(fh.is_open())
+    {
+        for(MD5FileMap::iterator i = fm.begin(); i != fm.end(); i++)
+        {
+            fh << i->first << "|" << toHexDump(i->second,MD5_DIGEST_LENGTH,false) << std::endl; // write file content
+            delete [] i->second; // and delete previously allocated memory
+        }
+        fh.close();
+    }
+    else
+    {
+        printf("Couldn't output MD5 list to '%s'\n",fullname.c_str());
+    }
+}
+
+        
+
 
 bool ConvertDBC(void)
 {
@@ -296,6 +323,7 @@ void ExtractMaps(void)
     char outbuf[2000];
     uint32 extr,extrtotal=0;
     MPQHelper mpq("terrain");
+    MD5FileMap md5map;
     CreateDir("stuffextract/data/maps");
     for(std::map<uint32,std::string>::iterator it = mapNames.begin(); it != mapNames.end(); it++)
     {
@@ -347,6 +375,12 @@ void ExtractMaps(void)
                         ADT_FillModelData(bb.contents(),modelNames); 
                         ADT_FillWMOData(bb.contents(),wmoNames); 
                         depdiff = texNames.size() + modelNames.size() + wmoNames.size() - olddeps;
+                        MD5Hash h;
+                        h.Update((uint8*)bb.contents(), bb.size());
+                        h.Finalize();
+                        uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                        md5map[_PathToFileName(outbuf)] = md5ptr;
+                        memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
                         extr++;
                         printf("[%u:%u] %s; %u new deps.\n",extr,it->first,namebuf,depdiff);
                     }
@@ -358,6 +392,7 @@ void ExtractMaps(void)
     }
 
     printf("\nDONE - %u maps extracted, %u total dependencies.\n",extrtotal, texNames.size() + modelNames.size() + wmoNames.size());
+    OutMD5(MAPSDIR,md5map);
 }
 
 void ExtractMapDependencies(void)
@@ -372,6 +407,7 @@ void ExtractMapDependencies(void)
     std::string pathmodel = path + "/model";
     std::string pathwmo = path + "/wmo";
     std::string mpqfn,realfn;
+    MD5FileMap md5Tex, md5Wmo, md5Model;
     CreateDir(pathtex.c_str());
     CreateDir(pathmodel.c_str());
     CreateDir(pathwmo.c_str());
@@ -389,6 +425,12 @@ void ExtractMapDependencies(void)
         {
             ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
             fh.write((const char*)bb.contents(),bb.size());
+            MD5Hash h;
+            h.Update((uint8*)bb.contents(), bb.size());
+            h.Finalize();
+            uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+            md5Tex[_PathToFileName(realfn)] = md5ptr;
+            memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
             texdone++;
             printf("- textures... %u\r",texdone);
         }
@@ -397,6 +439,7 @@ void ExtractMapDependencies(void)
         fh.close();
     }
     printf("\n");
+    OutMD5((char*)pathtex.c_str(),md5Tex);
 
     for(std::set<std::string>::iterator i = modelNames.begin(); i != modelNames.end(); i++)
     {
@@ -426,6 +469,12 @@ void ExtractMapDependencies(void)
         {
             ByteBuffer& bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
             fh.write((const char*)bb.contents(),bb.size());
+            MD5Hash h;
+            h.Update((uint8*)bb.contents(), bb.size());
+            h.Finalize();
+            uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+            md5Model[_PathToFileName(realfn)] = md5ptr;
+            memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
             mdone++;
             printf("- models... %u\r",mdone);
         }
@@ -434,6 +483,7 @@ void ExtractMapDependencies(void)
         fh.close();
     }
     printf("\n");
+    OutMD5((char*)pathmodel.c_str(),md5Model);
 
     for(std::set<std::string>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
     {
@@ -447,6 +497,12 @@ void ExtractMapDependencies(void)
         {
             ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
             fh.write((const char*)bb.contents(),bb.size());
+            MD5Hash h;
+            h.Update((uint8*)bb.contents(), bb.size());
+            h.Finalize();
+            uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+            md5Wmo[_PathToFileName(realfn)] = md5ptr;
+            memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
             wmosdone++;
             printf("- WMOs... %u\r",wmosdone);
         }
@@ -455,11 +511,13 @@ void ExtractMapDependencies(void)
         fh.close();
     }
     printf("\n");
+    OutMD5((char*)pathwmo.c_str(),md5Wmo);
 
 }
 
 void ExtractSoundFiles(void)
 {
+    MD5FileMap md5data;
     uint32 done = 0;
     printf("\nExtracting game audio files, %u total...\n",soundFileSet.size());
     CreateDir(SOUNDDIR);
@@ -479,6 +537,12 @@ void ExtractSoundFiles(void)
             if(bb.size())
             {
                 fh.write((const char*)bb.contents(),bb.size());
+                MD5Hash h;
+                h.Update((uint8*)bb.contents(), bb.size());
+                h.Finalize();
+                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                md5data[_PathToFileName(*i)] = md5ptr;
+                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
                 done++;
                 printf("- %u files done.\r",done);
             }
@@ -489,6 +553,7 @@ void ExtractSoundFiles(void)
         }
         fh.close();
     }
+    OutMD5(SOUNDDIR,md5data);
     printf("\n");
 }
 

@@ -92,8 +92,14 @@ std::string toHexDump(uint8* array,uint32 size,bool spaces)
     char buf[5];
     for(uint32 i=0;i<size;i++)
     {
-        sprintf(buf,(array[i]<0x0F)?"0%X":"%X",(uint32)array[i]);
-        ss << buf;
+        if(array[i])
+        {
+            sprintf(buf,(array[i]<0x0F)?"0%X":"%X",(uint32)array[i]);
+            ss << buf;
+        }
+        else
+            ss << "00"; // little hacklike fix
+
         if(spaces)
             ss << ' ';
     }
