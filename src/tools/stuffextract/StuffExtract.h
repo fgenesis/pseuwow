@@ -15,6 +15,9 @@ typedef std::map< uint32,std::list<std::string> > SCPStorageMap;
 typedef std::map<std::string,uint8*> MD5FileMap;
 
 int main(int argc, char *argv[]);
+void ProcessCmdArgs(int argc, char *argv[]);
+void PrintConfig(void);
+void PrintHelp(void);
 void OutSCP(char*, SCPStorageMap&);
 void OutMD5(char*, MD5FileMap&);
 bool ConvertDBC(void);
