@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	    memcpy(loc,input,4); loc[4]=0;	
 	    SetLocale(loc);
     }
-	if(FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
+	if(GetLocale() && FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
 	{
 		printf("Locale \"%s\" seems valid, starting conversion...\n",GetLocale());
         CreateDir("stuffextract");
