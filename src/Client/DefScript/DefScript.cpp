@@ -810,7 +810,7 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
             if(!bracketsOpen)
             {
                 closingBracket=i;
-                if(nextVar==DEFSCRIPT_NONE && VarType!=DEFSCRIPT_NONE && !hasVar) // remove brackets in var names, like ${var{ia}ble}
+                if(nextVar==DEFSCRIPT_NONE && VarType==DEFSCRIPT_VAR && !hasVar) // remove brackets in var names, like ${var{ia}ble}
                 {
                     str.erase(closingBracket,1);
                     str.erase(openingBracket,1);
@@ -861,7 +861,7 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
                 std::string subs=vname.substr(1,str.length()-1);
                 unsigned int vn=atoi( subs.c_str() );
                 vns << vn;
-                if(pSet && vns.str()==subs) // resolve arg macros @0 - @99
+                if(pSet && vns.str()==subs) // resolve arg macros @0 - @4294967295
                     str=pSet->arg[vn];
                 else if(pSet && subs=="def")
                     str=pSet->defaultarg;
