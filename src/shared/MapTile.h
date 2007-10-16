@@ -30,10 +30,7 @@ public:
     ~MapTile();
     void ImportFromADT(ADTFile*);
     float GetZ(float,float);
-
-#ifdef _DEBUG
     void DebugDumpToFile(void);
-#endif
 
 private:
     MapChunk _chunks[256]; // 16x16

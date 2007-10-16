@@ -42,7 +42,7 @@ uint32 SCPDatabase::LoadFromMem(char *buf, uint32 size)
                 line.clear();
                 continue;
             }
-            if(line[line.size()-1] == 13) // this fixes the annoying newline problems on windows + binary mode
+            if(line[line.size()-1] == 13 || line[line.size()-1] == 10) // this fixes the annoying newline problems on windows + binary mode
                 line[line.size()-1] = 0;
             if(line[0]=='[')
             {
