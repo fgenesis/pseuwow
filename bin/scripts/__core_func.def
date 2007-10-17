@@ -110,7 +110,7 @@ set,top ${@caller}
 default,top #
 set,v ?{globname,${top} ${@def}}
 unset top
-out getvar: v=${v} -> ${${v}}
+//out getvar: v=${v} -> ${${v}}
 if ?{isset ${v}}
         return ${${v}}
 endif
