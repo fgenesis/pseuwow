@@ -187,10 +187,12 @@ private:
     DefReturnResult func_removeevent(CmdSet&);
     DefReturnResult func_abs(CmdSet&);
     DefReturnResult func_bigger(CmdSet&);
+    DefReturnResult func_bigger_eq(CmdSet&);
     DefReturnResult func_equal(CmdSet&);
     DefReturnResult func_isset(CmdSet&);
     DefReturnResult func_not(CmdSet&);
     DefReturnResult func_smaller(CmdSet&);
+    DefReturnResult func_smaller_eq(CmdSet&);
     DefReturnResult func_strlen(CmdSet&);
     DefReturnResult func_tohex(CmdSet&);
     DefReturnResult func_and(CmdSet&);

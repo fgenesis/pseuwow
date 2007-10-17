@@ -105,11 +105,14 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("removeevent",&DefScriptPackage::func_removeevent);
     AddFunc("abs",&DefScriptPackage::func_abs);
     AddFunc("greater",&DefScriptPackage::func_bigger);
+    AddFunc("greater_eq",&DefScriptPackage::func_bigger_eq);
     AddFunc("bigger",&DefScriptPackage::func_bigger);
+    AddFunc("bigger_eq",&DefScriptPackage::func_bigger_eq);
     AddFunc("equal",&DefScriptPackage::func_equal);
     AddFunc("isset",&DefScriptPackage::func_isset);
     AddFunc("not",&DefScriptPackage::func_not);
     AddFunc("smaller",&DefScriptPackage::func_smaller);
+    AddFunc("smaller_eq",&DefScriptPackage::func_smaller_eq);
     AddFunc("strlen",&DefScriptPackage::func_strlen);
     AddFunc("tohex",&DefScriptPackage::func_tohex);
     AddFunc("and",&DefScriptPackage::func_and);

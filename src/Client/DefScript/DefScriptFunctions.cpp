@@ -369,6 +369,16 @@ DefReturnResult DefScriptPackage::func_bigger(CmdSet& Set)
     return toNumber(Set.arg[0]) > toNumber(Set.defaultarg);
 }
 
+DefReturnResult DefScriptPackage::func_smaller_eq(CmdSet& Set)
+{
+    return toNumber(Set.arg[0]) <= toNumber(Set.defaultarg);
+}
+
+DefReturnResult DefScriptPackage::func_bigger_eq(CmdSet& Set)
+{
+    return toNumber(Set.arg[0]) >= toNumber(Set.defaultarg);
+}
+
 DefReturnResult DefScriptPackage::func_not(CmdSet& Set)
 {
     return !isTrue(Set.defaultarg);
