@@ -47,7 +47,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
 {
     _runnable=run;
     _ver="PseuWoW Alpha Build 13.31" DEBUG_APPENDIX;
-    _ver_short="A13.2" DEBUG_APPENDIX;
+    _ver_short="A13.31" DEBUG_APPENDIX;
     _wsession=NULL;
     _rsession=NULL;
     _scp=NULL;
