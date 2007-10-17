@@ -239,6 +239,7 @@ DefReturnResult DefScriptPackage::func_lmclean(CmdSet& Set)
     return toString((uint64)r);
 }
 
+// erase element at position @def, return erased element
 DefReturnResult DefScriptPackage::func_lerase(CmdSet& Set)
 {
     DefList *l = lists.GetNoCreate(_NormalizeVarName(Set.arg[0],Set.myname));

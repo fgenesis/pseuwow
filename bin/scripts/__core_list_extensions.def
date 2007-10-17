@@ -34,7 +34,7 @@ return ${result}
 // -----------------------------------------
 #script=lcontains_ext
 // -----------------------------------------
-// return true if any substring in @def matches any element in list @0.
+// returns the amount of matched substrings of @def in list @0.
 // default delimiter is space, override with @1.
 // by default, any char in @1 serves as delimiter.
 // if you set @2 to true, the exact string @1 is used as delimiter (no default is set)
@@ -57,15 +57,15 @@ ${engine},myl,{${delim}} ${@def}
 
 // list to check must at least contain 1 element
 if ?{not ?{llen ${l}}}
-	return
+	return 0
 endif
 
 // and our pattern list must contain 1 element also
 if ?{not ?{llen myl}}
-	return
+	return 0
 endif
 
-set,result false
+set,result 0
 
 loop
 	if ?{equal,${i} ?{llen ${l}}}
@@ -79,14 +79,10 @@ loop
 		endif
 		set,myelem ?{lindex,myl ${j}}
 		if ?{equal,{${elem}} ${myelem}}
-			set,result true
-			exitloop
+			add,result 1
 		endif
 		add,j 1
 	endloop
-	if ${result}
-		exitloop
-	endif
 	add,i 1
 endloop
 
@@ -101,3 +97,40 @@ unset delim
 
 return ${result}
 
+
+//--------------------------------------------
+#script=lfind
+//--------------------------------------------
+// return the position of the first element matching @def
+// @0: list name, @def: search string
+// @1: ignore case?
+// if nothing is found, return empty string
+
+set,i 0
+set,l ?{globname,{${@caller}} ${@0}}
+
+if ?{not ?{llen ${l}}}
+	return
+endif
+
+set,result
+loop
+	if ?{equal,${i} ?{llen ${l}}}
+		exitloop
+	endif
+	set,elem ?{lindex,{${l}} ${i}}
+	if ${@1}
+		set,eq ?{equal,{?{lowercase ${elem}}} ?{lowercase ${@def}}}
+	else
+		set,eq ?{equal,{${elem}} ${@def}}
+	endif
+	if ${eq}
+		set,result ${i}
+		exitloop
+	endif
+	add,i 1
+endloop
+unset i
+unset l
+unset elem
+return ${result}

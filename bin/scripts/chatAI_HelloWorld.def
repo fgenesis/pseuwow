@@ -7,21 +7,22 @@
 // @3: channel name
 // @4: language name
 
-#onload
-// call us only if somebody says a text containing "hello" and "world"
-RegisterChatAIScript,chat_ai_helloworld,EXACT hello world
-#/onload
-
 // ---------------------------------------
 #script=chat_ai_helloworld
 // ---------------------------------------
+#onload
+// call us only if somebody says a text containing "hello" and "world"
+RegisterChatAIScript,{${@myname}},ALL hello world
+set,counter 0
+#/onload
+
 if ?{equal,${@0} 0}
 	// say some stuff is the language that was used by the sender
-	say,${@1} Hello World! This is an example!
+	say,${@1} Hello World! This is an example! You used ${@4} language.
 else
-	// else shout back in our default language
+	// or shout back in our default language
 	if ?{equal,${@0} 5}
-		yell Yah "Hello World!" is widely used to proof that something is working!!
+		yell Yah "Hello World!" is widely used to proof that something is working!! You used ${@4} language.
 	else
 		if ?{equal,${@0} 14}
 			chan,{${@3}} Recieved a nice "Hello World" in channel ${@3} ;)
@@ -29,4 +30,10 @@ else
 	endif
 endif
 
+add,counter 1
+
+// after 5 times of calling this script, it might get annoying, drop it
+if ?{greater_eq,${counter} 5}
+	DropChatAIScript ${@myname}
+endif
 
