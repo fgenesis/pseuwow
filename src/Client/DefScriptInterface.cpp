@@ -407,7 +407,8 @@ DefReturnResult DefScriptPackage::SCGetPlayerGuid(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
 {
-    if(!(((PseuInstance*)parentMethod)->GetWSession()))
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
     {
         logerror("Invalid Script call: SCGetName: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -415,7 +416,7 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
     DefReturnResult r;
     uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
     r.ret="Unknown Entity";
-    Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
+    Object *o = ws->objmgr.GetObj(guid);
     if(o)
     {
         if(o->GetTypeId()==TYPEID_ITEM || o->GetTypeId()==TYPEID_CONTAINER)
@@ -431,7 +432,11 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
     }
     else
     {
-        logerror("SCGetName: Object "I64FMT" not known",guid);
+        // if no object with that guid is near, it might exist in the cache, check it and use that if present
+        if(ws->plrNameCache.IsKnown(guid))
+            r.ret = ws->plrNameCache.GetName(guid);
+        else
+            logerror("SCGetName: Object "I64FMT" not known",guid);
     }
     return r;
 }

@@ -125,8 +125,6 @@ loop
             endif
         endif
     endif
-
-    logdebug AI call: ${call}
     
     if ${call}
     //  logdebug DEBUG: ChatAI: calling script ${script}, condition ${cond} matched.
