@@ -37,8 +37,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getscpvalue",&DefScriptPackage::SCGetScpValue);
     AddFunc("getplayerguid",&DefScriptPackage::SCGetPlayerGuid);
     AddFunc("getname",&DefScriptPackage::SCGetName);
-    AddFunc("getentry",&DefScriptPackage::SCGetName);
-    AddFunc("getitemprotovalue",&DefScriptPackage::SCGetName);
+    AddFunc("getentry",&DefScriptPackage::SCGetEntry);
+    AddFunc("getitemprotovalue",&DefScriptPackage::SCGetItemProtoValue);
     AddFunc("getobjecttype",&DefScriptPackage::SCGetObjectType);
     AddFunc("objectknown",&DefScriptPackage::SCObjectKnown);
     AddFunc("getplayerperm",&DefScriptPackage::SCGetPlayerPerm);
@@ -843,6 +843,7 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
 
     Interpret(curSet);
 }
+
 
 
 
