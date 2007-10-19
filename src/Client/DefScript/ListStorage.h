@@ -11,6 +11,8 @@ typedef std::map<std::string,DefList*> DefListMap;
 class ListStorage
 {
 public:
+	~ListStorage();
+
 	bool Exists(std::string);
 	void Delete(std::string);
 	DefList *Get(std::string);

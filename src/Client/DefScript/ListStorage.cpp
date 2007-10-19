@@ -43,3 +43,12 @@ DefList *ListStorage::Get(std::string s)
     DefList *l = GetNoCreate(s);
     return l ? l : _Create(s);
 }
+
+ListStorage::~ListStorage()
+{
+	for(DefListMap::iterator it = _storage.begin(); it != _storage.end();)
+	{
+		delete it->second;
+		_storage.erase(it++);
+	}
+}

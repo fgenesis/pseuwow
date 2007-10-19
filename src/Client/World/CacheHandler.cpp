@@ -13,6 +13,14 @@
 // increase this number whenever you change something that makes old files unusable
 uint32 ITEMPROTOTYPES_CACHE_VERSION = 0x00000001;
 
+PlayerNameCache::~PlayerNameCache()
+{
+	for(std::vector<PlayerNameCacheItem*>::iterator i=_cache.begin(); i!=_cache.end(); i++)
+	{
+		delete *i;
+	}
+}
+
 bool PlayerNameCache::AddInfo(uint64 guid, std::string name){
     PlayerNameCacheItem *cacheItem=new PlayerNameCacheItem;
     cacheItem->_name=name;
