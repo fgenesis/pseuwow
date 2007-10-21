@@ -94,7 +94,8 @@ PseuInstance::~PseuInstance()
 
 bool PseuInstance::Init(void)
 {
-    log_prepare("logfile.txt",this);
+    log_prepare("logfile.txt","a");
+    log_setloglevel(0);
     log("");
     log("--- Initializing Instance ---");
 
@@ -185,9 +186,19 @@ bool PseuInstance::Init(void)
 
 void PseuInstance::Run(void)
 {
-
     if(!_initialized)
         return;
+
+    logdetail("PseuInstance: Initialized and running!");
+
+    if(GetGUI())
+    {
+        while(!GetGUI()->IsInitialized())
+            Sleep(1); // wait until the gui is ready. it will crash otherwise
+        logdebug("GUI: switching to startup display...");
+        GetGUI()->SetSceneState(SCENESTATE_GUISTART);
+    }
+    // TODO: as soon as username ans password can be inputted into the gui, wait until it was set by user.
 
     if(GetConf()->realmlist.empty() || GetConf()->realmport==0)
     {
@@ -404,6 +415,8 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
             num+=opt.at(i);
         }
     }
+
+    log_setloglevel(debug);
 }
 
 

@@ -1,16 +1,25 @@
 #include <stdarg.h>
 #include "common.h"
-#include "PseuWoW.h"
 #include "log.h"
 
-PseuInstance *instance=NULL;
+#if PLATFORM == PLATFORM_WIN32
+#include <windows.h>
+#endif
+
 FILE *logfile=NULL;
+uint8 loglevel=0;
 
 
-void log_prepare(char *fn, PseuInstance* p)
+void log_prepare(char *fn, char *mode = NULL)
 {
-    logfile = fopen(fn,"a");
-    instance = p;
+    if(!mode)
+        mode = "a";
+    logfile = fopen(fn,mode);
+}
+
+void log_setloglevel(uint8 lvl)
+{
+    loglevel = lvl;
 }
 
 void log(const char *str, ...)
@@ -40,7 +49,7 @@ void log(const char *str, ...)
 
 void logdetail(const char *str, ...)
 {
-    if(!str || instance->GetConf()->debug < 1)
+    if(!str || loglevel < 1)
         return;
     va_list ap;
     _log_setcolor(true,LCYAN);
@@ -65,7 +74,7 @@ void logdetail(const char *str, ...)
 
 void logdebug(const char *str, ...)
 {
-    if(!str || instance->GetConf()->debug < 2)
+    if(!str || loglevel < 2)
         return;
     va_list ap;
     _log_setcolor(true,LBLUE);
@@ -91,7 +100,7 @@ void logdebug(const char *str, ...)
 
 void logdev(const char *str, ...)
 {
-	if(!str || instance->GetConf()->debug < 3)
+	if(!str || loglevel < 3)
 		return;
 	va_list ap;
 	_log_setcolor(true,LMAGENTA);
@@ -161,9 +170,9 @@ void logcritical(const char *str, ...)
     fflush(stdout);
 }
 
-void logcustom(uint8 loglevel, Color color, const char *str, ...)
+void logcustom(uint8 lvl, Color color, const char *str, ...)
 {
-    if(!str || instance->GetConf()->debug < loglevel)
+    if(!str || loglevel < lvl)
         return;
     va_list ap;
     _log_setcolor(true,color);

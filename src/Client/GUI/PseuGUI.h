@@ -7,6 +7,27 @@
 class PseuGUI;
 class Object;
 class PseuInstance;
+class Scene;
+
+enum SceneState
+{
+    SCENESTATE_NULL,
+    SCENESTATE_GUISTART,
+    SCENESTATE_LOGINSCREEN,
+    SCENESTATE_CHARACTERSELECTION,
+    SCENESTATE_LOADING,
+    SCENESTATE_WORLD
+};
+
+enum DriverIDs
+{
+    NULLDEVICE = 0,
+    SOFTWARE = 1,
+    BURNINGSVIDEO = 2,
+    OPENGL = 3,
+    DIRECTX8 = 4,
+    DIRECTX9 = 5,
+};
 
 class PseuGUIRunnable : public ZThread::Runnable
 {
@@ -22,6 +43,12 @@ private:
 
 class PseuGUI
 {
+    //  too bad friends are not inherited... 
+    friend class Scene;
+    friend class SceneWorld;
+    friend class SceneGuiStart;
+    // ...
+
 public:
     PseuGUI();
     ~PseuGUI();
@@ -35,14 +62,21 @@ public:
     void UseShadows(bool);
     void Cancel(void);
     void Shutdown(void);
+    inline bool IsInitialized(void) { return _initialized; }
+
     inline bool MustDie(void) { return _mustdie; }
 
     // interfaces to tell the gui what to draw
     void NotifyObjectDeletion(uint64 guid);
     void NotifyObjectCreation(Object *o);
 
+    // scenes
+    void DrawCurrentScene(void);
+    void SetSceneState(SceneState);
+
 private:
     void _Init(void);
+    void _UpdateSceneState(void);
     uint16 _xres,_yres,_colordepth;
     bool _windowed,_vsync,_shadows;
     bool _initialized,_mustdie;
@@ -53,6 +87,8 @@ private:
     irr::video::E_DRIVER_TYPE _driverType;
     DrawObjMgr domgr;
     PseuInstance *_instance;
+    SceneState _scenestate, _scenestate_new;
+    Scene *_scene;
 
 };
 

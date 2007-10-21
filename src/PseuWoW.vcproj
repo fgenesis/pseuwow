@@ -178,12 +178,6 @@
 				RelativePath=".\Client\HelperDefs.h">
 			</File>
 			<File
-				RelativePath=".\Client\log.cpp">
-			</File>
-			<File
-				RelativePath=".\Client\log.h">
-			</File>
-			<File
 				RelativePath=".\Client\main.cpp">
 			</File>
 			<File
@@ -425,6 +419,18 @@
 				</File>
 				<File
 					RelativePath=".\Client\Gui\PseuGUI.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\Scene.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\Scene.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\SceneGuiStart.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\SceneWorld.cpp">
 				</File>
 			</Filter>
 		</Filter>
