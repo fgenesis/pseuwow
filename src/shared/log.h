@@ -1,8 +1,6 @@
 #ifndef _LOG_H
 #define _LOG_H
 
-class PseuInstance;
-
 enum Color
 {
     BLACK,
@@ -22,7 +20,8 @@ enum Color
     WHITE
 };
 
-void log_prepare(char *fn, PseuInstance* p); // instance reference needed for log level determination
+void log_prepare(char *fn, char *mode);
+void log_setloglevel(uint8 lvl);
 void log(const char *str, ...);
 void logdetail(const char *str, ...);
 void logdebug(const char *str, ...);

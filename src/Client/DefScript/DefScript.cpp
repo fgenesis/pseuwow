@@ -89,7 +89,7 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("shdn",&DefScriptPackage::func_shdn);
     AddFunc("loaddef",&DefScriptPackage::func_loaddef);
     AddFunc("reloaddef",&DefScriptPackage::func_reloaddef);
-    AddFunc("reloaddef",&DefScriptPackage::func_unloaddef);
+    AddFunc("unloaddef",&DefScriptPackage::func_unloaddef);
     AddFunc("setscriptpermission",&DefScriptPackage::func_setscriptpermission);
     AddFunc("toint",&DefScriptPackage::func_toint);
     AddFunc("add",&DefScriptPackage::func_add);

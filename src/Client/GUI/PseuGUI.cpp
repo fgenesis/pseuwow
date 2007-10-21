@@ -3,24 +3,8 @@
 #include "Object.h"
 #include "DrawObject.h"
 #include "PseuWoW.h"
+#include "Scene.h"
 #include "PseuGUI.h"
-
-using namespace irr;
-using namespace core;
-using namespace scene;
-using namespace video;
-using namespace io;
-using namespace gui;
-
-enum DriverIDs
-{
-    NULLDEVICE = 0,
-    SOFTWARE = 1,
-    BURNINGSVIDEO = 2,
-    OPENGL = 3,
-    DIRECTX8 = 4,
-    DIRECTX9 = 5,
-};
 
 PseuGUIRunnable::PseuGUIRunnable()
 {
@@ -53,6 +37,11 @@ PseuGUI::PseuGUI()
     _initialized = false;
     _mustdie = false;
     _driverType = video::EDT_BURNINGSVIDEO; // nulldevice makes not really a sense to display stuff
+    _scenestate = SCENESTATE_NULL;
+    _smgr = NULL;
+    _device = NULL;
+    _guienv = NULL;
+    _scene = NULL;
 }
 
 PseuGUI::~PseuGUI()
@@ -108,6 +97,7 @@ void PseuGUI::_Init(void)
     _device->setWindowCaption(L"PseuWoW - Initializing");
     _driver = _device->getVideoDriver();
     _smgr = _device->getSceneManager();
+    _guienv = _device->getGUIEnvironment();
     //...
     _initialized = true;
 }
@@ -115,12 +105,19 @@ void PseuGUI::_Init(void)
 void PseuGUI::Cancel(void)
 {
     DEBUG(logdebug("PseuGUI::Cancel()"));
-    _mustdie = true;
+
+    if(_scene)
+    {
+        delete _scene;
+        _scene = NULL;
+    }
     if(_device)
     {
         _device->drop();
         _device = NULL;
+
     }
+    _mustdie = true;
 }
 
 void PseuGUI::Shutdown(void)
@@ -149,9 +146,11 @@ void PseuGUI::Run(void)
         {
             _driver->beginScene(true, true, 0);
 
-            domgr.Update(); // iterate over DrawObjects, draw them and clean up
+            _UpdateSceneState();
+            DrawCurrentScene();
 
             _smgr->drawAll();
+            _guienv->drawAll();
 
             _driver->endScene();
         }
@@ -198,4 +197,39 @@ void PseuGUI::SetInstance(PseuInstance* in)
     _instance = in;
 }
 
+void PseuGUI::SetSceneState(SceneState state)
+{
+    _scenestate_new = state; // will be applied at next cycle
+}
+
+void PseuGUI::_UpdateSceneState(void)
+{
+    if(_scenestate != _scenestate_new && _smgr)
+    {
+        _smgr->clear();
+        if(_scene)
+            delete _scene;
+
+        _scenestate = _scenestate_new;
+
+        logdebug("PseuGUI: switched to SceneState %u", _scenestate);
+
+        switch (_scenestate)
+        {
+            case SCENESTATE_GUISTART: _scene = new SceneGuiStart(this); break;
+            case SCENESTATE_WORLD: _scene = new SceneWorld(this); break;
+            default: _scene = new Scene(this); // will draw nothing, just yield the gui
+        }
+
+        logdebug("PseuGUI: scene created.");
+    }
+}
+
+void PseuGUI::DrawCurrentScene()
+{
+    if(!_initialized)
+        return;
+    if(_scene)
+        _scene->Draw();
+}
 

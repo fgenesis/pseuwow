@@ -26,6 +26,7 @@
 #include "SysDefs.h"
 #include "DebugStuff.h"
 #include "tools.h"
+#include "log.h"
 
 #include "ByteBuffer.h"
 

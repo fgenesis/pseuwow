@@ -139,6 +139,12 @@
 				RelativePath=".\shared\DebugStuff.h">
 			</File>
 			<File
+				RelativePath=".\shared\log.cpp">
+			</File>
+			<File
+				RelativePath=".\shared\log.h">
+			</File>
+			<File
 				RelativePath=".\shared\SysDefs.h">
 			</File>
 			<File
