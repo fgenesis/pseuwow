@@ -6,7 +6,6 @@
 #include <sstream>
 #include <math.h>
 #include "DefScript.h"
-#include "DefScriptTools.h"
 
 using namespace DefScriptTools;
 
@@ -64,6 +63,14 @@ DefReturnResult DefScriptPackage::func_reloaddef(CmdSet& Set){
         r.ret="";
     }
     return r;
+}
+
+DefReturnResult DefScriptPackage::func_unloaddef(CmdSet& Set)
+{
+    if(!ScriptExists(Set.defaultarg))
+        return false;
+    this->DeleteScript(Set.defaultarg);
+    return true;
 }
 
 DefReturnResult DefScriptPackage::func_unset(CmdSet& Set){
@@ -494,5 +501,17 @@ DefReturnResult DefScriptPackage::func_strfind(CmdSet& Set)
     return toString((uint64)pos);    
 }
 
+DefReturnResult DefScriptPackage::func_scriptexists(CmdSet& Set)
+{
+    return ScriptExists(Set.defaultarg);
+}
 
-
+DefReturnResult DefScriptPackage::func_funcexists(CmdSet& Set)
+{
+    for(DefScriptFunctionTable::iterator i = _functable.begin(); i != _functable.end(); i++)
+    {
+        if(i->name == stringToLower(Set.defaultarg))
+            return true;
+    }
+    return false;
+}

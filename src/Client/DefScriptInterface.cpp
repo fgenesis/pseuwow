@@ -20,6 +20,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("savecache",&DefScriptPackage::SCsavecache);
     AddFunc("sendchatmessage",&DefScriptPackage::SCSendChatMessage);
     AddFunc("joinchannel",&DefScriptPackage::SCjoinchannel);
+    AddFunc("leavechannel",&DefScriptPackage::SCleavechannel);
+    AddFunc("listchannel",&DefScriptPackage::SClistchannel);
     AddFunc("loadconf",&DefScriptPackage::SCloadconf);
     AddFunc("applyconf",&DefScriptPackage::SCapplyconf);
     AddFunc("applypermissions",&DefScriptPackage::SCapplypermissions);
@@ -164,6 +166,18 @@ DefReturnResult DefScriptPackage::SCjoinchannel(CmdSet& Set){
         DEF_RETURN_ERROR;
     }
     ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->Join(Set.defaultarg,Set.arg[0]);
+    return true;
+}
+
+DefReturnResult DefScriptPackage::SClistchannel(CmdSet& Set){
+    if(Set.defaultarg.empty())
+        return false;
+    if(!(((PseuInstance*)parentMethod)->GetWSession()))
+    {
+        logerror("Invalid Script call: SClistchannel: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    ((PseuInstance*)parentMethod)->GetWSession()->GetChannels()->RequestList(Set.defaultarg);
     return true;
 }
 

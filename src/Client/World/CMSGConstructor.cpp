@@ -11,25 +11,20 @@ void WorldSession::SendChatMessage(uint32 type, uint32 lang, std::string msg, st
     if((!_logged) || msg.empty())
         return;
 	WorldPacket packet;
-	packet<<type<<lang;
+	packet << type << lang;
 	switch(type){
-		case CHAT_MSG_SAY:
-		case CHAT_MSG_YELL:
-		case CHAT_MSG_PARTY:
-		case CHAT_MSG_GUILD:
-		case CHAT_MSG_OFFICER: // not sure about that
-			packet<<msg;
-			break;
 		case CHAT_MSG_WHISPER:
             if(to.empty())
                 return;
-			packet<<to<<msg;
+			packet << to << msg;
 			break;
 		case CHAT_MSG_CHANNEL:
             if(to.empty() /*|| !_channels->IsOnChannel(to)*/)
                 return;
-			packet<<to<<msg;
+			packet << to << msg;
 			break;
+        default:
+            packet << msg;
 	}
     packet.SetOpcode(CMSG_MESSAGECHAT);
 	SendWorldPacket(packet);

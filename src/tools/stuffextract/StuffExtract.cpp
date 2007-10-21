@@ -192,12 +192,16 @@ std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 
 
 
 // output a formatted scp file
-void OutSCP(char *fn, SCPStorageMap& scp)
+void OutSCP(char *fn, SCPStorageMap& scp, std::string dbName="")
 {
     std::fstream f;
     f.open(fn, std::ios_base::out);
     if(f.is_open())
     {
+        if(dbName.length())
+        {
+            f << "#dbname=" << dbName << "\n";
+        }
         for(SCPStorageMap::iterator mi = scp.begin(); mi != scp.end(); mi++)
         {
             f << "[" << mi->first << "]\n";
@@ -413,12 +417,12 @@ bool ConvertDBC(void)
     CreateDir("stuffextract/data/scp");
 
     printf("Writing SCP files:\n");    
-    printf("emote.."); OutSCP(SCPDIR "/emote.scp",EmoteDataStorage);
-    printf("race.."); OutSCP(SCPDIR "/race.scp",RaceDataStorage);
-    printf("sound.."); OutSCP(SCPDIR "/sound.scp",SoundDataStorage);
-    printf("map.."); OutSCP(SCPDIR "/map.scp",MapDataStorage);
-    printf("area.."); OutSCP(SCPDIR "/area.scp",AreaDataStorage);
-    printf("itemdisplayinfo."); OutSCP(SCPDIR "/itemdisplayinfo.scp",ItemDisplayInfoStorage);
+    printf("emote.."); OutSCP(SCPDIR "/emote.scp",EmoteDataStorage, "emote");
+    printf("race.."); OutSCP(SCPDIR "/race.scp",RaceDataStorage, "race");
+    printf("sound.."); OutSCP(SCPDIR "/sound.scp",SoundDataStorage, "sound");
+    printf("map.."); OutSCP(SCPDIR "/map.scp",MapDataStorage, "map");
+    printf("area.."); OutSCP(SCPDIR "/area.scp",AreaDataStorage, "area");
+    printf("itemdisplayinfo."); OutSCP(SCPDIR "/itemdisplayinfo.scp",ItemDisplayInfoStorage, "itemdisplayinfo");
     //...
     printf("DONE!\n");
 

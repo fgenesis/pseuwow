@@ -2,14 +2,14 @@
 #ifndef __DEFSCRIPT_H
 #define __DEFSCRIPT_H
 
+#include "DefScriptDefines.h"
 #include <map>
 #include <deque>
 #include <fstream>
 #include "VarSet.h"
 #include "DynamicEvent.h"
 #include "ListStorage.h"
-
-#include "DefScriptDefines.h"
+#include "DefScriptTools.h"
 
 class DefScriptPackage;
 class DefScript;
@@ -169,6 +169,7 @@ private:
     DefReturnResult func_unset(CmdSet&);
     DefReturnResult func_loaddef(CmdSet&);
     DefReturnResult func_reloaddef(CmdSet&);
+    DefReturnResult func_unloaddef(CmdSet&);
     DefReturnResult func_out(CmdSet&);
     DefReturnResult func_eof(CmdSet&);
     DefReturnResult func_shdn(CmdSet&);
@@ -204,6 +205,9 @@ private:
     DefReturnResult func_random(CmdSet&);
     DefReturnResult func_fileexists(CmdSet&);
     DefReturnResult func_strfind(CmdSet&);
+    DefReturnResult func_scriptexists(CmdSet&);
+    DefReturnResult func_funcexists(CmdSet&);
+
 
     // list functions
     DefReturnResult func_lpushback(CmdSet&);

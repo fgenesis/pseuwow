@@ -7,7 +7,6 @@
 #include <stdarg.h>
 #include "VarSet.h"
 #include "DefScript.h"
-#include "DefScriptTools.h"
 
 using namespace DefScriptTools;
 
@@ -90,6 +89,7 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("shdn",&DefScriptPackage::func_shdn);
     AddFunc("loaddef",&DefScriptPackage::func_loaddef);
     AddFunc("reloaddef",&DefScriptPackage::func_reloaddef);
+    AddFunc("reloaddef",&DefScriptPackage::func_unloaddef);
     AddFunc("setscriptpermission",&DefScriptPackage::func_setscriptpermission);
     AddFunc("toint",&DefScriptPackage::func_toint);
     AddFunc("add",&DefScriptPackage::func_add);
@@ -124,6 +124,8 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("random",&DefScriptPackage::func_random);
     AddFunc("fileexists",&DefScriptPackage::func_fileexists);
     AddFunc("strfind",&DefScriptPackage::func_strfind);
+    AddFunc("funcexists",&DefScriptPackage::func_funcexists);
+    AddFunc("scriptexists",&DefScriptPackage::func_scriptexists);
 
     // list functions
     AddFunc("lpushback",&DefScriptPackage::func_lpushback);
