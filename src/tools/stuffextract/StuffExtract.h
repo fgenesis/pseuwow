@@ -18,7 +18,7 @@ int main(int argc, char *argv[]);
 void ProcessCmdArgs(int argc, char *argv[]);
 void PrintConfig(void);
 void PrintHelp(void);
-void OutSCP(char*, SCPStorageMap&);
+void OutSCP(char*, SCPStorageMap&, std::string);
 void OutMD5(char*, MD5FileMap&);
 bool ConvertDBC(void);
 void ExtractMaps(void);

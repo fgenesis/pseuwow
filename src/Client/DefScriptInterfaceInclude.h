@@ -3,7 +3,7 @@
 #define USING_DEFSCRIPT_EXTENSIONS true
 
 void _InitDefScriptInterface(void);
-// Useable own internal functions:
+// Usable own internal functions:
 DefReturnResult SCpause(CmdSet&);
 DefReturnResult SCSendChatMessage(CmdSet&);
 DefReturnResult SCsavecache(CmdSet&);
@@ -12,6 +12,7 @@ DefReturnResult SCfollow(CmdSet&);
 DefReturnResult SCshdn(CmdSet&);
 DefReturnResult SCjoinchannel(CmdSet&);
 DefReturnResult SCleavechannel(CmdSet&);
+DefReturnResult SClistchannel(CmdSet&);
 DefReturnResult SCloadconf(CmdSet&);
 DefReturnResult SCapplypermissions(CmdSet&);
 DefReturnResult SCapplyconf(CmdSet&);

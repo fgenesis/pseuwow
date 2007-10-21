@@ -195,16 +195,20 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 	uint64 guid;
 	uint8 mode;
 	recvPacket >> unk >> size;
+
+    // store list of GUIDs in: @ChannelList
+    DefList *l = _worldSession->GetInstance()->GetScripts()->lists.Get("@ChannelList");
+    l->clear();
 	for(uint32 i = 0; i < size; i++)
 	{
 		recvPacket >> guid >> mode;
 		cpl[guid] = mode;
+        l->push_back(DefScriptTools::toString(guid));
 	}
 
-	// now we could do something with that list, but for now, only request names of unknown players
 	std::string pname;
 	bool muted,mod;
-	log("Player channel list, %u players:",size);
+	logcustom(0,WHITE,"Player channel list, %u players:",size);
 	for(ChannelPlayerList::iterator i = cpl.begin(); i != cpl.end(); i++)
 	{
 		pname = _worldSession->plrNameCache.GetName(i->first);
@@ -220,7 +224,7 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 		while(pname.length()<12)
 			pname += " "; // for better formatting
 
-		log("%s ["I64FMT"] %s %s",pname.c_str(),i->first,muted?"(muted)":"",mod?"(moderator)":"");
+		logcustom(0,WHITE,"%s ["I64FMT"] %s %s",pname.c_str(),i->first,muted?"(muted)":"",mod?"(moderator)":"");
 	}
 }
 

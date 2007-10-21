@@ -3,7 +3,6 @@
 #include <string>
 #include <algorithm>
 #include "DefScript.h"
-#include "DefScriptTools.h"
 
 using namespace DefScriptTools;
 
