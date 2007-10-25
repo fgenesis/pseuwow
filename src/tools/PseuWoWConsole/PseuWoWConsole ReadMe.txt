@@ -1,7 +1,7 @@
 =======================================================
-PseuWoWConsole - Version 1.1.0
+PseuWoWConsole - Version 2.0.0
 =======================================================
-"What ain't no country I ever heard of! They speak English in What? "
+"At First you listen to users, then you stop listening"
 
 =======================================================
 Greetings from TheTourist
@@ -25,3 +25,11 @@ I can't profess to be a trained developer, I am entirely self taught. So any adv
 
 This is all released under the GNU General Public License, which you review at: http://www.gnu.org/copyleft/gpl.html
 As I feel it's better to share, we all get along better that way.
+
+=======================================================
+Changes
+=======================================================
+Version 2.0.0
+	* Added Nifty Icon Feature - Basically If you run more than one session you now tell which one is which!
+	* Display of Char Name
+	* Started Work on reading the colors from input	
