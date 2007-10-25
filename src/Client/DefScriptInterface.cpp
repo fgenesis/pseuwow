@@ -47,6 +47,9 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getscriptperm",&DefScriptPackage::SCGetScriptPerm);
     AddFunc("lgetfiles",&DefScriptPackage::SCGetFileList);
     AddFunc("printscript",&DefScriptPackage::SCPrintScript);
+    AddFunc("getobjectvalue",&DefScriptPackage::SCGetObjectValue);
+    AddFunc("getrace",&DefScriptPackage::SCGetRace);
+    AddFunc("getclass",&DefScriptPackage::SCGetClass);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -782,6 +785,74 @@ DefReturnResult DefScriptPackage::SCPrintScript(CmdSet &Set)
     for(uint32 i = 0; i < sc->GetLines(); i++)
     {
         logcustom(0,GREEN,sc->GetLine(i).c_str());
+    }
+    return "";
+}
+
+DefReturnResult DefScriptPackage::SCGetObjectValue(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCGetObjectValue: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+
+    uint64 guid = DefScriptTools::toNumber(Set.defaultarg);
+    Object *o = ws->objmgr.GetObj(guid);
+    if(o)
+    {
+        uint32 v = (uint32)DefScriptTools::toNumber(Set.arg[0]);
+        if(v > o->GetValuesCount())
+        {
+            logerror("SCGetObjectValue ["I64FMTD", type %u]: invalid value index: %u",guid,o->GetTypeId(),v);
+            return "";
+        }
+        else
+        {
+            if(DefScriptTools::stringToLower(Set.arg[1]) == "f")
+                return toString((ldbl)o->GetFloatValue(v));
+            else if(DefScriptTools::stringToLower(Set.arg[1]) == "i64")
+                return toString(o->GetUInt64Value(v));
+            else
+                return toString((uint64)o->GetUInt32Value(v));
+        }
+    }
+    return "";
+}
+
+DefReturnResult DefScriptPackage::SCGetRace(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCGetObjectValue: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+
+    uint64 guid = DefScriptTools::toNumber(Set.defaultarg);
+    Object *o = ws->objmgr.GetObj(guid);
+    if(o && (o->GetTypeId() == TYPEID_UNIT || o->GetTypeId() == TYPEID_PLAYER))
+    {
+        return DefScriptTools::toString((uint64)((Unit*)o)->GetRace());
+    }
+    return "";
+}
+
+DefReturnResult DefScriptPackage::SCGetClass(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCGetObjectValue: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+
+    uint64 guid = DefScriptTools::toNumber(Set.defaultarg);
+    Object *o = ws->objmgr.GetObj(guid);
+    if(o && (o->GetTypeId() == TYPEID_UNIT || o->GetTypeId() == TYPEID_PLAYER))
+    {
+        return DefScriptTools::toString((uint64)((Unit*)o)->GetClass());
     }
     return "";
 }
