@@ -37,6 +37,9 @@ DefReturnResult SCObjectKnown(CmdSet&);
 DefReturnResult SCGetPlayerPerm(CmdSet&);
 DefReturnResult SCGetScriptPerm(CmdSet&);
 DefReturnResult SCGetFileList(CmdSet&);
-DefReturnResult SCPrintScript(CmdSet &Set);
+DefReturnResult SCPrintScript(CmdSet&);
+DefReturnResult SCGetObjectValue(CmdSet&);
+DefReturnResult SCGetRace(CmdSet&);
+DefReturnResult SCGetClass(CmdSet&);
 
 #endif

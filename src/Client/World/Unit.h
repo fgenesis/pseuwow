@@ -51,6 +51,8 @@ public:
     uint8 GetGender(void);
     void SetSpeed(uint8 speednr, float speed) { _speed[speednr] = speed; }
     float GetSpeed(uint8 speednr) { return _speed[speednr]; }
+    uint8 GetRace() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_0) & 0xFF); };
+    uint8 GetClass() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 8) & 0xFF); };
 protected:
     float _speed[MAX_MOVE_TYPE];
 
