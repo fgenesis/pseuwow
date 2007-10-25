@@ -1,5 +1,5 @@
 =======================================================
-PseuWoWConsole - Version 2.0.0
+PseuWoWConsole - Version 2.1.0
 =======================================================
 "At First you listen to users, then you stop listening"
 
@@ -33,3 +33,6 @@ Version 2.0.0
 	* Added Nifty Icon Feature - Basically If you run more than one session you now tell which one is which!
 	* Display of Char Name
 	* Started Work on reading the colors from input	
+
+Version 2.1.0	
+	* Fixed a problem due to failed recompile

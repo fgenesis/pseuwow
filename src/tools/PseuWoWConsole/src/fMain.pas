@@ -121,14 +121,6 @@ begin
   begin
     Port := 8089;
     Open;
-
-    if (Active) then
-    begin
-      Close;
-      servRemote.Active := False;
-    end
-    else
-      servRemote.Active := True;
   end;
 
 
@@ -196,6 +188,7 @@ begin
   if clientSock.Port = 8089 then
   begin
     Log('**** Already Listening ****');
+    servRemote.Active := False;
   end;
 
 end;
@@ -214,7 +207,8 @@ begin
   end
   else
   begin
-    Log('Error in Checking For Listening', clMaroon);
+    Log('No Listening Console', clGreen);
+    servRemote.Active := True;
     ErrorCode := 0;
   end;
 end;
