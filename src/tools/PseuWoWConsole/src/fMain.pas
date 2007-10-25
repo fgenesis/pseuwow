@@ -5,11 +5,11 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, RedirectConsole, ExtCtrls, IniFiles, ScktComp, JvComponentBase,
-  JvTrayIcon, ComCtrls, modRichEdit, StrUtils;
+  JvTrayIcon, ComCtrls, modRichEdit, StrUtils, ImgList, modSCPUtils;
 
 type
   TfrmMain = class(TForm)
-    Panel1: TPanel;
+    pnlTop: TPanel;
     txtExe: TEdit;
     btnRun: TButton;
     btnExit: TButton;
@@ -18,8 +18,13 @@ type
     clientSock: TClientSocket;
     TrayIcon: TJvTrayIcon;
     Console: TRichEdit;
+    imgList: TImageList;
+    pnlBottom: TPanel;
     grpCmd: TGroupBox;
     comCommand: TComboBox;
+    pnlSessionTop: TPanel;
+    cbexIcon: TComboBoxEx;
+    txtChar: TStaticText;
     procedure btnRunClick(Sender: TObject);
     procedure btnExitClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -36,6 +41,7 @@ type
       Shift: TShiftState);
     procedure clientSockConnecting(Sender: TObject;
       Socket: TCustomWinSocket);
+    procedure cbexIconChange(Sender: TObject);
   private
     { Private declarations }
     App : String;
@@ -43,6 +49,11 @@ type
     Ready : Boolean;
 
     function ConsoleCommand(AString : String):Boolean;
+
+    procedure LoadSettings;
+    procedure SetupIcons;
+    procedure SetIcon(AIndex : Integer; AUpdateINI : Boolean = True);
+    procedure LoadPseuSettings(AConFile : string);
 
     procedure ShutDown;
     procedure Execute(AFile: String);
@@ -71,6 +82,8 @@ end;
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   RC_LineOut:=MyLineOut; // set Output
+  SetupIcons;
+  LoadSettings;
   Ready := False;
 end;
 
@@ -100,11 +113,30 @@ end;
 
 procedure TfrmMain.Execute(AFile : String);
 begin
-  servRemote.Active := True;
+  //TT: Get Info from PseuWow.conf
+  LoadPseuSettings(ExtractFilePath(AFile)+'\conf\PseuWoW.conf');
+
+  //TT: See if we already have a server running
+  with clientSock do
+  begin
+    Port := 8089;
+    Open;
+
+    if (Active) then
+    begin
+      Close;
+      servRemote.Active := False;
+    end
+    else
+      servRemote.Active := True;
+  end;
+
+
   Running := True;
-  Panel1.Hide;
-  RC_Run(AFile);
+  pnlTop.Hide;
   comCommand.SetFocus;
+  RC_Run(AFile);
+
 end;
 
 procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -121,7 +153,7 @@ begin
   timerStart.Enabled := False;
   if Ready then
   begin
-    TrayIcon.HideApplication;
+    //TrayIcon.HideApplication;
     Launch;
     Exit;
   end
@@ -150,25 +182,47 @@ end;
 procedure TfrmMain.clientSockConnect(Sender: TObject;
   Socket: TCustomWinSocket);
 begin
-  Ready := True;
-  clientSock.Active := False;
-  Log('**** WS Is Ready For Connections ****');
-  Launch;
+
+  //World Server Check
+  if clientSock.Port = 8085 then
+  begin
+    Ready := True;
+    clientSock.Active := False;
+    Log('**** WS Is Ready For Connections ****');
+    Launch;
+  end;
+
+  //Checking If We Have A listening Console
+  if clientSock.Port = 8089 then
+  begin
+    Log('**** Already Listening ****');
+  end;
+
 end;
 
 procedure TfrmMain.clientSockError(Sender: TObject;
   Socket: TCustomWinSocket; ErrorEvent: TErrorEvent;
   var ErrorCode: Integer);
 begin
-  Ready := False;
-  clientSock.Active := False;
-  Log('Still Waiting For Server',clMaroon);
-  ErrorCode := 0;
+  //World Server Check
+  if clientSock.Port = 8085 then
+  begin
+    Ready := False;
+    clientSock.Active := False;
+    Log('Still Waiting For Server',clMaroon);
+    ErrorCode := 0;
+  end
+  else
+  begin
+    Log('Error in Checking For Listening', clMaroon);
+    ErrorCode := 0;
+  end;
 end;
 
 procedure TfrmMain.Launch;
 var
   IniFile : TInifile;
+  iIcon : Integer;
 begin
   if Ready = False then
     Exit;
@@ -176,20 +230,12 @@ begin
   Running := False;
   timerStart.Enabled := False;
 
-  //TT: Read from Inifile for the path the file we want.
-  IniFile := TIniFile.Create(ExtractFilePath(Application.ExeName)+'Settings.INI');
-  App := IniFile.ReadString('Execute','Application','');
-  if App = '' then
-  begin
-    if FileExists(ExtractFilePath(Application.ExeName)+'pseuwow.exe') then
-      App := ExtractFilePath(Application.ExeName)+'pseuwow.exe';
-  end;
-  IniFile.WriteString('Execute','Application',App);
-  IniFile.UpdateFile;
-  IniFile.Free;
-
   if App <> '' then
-    Execute(App);
+    Execute(App)
+  else
+  begin
+    timerStart.Enabled := True;
+  end;
 end;
 
 
@@ -235,7 +281,15 @@ end;
 procedure TfrmMain.clientSockConnecting(Sender: TObject;
   Socket: TCustomWinSocket);
 begin
-  Log('Establishing Connection to WS',clGreen);
+  if clientSock.Port = 8085 then
+  begin
+    Log('Establishing Connection to WS',clGreen);
+  end;
+
+  if clientSock.Port = 8089 then
+  begin
+    Log('Checking For Listening Console',clGreen);
+  end;
 end;
 
 procedure TfrmMain.WriteFromPseWow(AString: String);
@@ -269,6 +323,115 @@ begin
     Close;
   end;
 
+end;
+
+procedure TfrmMain.SetupIcons;
+var
+  i : Integer;
+begin
+  cbexIcon.Clear;
+  
+  for i := 0 to imgList.Count - 1 do
+  begin
+    cbexIcon.ItemsEx.AddItem('',i,i,i,0,nil);
+  end;
+
+end;
+
+procedure TfrmMain.SetIcon(AIndex : Integer; AUpdateINI : Boolean = True);
+var
+  IniFile : TInifile;
+begin
+  try
+    IniFile := TIniFile.Create(ExtractFilePath(Application.ExeName)+'Settings.INI');
+    if AUpdateINI then
+      IniFile.WriteInteger('Look','Icon',AIndex);
+
+    with imgList do
+    begin
+      GetIcon(AIndex, Application.Icon);
+      TrayIcon.IconIndex := AIndex;
+    end;
+    cbexIcon.ItemIndex := AIndex;
+  finally
+    if AUpdateINI then
+    begin
+      IniFile.UpdateFile;
+      comCommand.SetFocus;
+    end;
+    IniFile.Free;
+  end;
+end;
+
+procedure TfrmMain.LoadSettings;
+var
+  IniFile : TInifile;
+  iIcon : Integer;
+begin
+  try
+    //TT: Read from Inifile for the path the file we want.
+    IniFile := TIniFile.Create(ExtractFilePath(Application.ExeName)+'Settings.INI');
+    App := IniFile.ReadString('Execute','Application','');
+    if App = '' then
+    begin
+      if FileExists(ExtractFilePath(Application.ExeName)+'pseuwow.exe') then
+      begin
+        App := ExtractFilePath(Application.ExeName)+'pseuwow.exe';
+        pnlTop.Hide;
+      end
+      else
+        pnlTop.Show;
+    end;
+    IniFile.WriteString('Execute','Application',App);
+
+    //TT: Read Tray Icon, Nice for those of us who more than one session at a time!
+    iIcon := IniFile.ReadInteger('Look','Icon',-1);
+
+    if (iIcon = -1) then
+      IniFile.WriteInteger('Look','Icon',0);
+
+    SetIcon(iIcon, False);
+
+  finally
+    IniFile.UpdateFile;
+    IniFile.Free;
+  end;
+end;
+
+procedure TfrmMain.cbexIconChange(Sender: TObject);
+begin
+  if Ready then
+    SetIcon(cbexIcon.ItemIndex);
+end;
+
+procedure TfrmMain.LoadPseuSettings(AConFile : string);
+var
+  fFile : textfile;
+  sBuffer : string;
+  sRes : string;
+begin
+  if FileExists(AConFile) then
+  begin
+    AssignFile(fFile, AConFile);
+    Reset(fFile);
+
+    while not(Eof(fFile)) do
+    begin
+      sRes := '';
+
+      Readln(fFile, sBuffer);
+
+      if EvaluateProperty(sBuffer, 'charname=', sRes) then
+      begin
+        txtChar.Caption := sRes;
+        Application.Title := sRes + ' - PseuWoW Console';
+        TrayIcon.Hint := Application.Title;
+      end;
+    end;
+  end;
+  CloseFile(fFile);
+
+  comCommand.SetFocus;
 end;
 
 end.

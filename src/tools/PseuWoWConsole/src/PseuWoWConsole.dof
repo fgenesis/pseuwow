@@ -63,8 +63,8 @@ RootDir=
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
-MajorVer=1
-MinorVer=1
+MajorVer=2
+MinorVer=0
 Release=0
 Build=0
 Debug=0
@@ -77,7 +77,7 @@ CodePage=1252
 [Version Info Keys]
 CompanyName=
 FileDescription=
-FileVersion=1.1.0.0
+FileVersion=2.0.0.0
 InternalName=
 LegalCopyright=
 LegalTrademarks=
@@ -86,7 +86,6 @@ ProductName=
 ProductVersion=1.0.0.0
 Comments=
 [Excluded Packages]
-c:\program files\borland\delphi6\Projects\Bpl\SweetControls6.bpl=CA SweetControls
 c:\program files\borland\delphi6\Projects\Bpl\SynUni_D5.bpl=(untitled)
 c:\program files\borland\delphi6\Projects\Bpl\images.bpl=Images
 c:\program files\borland\delphi6\Projects\Bpl\ryansvcl.bpl=Ryans VCL
