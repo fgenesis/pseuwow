@@ -50,6 +50,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getobjectvalue",&DefScriptPackage::SCGetObjectValue);
     AddFunc("getrace",&DefScriptPackage::SCGetRace);
     AddFunc("getclass",&DefScriptPackage::SCGetClass);
+    AddFunc("sendworldpacket",&DefScriptPackage::SCSendWorldPacket);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -855,6 +856,30 @@ DefReturnResult DefScriptPackage::SCGetClass(CmdSet &Set)
         return DefScriptTools::toString((uint64)((Unit*)o)->GetClass());
     }
     return "";
+}
+
+DefReturnResult DefScriptPackage::SCSendWorldPacket(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCSendWorldPacket: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    ByteBuffer *bb = bytebuffers.GetNoCreate(_NormalizeVarName(Set.defaultarg,Set.myname));
+    if(bb)
+    {
+        uint32 opcode = (uint32)DefScriptTools::toNumber(Set.arg[0]);
+        if(opcode) // prevent sending CMSG_NULL_ACTION
+        {
+            WorldPacket wp(opcode, bb->size());
+            if(bb->size())
+                wp.append(bb->contents(), bb->size());
+            ws->SendWorldPacket(wp);
+            return true;
+        }
+    }
+    return false;
 }
 
 
