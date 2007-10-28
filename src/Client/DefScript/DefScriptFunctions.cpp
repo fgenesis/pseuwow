@@ -92,14 +92,18 @@ DefReturnResult DefScriptPackage::func_unset(CmdSet& Set){
     return r;
 }
 
-DefReturnResult DefScriptPackage::func_set(CmdSet& Set){
+DefReturnResult DefScriptPackage::func_set(CmdSet& Set)
+{
     DefReturnResult r;
-    if(Set.arg[0].empty()){
+    if(Set.arg[0].empty())
+    {
         //if(curIsDebug)
         //   printf("Can't assign value, no variable name given.\n");
         return r;
     }
-    if(Set.arg[0].at(0)=='@'){
+    Set.arg[0]=UnescapeString(Set.arg[0]);
+    if(Set.arg[0].at(0)=='@')
+    {
         //if(curIsDebug)
         //    printf("Can't assign value to a macro!\n");
         return r;
@@ -120,14 +124,18 @@ DefReturnResult DefScriptPackage::func_set(CmdSet& Set){
     return r;
 }
 
-DefReturnResult DefScriptPackage::func_default(CmdSet& Set){
+DefReturnResult DefScriptPackage::func_default(CmdSet& Set)
+{
     DefReturnResult r;
-    if(Set.arg[0].empty()){
+    if(Set.arg[0].empty())
+    {
         //if(curIsDebug)
         //   printf("Can't assign value, no variable name given.\n");
         return r;
     }
-    if(Set.arg[0].at(0)=='@'){
+    Set.arg[0]=UnescapeString(Set.arg[0]);
+    if(Set.arg[0].at(0)=='@')
+    {
         //if(curIsDebug)
         //    printf("Can't assign value to a macro!\n");
         return r;

@@ -240,10 +240,16 @@
 					RelativePath=".\Client\DefScript\DynamicEvent.h">
 				</File>
 				<File
-					RelativePath=".\Client\DefScript\ListStorage.cpp">
+					RelativePath=".\Client\DefScript\TypeStorage.cpp">
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Client\DefScript\ListStorage.h">
+					RelativePath=".\Client\DefScript\TypeStorage.h">
 				</File>
 				<File
 					RelativePath=".\Client\DefScript\VarSet.cpp">

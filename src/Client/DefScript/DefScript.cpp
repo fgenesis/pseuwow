@@ -83,10 +83,10 @@ void DefScriptPackage::Clear(void)
 void DefScriptPackage::_InitFunctions(void)
 {
     AddFunc("out",&DefScriptPackage::func_out);
-    AddFunc("set",&DefScriptPackage::func_set);
-    AddFunc("default",&DefScriptPackage::func_default);
+    AddFunc("set",&DefScriptPackage::func_set,false);
+    AddFunc("default",&DefScriptPackage::func_default,false);
     AddFunc("unset",&DefScriptPackage::func_unset);
-    AddFunc("shdn",&DefScriptPackage::func_shdn);
+    AddFunc("shdn",&DefScriptPackage::func_shdn,false);
     AddFunc("loaddef",&DefScriptPackage::func_loaddef);
     AddFunc("reloaddef",&DefScriptPackage::func_reloaddef);
     AddFunc("unloaddef",&DefScriptPackage::func_unloaddef);
@@ -147,9 +147,9 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("lsort",&DefScriptPackage::func_lsort);
 }
 
-void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
+void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set), bool esc)
 {
-    DefScriptFunctionEntry e(n,f);
+    DefScriptFunctionEntry e(n,f,esc);
     AddFunc(e);
 }
 
@@ -352,7 +352,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
         {
             if(line[bpos]=='{')
                 bopen++;
-            if(line[bpos]=='}')
+            else if(line[bpos]=='}')
             {
                 if(bpos)
                     bopen--;
@@ -361,6 +361,11 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                     mismatch=true;
                     break;
                 }
+            }
+            else if(line[bpos]=='\\')
+            {
+                bpos++;
+                continue;
             }
         }
         if(mismatch || bopen) // no bracket must be left open now
@@ -643,14 +648,16 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
     return r;
 }
 
-DefReturnResult DefScriptPackage::RunSingleLine(std::string line){
+DefReturnResult DefScriptPackage::RunSingleLine(std::string line)
+{
     DefXChgResult final=ReplaceVars(line,NULL,0,true);
 	CmdSet Set;
     SplitLine(Set,final.str);
     return Interpret(Set);
 }
 
-DefReturnResult DefScriptPackage::RunSingleLineFromScript(std::string line, DefScript *pScript){
+DefReturnResult DefScriptPackage::RunSingleLineFromScript(std::string line, DefScript *pScript)
+{
     CmdSet Set;
     Set.myname=pScript->GetName();
     DefXChgResult final=ReplaceVars(line,&Set,0,true);
@@ -658,7 +665,8 @@ DefReturnResult DefScriptPackage::RunSingleLineFromScript(std::string line, DefS
     return Interpret(Set);
 }
 
-void DefScriptPackage::SplitLine(CmdSet& Set,std::string line){	
+void DefScriptPackage::SplitLine(CmdSet& Set,std::string line)
+{	
 	
 	unsigned int i=0;
 	unsigned int bracketsOpen=0,curParam=0;
@@ -670,10 +678,9 @@ void DefScriptPackage::SplitLine(CmdSet& Set,std::string line){
 
 		if(line[i]=='{')
 			bracketsOpen++;
-        if(line[i]=='}')
+        else if(line[i]=='}')
 			bracketsOpen--;
-        
-        if( line[i]==',' && !bracketsOpen)
+        else if( line[i]==',' && !bracketsOpen)
         {
             if(!cmdDefined){
                 Set.cmd=tempLine;
@@ -698,6 +705,11 @@ void DefScriptPackage::SplitLine(CmdSet& Set,std::string line){
             break;            
             
         }
+        else if(line[i]=='\\')
+        {
+            i++;
+            continue;
+        }
         else
         {
             tempLine+=line[i];
@@ -710,10 +722,12 @@ void DefScriptPackage::SplitLine(CmdSet& Set,std::string line){
         Set.arg[curParam]=tempLine;
 
     Set.cmd = DefScriptTools::stringToLower(Set.cmd); // lowercase cmd
+    Set.cmd = UnescapeString(Set.cmd); // always unescape the cmd!
     RemoveBrackets(Set); // TODO: call this somewhere else as soon as IF and LOOP statements are implemented!
 }
 
-std::string DefScriptPackage::RemoveBracketsFromString(std::string t){
+std::string DefScriptPackage::RemoveBracketsFromString(std::string t)
+{
     if(t.empty())
         return t;
 
@@ -724,37 +738,41 @@ std::string DefScriptPackage::RemoveBracketsFromString(std::string t){
     }
     unsigned int ob=0,bo=0;
     bool isVar=false;
-    for(unsigned int i=0;i<t.length();i++){
-            
-
-            if(t[i]=='{')
+    for(unsigned int i=0; i<t.length(); i++)
+    {
+        if(t[i]=='{')
+        {
+            if(i>0 && (t[i-1]=='$' || t[i-1]=='?') )
+                isVar=true;
+            if(!bo)
+                ob=i;
+            bo++;
+        }
+        else if(t[i]=='}')
+        {
+            bo--;
+            if(!bo)
             {
-                if(i>0 && (t[i-1]=='$' || t[i-1]=='?') )
-                    isVar=true;
-                if(!bo)
-                    ob=i;
-                bo++;
-            }
-
-            if(t[i]=='}')
-            {
-                bo--;
-                if(!bo)
+                if(!isVar)
                 {
-                    if(!isVar)
-                    {
-                        unsigned int blen=i-ob+1;
-                        std::string subStr=t.substr(ob,blen);
-                        std::string retStr=RemoveBracketsFromString(subStr);
-                        t.erase(ob,blen);
-                        t.insert(ob,retStr);
-                        i=ob-1;
-                        
-                    }
-                isVar=false;
+                    unsigned int blen=i-ob+1;
+                    std::string subStr=t.substr(ob,blen);
+                    std::string retStr=RemoveBracketsFromString(subStr);
+                    t.erase(ob,blen);
+                    t.insert(ob,retStr);
+                    i=ob-1;
+                    
                 }
+            isVar=false;
             }
         }
+        else if(t[i]=='\\')
+        {
+            i++;
+            continue;
+        }
+
+    }
 
     return t;
 }
@@ -769,8 +787,19 @@ void DefScriptPackage::RemoveBrackets(CmdSet& Set)
     }
 }
 
+void DefScriptPackage::UnescapeSet(CmdSet& Set)
+{
+    Set.defaultarg=UnescapeString(Set.defaultarg);
+    //Set.cmd=UnescapeString(Set.cmd); // this is done already in SplitLine() !
+    for(_CmdSetArgMap::iterator i=Set.arg.begin(); i!=Set.arg.end(); i++)
+    {
+        i->second=UnescapeString(i->second);
+    }
+}
 
-DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsigned char VarType, bool run_embedded){
+
+DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsigned char VarType, bool run_embedded)
+{
 
     unsigned int
         openingBracket=0, // defines the position from where the recursive call is started
@@ -782,14 +811,20 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
         nextVar=DEFSCRIPT_NONE; // '$' or '?'
     bool
         hasChanged=false, // additional helper. once true, xchg.result will be true later also
-        hasVar=false; // true if openingBracket (= the first bracket) was preceded by '$' or '?'
+        hasVar=false, // true if openingBracket (= the first bracket) was preceded by '$' or '?'
+        escaped=false;
 
     std::string subStr;
     DefXChgResult xchg;
 
     for(unsigned int i=0;i<str.length();i++)
     {
-        if(str[i]=='{')		
+        if(escaped)
+        {
+            escaped=false;
+            continue;
+        }
+        else if(str[i]=='{')		
         {
             if(!bracketsOpen)
                 openingBracket=i; // var starts with $, normal bracket with {
@@ -807,8 +842,7 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
             }
             bracketsOpen++;
         }
- 
-        if(str[i]=='}')
+        else if(str[i]=='}')
         {
             if(bracketsOpen)
 		        bracketsOpen--;
@@ -841,12 +875,19 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
                         str.erase(openingBracket-1,bLen+3); // remove ${...} (+3 because of '${}')
                         i-=(bLen+2); // adjust position
                         str.insert(i,xchg.str);
+                        if(str[i]=='\\') // workaround, since i will be increased 1 too high
+                            escaped=true;
                         hasVar=false;
                         nextVar=DEFSCRIPT_NONE;
                     }
                 }
             }
        } // end if '}'
+       else if(str[i]=='\\') // if escape char \ found, skip parsing next char
+       {
+           i++;
+           continue;
+       }
     } // end for
     if(!bracketsOpen && VarType!=DEFSCRIPT_NONE)
     {
@@ -966,7 +1007,12 @@ DefReturnResult DefScriptPackage::Interpret(CmdSet& Set)
     {
         if(Set.cmd==_functable[i].name)
         {
+            if(_functable[i].escape) // if we are going to use a C++ function, unescape the whole set, if supposed to do so.
+                UnescapeSet(Set);    // it will not have any bad side effects, we leave the func within this block!
+            
             result=(this->*(_functable[i].func))(Set);
+            if(_functable[i].escape)
+                result.ret = EscapeString(result.ret); // and since we are returning a string into the engine, escape it again, if set.
             return result;
         }
     }
@@ -996,7 +1042,6 @@ void DefScriptPackage::_UpdateOrCreateScriptByName(std::string sn)
     Script[sn] = newscript;
 }
 
-// TODO: add support for safe brackets ( "\{" , "\}" ) and fix the string this way
 std::string DefScriptPackage::SecureString(std::string s)
 {
     std::string out;
@@ -1011,3 +1056,81 @@ std::string DefScriptPackage::SecureString(std::string s)
     }
     return out;
 }
+
+// escapes whole string, which can no longer be parsed & interpreted 
+std::string DefScriptPackage::EscapeString(std::string s)
+{
+    std::string out;
+    out.reserve(s.length()+8);
+    for(unsigned int i = 0; i < s.length(); i++)
+    {
+        switch(s[i])
+        {
+            case '{':
+            case '}':
+            case '\\':
+            out += '\\';
+            out += s[i];
+            break;
+
+            case '\n':
+            out += "\\n";
+            break;
+
+            case '\t':
+            out += "\\t";
+            break;
+
+            default:
+            out += s[i];
+        }
+
+    }
+    return out;
+}
+
+// converts a string into a printable form, with all escape sequences resolved
+std::string DefScriptPackage::UnescapeString(std::string s)
+{
+    std::string out;
+    out.reserve(s.length());
+    for(unsigned int i = 0; i < s.length(); i++)
+    {
+        if(s[i] == '\\' && i+1 < s.length())
+        {
+            switch(s[i+1])
+            {   // if any of these are found, append to output string and skip this byte
+                case '{':
+                case '}':
+                case '\\':
+                out += s[++i];
+                break;
+
+                case 'n':
+                out += '\n';
+                i++;
+                break;
+
+                case 't':
+                out += '\t';
+                i++;
+                break;
+
+                case 'x':
+                if(i+4 <= s.length())
+                {
+                    std::string xd = s.substr(i+2,2);
+                    char c = (char)strtoul(s.substr(i+2,2).c_str(),NULL,16);
+                    out += c;
+                    i += 3;
+                }
+            }
+        }
+        else
+        {
+            out += s[i];
+        }
+    }
+    return out;
+}
+

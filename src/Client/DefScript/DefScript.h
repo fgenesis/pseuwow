@@ -8,7 +8,7 @@
 #include <fstream>
 #include "VarSet.h"
 #include "DynamicEvent.h"
-#include "ListStorage.h"
+#include "TypeStorage.h"
 #include "DefScriptTools.h"
 
 class DefScriptPackage;
@@ -62,16 +62,21 @@ class CmdSet {
 };
 
 struct DefScriptFunctionEntry {
-    DefScriptFunctionEntry(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set))
+    DefScriptFunctionEntry(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set), bool esc)
     {
         name=n;
         func=f;
+        escape=esc;
     }
     std::string name;
     DefReturnResult (DefScriptPackage::*func)(CmdSet& Set);
+    bool escape;
 };
 
 typedef std::deque<DefScriptFunctionEntry> DefScriptFunctionTable;
+
+typedef std::deque<std::string> DefList;
+typedef std::map<std::string,DefList*> DefListMap;
 
 class DefScript {
 public:
@@ -123,11 +128,13 @@ public:
     DefReturnResult RunSingleLineFromScript(std::string line, DefScript *pScript);
     DefScript_DynamicEventMgr *GetEventMgr(void);
     void AddFunc(DefScriptFunctionEntry);
-    void AddFunc(std::string n,DefReturnResult (DefScriptPackage::*)(CmdSet& Set));
+    void AddFunc(std::string n,DefReturnResult (DefScriptPackage::*)(CmdSet& Set), bool esc=true);
     bool HasFunc(std::string);
     void DelFunc(std::string);
-	ListStorage lists;
-    std::string SecureString(std::string s);
+	TypeStorage<DefList> lists;
+    std::string SecureString(std::string);
+    std::string EscapeString(std::string);
+    std::string UnescapeString(std::string);
 
     // own logging functions. default is printf.
     // DO NOT USE THEM YET! THEY DO NOT WORK CORRECTLY!
@@ -153,8 +160,8 @@ private:
 	void SplitLine(CmdSet&,std::string);
     DefReturnResult Interpret(CmdSet&);
     void RemoveBrackets(CmdSet&);
+    void UnescapeSet(CmdSet&);
     std::string RemoveBracketsFromString(std::string);
-    unsigned int functions;
     void *parentMethod;
     DefScript_DynamicEventMgr *_eventmgr;
     std::map<std::string,DefScript*> Script;
