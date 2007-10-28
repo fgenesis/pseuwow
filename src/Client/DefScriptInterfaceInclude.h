@@ -41,5 +41,6 @@ DefReturnResult SCPrintScript(CmdSet&);
 DefReturnResult SCGetObjectValue(CmdSet&);
 DefReturnResult SCGetRace(CmdSet&);
 DefReturnResult SCGetClass(CmdSet&);
+DefReturnResult SCSendWorldPacket(CmdSet&);
 
 #endif
