@@ -1,6 +1,6 @@
-#include "ListStorage.h"
+#include "TypeStorage.h"
 
-bool ListStorage::Exists(std::string s)
+template<class T> bool TypeStorage<T>::Exists(std::string s)
 {
     for(DefListMap::iterator it = _storage.begin(); it != _storage.end(); it++)
     {
@@ -10,14 +10,14 @@ bool ListStorage::Exists(std::string s)
     return false;
 }
 
-DefList *ListStorage::_Create(std::string s)
+template<class T> T *TypeStorage<T>::_Create(std::string s)
 {
-    DefList *l = new DefList();
+    T *l = new DefList();
     _storage[s] = l;
     return l;
 }
 
-void ListStorage::Delete(std::string s)
+template<class T> void TypeStorage<T>::Delete(std::string s)
 {
     for(DefListMap::iterator it = _storage.begin(); it != _storage.end(); it++)
     {
@@ -30,21 +30,21 @@ void ListStorage::Delete(std::string s)
     }
 }
 
-DefList *ListStorage::GetNoCreate(std::string s)
+template <class T> T *TypeStorage<T>::GetNoCreate(std::string s)
 {
-    for(DefListMap::iterator it = _storage.begin(); it != _storage.end(); it++)
+    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end(); it++)
         if(it->first == s)
             return it->second;
     return NULL;
 }
 
-DefList *ListStorage::Get(std::string s)
+template<class T> T *TypeStorage<T>::Get(std::string s)
 {
     DefList *l = GetNoCreate(s);
     return l ? l : _Create(s);
 }
 
-ListStorage::~ListStorage()
+template<class T> TypeStorage<T>::~TypeStorage()
 {
 	for(DefListMap::iterator it = _storage.begin(); it != _storage.end();)
 	{
