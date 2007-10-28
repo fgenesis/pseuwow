@@ -145,6 +145,18 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("lmclean",&DefScriptPackage::func_lmclean);
     AddFunc("lerase",&DefScriptPackage::func_lerase);
     AddFunc("lsort",&DefScriptPackage::func_lsort);
+
+    // ByteBuffer functions
+    AddFunc("bbinit",&DefScriptPackage::func_bbinit);
+    AddFunc("bbdelete",&DefScriptPackage::func_bbdelete);
+    AddFunc("bbappend",&DefScriptPackage::func_bbappend);
+    AddFunc("bbread",&DefScriptPackage::func_bbread);
+    AddFunc("bbhexlike",&DefScriptPackage::func_bbhexlike);
+    AddFunc("bbtextlike",&DefScriptPackage::func_bbtextlike);
+    AddFunc("bbsetrpos",&DefScriptPackage::func_bbsetrpos);
+    AddFunc("bbsetwpos",&DefScriptPackage::func_bbsetwpos);
+    AddFunc("bbsize",&DefScriptPackage::func_bbsize);
+	
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set), bool esc)

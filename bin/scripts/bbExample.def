@@ -1,0 +1,29 @@
+#script=bbexample
+bbinit,50 mybb
+bbappend,mybb,uint32 123456
+bbappend,mybb,uint8 255
+bbappend,mybb,float 3.141592
+bbappend,mybb,string Hello World!
+bbappend,mybb,uint32 0xDEADBABE
+bbappend,mybb,uint16 1024
+bbappend,mybb,uint64 0
+bbappend,mybb,uint64 0
+
+out ByteBuffer Example:
+bbhexlike mybb
+bbtextlike mybb
+
+bbrpos,mybb 0
+out Reading uint32 - ?{bbread,mybb uint32}
+out Reading uint8 - ?{bbread,mybb uint8}
+out Reading float - ?{bbread,mybb float}
+out Reading string - ?{bbread,mybb string}
+set,t ?{bbread,mybb uint32}
+out Reading uint32 - ${t} hex: ?{tohex ${t}}
+out Reading uint16 - ?{bbread,mybb uint16}
+out skipping 16 bytes
+bbread,mybb uint64
+bbread,mybb uint64
+out read from invalid position: result='?{bbread,mybb uint8}'
+
+bbdelete mybb
