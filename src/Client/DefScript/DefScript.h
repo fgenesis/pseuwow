@@ -135,6 +135,8 @@ public:
     std::string SecureString(std::string);
     std::string EscapeString(std::string);
     std::string UnescapeString(std::string);
+    std::string GetUnescapedVar(std::string);
+
 
     // own logging functions. default is printf.
     // DO NOT USE THEM YET! THEY DO NOT WORK CORRECTLY!

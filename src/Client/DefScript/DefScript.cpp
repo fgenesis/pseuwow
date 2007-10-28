@@ -1134,3 +1134,7 @@ std::string DefScriptPackage::UnescapeString(std::string s)
     return out;
 }
 
+std::string DefScriptPackage::GetUnescapedVar(std::string n)
+{
+    return UnescapeString(variables.Get(n));
+}
