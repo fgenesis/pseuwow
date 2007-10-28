@@ -219,6 +219,9 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Client\DefScript\DefScriptBBFunctions.cpp">
+				</File>
+				<File
 					RelativePath=".\Client\DefScript\DefScriptDefines.h">
 				</File>
 				<File

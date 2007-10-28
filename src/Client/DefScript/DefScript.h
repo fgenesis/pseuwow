@@ -7,6 +7,7 @@
 #include <deque>
 #include <fstream>
 #include "VarSet.h"
+#include "ByteBuffer.h"
 #include "DynamicEvent.h"
 #include "TypeStorage.h"
 #include "DefScriptTools.h"
@@ -132,6 +133,7 @@ public:
     bool HasFunc(std::string);
     void DelFunc(std::string);
 	TypeStorage<DefList> lists;
+    TypeStorage<ByteBuffer> bytebuffers;
     std::string SecureString(std::string);
     std::string EscapeString(std::string);
     std::string UnescapeString(std::string);
@@ -235,6 +237,17 @@ private:
     DefReturnResult func_lmclean(CmdSet&);
     DefReturnResult func_lerase(CmdSet&);
     DefReturnResult func_lsort(CmdSet&);
+
+    // ByteBuffer functions
+    DefReturnResult func_bbinit(CmdSet&);
+    DefReturnResult func_bbdelete(CmdSet&);
+    DefReturnResult func_bbappend(CmdSet&);
+    DefReturnResult func_bbread(CmdSet&);
+    DefReturnResult func_bbsetrpos(CmdSet&);
+    DefReturnResult func_bbsetwpos(CmdSet&);
+    DefReturnResult func_bbhexlike(CmdSet&);
+    DefReturnResult func_bbtextlike(CmdSet&);
+    DefReturnResult func_bbsize(CmdSet&);
 
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"
