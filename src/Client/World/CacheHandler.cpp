@@ -40,7 +40,10 @@ bool PlayerNameCache::AddInfo(PlayerNameCacheItem* cacheItem)
 {
     for(std::vector<PlayerNameCacheItem*>::iterator i=_cache.begin(); i!=_cache.end(); i++)
         if(cacheItem->_guid==(*i)->_guid)
+        {
+            delete cacheItem;
             return false;
+        }
     _cache.push_back(cacheItem);
     return true;
 }
@@ -261,7 +264,8 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
             //DEBUG(logdebug("ItemProtoCache: Loaded %u [%s]",proto->Id, proto->Name[0].c_str()));
             session->objmgr.Add(proto);
             counter++;
-        }
+        } else
+            delete proto;
     }
     fh.close();
     log("ItemProtoCache: Loaded %u Item Prototypes",counter);

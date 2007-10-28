@@ -16,6 +16,11 @@ DrawObjMgr::~DrawObjMgr()
         DEBUG( logdebug("del for guid "I64FMT, i->first) );
         delete i->second; // this can be done safely, since the object ptrs are not accessed
     }
+
+    while(_add.size())
+    {
+        delete _add.next().second;
+    }
 }
 
 void DrawObjMgr::Add(uint64 objguid, DrawObject *o)
