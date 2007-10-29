@@ -4,9 +4,10 @@ interface
 uses SysUtils, Classes, StdCtrls, ComCtrls, Graphics, StrUtils, Windows;
 
 procedure AddColouredLine(ARichEdit : TRichEdit; AText : String; AColor : TColor);
-procedure AddColourToLine(ARichEdit : TRichEdit; AText : String);
+procedure AddColourToLine(ARichEdit : TRichEdit; AText : String; ADefautColor : TColor = clLime);
 
 function  HexToColor(sColor : String): TColor;
+function  AddHilightedItem(AString, AHText : String): string;
 
 implementation
 
@@ -21,13 +22,17 @@ begin
   end;
 end;
 
-procedure AddColourToLine(ARichEdit : TRichEdit; AText : String);
+procedure AddColourToLine(ARichEdit : TRichEdit; AText : String; ADefautColor : TColor);
 var
   i : Integer;
   myColor : TColor;
   sTemp : String;
 begin
+  myColor := ADefautColor;
+
   i := AnsiPos('|c',LowerCase(AText));
+
+  //TODO read multicolured lines
 
   while i <> 0 do
   begin
@@ -41,7 +46,6 @@ begin
 
         myColor := HexToColor(sTemp);
         AText := AnsiReplaceText(AText,'|CFF'+sTemp,'');
-        AddColouredLine(ARichEdit, AText, myColor);
 {
         SelStart := Length(AText) - i;
         SelAttributes.Color := myColor;
@@ -52,10 +56,10 @@ begin
       i := AnsiPos('|c',LowerCase(AText));
     end
     else
-      i := 0;
+      break;
   end;
 
-  ARichEdit.Lines.Add(AText);
+  AddColouredLine(ARichEdit, AText, myColor);
 end;
 
 function  HexToColor(sColor : String): TColor;
@@ -67,5 +71,25 @@ begin
     StrToInt('$'+Copy(sColor,4,2))
     );
 end;
+
+function  AddHilightedItem(AString, AHText : String): string;
+var
+  iPos, iPos2 : Integer;
+begin
+  if AnsiContainsText(AString, '|H'+AHText) then
+  begin
+    iPos := AnsiPos('|H' + AHText, AString);
+    iPos2 := AnsiPos(']', AString);
+
+    Result := Copy(AString, 0, iPos - 1);
+
+    iPos := AnsiPos('[', AString);
+
+    Result := Result + Copy(AString, iPos, iPos2);
+    Result := AnsiReplaceText(Result, '|h','');
+  end;
+
+end;
+
 
 end.

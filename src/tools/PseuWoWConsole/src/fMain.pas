@@ -5,9 +5,37 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, RedirectConsole, ExtCtrls, IniFiles, ScktComp, JvComponentBase,
-  JvTrayIcon, ComCtrls, modRichEdit, StrUtils, ImgList, modSCPUtils;
+  JvTrayIcon, ComCtrls, modRichEdit, StrUtils, ImgList, modSCPUtils, SyncObjs;
 
 type
+  TMsgType = (mtUnknown = 0, mtChat = 1, mtWhisper, mtReply, mtSysMsg, mtMOTD, mtEmote);
+
+  TPseuWowCMD = (pwUnknown = 0, pwSay = 1);
+
+  TLogItem = class
+    MsgType : TMsgType;
+    LogMessage : string;
+  end;
+
+
+  TLogThread = class(TThread)
+  protected
+    procedure Execute; override;
+  public
+    LogList : TThreadList;
+    currMessage : string;
+    currCommand : TPseuWowCMD;
+    critWrite : TCriticalSection;
+
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure AddMessage(AMsg : string);
+    procedure SyncWrite();
+
+    procedure WriteFromPseWow(AString : String);
+  end;
+
   TfrmMain = class(TForm)
     pnlTop: TPanel;
     txtExe: TEdit;
@@ -25,6 +53,8 @@ type
     pnlSessionTop: TPanel;
     cbexIcon: TComboBoxEx;
     txtChar: TStaticText;
+    chkCleanMessages: TCheckBox;
+    pnlTestColor: TPanel;
     procedure btnRunClick(Sender: TObject);
     procedure btnExitClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -44,6 +74,8 @@ type
     procedure cbexIconChange(Sender: TObject);
   private
     { Private declarations }
+    Logger : TLogThread;
+
     App : String;
     Running : Boolean;
     Ready : Boolean;
@@ -59,7 +91,7 @@ type
     procedure Execute(AFile: String);
     procedure Launch;
     procedure Log(AText: String; Color : TColor = clAqua);
-    procedure WriteFromPseWow(AString : String);
+
     procedure AddHistoryItem(Item : String);
 
   public
@@ -75,13 +107,267 @@ implementation
 
 procedure MyLineOut(s: string); // Output procedure
 begin
-//  frmMain.memo1.lines.add(s);
-  frmMain.WriteFromPseWow(s);
+    frmMain.Logger.AddMessage(s);
 end;
+
+{---------TLogThread-----------------------------------------------------------\
+\------------------------------------------------------------------------------}
+
+procedure TLogThread.AddMessage(AMsg: string);
+var
+  NewItem : TLogItem;
+begin
+  NewItem := TLogItem.Create;
+  NewItem.MsgType := mtUnknown;
+  NewItem.LogMessage := AMsg;
+
+  LogList.Add(NewItem);
+end;
+
+constructor TLogThread.Create;
+begin
+  inherited Create(true);
+
+  currCommand := pwUnknown;
+
+  LogList := TThreadList.Create;
+  critWrite := TCriticalSection.Create;
+end;
+
+destructor TLogThread.Destroy;
+begin
+  FreeAndNil(LogList);
+  FreeAndNil(critWrite);
+  inherited;
+end;
+
+procedure TLogThread.Execute;
+var
+  List : TList;
+  oItem : TLogItem;
+begin
+  currMessage := '';
+
+  while not (Terminated) do
+  begin
+    List := LogList.LockList;
+    LogList.UnlockList;
+
+    while List.Count > 0 do
+    begin
+      oItem := TLogItem(List[0]);
+
+      //Do the Stuff
+
+      //If the case of sysmsg that hasn't given |r and we get a new message
+      //with <say> in it, write the current message
+      if (currMessage <> '') and (AnsiPos('<say>', oItem.LogMessage) <> 0) then
+      begin
+        currMessage := currMessage + '|r';
+        Synchronize(SyncWrite);
+        currMessage := '';
+      end;
+
+      currMessage := Trim(currMessage + oItem.LogMessage);
+      Synchronize(SyncWrite);
+
+      LogList.Remove(oItem);
+      oItem.Free;
+    end;
+
+    //TT: If we still have something in the buffer just write it
+    if currMessage <> '' then
+    begin
+      //In the case of a SYSMSG without |r
+      if AnsiPos('|r',currMessage) = 0 then
+        currMessage := currMessage + '|r';
+      Synchronize(SyncWrite);
+    end;
+
+    SleepEx(100, True);
+  end;
+end;
+
+procedure TLogThread.SyncWrite;
+begin
+  critWrite.Acquire;
+  WriteFromPseWow(currMessage);
+  critWrite.Release;
+end;
+
+procedure TLogThread.WriteFromPseWow(AString: String);
+var
+  mt : TMsgType;
+  iPos, iPos2 : Integer;
+  bEOL : Boolean;
+  NewCommand : TPseuWowCMD;
+begin
+  //TT: Assume we have EOL
+  bEOL := True;
+  NewCommand := pwUnknown;
+
+  //TT: Remove the current command display to minimise spam
+  if frmMain.chkCleanMessages.Checked then
+  begin
+    //Get Our New Command
+    if AnsiPos('<say>:', AString) <> 0 then
+      NewCommand := pwSay;
+
+    //May cause a problem if there is more than cmd data in a received string
+    //if (currCommand <> pwUnknown) and (NewCommand = currCommand) then
+    //  Exit;
+
+    //We have a new command
+    if (NewCommand = pwUnknown) and (currCommand <> pwUnknown) then
+    begin
+      //Remove redundent PW Command Text
+      if (currCommand = pwSay) then
+        AnsiReplaceText(AString, '<say>', '');
+    end
+    else
+      currCommand := NewCommand;
+  end;
+
+  try
+    if Trim(AString) <> '' then
+    begin
+
+      if LeftStr(AString, 8) = 'SYSMSG: ' then
+      begin
+        //Check for end of line |r
+        if AnsiPos('|r',AString) = 0 then
+        begin
+          bEOL := False;
+
+          if RightStr(Trim(AString), 1) = '"' then
+            bEOL := True
+          else
+           Exit;
+        end;
+
+        AString := AnsiReplaceText(AString,'|r','');
+
+
+        if frmMain.chkCleanMessages.Checked then
+        begin
+          AString := AnsiReplaceText(AString,'SYSMSG: ','');
+          AString := AnsiReplaceText(AString, '"', '');
+        end;
+
+        //Clean Ups for Say Outputs like lookup etc.
+        if frmMain.chkCleanMessages.Checked then
+        begin
+          if AnsiContainsText(AString, '|Hquest') then
+          begin
+            AString := AddHilightedItem(AString,'quest');
+          end;
+
+          if AnsiContainsText(AString, '|Hitem') then
+          begin
+            AString := AddHilightedItem(AString,'item');
+          end;
+
+          if AnsiContainsText(AString, '|Htele') then
+          begin
+            AString := AddHilightedItem(AString,'tele');
+          end;
+
+          if AnsiContainsText(AString, '|Hspell') then
+          begin
+            AString := AddHilightedItem(AString,'spell');
+          end;
+
+          if AnsiContainsText(AString, '|Hcreature') then
+          begin
+            AString := AddHilightedItem(AString,'creature');
+          end;
+
+          if AnsiContainsText(AString, '|Hobject') then
+          begin
+            AString := AddHilightedItem(AString,'object');
+          end;
+
+        end;
+
+        AddColourToLine(frmMain.Console,AString, );
+        Exit;
+      end;
+
+      if frmMain.chkCleanMessages.Checked then
+        AString := AnsiReplaceText(AString, '"', '');
+
+      AString := AnsiReplaceText(AString,'|r','');
+
+      if LeftStr(AString, 6) = 'CHAT: ' then
+      begin
+        if frmMain.chkCleanMessages.Checked then
+          AString := AnsiReplaceText(AString,'CHAT: ','');
+
+        AddColourToLine(frmMain.Console, AString, clWhite);
+        Exit;
+      end;
+
+      //Are we doing clean messages?
+      if frmMain.chkCleanMessages.Checked then
+      begin
+        AnsiReplaceText(AString,'"','');
+      end;
+
+      //TT: Check for known string headers and color accordingly
+      if LeftStr(AString, 6) = 'WHISP:' then
+      begin
+        if frmMain.chkCleanMessages.Checked then
+          AString := AnsiReplaceText(AString,'WHISP: ','');
+        AddColouredLine(frmMain.Console,AString, $00FB00FB);
+        Exit;
+      end;
+
+      if LeftStr(AString, 3) = 'TO ' then
+      begin
+        if frmMain.chkCleanMessages.Checked then
+          AString := AnsiReplaceText(AString,'TO ','');
+
+        AddColouredLine(frmMain.Console,AString, $00FB00FB);
+        Exit;
+      end;
+
+      if LeftStr(AString, 7) = 'EMOTE: ' then
+      begin
+        if frmMain.chkCleanMessages.Checked then
+          AString := AnsiReplaceText(AString,'EMOTE: ','');
+        AddColouredLine(frmMain.Console,AString, clYellow);
+        Exit;
+      end;
+
+      if LeftStr(AString, 6) = 'MOTD: ' then
+      begin
+        if frmMain.chkCleanMessages.Checked then
+          AString := AnsiReplaceText(AString,'MOTD: ','');
+
+        AddColouredLine(frmMain.Console,AString, clAqua);
+        Exit;
+      end;
+
+      //This doesnt ADD any color at the moment it just seems to clean up the string a bit
+      AddColourToLine(frmMain.Console,AString);
+    end;
+  finally
+    if bEOL then
+      currMessage := '';
+  end;
+end;
+
+
+{---------TfrmMain-------------------------------------------------------------\
+\------------------------------------------------------------------------------}
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   RC_LineOut:=MyLineOut; // set Output
+
+  Logger := TLogThread.Create;
+  Logger.Resume;
+
   SetupIcons;
   LoadSettings;
   Ready := False;
@@ -95,7 +381,7 @@ begin
   IniFile.WriteString('Execute','Application',txtExe.Text);
   IniFile.UpdateFile;
   IniFile.Free;
-  RC_Run(txtExe.text); // run console program
+  RC_Run(txtExe.text); // run frmMain.Console program
 end;
 
 procedure TfrmMain.btnExitClick(Sender: TObject);
@@ -168,6 +454,9 @@ end;
 
 procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
+  Logger.Terminate;
+  FreeAndNil(Logger);
+  
   servRemote.Active := False;
 end;
 
@@ -235,7 +524,7 @@ end;
 
 procedure TfrmMain.Log(AText: String; Color: TColor);
 begin
-  AddColouredLine(Console,'CONSOLE: '+AText, Color);
+  AddColouredLine(frmMain.Console,'Console: '+AText, Color);
 end;
 
 
@@ -245,6 +534,7 @@ var
   i : Integer;
 begin
   ScrollMessage.Msg := WM_VScroll;
+
   for i := 0 to Console.Lines.Count do
   begin
     ScrollMessage.ScrollCode := sb_LineDown;
@@ -258,7 +548,7 @@ procedure TfrmMain.comCommandKeyDown(Sender: TObject; var Key: Word;
 begin
   if key = VK_RETURN then
   begin
-    if ConsoleCommand(comCommand.Text) then
+    if frmMain.ConsoleCommand(comCommand.Text) then
     begin
       key := 0;
       Exit;
@@ -269,7 +559,17 @@ begin
     AddHistoryItem(comCommand.Text);
     comCommand.Text := '';
     key:=0;
+    Exit;
   end;
+
+  if key = VK_F3 then
+  begin
+    if comCommand.Items.Count > 0 then
+      comCommand.ItemIndex := comCommand.Items.Count -1;
+    Key := 0;
+    Exit;
+  end;
+
 end;
 
 procedure TfrmMain.clientSockConnecting(Sender: TObject;
@@ -284,13 +584,6 @@ begin
   begin
     Log('Checking For Listening Console',clGreen);
   end;
-end;
-
-procedure TfrmMain.WriteFromPseWow(AString: String);
-begin
-  AString := AnsiReplaceText(AString,'|r','');
-  //This doesnt ADD any color at the moment it just seems to clean up the string a bit
-  AddColourToLine(Console,AString);
 end;
 
 procedure TfrmMain.AddHistoryItem(Item: String);
@@ -309,7 +602,7 @@ begin
   Result := False;
   AString := UpperCase(AString);
 
-  if (AString = 'QUIT') or (AString = 'EXIT') then
+  if (AString = '!QUIT') or (AString = '!EXIT') then
   begin
     Result := True;
     ShutDown;
@@ -324,7 +617,7 @@ var
   i : Integer;
 begin
   cbexIcon.Clear;
-  
+
   for i := 0 to imgList.Count - 1 do
   begin
     cbexIcon.ItemsEx.AddItem('',i,i,i,0,nil);
@@ -418,7 +711,7 @@ begin
       if EvaluateProperty(sBuffer, 'charname=', sRes) then
       begin
         txtChar.Caption := sRes;
-        Application.Title := sRes + ' - PseuWoW Console';
+        Application.Title := sRes + ' - PseuWoW frmMain.Console';
         TrayIcon.Hint := Application.Title;
       end;
     end;
