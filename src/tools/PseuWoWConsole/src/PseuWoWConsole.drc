@@ -53,102 +53,102 @@
 #define JclResources_RsIntelCacheDescr44 65213
 #define JclResources_RsIntelCacheDescr45 65214
 #define JclResources_RsIntelCacheDescr50 65215
-#define JvResources_RsMenuHighlight 65216
-#define ComConst_SOleError 65217
-#define ComConst_SNoMethod 65218
-#define ComConst_SVarNotObject 65219
-#define ComConst_STooManyParams 65220
-#define ComStrs_sInvalidOwner 65221
-#define ComStrs_sRichEditInsertError 65222
-#define ComStrs_sRichEditLoadFail 65223
-#define ComStrs_sRichEditSaveFail 65224
-#define ComStrs_sInvalidComCtl32 65225
+#define JvResources_RsClInfoBk 65216
+#define JvResources_RsGradientActiveCaption 65217
+#define JvResources_RsGradientInactiveCaption 65218
+#define JvResources_RsHotLight 65219
+#define JvResources_RsMenuBar 65220
+#define JvResources_RsMenuHighlight 65221
+#define ComConst_SOleError 65222
+#define ComConst_SNoMethod 65223
+#define ComConst_SVarNotObject 65224
+#define ComConst_STooManyParams 65225
 #define JclResources_RsIntelCacheDescr00 65226
 #define JclResources_RsIntelCacheDescr01 65227
 #define JclResources_RsIntelCacheDescr02 65228
 #define JclResources_RsIntelCacheDescr03 65229
 #define JclResources_RsIntelCacheDescr04 65230
 #define JclResources_RsIntelCacheDescr06 65231
-#define JvResources_RsClHighlight 65232
-#define JvResources_RsClHighlightText 65233
-#define JvResources_RsClBtnFace 65234
-#define JvResources_RsClBtnShadow 65235
-#define JvResources_RsClGrayText 65236
-#define JvResources_RsClBtnText 65237
-#define JvResources_RsClInactiveCaptionText 65238
-#define JvResources_RsClBtnHighlight 65239
-#define JvResources_RsCl3DDkShadow 65240
-#define JvResources_RsCl3DLight 65241
-#define JvResources_RsClInfoText 65242
-#define JvResources_RsClInfoBk 65243
-#define JvResources_RsGradientActiveCaption 65244
-#define JvResources_RsGradientInactiveCaption 65245
-#define JvResources_RsHotLight 65246
-#define JvResources_RsMenuBar 65247
-#define JvResources_RsClLightTurquoise 65248
-#define JvResources_RsClPaleBlue 65249
-#define JvResources_RsClLavender 65250
-#define JvResources_RsClScrollBar 65251
-#define JvResources_RsClBackground 65252
-#define JvResources_RsClActiveCaption 65253
-#define JvResources_RsClInactiveCaption 65254
-#define JvResources_RsClMenu 65255
-#define JvResources_RsClWindow 65256
-#define JvResources_RsClWindowFrame 65257
-#define JvResources_RsClMenuText 65258
-#define JvResources_RsClWindowText 65259
-#define JvResources_RsClCaptionText 65260
-#define JvResources_RsClActiveBorder 65261
-#define JvResources_RsClInactiveBorder 65262
-#define JvResources_RsClAppWorkSpace 65263
-#define JvResources_RsClGray50 65264
-#define JvResources_RsClLightOrange 65265
-#define JvResources_RsClSeaGreen 65266
-#define JvResources_RsClLightBlue 65267
-#define JvResources_RsClViolet 65268
-#define JvResources_RsClGray40 65269
-#define JvResources_RsClPink 65270
-#define JvResources_RsClGold 65271
-#define JvResources_RsClBrightGreen 65272
-#define JvResources_RsClTurquoise 65273
-#define JvResources_RsClPlum 65274
-#define JvResources_RsClGray25 65275
-#define JvResources_RsClRose 65276
-#define JvResources_RsClTan 65277
-#define JvResources_RsClLightYellow 65278
-#define JvResources_RsClLightGreen 65279
-#define JvResources_RsClWhite 65280
-#define JvResources_RsClMoneyGreen 65281
-#define JvResources_RsClSkyBlue 65282
-#define JvResources_RsClCream 65283
-#define JvResources_RsClMedGray 65284
-#define JvResources_RsClBrown 65285
-#define JvResources_RsClOliveGreen 65286
-#define JvResources_RsClDarkGreen 65287
-#define JvResources_RsClDarkTeal 65288
-#define JvResources_RsClDarkBlue 65289
-#define JvResources_RsClIndigo 65290
-#define JvResources_RsClGray80 65291
-#define JvResources_RsClDarkRed 65292
-#define JvResources_RsClOrange 65293
-#define JvResources_RsClDarkYellow 65294
-#define JvResources_RsClBlueGray 65295
+#define JvResources_RsClWindowText 65232
+#define JvResources_RsClCaptionText 65233
+#define JvResources_RsClActiveBorder 65234
+#define JvResources_RsClInactiveBorder 65235
+#define JvResources_RsClAppWorkSpace 65236
+#define JvResources_RsClHighlight 65237
+#define JvResources_RsClHighlightText 65238
+#define JvResources_RsClBtnFace 65239
+#define JvResources_RsClBtnShadow 65240
+#define JvResources_RsClGrayText 65241
+#define JvResources_RsClBtnText 65242
+#define JvResources_RsClInactiveCaptionText 65243
+#define JvResources_RsClBtnHighlight 65244
+#define JvResources_RsCl3DDkShadow 65245
+#define JvResources_RsCl3DLight 65246
+#define JvResources_RsClInfoText 65247
+#define JvResources_RsClGray25 65248
+#define JvResources_RsClRose 65249
+#define JvResources_RsClTan 65250
+#define JvResources_RsClLightYellow 65251
+#define JvResources_RsClLightGreen 65252
+#define JvResources_RsClLightTurquoise 65253
+#define JvResources_RsClPaleBlue 65254
+#define JvResources_RsClLavender 65255
+#define JvResources_RsClScrollBar 65256
+#define JvResources_RsClBackground 65257
+#define JvResources_RsClActiveCaption 65258
+#define JvResources_RsClInactiveCaption 65259
+#define JvResources_RsClMenu 65260
+#define JvResources_RsClWindow 65261
+#define JvResources_RsClWindowFrame 65262
+#define JvResources_RsClMenuText 65263
+#define JvResources_RsClGray80 65264
+#define JvResources_RsClDarkRed 65265
+#define JvResources_RsClOrange 65266
+#define JvResources_RsClDarkYellow 65267
+#define JvResources_RsClBlueGray 65268
+#define JvResources_RsClGray50 65269
+#define JvResources_RsClLightOrange 65270
+#define JvResources_RsClSeaGreen 65271
+#define JvResources_RsClLightBlue 65272
+#define JvResources_RsClViolet 65273
+#define JvResources_RsClGray40 65274
+#define JvResources_RsClPink 65275
+#define JvResources_RsClGold 65276
+#define JvResources_RsClBrightGreen 65277
+#define JvResources_RsClTurquoise 65278
+#define JvResources_RsClPlum 65279
+#define JvResources_RsClLime 65280
+#define JvResources_RsClYellow 65281
+#define JvResources_RsClBlue 65282
+#define JvResources_RsClFuchsia 65283
+#define JvResources_RsClAqua 65284
+#define JvResources_RsClWhite 65285
+#define JvResources_RsClMoneyGreen 65286
+#define JvResources_RsClSkyBlue 65287
+#define JvResources_RsClCream 65288
+#define JvResources_RsClMedGray 65289
+#define JvResources_RsClBrown 65290
+#define JvResources_RsClOliveGreen 65291
+#define JvResources_RsClDarkGreen 65292
+#define JvResources_RsClDarkTeal 65293
+#define JvResources_RsClDarkBlue 65294
+#define JvResources_RsClIndigo 65295
 #define HelpIntfs_hNoTopics 65296
-#define JvResources_RsClBlack 65297
-#define JvResources_RsClMaroon 65298
-#define JvResources_RsClGreen 65299
-#define JvResources_RsClOlive 65300
-#define JvResources_RsClNavy 65301
-#define JvResources_RsClPurple 65302
-#define JvResources_RsClTeal 65303
-#define JvResources_RsClGray 65304
-#define JvResources_RsClSilver 65305
-#define JvResources_RsClRed 65306
-#define JvResources_RsClLime 65307
-#define JvResources_RsClYellow 65308
-#define JvResources_RsClBlue 65309
-#define JvResources_RsClFuchsia 65310
-#define JvResources_RsClAqua 65311
+#define ComStrs_sInvalidOwner 65297
+#define ComStrs_sRichEditInsertError 65298
+#define ComStrs_sRichEditLoadFail 65299
+#define ComStrs_sRichEditSaveFail 65300
+#define ComStrs_sInvalidComCtl32 65301
+#define JvResources_RsClBlack 65302
+#define JvResources_RsClMaroon 65303
+#define JvResources_RsClGreen 65304
+#define JvResources_RsClOlive 65305
+#define JvResources_RsClNavy 65306
+#define JvResources_RsClPurple 65307
+#define JvResources_RsClTeal 65308
+#define JvResources_RsClGray 65309
+#define JvResources_RsClSilver 65310
+#define JvResources_RsClRed 65311
 #define Consts_SmkcDel 65312
 #define Consts_SmkcShift 65313
 #define Consts_SmkcCtrl 65314
@@ -420,22 +420,27 @@ BEGIN
 	JclResources_RsIntelCacheDescr44,	"Unified cache, 32 byte cache line, 4-way set associative, 1Mb"
 	JclResources_RsIntelCacheDescr45,	"Unified cache, 32 byte cache line, 4-way set associative, 2Mb"
 	JclResources_RsIntelCacheDescr50,	"Instruction TLB, 4 KBytes and 2 MBytes or 4 MBytes pages, 64 Entries"
+	JvResources_RsClInfoBk,	"Tooltip background"
+	JvResources_RsGradientActiveCaption,	"Gradient Active Caption"
+	JvResources_RsGradientInactiveCaption,	"Gradient Inactive Caption"
+	JvResources_RsHotLight,	"Hot Light"
+	JvResources_RsMenuBar,	"Menu Bar"
 	JvResources_RsMenuHighlight,	"Menu Highlight"
 	ComConst_SOleError,	"OLE error %.8x"
 	ComConst_SNoMethod,	"Method '%s' not supported by automation object"
 	ComConst_SVarNotObject,	"Variant does not reference an automation object"
 	ComConst_STooManyParams,	"Dispatch methods do not support more than 64 parameters"
-	ComStrs_sInvalidOwner,	"Invalid owner"
-	ComStrs_sRichEditInsertError,	"RichEdit line insertion error"
-	ComStrs_sRichEditLoadFail,	"Failed to Load Stream"
-	ComStrs_sRichEditSaveFail,	"Failed to Save Stream"
-	ComStrs_sInvalidComCtl32,	"This control requires version 4.70 or greater of COMCTL32.DLL"
 	JclResources_RsIntelCacheDescr00,	"Null descriptor"
 	JclResources_RsIntelCacheDescr01,	"Instruction TLB, 4Kb pages, 4-way set associative, 32 entries"
 	JclResources_RsIntelCacheDescr02,	"Instruction TLB, 4Mb pages, fully associative, 2 entries"
 	JclResources_RsIntelCacheDescr03,	"Data TLB, 4Kb pages, 4-way set associative, 64 entries"
 	JclResources_RsIntelCacheDescr04,	"Data TLB, 4Mb pages, 4-way set associative, 8 entries"
 	JclResources_RsIntelCacheDescr06,	"8KB instruction cache, 4-way set associative, 32 byte line size"
+	JvResources_RsClWindowText,	"Window text"
+	JvResources_RsClCaptionText,	"Active window title bar text"
+	JvResources_RsClActiveBorder,	"Active window border"
+	JvResources_RsClInactiveBorder,	"Inactive window border"
+	JvResources_RsClAppWorkSpace,	"Application workspace"
 	JvResources_RsClHighlight,	"Selection background"
 	JvResources_RsClHighlightText,	"Selection text"
 	JvResources_RsClBtnFace,	"Button face"
@@ -447,11 +452,11 @@ BEGIN
 	JvResources_RsCl3DDkShadow,	"Dark shadow 3D elements"
 	JvResources_RsCl3DLight,	"Highlight 3D elements"
 	JvResources_RsClInfoText,	"Tooltip text"
-	JvResources_RsClInfoBk,	"Tooltip background"
-	JvResources_RsGradientActiveCaption,	"Gradient Active Caption"
-	JvResources_RsGradientInactiveCaption,	"Gradient Inactive Caption"
-	JvResources_RsHotLight,	"Hot Light"
-	JvResources_RsMenuBar,	"Menu Bar"
+	JvResources_RsClGray25,	"Gray 25%"
+	JvResources_RsClRose,	"Rose"
+	JvResources_RsClTan,	"Tan"
+	JvResources_RsClLightYellow,	"Light Yellow"
+	JvResources_RsClLightGreen,	"Light Green"
 	JvResources_RsClLightTurquoise,	"Light Turquoise"
 	JvResources_RsClPaleBlue,	"Pale Blue"
 	JvResources_RsClLavender,	"Lavender"
@@ -463,11 +468,11 @@ BEGIN
 	JvResources_RsClWindow,	"Window background"
 	JvResources_RsClWindowFrame,	"Window frame"
 	JvResources_RsClMenuText,	"Menu text"
-	JvResources_RsClWindowText,	"Window text"
-	JvResources_RsClCaptionText,	"Active window title bar text"
-	JvResources_RsClActiveBorder,	"Active window border"
-	JvResources_RsClInactiveBorder,	"Inactive window border"
-	JvResources_RsClAppWorkSpace,	"Application workspace"
+	JvResources_RsClGray80,	"Gray 80%"
+	JvResources_RsClDarkRed,	"Dark Red"
+	JvResources_RsClOrange,	"Orange"
+	JvResources_RsClDarkYellow,	"Dark Yellow"
+	JvResources_RsClBlueGray,	"Blue Gray"
 	JvResources_RsClGray50,	"Gray 50%"
 	JvResources_RsClLightOrange,	"Light Orange"
 	JvResources_RsClSeaGreen,	"Sea Green"
@@ -479,11 +484,11 @@ BEGIN
 	JvResources_RsClBrightGreen,	"Bright Green"
 	JvResources_RsClTurquoise,	"Turquoise"
 	JvResources_RsClPlum,	"Plum"
-	JvResources_RsClGray25,	"Gray 25%"
-	JvResources_RsClRose,	"Rose"
-	JvResources_RsClTan,	"Tan"
-	JvResources_RsClLightYellow,	"Light Yellow"
-	JvResources_RsClLightGreen,	"Light Green"
+	JvResources_RsClLime,	"Lime"
+	JvResources_RsClYellow,	"Yellow"
+	JvResources_RsClBlue,	"Blue"
+	JvResources_RsClFuchsia,	"Fuchsia"
+	JvResources_RsClAqua,	"Aqua"
 	JvResources_RsClWhite,	"White"
 	JvResources_RsClMoneyGreen,	"Money green"
 	JvResources_RsClSkyBlue,	"Sky blue"
@@ -495,12 +500,12 @@ BEGIN
 	JvResources_RsClDarkTeal,	"Dark Teal"
 	JvResources_RsClDarkBlue,	"Dark Blue"
 	JvResources_RsClIndigo,	"Indigo"
-	JvResources_RsClGray80,	"Gray 80%"
-	JvResources_RsClDarkRed,	"Dark Red"
-	JvResources_RsClOrange,	"Orange"
-	JvResources_RsClDarkYellow,	"Dark Yellow"
-	JvResources_RsClBlueGray,	"Blue Gray"
 	HelpIntfs_hNoTopics,	"No topic-based help system installed"
+	ComStrs_sInvalidOwner,	"Invalid owner"
+	ComStrs_sRichEditInsertError,	"RichEdit line insertion error"
+	ComStrs_sRichEditLoadFail,	"Failed to Load Stream"
+	ComStrs_sRichEditSaveFail,	"Failed to Save Stream"
+	ComStrs_sInvalidComCtl32,	"This control requires version 4.70 or greater of COMCTL32.DLL"
 	JvResources_RsClBlack,	"Black"
 	JvResources_RsClMaroon,	"Maroon"
 	JvResources_RsClGreen,	"Green"
@@ -511,11 +516,6 @@ BEGIN
 	JvResources_RsClGray,	"Gray"
 	JvResources_RsClSilver,	"Silver"
 	JvResources_RsClRed,	"Red"
-	JvResources_RsClLime,	"Lime"
-	JvResources_RsClYellow,	"Yellow"
-	JvResources_RsClBlue,	"Blue"
-	JvResources_RsClFuchsia,	"Fuchsia"
-	JvResources_RsClAqua,	"Aqua"
 	Consts_SmkcDel,	"Del"
 	Consts_SmkcShift,	"Shift+"
 	Consts_SmkcCtrl,	"Ctrl+"

@@ -123,8 +123,7 @@ object frmMain: TfrmMain
         Items.Strings = (
           '!'
           '!SAY'
-          'QUIT'
-          'SAY')
+          '!QUIT')
       end
     end
   end
@@ -170,6 +169,26 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 1
     end
+    object chkCleanMessages: TCheckBox
+      Left = 360
+      Top = 16
+      Width = 97
+      Height = 17
+      Anchors = [akTop, akRight]
+      Caption = 'Clean Up'
+      Checked = True
+      State = cbChecked
+      TabOrder = 2
+    end
+    object pnlTestColor: TPanel
+      Left = 208
+      Top = 16
+      Width = 25
+      Height = 25
+      Color = clYellow
+      TabOrder = 3
+      Visible = False
+    end
   end
   object servRemote: TServerSocket
     Active = False
@@ -210,7 +229,7 @@ object frmMain: TfrmMain
     Left = 312
     Top = 40
     Bitmap = {
-      494C010111001300040020002000FFFFFFFFFF00FFFFFFFFFFFFFFFF424D3600
+      494C010111001300040020002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000080000000A000000001002000000000000040
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2854,6 +2873,7 @@ object frmMain: TfrmMain
       E0000000FF000078EC000017E38001FFFE000000FE8000FCFC00001F87F001FF
       FF000000FD80003EFE00003F0FFC01FFFF00000CFB4001FFFE00003F0FFE03FF
       FF8E03FEFEE002FFFE0000379FFF03FFFFCF1FFEFFD0077FF1F0070BFFFF03FF
-      FFFF9FFFFFFC1FFFFFFC1FEFFFFF87FF}
+      FFFF9FFFFFFC1FFFFFFC1FEFFFFF87FF00000000000000000000000000000000
+      000000000000}
   end
 end
