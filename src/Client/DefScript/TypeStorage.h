@@ -14,6 +14,8 @@ public:
     T *GetNoCreate(std::string);
     void Assign(std::string,T*);
     void Unlink(std::string);
+    void UnlinkByPtr(T*);
+    std::string GetNameByPtr(T*);
 
 private:
     T *_Create(std::string);
@@ -93,5 +95,29 @@ template<class T> void TypeStorage<T>::Unlink(std::string s)
     _storage.erase(s);
 }
 
+// removes the pointer from the storage without deleting it, if name is unknown
+template<class T> void TypeStorage<T>::UnlinkByPtr(T *ptr)
+{
+    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end();)
+    {
+        if(it->second == ptr)
+        {
+            Unlink(it->first);
+            return;
+        }
+    }
+}
+
+template<class T> std::string TypeStorage<T>::GetNameByPtr(T *ptr)
+{
+    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end();)
+    {
+        if(it->second == ptr)
+        {
+            return it->first;
+        }
+    }
+    return "";
+}
 
 #endif

@@ -35,4 +35,6 @@ enum VariableType
 
 typedef long double ldbl;
 
+#define SCRIPT_NAMESPACE "DEFSCRIPT::SCRIPT::"
+
 #endif

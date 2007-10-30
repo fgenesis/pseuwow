@@ -11,7 +11,6 @@
 using namespace DefScriptTools;
 
 #define SN_ONLOAD "?onload?"
-#define SCRIPT_NAMESPACE "DEFSCRIPT::SCRIPT::"
 
 enum DefScriptBlockType
 {
@@ -316,7 +315,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                 DeleteScript(SN_ONLOAD);
                 curScript=Script[sn];
             }
-            else if(strcmp(line.c_str(),"tag")==0 || strcmp(line.c_str(),"mark")==0)
+            else if(strncmp(line.c_str(),"tag",3)==0 || strncmp(line.c_str(),"mark",4)==0)
             {
                 curScript->AddLine("#" + line);
             }
