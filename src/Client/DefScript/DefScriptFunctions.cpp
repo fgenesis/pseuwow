@@ -73,6 +73,17 @@ DefReturnResult DefScriptPackage::func_unloaddef(CmdSet& Set)
     return true;
 }
 
+DefReturnResult DefScriptPackage::func_createdef(CmdSet& Set)
+{
+    std::string sn = stringToLower(Set.defaultarg);
+    if(!ScriptExists(sn))
+    {
+        _UpdateOrCreateScriptByName(sn);
+        return true;
+    }
+    return false;
+}
+
 DefReturnResult DefScriptPackage::func_unset(CmdSet& Set){
     DefReturnResult r;
     r.ret=Set.defaultarg;
@@ -511,7 +522,7 @@ DefReturnResult DefScriptPackage::func_strfind(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::func_scriptexists(CmdSet& Set)
 {
-    return ScriptExists(Set.defaultarg);
+    return ScriptExists(stringToLower(Set.defaultarg));
 }
 
 DefReturnResult DefScriptPackage::func_funcexists(CmdSet& Set)

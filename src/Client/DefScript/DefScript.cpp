@@ -11,6 +11,7 @@
 using namespace DefScriptTools;
 
 #define SN_ONLOAD "?onload?"
+#define SCRIPT_NAMESPACE "DEFSCRIPT::SCRIPT::"
 
 enum DefScriptBlockType
 {
@@ -74,6 +75,7 @@ void DefScriptPackage::Clear(void)
 {
     for(std::map<std::string,DefScript*>::iterator i = Script.begin(); i != Script.end(); i++)
     {
+        lists.Unlink(SCRIPT_NAMESPACE + i->first); // remove name from the list storage
         delete i->second; // delete each script
     }
 
@@ -89,6 +91,7 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("shdn",&DefScriptPackage::func_shdn,false);
     AddFunc("loaddef",&DefScriptPackage::func_loaddef);
     AddFunc("reloaddef",&DefScriptPackage::func_reloaddef);
+    AddFunc("createdef",&DefScriptPackage::func_createdef);
     AddFunc("unloaddef",&DefScriptPackage::func_unloaddef);
     AddFunc("setscriptpermission",&DefScriptPackage::func_setscriptpermission);
     AddFunc("toint",&DefScriptPackage::func_toint);
@@ -216,10 +219,12 @@ bool DefScriptPackage::ScriptExists(std::string name)
 
 void DefScriptPackage::DeleteScript(std::string sn)
 {
+    lists.Unlink(SCRIPT_NAMESPACE + sn); // remove name from the list storage
     if(ScriptExists(sn))
     {
-        delete GetScript(sn);
-        Script.erase(sn);
+
+        delete GetScript(sn); // delete the script itself
+        Script.erase(sn); // remove reference
     }
 }
 
@@ -310,6 +315,10 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                 RunScript(SN_ONLOAD,NULL,sn);
                 DeleteScript(SN_ONLOAD);
                 curScript=Script[sn];
+            }
+            else if(strcmp(line.c_str(),"tag")==0 || strcmp(line.c_str(),"mark")==0)
+            {
+                curScript->AddLine("#" + line);
             }
 
             //...
@@ -519,11 +528,14 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
     pSet->myname=name;
 
     std::deque<Def_Block> Blocks;
+    CmdSet mySet;
+    std::string line;
 
     for(unsigned int i=0;i<sc->GetLines();i++)
     {   
-        CmdSet mySet;
-        std::string line=sc->GetLine(i);
+        line=sc->GetLine(i);
+        if(line.empty() || line[0] == '#') // skip markers and preload statements if not removed before
+            continue;
         if(line=="else")
         {
             if(!Blocks.size())
@@ -597,6 +609,7 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
         //_DEFSC_DEBUG(printf("DefScript before: \"%s\"\n",line.c_str()));
         DefXChgResult final=ReplaceVars(line,pSet,0,true);
         //_DEFSC_DEBUG(printf("DefScript parsed: \"%s\"\n",final.str.c_str()));
+        mySet.Clear();
 	    SplitLine(mySet,final.str);
         if(mySet.cmd=="if")
         {
@@ -1052,6 +1065,7 @@ void DefScriptPackage::_UpdateOrCreateScriptByName(std::string sn)
     DefScript *newscript = new DefScript(this);
     newscript->SetName(sn); // necessary that the script knows its own name
     Script[sn] = newscript;
+    lists.Assign(SCRIPT_NAMESPACE + sn, &(newscript->Line));
 }
 
 std::string DefScriptPackage::SecureString(std::string s)

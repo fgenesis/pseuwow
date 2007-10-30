@@ -136,6 +136,20 @@ endloop
 ldelete mylist
 return ${outstr}
 
-
-
+//--------------------------------------------------------
+#script=appenddef
+//--------------------------------------------------------
+// purpose: append a line of code to a script
+// args: @0: script name; @def: code
+// be sure that the code you append is valid and working DefScript code! (no if/loop block mismatches, etc)
+// if you need to use { or }, escape them: "appenddef,myscript log Myscript: finished, @def=$\{@def\}" 
+if ?{and,{?{strlen ${@def}}} ?{strlen ${@0}}}
+	if ?{not ?{ScriptExists ${@0}}}
+		createdef ${@0}
+		logdebug AppendDef: ${@0} didnt exist, created
+	endif
+		
+	lpushback,#DEFSCRIPT::SCRIPT::${@0} ${@def}
+	unset cmd
+endif
 

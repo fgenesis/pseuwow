@@ -80,6 +80,7 @@ typedef std::deque<std::string> DefList;
 typedef std::map<std::string,DefList*> DefListMap;
 
 class DefScript {
+    friend class DefScriptPackage;
 public:
 	DefScript(DefScriptPackage *p);
 	~DefScript();
@@ -97,7 +98,7 @@ public:
 
 
 private:
-    std::deque<std::string> Line;
+    DefList Line;
 	unsigned int lines;
 	std::string scriptname;
 	unsigned char permission;
@@ -108,6 +109,7 @@ private:
 
 
 class DefScriptPackage {
+    friend class DefScript;
 public:
 	DefScriptPackage();
 	~DefScriptPackage();
@@ -180,6 +182,7 @@ private:
     DefReturnResult func_unset(CmdSet&);
     DefReturnResult func_loaddef(CmdSet&);
     DefReturnResult func_reloaddef(CmdSet&);
+    DefReturnResult func_createdef(CmdSet&);
     DefReturnResult func_unloaddef(CmdSet&);
     DefReturnResult func_out(CmdSet&);
     DefReturnResult func_eof(CmdSet&);

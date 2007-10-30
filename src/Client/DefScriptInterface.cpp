@@ -783,9 +783,13 @@ DefReturnResult DefScriptPackage::SCGetFileList(CmdSet& Set)
 DefReturnResult DefScriptPackage::SCPrintScript(CmdSet &Set)
 {
     DefScript *sc = GetScript(DefScriptTools::stringToLower(Set.defaultarg));
-    for(uint32 i = 0; i < sc->GetLines(); i++)
+    if(sc)
     {
-        logcustom(0,GREEN,sc->GetLine(i).c_str());
+        logcustom(0,GREEN,"== DefScript \"%s\", %u lines: ==",sc->GetName().c_str(),sc->GetLines());
+        for(uint32 i = 0; i < sc->GetLines(); i++)
+        {
+            logcustom(0,GREEN,sc->GetLine(i).c_str());
+        }
     }
     return "";
 }
