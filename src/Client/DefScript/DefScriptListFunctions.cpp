@@ -45,7 +45,16 @@ DefReturnResult DefScriptPackage::func_lpopfront(CmdSet& Set)
 // delete a list and all its elements
 DefReturnResult DefScriptPackage::func_ldelete(CmdSet& Set)
 {
-	lists.Delete(_NormalizeVarName(Set.defaultarg,Set.myname));
+    std::string lname = _NormalizeVarName(Set.defaultarg,Set.myname);
+    if(strncmp(lname.c_str(), SCRIPT_NAMESPACE,strlen(SCRIPT_NAMESPACE))==0)
+    {
+        printf("DefScript: WARNING: ldelete used on a script list, clearing instead! (called by '%s', list '%s')\n",Set.myname.c_str(), lname.c_str());
+        DefList *l = lists.GetNoCreate(lname);
+        if(l)
+            l->clear();
+        return true;
+    }
+	lists.Delete(lname);
 	return true;
 }
 

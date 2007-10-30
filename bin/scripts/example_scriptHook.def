@@ -44,7 +44,7 @@ add,counter 1
 #script=hook_example_cleanup
 //----------------------------------
 unloaddef hook_example_new
-// other possible way: lclear DEFSCRIPT::SCRIPT::hook_example_new
+// other possible, but wrong way: delete DEFSCRIPT::SCRIPT::hook_example_new
 
 
 
