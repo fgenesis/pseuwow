@@ -1,0 +1,56 @@
+//----------------------------------
+#script=hook_example_base
+//----------------------------------
+// just do some random stuff here
+set,var 0
+set,x hello world
+add,var 15
+out base: var=${var}
+
+
+
+//----------------------------------
+#script=hook_example_hooker
+//----------------------------------
+#onload
+set,counter 0
+#/onload
+
+// check if we have already added our code
+if ?{ScriptHasLine,hook_example_base #tag:hook:${@myname}}
+	out Hook Example: code already added, skipping.
+else
+	set,somevar some text
+	
+	// this is a custom "tag" to indicate the modification. its necessary because a 'reloaddef' on base script removes our custom content,
+	// so we can check if our added lines are still there; and a reloaddef on this script would cause the lines to get added twice or more.
+	appenddef,hook_example_base #tag:hook:${@myname}
+	
+	appenddef,hook_example_base out == this is the hooked part ==
+	appenddef,hook_example_base out text copied from hooking script: ${somevar}
+	appenddef,hook_example_base out x in base script: $\{x\}
+	appenddef,hook_example_base out add,a 10
+	appenddef,hook_example_base out var=$\{var\}
+	out Hook Example: ++ code appended.
+endif
+
+// everytine this script gets executed, add the same line of code to a "new" script (its not defined if you call this first time)
+appenddef,hook_example_new out line of text [${counter}]
+add,counter 1
+
+
+
+//----------------------------------
+#script=hook_example_cleanup
+//----------------------------------
+unloaddef hook_example_new
+// other possible way: lclear DEFSCRIPT::SCRIPT::hook_example_new
+
+
+
+//-----------------------------------
+// dummy for running scripts as soon as all scripts in this file are loaded
+#script=dummy
+#onload
+hook_example_hooker
+#/onload

@@ -149,7 +149,17 @@ if ?{and,{?{strlen ${@def}}} ?{strlen ${@0}}}
 		logdebug AppendDef: ${@0} didnt exist, created
 	endif
 		
-	lpushback,#DEFSCRIPT::SCRIPT::${@0} ${@def}
+	lpushback,{#DEFSCRIPT::SCRIPT::${@0}} ${@def}
 	unset cmd
 endif
+
+//---------------------------------------------------------
+#script=scripthasline
+//---------------------------------------------------------
+// purpose: check if a script has a certain line of code (exact match)
+// args:
+//  @0: script name
+//  @def: line of text to look for
+
+return ?{lcontains,{#DEFSCRIPT::SCRIPT::${@0}} ${@def}}
 
