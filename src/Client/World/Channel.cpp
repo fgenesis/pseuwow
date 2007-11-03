@@ -40,11 +40,34 @@ enum NotifyTypes
 	UNKNOWN6        = 0x20  // You are in not the correct area for this channel.
 };
 
-enum PlayerChannelModes
+enum ChannelFlags
 {
-	// 0x01 = ??
-	MODERATOR = 0x02,
-	MUTED = 0x04
+    CHANNEL_FLAG_CUSTOM     = 0x01,
+    // 0x02
+    CHANNEL_FLAG_TRADE      = 0x04,
+    CHANNEL_FLAG_NOT_LFG    = 0x08,
+    CHANNEL_FLAG_GENERAL    = 0x10,
+    CHANNEL_FLAG_CITY       = 0x20,
+    CHANNEL_FLAG_LFG        = 0x40,
+    CHANNEL_FLAG_VOICE      = 0x80
+    // General                  0x18 = 0x10 | 0x08
+    // Trade                    0x3C = 0x20 | 0x10 | 0x08 | 0x04
+    // LocalDefence             0x18 = 0x10 | 0x08
+    // GuildRecruitment         0x38 = 0x20 | 0x10 | 0x08
+    // LookingForGroup          0x50 = 0x40 | 0x10
+};
+
+enum ChannelMemberFlags
+{
+    MEMBER_FLAG_NONE        = 0x00,
+    MEMBER_FLAG_OWNER       = 0x01,
+    MEMBER_FLAG_MODERATOR   = 0x02,
+    MEMBER_FLAG_VOICED      = 0x04,
+    MEMBER_FLAG_MUTED       = 0x08,
+    MEMBER_FLAG_CUSTOM      = 0x10,
+    MEMBER_FLAG_MIC_MUTED   = 0x20,
+    // 0x40
+    // 0x80
 };
 
 typedef std::map<uint64,uint8> ChannelPlayerList;
@@ -58,7 +81,9 @@ void Channel::Join(std::string channel, std::string password)
 	// Send join channel request
 	WorldPacket worldPacket;
 	worldPacket.SetOpcode(CMSG_JOIN_CHANNEL);
-	worldPacket << (uint32)0 << (uint8)0; // new since 2.0.x // uint32: some channel ID? server answers us with that number later if channel joined
+	worldPacket << (uint32)0; // new since 2.0.x, some channel ID? server answers us with that number later if channel joined
+    worldPacket << (uint8)0;  // unk
+    worldPacket << (uint8)0;  // unk, new since 2.2.x
 	worldPacket << channel << password;
 	_worldSession->SendWorldPacket(worldPacket);
 }
@@ -72,7 +97,7 @@ void Channel::Leave(std::string channel)
 		    // Send leave channel request
 		    WorldPacket worldPacket;
 		    worldPacket.SetOpcode(CMSG_LEAVE_CHANNEL);
-			worldPacket << (uint32)0; // new since 2.0.x
+			worldPacket << (uint32)0; // new since 2.0.x, maybe channel id
 		    worldPacket << channel;
 		    _worldSession->SendWorldPacket(worldPacket);
             return;
@@ -193,8 +218,9 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 	uint8 unk;
 	uint32 size;
 	uint64 guid;
-	uint8 mode;
-	recvPacket >> unk >> size;
+	uint8 mode, flags; // mode: player flags; flags: channel flags
+    std::string name;
+	recvPacket >> unk >> name >> flags >> size;
 
     // store list of GUIDs in: @ChannelList
     DefList *l = _worldSession->GetInstance()->GetScripts()->lists.Get("@ChannelList");
@@ -218,8 +244,8 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 			pname="<unknown>";
 			_worldSession->SendQueryPlayerName(i->first);
 		}
-		muted = mode & MUTED;
-		mod = mode & MODERATOR;
+		muted = mode & MEMBER_FLAG_MUTED;
+		mod = mode & MEMBER_FLAG_MODERATOR;
 
 		while(pname.length()<12)
 			pname += " "; // for better formatting
