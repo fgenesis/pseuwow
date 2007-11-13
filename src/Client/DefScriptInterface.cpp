@@ -51,6 +51,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getrace",&DefScriptPackage::SCGetRace);
     AddFunc("getclass",&DefScriptPackage::SCGetClass);
     AddFunc("sendworldpacket",&DefScriptPackage::SCSendWorldPacket);
+    AddFunc("getopcodename",&DefScriptPackage::SCGetOpcodeName);
+    AddFunc("getopcodeid",&DefScriptPackage::SCGetOpcodeID);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -886,6 +888,16 @@ DefReturnResult DefScriptPackage::SCSendWorldPacket(CmdSet &Set)
     return false;
 }
 
+DefReturnResult DefScriptPackage::SCGetOpcodeID(CmdSet &Set)
+{
+    uint32 id = GetOpcodeID(Set.defaultarg.c_str());
+    return id != (uint32)(-1) ? toString(id) : "";
+}
+
+DefReturnResult DefScriptPackage::SCGetOpcodeName(CmdSet &Set)
+{
+    return GetOpcodeName((uint32)DefScriptTools::toUint64(Set.defaultarg));
+}
 
 
 

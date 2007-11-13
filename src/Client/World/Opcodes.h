@@ -24,6 +24,7 @@
 #define _OPCODES_H
 
 const char *GetOpcodeName(unsigned int);
+const unsigned int GetOpcodeID(const char *);
 
 /// List of OpCodes
 enum OpCodes

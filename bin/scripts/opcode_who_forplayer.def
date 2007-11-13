@@ -1,0 +1,22 @@
+// temporary wrapper for requesting info about a certain player until implemented into the core
+#script=SendWhoForPlayer
+
+// minlvl 0
+bbappend,pkt,uint32 0
+// maxlvl 100
+bbappend,pkt,uint32 100
+// player name, case-sensitive string
+bbappend,pkt,string ${@def}
+// no guild, empty string
+bbappend,pkt,string
+// racemask - all races
+bbappend,pkt,uint32 0xFFFFFFFF
+// classmask - all classes
+bbappend,pkt,uint32 0xFFFFFFFF
+// 0 zones to check
+bbappend,pkt,uint32 0
+// 0 additional strings
+bbappend,pkt,uint32 0
+
+SendWorldPacket,{?{GetOpcodeID CMSG_WHO}} pkt
+bbdelete pkt
