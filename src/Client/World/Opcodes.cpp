@@ -19,7 +19,7 @@
 /** \file
     \ingroup u2w
 */
-
+#include "common.h"
 #include "Opcodes.h"
 
 
@@ -986,11 +986,24 @@ const char* worldOpcodeNames[] =
     "UNKNOWN953",                                          // 953
     "SMSG_UNKNOWN_954",                                    // 954
     "SMSG_UNKNOWN_955",                                    // 955
-    //there would be declared new opcode, id 956
-	//do not forget to change MAX_OPCODE_ID, if you add a line here!
+    ""                                                     // last entry should be empty
 };
 
 const char *GetOpcodeName(unsigned int id)
 {
+    if(id > MAX_OPCODE_ID)
+        return "";
     return worldOpcodeNames[id];
+}
+
+const unsigned int GetOpcodeID(const char *name)
+{
+    for(unsigned int i=0; strlen(worldOpcodeNames[i]); i++)
+    {
+        if(!stricmp(worldOpcodeNames[i], name))
+        {
+            return i;
+        }
+    }
+    return -1; // invalid name
 }

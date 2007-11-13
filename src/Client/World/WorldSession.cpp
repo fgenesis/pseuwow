@@ -113,56 +113,71 @@ void WorldSession::Update(void)
         }
     }
 
+    DefScriptPackage *sc = GetInstance()->GetScripts();
 
     OpcodeHandler *table = _GetOpcodeHandlerTable();
 
     uint16 hpos;
     bool known=false;
-        while(pktQueue.size())
+
+    while(pktQueue.size())
+    {
+        WorldPacket *packet = pktQueue.next();
+
+        for (hpos = 0; table[hpos].handler != NULL; hpos++)
         {
-                WorldPacket *packet = pktQueue.next();
+            if (table[hpos].opcode == packet->GetOpcode())
+            {
+                known=true;
+                break;
+            }
+        }
 
-                for (hpos = 0; table[hpos].handler != NULL; hpos++)
-                {
-                        if (table[hpos].opcode == packet->GetOpcode())
-                        {
-                                known=true;
-                                break;
-                        }
-                }
+        bool hideOpcode = false;
 
-                bool hideOpcode = false;
+        // TODO: Maybe make table or something with all the frequently opcodes
+        if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
+        {
+            hideOpcode = true;
+        }
 
-                // TODO: Maybe make table or something with all the frequently opcodes
-                if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
-                {
-                        hideOpcode = true;
-                }
-
-                if( (known && GetInstance()->GetConf()->showopcodes==1)
-                        || ((!known) && GetInstance()->GetConf()->showopcodes==2)
-                        || (GetInstance()->GetConf()->showopcodes==3) )
-                {
+        if( (known && GetInstance()->GetConf()->showopcodes==1)
+            || ((!known) && GetInstance()->GetConf()->showopcodes==2)
+            || (GetInstance()->GetConf()->showopcodes==3) )
+        {
             if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode))
-                            logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
-                }
+                logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
+        }
 
-        if(known)
+        try
         {
-            try
-            {
+            // call the opcode handler
+            if(known)
                 (this->*table[hpos].handler)(*packet);
-            }
-            catch (...)
+
+            // if there is a script attached to that opcode, call it now.
+            // note: the pkt rpos needs to be reset in by the scripts!
+            std::string scname = "opcode::";
+            scname += stringToLower(GetOpcodeName(packet->GetOpcode()));
+            if(sc->ScriptExists(scname))
             {
-                logerror("Exception while handling opcode %u!",packet->GetOpcode());
-                logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
+                std::string pktname = "PACKET::";
+                pktname += GetOpcodeName(packet->GetOpcode());
+                GetInstance()->GetScripts()->bytebuffers.Assign(pktname,packet);
+                sc->RunScript(scname,NULL);
+                GetInstance()->GetScripts()->bytebuffers.Unlink(pktname);
             }
+
+        }
+        catch (...)
+        {
+            logerror("Exception while handling opcode %u!",packet->GetOpcode());
+            logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
         }
 
-                delete packet;
+        delete packet;
         known=false;
-        }
+    }
 
     _DoTimedActions();
 

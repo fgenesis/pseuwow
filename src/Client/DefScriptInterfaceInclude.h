@@ -42,5 +42,7 @@ DefReturnResult SCGetObjectValue(CmdSet&);
 DefReturnResult SCGetRace(CmdSet&);
 DefReturnResult SCGetClass(CmdSet&);
 DefReturnResult SCSendWorldPacket(CmdSet&);
+DefReturnResult SCGetOpcodeName(CmdSet&);
+DefReturnResult SCGetOpcodeID(CmdSet&);
 
 #endif
