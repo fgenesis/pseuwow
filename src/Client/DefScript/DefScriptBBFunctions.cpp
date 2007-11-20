@@ -50,6 +50,11 @@ DefReturnResult DefScriptPackage::func_bbappend(CmdSet& Set)
         *bb << Set.defaultarg;
         return true;
     }
+    else if(dtype == "strnz")
+    {
+        bb->append(Set.defaultarg.c_str(), Set.defaultarg.length()); // append the string skipping \0
+        return true;
+    }
 
     BB_MACRO_INSERT(bb, dtype, uint8);
     BB_MACRO_INSERT(bb, dtype, uint16);
@@ -77,6 +82,20 @@ DefReturnResult DefScriptPackage::func_bbread(CmdSet& Set)
         *bb >> g;
         return g;
 	}
+    else if(dtype == "strnz") // extract some amount of bytes not terminated by \0
+    {
+        uint32 bytes = (uint32)toUint64(Set.arg[1]);
+        if(bytes)
+        {
+            std::string g;
+            char *buf = new char[bytes];
+            bb->read((uint8*)buf,bytes);
+            g = buf;
+            delete [] buf;
+            return g;
+        }
+        return "";
+    }
 
     BB_MACRO_EXTRACT_I(bb, dtype, uint8);
     BB_MACRO_EXTRACT_I(bb, dtype, uint16);

@@ -53,6 +53,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("sendworldpacket",&DefScriptPackage::SCSendWorldPacket);
     AddFunc("getopcodename",&DefScriptPackage::SCGetOpcodeName);
     AddFunc("getopcodeid",&DefScriptPackage::SCGetOpcodeID);
+    AddFunc("bbgetpackedguid",&DefScriptPackage::SCBBGetPackedGuid);
+    AddFunc("bbputpackedguid",&DefScriptPackage::SCBBPutPackedGuid);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -899,7 +901,61 @@ DefReturnResult DefScriptPackage::SCGetOpcodeName(CmdSet &Set)
     return GetOpcodeName((uint32)DefScriptTools::toUint64(Set.defaultarg));
 }
 
+DefReturnResult DefScriptPackage::SCBBGetPackedGuid(CmdSet &Set)
+{
+    ByteBuffer *bb = bytebuffers.GetNoCreate(_NormalizeVarName(Set.defaultarg,Set.myname));
+    if (!bb)
+        return false;
 
+    if (bb->size() - bb->rpos() < sizeof(uint8))
+        return false;
+
+    uint8 mask;
+    *bb >> mask;
+    uint64 guid=0;
+    for(uint8 i=0;i<8;i++)
+    {
+        if(mask & (1<<i) )
+        {
+            if (bb->size() - bb->rpos() < sizeof(uint8))
+                return false;
+
+            *bb >> ((uint8*)&guid)[i];
+        }
+    }
+
+    return toString(guid);
+}
+
+DefReturnResult DefScriptPackage::SCBBPutPackedGuid(CmdSet &Set)
+{
+    ByteBuffer *bb = bytebuffers.Get(_NormalizeVarName(Set.arg[0],Set.myname));
+    
+    uint64 guid = DefScriptTools::toUint64(Set.defaultarg);
+    if (!guid) // fast check if guid is empty (in this case mask must be 0 with no extra data)
+    {
+        *bb << uint8(0);
+        return false;
+    }
+
+    ByteBuffer bbmask;
+    uint8 mask = 0;
+
+    for(uint8 i = 0; i < 8; i++)
+    {
+        if(guid & 0xFF)
+        {
+            mask |= (1<<i);
+            bbmask << ((uint8)(guid & 0xFF));
+        }
+        guid >>= 8;
+    }
+
+    *bb << mask;
+    bb->append(bbmask);
+
+    return true;
+}
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {
@@ -969,6 +1025,7 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
 
     Interpret(curSet);
 }
+
 
 
 
