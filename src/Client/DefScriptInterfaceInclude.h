@@ -44,5 +44,7 @@ DefReturnResult SCGetClass(CmdSet&);
 DefReturnResult SCSendWorldPacket(CmdSet&);
 DefReturnResult SCGetOpcodeName(CmdSet&);
 DefReturnResult SCGetOpcodeID(CmdSet&);
+DefReturnResult SCBBGetPackedGuid(CmdSet&);
+DefReturnResult SCBBPutPackedGuid(CmdSet&);
 
 #endif
