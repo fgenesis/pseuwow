@@ -99,7 +99,7 @@ public:
     //////////////////////
     // helper functions //
     //////////////////////
-    std::string GetAreaName(uint32 id);
+    std::string GetZoneName(uint32 id);
     std::string GetRaceName(uint32 id);
     std::string GetClassName_(uint32 id);
     std::string GetGenderName(uint32 id);

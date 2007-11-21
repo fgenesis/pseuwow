@@ -146,5 +146,35 @@ void WorldSession::SendCastSpell(uint32 spellid, bool nocheck)
         logerror(" - WARNING: spell is NOT known!");
 }
 
+void WorldSession::SendWhoListRequest(uint32 minlvl, uint32 maxlvl, uint32 racemask, uint32 classmask, std::string name, std::string guildname, std::vector<uint32> *zonelist, std::vector<std::string> *strlist)
+{
+    WorldPacket pkt(CMSG_WHO, 50); // guess size
+    pkt << minlvl;
+    pkt << maxlvl;
+    pkt << name;
+    pkt << guildname;
+    pkt << racemask;
+    pkt << classmask;
+
+    if(zonelist)
+    {
+        pkt << (uint32)zonelist->size();
+        for(uint32 i = 0; i < zonelist->size(); i++)
+            pkt << (*zonelist)[i];
+    }
+    else
+        pkt << uint32(0);
+
+    if(strlist)
+    {
+        pkt << (uint32)strlist->size();
+        for(uint32 i = 0; i < strlist->size(); i++)
+            pkt << (*strlist)[i];
+    }
+    else
+        pkt << uint32(0);
+}
+
+
 
 

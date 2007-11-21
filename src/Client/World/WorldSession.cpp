@@ -235,6 +235,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_LOGIN_VERIFY_WORLD, &WorldSession::_HandleLoginVerifyWorldOpcode},
         {SMSG_MOTD, &WorldSession::_HandleMotdOpcode},
         {SMSG_NOTIFICATION, &WorldSession::_HandleNotificationOpcode},
+        {SMSG_WHO, &WorldSession::_HandleWhoOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -386,13 +387,13 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 
         for(unsigned int i=0;i<num;i++)
         {
-            logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Area: %s",
+            logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Zone: %s",
                 plr[i]._name.c_str(),
                 plr[i]._level,
                 GetDBMgr().GetRaceName(plr[i]._race).c_str(),
                 GetDBMgr().GetClassName_(plr[i]._class).c_str(),
                 GetDBMgr().GetMapName(plr[i]._mapId).c_str(),
-                GetDBMgr().GetAreaName(plr[i]._zoneId).c_str());
+                GetDBMgr().GetZoneName(plr[i]._zoneId).c_str());
             logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
             plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
         for(unsigned int inv=0;inv<20;inv++)
@@ -552,7 +553,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
             else if(msg.length()<15 && (msg.find("omg")!=std::string::npos || msg.find("omfg")!=std::string::npos) )
                 SendChatMessage(CHAT_MSG_SAY,lang,"OMG a bot logged in, you don't believe it :O","");
             else if(msg.find("from")!=std::string::npos || msg.find("download")!=std::string::npos)
-                SendChatMessage(CHAT_MSG_SAY,lang,"http://my.opera.com/PseuWoW","");
+                SendChatMessage(CHAT_MSG_SAY,lang,"www.mangosclient.org","");
             else if(msg.find("Genesis")!=std::string::npos || msg.find("genesis")!=std::string::npos)
                 SendChatMessage(CHAT_MSG_YELL,lang,"False.Genesis, they are calling you!! Come here, master xD","");
         }
@@ -938,6 +939,59 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
         delete _world;
     _world = new World(this);
     _world->UpdatePos(x,y,m);
+}
+
+ByteBuffer& operator>>(ByteBuffer& bb, WhoListEntry& e)
+{
+    bb >> e.name >> e.level >> e.classId >> e.raceId, e.zoneId;
+    return bb;
+}
+
+void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
+{
+    uint32 count, unk;
+    recvPacket >> count >> unk;
+
+    log("Got WHO-List, %u players.         (unk=%u)",count,unk);
+    WhoListEntry wle;
+
+    if(count >= 1)
+    {
+        log("     Name     |Level|  Class   |   Race   |    Zone");
+        log("--------------+-----+----------+----------+----------------");
+        if(count > 1)
+        {
+            _whoList.clear(); // need to clear current list only if requesting more then one player name
+        }
+    }        
+
+    for(uint32 i = 0; i < count; i++)
+    {
+        recvPacket >> wle;
+
+        _whoList.push_back(wle);
+
+        // original WhoListEntry is saved, now do some formatting
+        while(wle.name.length() < 12)
+            wle.name += ' ';
+
+        SCPDatabaseMgr& db = GetInstance()->dbmgr;
+        std::string zonename = db.GetZoneName(wle.zoneId);
+        std::string classname = db.GetClassName_(wle.classId);
+        std::string racename = db.GetRaceName(wle.raceId);
+
+        while(classname.length() < 8)
+            classname += ' ';
+        while(racename.length() < 8)
+            racename += ' ';
+        char tmp[12];
+        sprintf(tmp,"%u",wle.level);
+        std::string lvl_str = tmp;
+        while(lvl_str.length() < 3)
+            lvl_str = " " + lvl_str;
+
+        log("%s | %s | %s | %s | %s", wle.name.c_str(), lvl_str.c_str(), classname.c_str(), racename.c_str(), zonename.c_str() );
+    }
 }
 
 

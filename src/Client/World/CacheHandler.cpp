@@ -101,9 +101,14 @@ bool PlayerNameCache::ReadFromFile(void)
     bool success=true;
     std::fstream fh;
     fh.open(fn, std::ios_base::in | std::ios_base::binary);
-    if(!fh)
+    if(!fh.is_open())
     {
         logerror("PlayerNameCache: Could not open file '%s'!",fn);
+        return false;
+    }
+    if(fh.eof())
+    {
+        logdetail("PlayerNameCache: Can't load empty file '%s'",fn);
         return false;
     }
     uint32 size;
