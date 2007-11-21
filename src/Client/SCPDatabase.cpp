@@ -170,9 +170,9 @@ uint32 SCPDatabaseMgr::AutoLoadFile(char *fn)
 
 // -- helper functions -- //
 
-std::string SCPDatabaseMgr::GetAreaName(uint32 id)
+std::string SCPDatabaseMgr::GetZoneName(uint32 id)
 {
-    return GetDB("area").GetField(id).GetString("name");
+    return GetDB("zone").GetField(id).GetString("name");
 }
 
 std::string SCPDatabaseMgr::GetRaceName(uint32 id)

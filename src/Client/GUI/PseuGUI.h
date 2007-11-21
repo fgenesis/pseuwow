@@ -77,6 +77,7 @@ public:
 private:
     void _Init(void);
     void _UpdateSceneState(void);
+    void _HandleWindowResize(void);
     uint16 _xres,_yres,_colordepth;
     bool _windowed,_vsync,_shadows;
     bool _initialized,_mustdie;
@@ -89,6 +90,7 @@ private:
     PseuInstance *_instance;
     SceneState _scenestate, _scenestate_new;
     Scene *_scene;
+    irr::core::dimension2d<irr::s32> _screendimension;
 
 };
 

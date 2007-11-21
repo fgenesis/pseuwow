@@ -93,8 +93,23 @@ void PseuGUI::UseShadows(bool b)
 void PseuGUI::_Init(void)
 {
     _device = createDevice(_driverType,dimension2d<s32>(_xres,_yres),_colordepth,!_windowed,_shadows,_vsync);
+    if(!_device)
+    {
+        logerror("PseuGUI: Can't use specified video driver, trying software mode...");
+        _device = createDevice(video::EDT_SOFTWARE,dimension2d<s32>(_xres,_yres),_colordepth,!_windowed,false,false);
+        if(!_device)
+        {
+            logerror("ERROR: PseuGUI::_Init() failed, no video driver available!");
+            return;
+        }
+        else
+        {
+            logerror("PseuGUI: Software mode OK!");
+        }
+    }
     DEBUG(logdebug("PseuGUI::Init() _device=%X",_device));
     _device->setWindowCaption(L"PseuWoW - Initializing");
+    _device->setResizeAble(true);
     _driver = _device->getVideoDriver();
     _smgr = _device->getSceneManager();
     _guienv = _device->getGUIEnvironment();
@@ -130,6 +145,12 @@ void PseuGUI::Run(void)
 {
     if(!_initialized)
         this->_Init();
+    if(!_initialized) // recheck
+    {
+        logerror("PseuGUI: not initialized, using non-GUI mode");
+        Cancel();
+        return;
+    }
 
     DEBUG(logdebug("PseuGUI::Run() _device=%X",_device));
 
@@ -137,6 +158,8 @@ void PseuGUI::Run(void)
 
     while(_device && _device->run() && !_mustdie)
     {
+        // _HandleWindowResize(); // not yet used; doesnt work
+
         if (!_device->isWindowActive())
         {
             _device->sleep(10); // save cpu & gpu power if not focused
@@ -225,7 +248,7 @@ void PseuGUI::_UpdateSceneState(void)
     }
 }
 
-void PseuGUI::DrawCurrentScene()
+void PseuGUI::DrawCurrentScene(void)
 {
     if(!_initialized)
         return;
@@ -233,3 +256,25 @@ void PseuGUI::DrawCurrentScene()
         _scene->Draw();
 }
 
+void PseuGUI::_HandleWindowResize(void)
+{
+    dimension2d<s32> scrn = _driver->getScreenSize();
+    if(_screendimension.Width != scrn.Width)
+    {
+        scrn.Height = s32(scrn.Width * 0.8f); // for now use aspect ratio 5:4
+        _screendimension = scrn;
+        _driver->OnResize(scrn);
+        DEBUG(logdebug("DEBUG: Width resize handled, Height adjusted"));
+
+    }
+    else if(_screendimension.Height != scrn.Height)
+    {
+        scrn.Width = s32(scrn.Height * 1.25); // 5:4 here too
+        _screendimension = scrn;
+        _driver->OnResize(scrn);
+        DEBUG(logdebug("DEBUG: Height resize handled, Width adjusted"));
+
+    }
+    // TODO: how to set irrlicht window size ?!
+
+}
