@@ -234,6 +234,9 @@ static const char *MapFormat =
 enum AreaTableEnum
 {
     AREATABLE_ID = 0,
+    AREATABLE_PARENTMAP = 2,
+    AREATABLE_FLAGS = 4, // 64 in normal (?) areas
+    AREATABLE_LEVEL = 10,
     AREATABLE_NAME1 = 11,
     AREATABLE_NAME2,
     AREATABLE_NAME3,
@@ -242,19 +245,20 @@ enum AreaTableEnum
     AREATABLE_NAME6,
     AREATABLE_NAME7,
     AREATABLE_NAME8,
+    AREATABLE_FACTION = 20, // 2 (alliance?) or 4 (horde?)
     AREATABLE_END = 27,
 };
 
 static const char *AreaTableFieldNames[] = {
-    "","","","","","","","","","",
-    "name","name","name","name","name","name","name","name","","",
-    "","","","","","",
+    "","","map","","flags","","","","","", // 0-9
+    "level","name","name","name","name","name","name","name","name","", // 10-19
+    "faction","","","","","", // 20-26
     ""
 };
 
 static const char *AreaTableFormat = {
-    "ixxxxxxxxx"
-    "xssssssssx"
+    "ixixixxxxx"
+    "issssssssx"
     "xxxxxxx"
 };
 

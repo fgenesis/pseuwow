@@ -164,11 +164,11 @@ void PrintHelp(void)
 
 
 // be careful using this, that you supply correct format string
-std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 field)
+std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 field, bool skip_null = true)
 {
     if(format[field]=='i')
     {
-        if((*it).getInt(field) == 0)
+        if((*it).getInt(field) == 0 && skip_null)
             return ""; // do not explicitly write int fields that are 0
         std::stringstream s;
         s << (*it).getInt(field);
@@ -176,7 +176,7 @@ std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 
     }
     else if(format[field]=='f')
     {
-        if((*it).getFloat(field) == 0)
+        if((*it).getFloat(field) == 0 && skip_null)
             return ""; // do not explicitly write float fields that are 0
         std::stringstream s;
         s << (*it).getFloat(field);
@@ -249,7 +249,7 @@ void OutMD5(char *path, MD5FileMap& fm)
 bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
-    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,AreaDataStorage,ItemDisplayInfoStorage; // will store the converted data from dbc files
+    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,ZoneDataStorage,ItemDisplayInfoStorage; // will store the converted data from dbc files
     DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo;
     printf("Opening DBC archive...\n");
     MPQHelper mpq("dbc");
@@ -378,7 +378,7 @@ bool ConvertDBC(void)
         }
     }
 
-    printf("area..");
+    printf("zonedata..");
     for(DBCFile::Iterator it = AreaTable.begin(); it != AreaTable.end(); ++it)
     {
         uint32 id = it->getUInt(MAP_ID);
@@ -386,9 +386,9 @@ bool ConvertDBC(void)
         {
             if(strlen(AreaTableFieldNames[field]))
             {
-                std::string value = AutoGetDataString(it,AreaTableFormat,field);
+                std::string value = AutoGetDataString(it,AreaTableFormat,field,false);
                 if(value.size()) // only store if not null
-                    AreaDataStorage[id].push_back(std::string(AreaTableFieldNames[field]) + "=" + value);
+                    ZoneDataStorage[id].push_back(std::string(AreaTableFieldNames[field]) + "=" + value);
             }
         }
     }
@@ -421,7 +421,7 @@ bool ConvertDBC(void)
     printf("race.."); OutSCP(SCPDIR "/race.scp",RaceDataStorage, "race");
     printf("sound.."); OutSCP(SCPDIR "/sound.scp",SoundDataStorage, "sound");
     printf("map.."); OutSCP(SCPDIR "/map.scp",MapDataStorage, "map");
-    printf("area.."); OutSCP(SCPDIR "/area.scp",AreaDataStorage, "area");
+    printf("area.."); OutSCP(SCPDIR "/zone.scp",ZoneDataStorage, "zone");
     printf("itemdisplayinfo."); OutSCP(SCPDIR "/itemdisplayinfo.scp",ItemDisplayInfoStorage, "itemdisplayinfo");
     //...
     printf("DONE!\n");
