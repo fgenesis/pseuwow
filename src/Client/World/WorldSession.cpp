@@ -313,12 +313,12 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         // recvPacket << ziped_UI_Plugins_Info
         // TODO: add addon data, simulate no addons.
         auth<<(uint32)0; // no addons? no idea, but seems to work. MaNGOS doesnt accept without this.
-    auth.SetOpcode(CMSG_AUTH_SESSION);
+        auth.SetOpcode(CMSG_AUTH_SESSION);
 
         SendWorldPacket(auth);
 
-    // note that if the sessionkey/auth is wrong or failed, the server sends the following packet UNENCRYPTED!
-    // so its not 100% correct to init the crypt here, but it should do the job if authing was correct
+        // note that if the sessionkey/auth is wrong or failed, the server sends the following packet UNENCRYPTED!
+        // so its not 100% correct to init the crypt here, but it should do the job if authing was correct
         _socket->InitCrypt(GetInstance()->GetSessionKey().AsByteArray(), 40);
 
 }
@@ -939,6 +939,13 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
         delete _world;
     _world = new World(this);
     _world->UpdatePos(x,y,m);
+
+    // temp. solution to test terrain rendering
+    PseuGUI *gui = GetInstance()->GetGUI();
+    if(gui)
+    {
+        gui->SetSceneState(SCENESTATE_WORLD);
+    }
 }
 
 ByteBuffer& operator>>(ByteBuffer& bb, WhoListEntry& e)

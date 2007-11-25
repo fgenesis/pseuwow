@@ -18,8 +18,12 @@ class Scene
     friend class PseuGUI;
 public:
     Scene(PseuGUI *g);
-    virtual void Draw(void);
+    ~Scene();
+    virtual void OnUpdate(f32);
+    virtual void OnDraw(void);
+    virtual void OnDelete(void);    
 protected:
+
     PseuGUI *gui;
     irr::IrrlichtDevice *device;
     irr::video::IVideoDriver* driver;
@@ -31,18 +35,28 @@ class SceneGuiStart : public Scene
 {
 public:
     SceneGuiStart(PseuGUI *gui);
-    ~SceneGuiStart();
+    void OnDelete(void);
 private:
     IGUIImage *irrlogo, *driverlogo;
 
 };
 
+
+class ShTlTerrainSceneNode;
+class MCameraFPS;
+class MyEventReceiver;
+
 class SceneWorld : public Scene
 {
 public:
     SceneWorld(PseuGUI *gui);
-    ~SceneWorld();
-    void Draw(void);
+    void OnDraw(void);
+    void OnDelete(void);
+    void OnUpdate(f32);
+private:
+    ShTlTerrainSceneNode *terrain;
+    MCameraFPS *camera;
+    MyEventReceiver *eventrecv;
 };
 
 

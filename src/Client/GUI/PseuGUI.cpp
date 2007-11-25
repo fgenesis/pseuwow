@@ -42,6 +42,7 @@ PseuGUI::PseuGUI()
     _device = NULL;
     _guienv = NULL;
     _scene = NULL;
+    _passtime = _lastpasstime = _passtimediff = 0;
 }
 
 PseuGUI::~PseuGUI()
@@ -113,6 +114,7 @@ void PseuGUI::_Init(void)
     _driver = _device->getVideoDriver();
     _smgr = _device->getSceneManager();
     _guienv = _device->getGUIEnvironment();
+    _timer = _device->getTimer();
     //...
     _initialized = true;
 }
@@ -123,6 +125,7 @@ void PseuGUI::Cancel(void)
 
     if(_scene)
     {
+        _scene->OnDelete();
         delete _scene;
         _scene = NULL;
     }
@@ -158,6 +161,9 @@ void PseuGUI::Run(void)
 
     while(_device && _device->run() && !_mustdie)
     {
+        _lastpasstime = _passtime;
+        _passtime = _timer->getTime() / 1000.0f;
+        _passtimediff = _passtime - _lastpasstime;
         // _HandleWindowResize(); // not yet used; doesnt work
 
         if (!_device->isWindowActive())
@@ -167,9 +173,13 @@ void PseuGUI::Run(void)
 
         try
         {
+            _UpdateSceneState();
+
+            if(_scene && _initialized)
+                _scene->OnUpdate(_passtimediff);
+
             _driver->beginScene(true, true, 0);
 
-            _UpdateSceneState();
             DrawCurrentScene();
 
             _smgr->drawAll();
@@ -229,9 +239,13 @@ void PseuGUI::_UpdateSceneState(void)
 {
     if(_scenestate != _scenestate_new && _smgr)
     {
-        _smgr->clear();
         if(_scene)
+        {
+            _scene->OnDelete();
             delete _scene;
+        }
+        _smgr->clear();
+        _guienv->clear();
 
         _scenestate = _scenestate_new;
 
@@ -250,10 +264,8 @@ void PseuGUI::_UpdateSceneState(void)
 
 void PseuGUI::DrawCurrentScene(void)
 {
-    if(!_initialized)
-        return;
-    if(_scene)
-        _scene->Draw();
+    if(_scene && _initialized)
+        _scene->OnDraw();
 }
 
 void PseuGUI::_HandleWindowResize(void)

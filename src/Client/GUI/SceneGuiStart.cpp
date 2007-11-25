@@ -27,8 +27,7 @@ SceneGuiStart::SceneGuiStart(PseuGUI *gui) : Scene(gui)
 
 }
 
-SceneGuiStart::~SceneGuiStart()
+void SceneGuiStart::OnDelete(void)
 {
-    irrlogo->drop();
-    driverlogo->drop();
+    // not necessary to delete the images, because they are deleted by guienv->clear()
 }

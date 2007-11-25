@@ -17,6 +17,7 @@ public:
     void UpdatePos(float,float,uint32);
     void UpdatePos(float,float);
     inline float GetPosZ(float x, float y);
+    inline MapMgr *GetMapMgr(void) { return _mapmgr; }
 
 private:
     WorldSession *_session;

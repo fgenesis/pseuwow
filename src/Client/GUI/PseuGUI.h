@@ -54,6 +54,7 @@ public:
     ~PseuGUI();
 
     void SetInstance(PseuInstance*);
+    inline PseuInstance *GetInstance(void) { return _instance; }
     void Run(void);
     void SetDriver(uint8);
     void SetResolution(uint16 x, uint16 y, uint16 depth=32);
@@ -90,6 +91,8 @@ private:
     PseuInstance *_instance;
     SceneState _scenestate, _scenestate_new;
     Scene *_scene;
+    irr::ITimer *_timer;
+    float _passtime, _lastpasstime, _passtimediff;
     irr::core::dimension2d<irr::s32> _screendimension;
 
 };
