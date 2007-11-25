@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="shared"
 	ProjectGUID="{F548FC51-24A4-45FF-A381-BEBC39F18270}"
 	RootNamespace="PseuWoW_Controller"
@@ -187,6 +187,14 @@
 			</File>
 			<File
 				RelativePath=".\shared\DebugStuff.h"
+				>
+			</File>
+			<File
+				RelativePath=".\shared\log.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\shared\log.h"
 				>
 			</File>
 			<File
@@ -401,10 +409,12 @@
 					>
 				</File>
 				<File
-					RelativePath=".\shared\Auth\MD5Hash.h">
+					RelativePath=".\shared\Auth\MD5Hash.h"
+					>
 				</File>
 				<File
-					RelativePath=".\shared\Auth\Sha1.cpp">
+					RelativePath=".\shared\Auth\Sha1.cpp"
+					>
 				</File>
 				<File
 					RelativePath=".\shared\Auth\Sha1.h"
