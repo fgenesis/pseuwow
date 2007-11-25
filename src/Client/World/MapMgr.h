@@ -2,6 +2,7 @@
 #define MAPMGR_H
 
 class MapTileStorage;
+class MapTile;
 
 class MapMgr
 {
@@ -11,6 +12,10 @@ public:
     void Update(float,float,uint32);
     void Flush(void);
     float GetZ(float,float);
+    uint32 GetGridCoord(float f);
+    MapTile *GetTile(uint32 xg, uint32 yg, bool forceLoad = false);
+    MapTile *GetCurrentTile(void);
+    inline bool Loaded(void) { return _mapsLoaded; }
 
 private:
     MapTileStorage *_tiles;
@@ -19,6 +24,7 @@ private:
     void _UnloadOldTiles(void);
     uint32 _mapid;
     uint32 _gridx,_gridy;
+    bool _mapsLoaded;
 };
 
 #endif

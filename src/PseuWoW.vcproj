@@ -415,6 +415,12 @@
 					RelativePath=".\Client\Gui\DrawObjMgr.h">
 				</File>
 				<File
+					RelativePath=".\Client\Gui\MCamera.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\MInput.h">
+				</File>
+				<File
 					RelativePath=".\Client\Gui\PseuGUI.cpp">
 				</File>
 				<File
@@ -431,6 +437,15 @@
 				</File>
 				<File
 					RelativePath=".\Client\Gui\SceneWorld.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\ShTlTerrainSceneNode.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\ShTlTerrainSceneNode.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\TlTMesh.h">
 				</File>
 			</Filter>
 		</Filter>

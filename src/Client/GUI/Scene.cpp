@@ -12,7 +12,20 @@ Scene::Scene(PseuGUI *g)
     guienv = gui->_guienv;
 }
 
-void Scene::Draw(void)
+void Scene::OnDraw(void)
 {
     device->yield();
+}
+
+void Scene::OnDelete(void)
+{
+}
+
+void Scene::OnUpdate(f32)
+{
+}
+
+Scene::~Scene()
+{
+    DEBUG(logdebug("Scene::~Scene()"));
 }

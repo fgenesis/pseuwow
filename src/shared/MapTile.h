@@ -31,6 +31,7 @@ public:
     void ImportFromADT(ADTFile*);
     float GetZ(float,float);
     void DebugDumpToFile(void);
+    inline MapChunk *GetChunk(uint32 x, uint32 y) { return &_chunks[x * 16 + y]; }
 
 private:
     MapChunk _chunks[256]; // 16x16

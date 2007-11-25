@@ -7,6 +7,7 @@ MapMgr::MapMgr()
 {
     _tiles = new MapTileStorage();
     _gridx = _gridy = _mapid = (-1);
+    _mapsLoaded = false;
 }
 
 MapMgr::~MapMgr()
@@ -33,8 +34,8 @@ void MapMgr::Update(float x, float y, uint32 m)
         _gridx = _gridy = (-1); // must load tiles now
     }
     uint32 xg,yg; // MapTile IDs. Range 0..64
-    xg = (uint32)( (ZEROPOINT - x) / TILESIZE);
-    yg = (uint32)( (ZEROPOINT - y) / TILESIZE);
+    xg = GetGridCoord(x);
+    yg = GetGridCoord(y);
     if(xg != _gridx || yg != _gridy)
     {
         _LoadNearTiles(xg,yg,m);
@@ -47,6 +48,7 @@ void MapMgr::Update(float x, float y, uint32 m)
 
 void MapMgr::Flush(void)
 {
+    _mapsLoaded = false;
     for(uint32 i = 0; i < 4096; i++)
         _tiles->UnloadMapTile(i);
     logdebug("MAPMGR: Flushed all maps");
@@ -62,6 +64,7 @@ void MapMgr::_LoadNearTiles(uint32 gx, uint32 gy, uint32 m)
             _LoadTile(h,v,m);
         }
     }
+    _mapsLoaded = true;
 }
 
 void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
@@ -115,11 +118,33 @@ void MapMgr::_UnloadOldTiles(void)
     }
 }
 
+// Using forceLoad is VERY ineffective here, because the tile is removed again after the next Update() call!
+MapTile *MapMgr::GetTile(uint32 xg, uint32 yg, bool forceLoad)
+{
+    MapTile *tile = _tiles->GetTile(xg,yg);
+    if(!tile)
+    {
+        _LoadTile(xg,yg,_mapid);
+        tile = _tiles->GetTile(xg,yg);
+    }
+    return tile;
+}
+
+MapTile *MapMgr::GetCurrentTile(void)
+{
+    return GetTile(_gridx,_gridy);
+}
+
+uint32 MapMgr::GetGridCoord(float f)
+{
+    return (ZEROPOINT - f) / TILESIZE;
+}
+
 float MapMgr::GetZ(float x, float y)
 {
     uint32 xg,yg; // MapTile IDs. Range 0..64
-    xg = (uint32)( (ZEROPOINT - x) / TILESIZE);
-    yg = (uint32)( (ZEROPOINT - y) / TILESIZE);
+    xg = GetGridCoord(x);
+    yg = GetGridCoord(y);
     MapTile *tile = _tiles->GetTile(xg,yg);
     if(tile)
     {
@@ -133,7 +158,4 @@ float MapMgr::GetZ(float x, float y)
     logerror("MapMgr::GetZ() called for not loaded MapTile (%u, %u) for (%f, %f)",xg,yg,x,y);
     return 0;
 }
-
-
-
  

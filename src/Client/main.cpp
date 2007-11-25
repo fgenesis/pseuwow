@@ -1,6 +1,9 @@
+#include <new.h>
+
 #include "common.h"
 #include "main.h"
 #include "PseuWoW.h"
+
 
 std::list<PseuInstanceRunnable*> instanceList; // TODO: move this to a "Master" class later
 
@@ -68,12 +71,20 @@ void abortproc(void)
     }
 }
 
+void _new_handler(void)
+{
+    logcritical("ERROR: Out of memory!");
+    throw;
+}
+
 int main(int argc, char* argv[]) {
     try 
     {
+        set_new_handler(_new_handler);
         _log_setcolor(true,LGREEN);
         printf("+----------------------------------+\n"
                "| (C) 2006,2007 Snowstorm Software |\n"
+               "|  http://www.mangosclient.org     |\n"
                "+----------------------------------+\n");
         _log_resetcolor(true);
         
