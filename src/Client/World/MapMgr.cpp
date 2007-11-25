@@ -135,6 +135,11 @@ MapTile *MapMgr::GetCurrentTile(void)
     return GetTile(_gridx,_gridy);
 }
 
+MapTile *MapMgr::GetNearTile(int32 xoffs, int32 yoffs)
+{
+    return GetTile(_gridx + xoffs, _gridy + yoffs);
+}
+
 uint32 MapMgr::GetGridCoord(float f)
 {
     return (ZEROPOINT - f) / TILESIZE;

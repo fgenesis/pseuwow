@@ -2,7 +2,6 @@
 #include "MapTile.h"
 #include "log.h"
 
-
 MapTile::MapTile()
 {
 }

@@ -11,13 +11,14 @@
 #include "World.h"
 #include <sstream>
 
+
 SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 {
     DEBUG(logdebug("SceneWorld: Initializing..."));
 
-    s32 mapsize = 9 * 16; // 9 height floats in 16 chunks per tile per axis
+    s32 mapsize = 9 * 16 * 3; // 9 height floats in 16 chunks per tile per axis in 3 MapTiles
     s32 tilesize = UNITSIZE;
-    s32 meshsize = CHUNKSIZE;
+    s32 meshsize = CHUNKSIZE*3;
     vector3df terrainPos(0.0f, 0.0f, 0.0f); // TODO: use PseuWoW's world coords here?
 
     eventrecv = new MyEventReceiver();
@@ -60,35 +61,45 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     // something is not good here. we have terrain, but the chunks are read incorrectly.
     // need to find out where which formula is wrong
-    // the current terrain renderer code is just a test to see if ADT files are read correctly. apparantly not :D
-    MapTile *maptile = mapmgr->GetCurrentTile();
-    if(maptile)
+    // the current terrain renderer code is just a test to see if ADT files are read correctly.
+    // EDIT: it seems to display fine now, but i am still not sure if the way it is done is correct...
+    mutex.acquire(); // prevent other threads deleting the maptile
+    for(s32 tiley = 0; tiley < 3; tiley++)
     {
-        // apply map height data
-        for(uint32 chx = 0; chx < 16; chx++)
-            for(uint32 chy = 0; chy < 16; chy++)
+        for(s32 tilex = 0; tilex < 3; tilex++)
+        {
+            MapTile *maptile = mapmgr->GetNearTile(tilex - 1, tiley - 1);
+            if(maptile)
             {
-                MapChunk *chunk = maptile->GetChunk(chx, chy);
-                std::stringstream ss;
-                DEBUG(logdebug("Apply MapChunk (%u, %u)",chx,chy));
-                for(uint32 hy = 0; hy < 9; hy++)
-                {
-                    for(uint32 hx = 0; hx < 9; hx++)
+                // apply map height data
+                for(uint32 chy = 0; chy < 16; chy++)
+                    for(uint32 chx = 0; chx < 16; chx++)
                     {
-                        f32 h = chunk->hmap_rough[hy * 9 + hx];
-                        ss.precision(3);
-                        ss << h << '\t';
-                        terrain->setHeight(9 * chx + hx, 9 * chy + hy, h);
+                        MapChunk *chunk = maptile->GetChunk(chx, chy);
+                        std::stringstream ss;
+                        DEBUG(logdebug("Apply MapChunk (%u, %u)",chx,chy));
+                        for(uint32 hy = 0; hy < 9; hy++)
+                        {
+                            for(uint32 hx = 0; hx < 9; hx++)
+                            {
+                                f32 h = chunk->hmap_rough[hx * 9 + hy] + chunk->baseheight; // not sure if hx and hy are used correctly here
+                                h *= -1; // as suggested by bLuma
+                                ss.precision(3);
+                                ss << h << '\t';
+                                terrain->setHeight((144 * tiley) + (9 * chx) + hx, (144  * tilex) + (9 * chy) + hy, h);
+                            }
+                            ss << "\n";
+                        }
+                        //DEBUG(logdebug("\n%s\n",ss.str().c_str()));
                     }
-                    ss << "\n";
-                }
-                DEBUG(logdebug("\n%s\n",ss.str().c_str()));
             }
+            else
+            {
+                logerror("SceneWorld: MapTile not loaded, can't apply heightmap!");
+            }
+        }
     }
-    else
-    {
-        logerror("SceneWorld: MapTile not loaded, can't apply heightmap!");
-    }
+    mutex.release();
 
     terrain->smoothNormals();
 
