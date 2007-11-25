@@ -15,6 +15,7 @@ public:
     uint32 GetGridCoord(float f);
     MapTile *GetTile(uint32 xg, uint32 yg, bool forceLoad = false);
     MapTile *GetCurrentTile(void);
+    MapTile *GetNearTile(int32, int32);
     inline bool Loaded(void) { return _mapsLoaded; }
 
 private:

@@ -17,6 +17,7 @@ class MapChunk
 public:
     float hmap_rough[9*9];
     float hmap_fine[8*8];
+    float hmap[17*17]; // combined rough and fine hmap
     float basex,basey,baseheight;
     //... TODO: implement the rest of this
 };

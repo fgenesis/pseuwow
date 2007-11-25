@@ -57,6 +57,7 @@ private:
     ShTlTerrainSceneNode *terrain;
     MCameraFPS *camera;
     MyEventReceiver *eventrecv;
+    ZThread::FastMutex mutex;
 };
 
 
