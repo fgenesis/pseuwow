@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8,00"
 	Name="StuffExtract"
-	ProjectGUID="{2176B5B1-ADA6-49D7-B70C-878651C15E91}"
+	ProjectGUID="{EFFE60F4-DA39-41E8-9E53-E462000A2D91}"
 	RootNamespace="StuffExtract"
 	>
 	<Platforms>

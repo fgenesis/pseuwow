@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="Irrlicht"
 	ProjectGUID="{E08E042A-6C45-411B-92BE-3CC31331019F}"
 	RootNamespace="Irrlicht"
@@ -16,13 +16,13 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\obj\IrrDebug"
-			IntermediateDirectory="..\obj\IrrDebug"
+			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="0"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -47,14 +47,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src\dep\include\zlib&quot;;&quot;$(SolutionDir)\src\dep\include\irrlicht&quot;;&quot;$(SolutionDir)\src\dep\include\DXSDK\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;IRRLICHT_EXPORTS;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
+				PreprocessorDefinitions="WIN32"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\..\obj\IrrDebug/Irrlicht.pch"
-				AssemblerListingLocation=".\..\obj\IrrDebug/"
-				ObjectFile=".\..\obj\IrrDebug/"
-				ProgramDataBaseFileName=".\..\obj\IrrDebug/"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -75,7 +75,8 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3dx8.lib"
 				OutputFile="$(SolutionDir)/src/dep/lib/debug/irrlicht.lib"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)/src/dep/lib/static&quot;"
+				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
+				IgnoreDefaultLibraryNames="libci.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -95,8 +96,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj\IrrRelease"
-			IntermediateDirectory="obj\IrrRelease"
+			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -129,21 +130,22 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src\dep\include\zlib&quot;;&quot;$(SolutionDir)\src\dep\include\irrlicht&quot;;&quot;$(SolutionDir)\src\dep\include\DXSDK\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;IRRLICHT_EXPORTS;_CRT_SECURE_NO_DEPRECATE"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
+				PreprocessorDefinitions="WIN32"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\..\obj\IrrRelease/Irrlicht.pch"
-				AssemblerListingLocation=".\..\obj\IrrRelease/"
-				ObjectFile=".\..\obj\IrrRelease/"
-				ProgramDataBaseFileName=".\..\obj\IrrRelease/"
+				EnableFunctionLevelLinking="false"
+				EnableEnhancedInstructionSet="0"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="0"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -160,7 +162,8 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3dx8.lib"
 				OutputFile="$(SolutionDir)/src/dep/lib/release/irrlicht.lib"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)/src/dep/lib/static&quot;"
+				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
+				IgnoreDefaultLibraryNames="libci.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -179,9 +182,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release - Fast FPU|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			Name="Relase - Fast FPU|Win32"
+			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -211,29 +214,27 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/QIfist /Oa&#x0D;&#x0A;"
 				Optimization="3"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="0"
+				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\src\dep\include\zlib&quot;;&quot;$(SolutionDir)\src\dep\include\irrlicht&quot;;&quot;$(SolutionDir)\src\dep\include\DXSDK\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;IRRLICHT_EXPORTS;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
+				PreprocessorDefinitions="WIN32"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
+				StructMemberAlignment="0"
 				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
-				RuntimeTypeInfo="false"
-				PrecompiledHeaderFile=".\..\obj\IrrRelease/Irrlicht.pch"
-				AssemblerListingLocation=".\..\obj\IrrRelease/"
-				ObjectFile=".\..\obj\IrrRelease/"
-				ProgramDataBaseFileName=".\..\obj\IrrRelease/"
+				TreatWChar_tAsBuiltInType="true"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="0"
 				CallingConvention="1"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -249,8 +250,96 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3dx8.lib"
-				OutputFile="$(SolutionDir)/src/dep/lib/dd/irrlicht.lib"
-				AdditionalLibraryDirectories="$(SolutionDir)/src/dep/lib/static"
+				IgnoreDefaultLibraryNames="libci.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release - Fast FPU DebugInfo|Win32"
+			OutputDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\Release/Irrlicht.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/QIfist"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				AdditionalIncludeDirectories="$(SolutionDir)\src\dep\include\zlib;$(SolutionDir)\src\dep\include\irrlicht;$(SolutionDir)\src\dep\include\DXSDK\include"
+				PreprocessorDefinitions="WIN32"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				StructMemberAlignment="3"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="0"
+				TreatWChar_tAsBuiltInType="true"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+				CallingConvention="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="3079"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3dx8.lib"
+				IgnoreDefaultLibraryNames="libci.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -395,7 +484,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\coreutil.h"
+					>
+				</File>
+				<File
 					RelativePath=".\..\..\include\dimension2d.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\fast_atof.h"
 					>
 				</File>
 				<File
@@ -527,6 +624,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\IAnimatedMeshMD3.h"
+					>
+				</File>
+				<File
 					RelativePath=".\..\..\include\IAnimatedMeshMS3D.h"
 					>
 				</File>
@@ -596,6 +697,10 @@
 				</File>
 				<File
 					RelativePath=".\..\..\include\IQ3LevelMesh.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IQ3Shader.h"
 					>
 				</File>
 				<File
@@ -699,6 +804,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\IGUIColorSelectDialog.h"
+					>
+				</File>
+				<File
 					RelativePath=".\..\..\include\IGUIComboBox.h"
 					>
 				</File>
@@ -712,10 +821,6 @@
 				</File>
 				<File
 					RelativePath=".\..\..\include\IGUIElement.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\IGUIElementFactory.h"
 					>
 				</File>
 				<File
@@ -812,6 +917,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CGUIColorSelectDialog.h"
+				>
+			</File>
+			<File
 				RelativePath="CGUIComboBox.cpp"
 				>
 			</File>
@@ -864,7 +973,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CGUIImage.h"
+				RelativePath=".\CGUIImage.H"
 				>
 			</File>
 			<File
@@ -969,6 +1078,10 @@
 			</File>
 			<File
 				RelativePath=".\CGUIWindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GUIIcons.h"
 				>
 			</File>
 		</Filter>
@@ -1203,54 +1316,6 @@
 					>
 				</File>
 				<File
-					RelativePath="CImageLoaderBMP.cpp"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderBMP.h"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderJPG.cpp"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderJPG.h"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderPCX.cpp"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderPCX.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CImageLoaderPNG.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CImageLoaderPNG.h"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderPSD.cpp"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderPSD.h"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderTGA.cpp"
-					>
-				</File>
-				<File
-					RelativePath="CImageLoaderTGA.h"
-					>
-				</File>
-				<File
 					RelativePath=".\CNullDriver.cpp"
 					>
 				</File>
@@ -1319,6 +1384,58 @@
 					</File>
 					<File
 						RelativePath=".\CImageWriterTGA.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Loader"
+					>
+					<File
+						RelativePath="CImageLoaderBMP.cpp"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderBMP.h"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderJPG.cpp"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderJPG.h"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderPCX.cpp"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderPCX.h"
+						>
+					</File>
+					<File
+						RelativePath=".\CImageLoaderPNG.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\CImageLoaderPNG.h"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderPSD.cpp"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderPSD.h"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderTGA.cpp"
+						>
+					</File>
+					<File
+						RelativePath="CImageLoaderTGA.h"
 						>
 					</File>
 				</Filter>
@@ -1984,7 +2101,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="animators"
+				Name="sceneNodes animators"
 				>
 				<File
 					RelativePath="CSceneNodeAnimatorCollisionResponse.cpp"
@@ -2040,6 +2157,110 @@
 				</File>
 				<File
 					RelativePath=".\CSceneNodeAnimatorTexture.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="io impl"
+				>
+				<File
+					RelativePath=".\CAttributeImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CAttributes.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CAttributes.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CFileList.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFileList.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CFileSystem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFileSystem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CLimitReadFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CLimitReadFile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CMemoryReadFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CMemoryReadFile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CPakReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CPakReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CReadFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CReadFile.h"
+					>
+				</File>
+				<File
+					RelativePath="CWriteFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath="CWriteFile.h"
+					>
+				</File>
+				<File
+					RelativePath="CXMLReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="CXMLReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CXMLReaderImpl.h"
+					>
+				</File>
+				<File
+					RelativePath="CXMLWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath="CXMLWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CZipReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CZipReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\irrXML.cpp"
 					>
 				</File>
 			</Filter>

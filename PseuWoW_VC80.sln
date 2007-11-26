@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PseuWoW", "src\PseuWoW_VC80.vcproj", "{EFFE60F4-DA39-41E8-9E53-E462000A2D91}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PseuWoW_VC80", "src\PseuWoW_VC80.vcproj", "{EFFE60F4-DA39-41E8-9E53-E462000A2D91}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E08E042A-6C45-411B-92BE-3CC31331019F} = {E08E042A-6C45-411B-92BE-3CC31331019F}
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
@@ -23,7 +23,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Irrlicht", "src\dep\src\irr
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StuffExtract", "src\tools\stuffextract_VC80.vcproj", "{2176B5B1-ADA6-49D7-B70C-878651C15E91}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StuffExtract", "src\tools\stuffextract_VC80.vcproj", "{FBBE6172-CCDE-4ADD-94A6-55C91D700DB6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
 		{F548FC51-24A4-45FF-A381-BEBC39F18270} = {F548FC51-24A4-45FF-A381-BEBC39F18270}
@@ -77,10 +77,10 @@ Global
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - Fast FPU DebugInfo|Win32.Build.0 = Release - Fast FPU DebugInfo|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release|Win32.ActiveCfg = Release|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release|Win32.Build.0 = Release|Win32
-		{2176B5B1-ADA6-49D7-B70C-878651C15E91}.Debug|Win32.ActiveCfg = Debug|Win32
-		{2176B5B1-ADA6-49D7-B70C-878651C15E91}.Relase - Fast FPU|Win32.ActiveCfg = Release|Win32
-		{2176B5B1-ADA6-49D7-B70C-878651C15E91}.Release - Fast FPU DebugInfo|Win32.ActiveCfg = Release|Win32
-		{2176B5B1-ADA6-49D7-B70C-878651C15E91}.Release|Win32.ActiveCfg = Release|Win32
+		{FBBE6172-CCDE-4ADD-94A6-55C91D700DB6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FBBE6172-CCDE-4ADD-94A6-55C91D700DB6}.Relase - Fast FPU|Win32.ActiveCfg = Release|Win32
+		{FBBE6172-CCDE-4ADD-94A6-55C91D700DB6}.Release - Fast FPU DebugInfo|Win32.ActiveCfg = Release|Win32
+		{FBBE6172-CCDE-4ADD-94A6-55C91D700DB6}.Release|Win32.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
