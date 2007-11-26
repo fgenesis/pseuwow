@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="zlib"
 	ProjectGUID="{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}"
 	RootNamespace="zlib"

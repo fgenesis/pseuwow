@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="PseuWoW"
 	ProjectGUID="{EFFE60F4-DA39-41E8-9E53-E462000A2D91}"
 	RootNamespace="PseuWoW"
@@ -174,7 +174,7 @@
 				OutputFile="$(OutDir)/$(InputName)_debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(SolutionDir)\src\dep\lib"
 				IgnoreDefaultLibraryNames="libci.lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/PseuWoW.pdb"
@@ -244,6 +244,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Client\log.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Client\log.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Client\main.cpp"
 				>
 			</File>
@@ -298,10 +306,6 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Client\DefScript\DefScriptBBFunctions.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\Client\DefScript\DefScriptDefines.h"
 					>
 				</File>
@@ -330,7 +334,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Client\DefScript\TypeStorage.h"
+					RelativePath=".\Client\DefScript\ListStorage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\DefScript\ListStorage.h"
 					>
 				</File>
 				<File
@@ -554,47 +562,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Client\Gui\MCamera.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\MInput.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Client\Gui\PseuGUI.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\Client\Gui\PseuGUI.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\Scene.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\Scene.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\SceneGuiStart.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\SceneWorld.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\ShTlTerrainSceneNode.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\ShTlTerrainSceneNode.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Client\Gui\TlTMesh.h"
 					>
 				</File>
 			</Filter>
