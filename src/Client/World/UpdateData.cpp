@@ -79,6 +79,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                     {
                         logdev("- already exists, deleting old , creating new object");
                         objmgr.Remove(uguid);
+                        // do not call script here, since the object does not really get deleted
                     }
                     else
                     {
@@ -157,11 +158,18 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 // ...and ask the server for eventually missing data.
                 _QueryObjectInfo(uguid);
 
+
+                // call script "_OnObjectCreate"
+                if(GetInstance()->GetScripts()->ScriptExists("_onobjectcreate"))
+                {
+                    CmdSet Set;
+                    Set.defaultarg = toString(uguid);
+                    Set.arg[0] = toString(objtypeid);
+                    GetInstance()->GetScripts()->RunScript("_onobjectcreate", &Set);
+                }
+
                 // if our own character got finally created, we have successfully entered the world,
                 // and should have gotten all info about our char already.
-                // TODO: make called script function like "_enterworld"
-                //if(uguid==GetGuid())
-                //    _OnCharCreate();
             }
             break;
 
@@ -172,6 +180,16 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 {
                     uguid = recvPacket.GetPackedGuid(); // not 100% sure if this is correct
                     logdebug("GUID "I64FMT" out of range",uguid);
+
+                    // call script just before object removal
+                    if(GetInstance()->GetScripts()->ScriptExists("_onobjectdelete"))
+                    {
+                        CmdSet Set;
+                        Set.defaultarg = toString(uguid);
+                        Set.arg[0] = "true"; // out of range = true
+                        GetInstance()->GetScripts()->RunScript("_onobjectdelete", &Set);
+                    }
+
                     objmgr.Remove(uguid);
                 }
             }

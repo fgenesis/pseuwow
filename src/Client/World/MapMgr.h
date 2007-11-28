@@ -17,6 +17,7 @@ public:
     MapTile *GetCurrentTile(void);
     MapTile *GetNearTile(int32, int32);
     inline bool Loaded(void) { return _mapsLoaded; }
+    uint32 GetLoadedMapsCount(void);
 
 private:
     MapTileStorage *_tiles;

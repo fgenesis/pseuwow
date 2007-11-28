@@ -145,6 +145,19 @@ uint32 MapMgr::GetGridCoord(float f)
     return (ZEROPOINT - f) / TILESIZE;
 }
 
+uint32 MapMgr::GetLoadedMapsCount(void)
+{
+    uint32 counter = 0;
+    for(uint32 i = 0; i < 4096; i++)
+    {
+        if(_tiles->GetTile(i))
+        {
+            counter++;
+        }
+    }
+    return counter;
+}
+
 float MapMgr::GetZ(float x, float y)
 {
     uint32 xg,yg; // MapTile IDs. Range 0..64

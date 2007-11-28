@@ -120,6 +120,7 @@ public:
 	bool LoadScriptFromFile(std::string);
     DefReturnResult RunScript(std::string name,CmdSet* pSet,std::string override_name="");
     bool BoolRunScript(std::string,CmdSet*);
+    bool RunScriptIfExists(std::string name, CmdSet *pSet = NULL);
 	unsigned int GetScriptID(std::string);
 	DefReturnResult RunSingleLine(std::string);
 	bool ScriptExists(std::string);

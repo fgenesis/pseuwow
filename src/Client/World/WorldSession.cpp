@@ -254,7 +254,7 @@ void WorldSession::_OnEnterWorld(void)
     {
         _logged=true;
         GetInstance()->GetScripts()->variables.Set("@inworld","true");
-        GetInstance()->GetScripts()->RunScript("_enterworld",NULL);
+        GetInstance()->GetScripts()->RunScriptIfExists("_enterworld");
 
     }
 }
@@ -264,7 +264,7 @@ void WorldSession::_OnLeaveWorld(void)
     if(InWorld())
     {
         _logged=false;
-        GetInstance()->GetScripts()->RunScript("_leaveworld",NULL);
+        GetInstance()->GetScripts()->RunScriptIfExists("_leaveworld");
         GetInstance()->GetScripts()->variables.Set("@inworld","false");
     }
 }
@@ -589,6 +589,8 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         }
 
     }
+
+    // TODO: remove this block soon, its obsoelete and has to be done via scripting!
     if(type==CHAT_MSG_WHISPER && (!isCmd) && target_guid!=GetGuid())
     {
         GetInstance()->GetScripts()->variables.Set("@thiswhisper_name",plrname);
@@ -729,6 +731,13 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     SendWorldPacket(response);
     if(_world)
         _world->UpdatePos(x,y);
+
+    if(GetInstance()->GetScripts()->ScriptExists("_onteleport"))
+    {
+        CmdSet Set;
+        Set.defaultarg = "false"; // teleported to other map = false
+        GetInstance()->GetScripts()->RunScriptIfExists("_onteleport");
+    }
 }
 
 void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
@@ -747,6 +756,13 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
         delete _world;
     _world = new World(this);
     _world->UpdatePos(x,y,mapid);
+
+    if(GetInstance()->GetScripts()->ScriptExists("_onteleport"))
+    {
+        CmdSet Set;
+        Set.defaultarg = "true"; // teleported to other map = false
+        GetInstance()->GetScripts()->RunScriptIfExists("_onteleport");
+    }
 }
 
 void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)

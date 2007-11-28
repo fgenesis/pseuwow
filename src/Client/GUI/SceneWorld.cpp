@@ -51,12 +51,28 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     MapMgr *mapmgr = g->GetInstance()->GetWSession()->GetWorld()->GetMapMgr();
 
+    if(!mapmgr)
+    {
+        logerror("SceneWorld: MapMgr not present, cant create World GUI. Switching back GUI to idle.");
+        g->SetSceneState(SCENESTATE_GUISTART);
+        return;
+    }
+
     // TODO: better to do this with some ZThread Condition or FastMutex, but dont know how to. help plz! [FG]
     if(!mapmgr->Loaded())
     {
         logdebug("SceneWorld: Waiting until maps are loaded...");
         while(!mapmgr->Loaded())
             device->sleep(50);
+    }
+
+    // TODO: as soon as WMO-only worlds are implemented, remove this!!
+    if(!mapmgr->GetLoadedMapsCount())
+    {
+        logerror("SceneWorld: Error: No maps loaded, not able to draw any terrain. Switching back GUI to idle.");
+        logerror("SceneWorld: Hint: Be sure you are not in an WMO-only world (e.g. human capital city or most instances)!");
+        g->SetSceneState(SCENESTATE_GUISTART);
+        return;
     }
 
     // something is not good here. we have terrain, but the chunks are read incorrectly.
@@ -76,19 +92,19 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
                     for(uint32 chx = 0; chx < 16; chx++)
                     {
                         MapChunk *chunk = maptile->GetChunk(chx, chy);
-                        std::stringstream ss;
-                        DEBUG(logdebug("Apply MapChunk (%u, %u)",chx,chy));
+                        //std::stringstream ss;
+                        //DEBUG(logdebug("Apply MapChunk (%u, %u)",chx,chy));
                         for(uint32 hy = 0; hy < 9; hy++)
                         {
                             for(uint32 hx = 0; hx < 9; hx++)
                             {
                                 f32 h = chunk->hmap_rough[hx * 9 + hy] + chunk->baseheight; // not sure if hx and hy are used correctly here
                                 h *= -1; // as suggested by bLuma
-                                ss.precision(3);
-                                ss << h << '\t';
+                                //ss.precision(3);
+                                //ss << h << '\t';
                                 terrain->setHeight((144 * tiley) + (9 * chx) + hx, (144  * tilex) + (9 * chy) + hy, h);
                             }
-                            ss << "\n";
+                            //ss << "\n";
                         }
                         //DEBUG(logdebug("\n%s\n",ss.str().c_str()));
                     }
