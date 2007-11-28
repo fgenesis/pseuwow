@@ -1163,3 +1163,12 @@ std::string DefScriptPackage::GetUnescapedVar(std::string n)
 {
     return UnescapeString(variables.Get(n));
 }
+
+bool DefScriptPackage::RunScriptIfExists(std::string name,CmdSet *pSet)
+{
+    if(ScriptExists(name))
+    {
+        return BoolRunScript(name,pSet);
+    }
+    return false;
+}

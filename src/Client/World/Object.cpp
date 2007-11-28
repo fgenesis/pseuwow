@@ -62,6 +62,16 @@ void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
     uint64 guid;
     recvPacket >> guid;
     logdebug("Destroy Object "I64FMT,guid);
+
+    // call script just before object removal
+    if(GetInstance()->GetScripts()->ScriptExists("_onobjectdelete"))
+    {
+        CmdSet Set;
+        Set.defaultarg = toString(guid);
+        Set.arg[0] = "false"; // out of range = false
+        GetInstance()->GetScripts()->RunScript("_onobjectdelete", &Set);
+    }
+
     objmgr.Remove(guid);
 }
 
