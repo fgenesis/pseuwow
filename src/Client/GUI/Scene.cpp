@@ -21,7 +21,7 @@ void Scene::OnDelete(void)
 {
 }
 
-void Scene::OnUpdate(f32)
+void Scene::OnUpdate(s32)
 {
 }
 

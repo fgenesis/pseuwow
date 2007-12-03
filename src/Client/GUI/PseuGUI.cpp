@@ -162,7 +162,7 @@ void PseuGUI::Run(void)
     while(_device && _device->run() && !_mustdie)
     {
         _lastpasstime = _passtime;
-        _passtime = _timer->getTime() / 1000.0f;
+        _passtime = _timer->getTime();
         _passtimediff = _passtime - _lastpasstime;
         // _HandleWindowResize(); // not yet used; doesnt work
 

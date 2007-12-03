@@ -92,7 +92,7 @@ private:
     SceneState _scenestate, _scenestate_new;
     Scene *_scene;
     irr::ITimer *_timer;
-    float _passtime, _lastpasstime, _passtimediff;
+    uint32 _passtime, _lastpasstime, _passtimediff;
     irr::core::dimension2d<irr::s32> _screendimension;
 
 };

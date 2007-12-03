@@ -87,7 +87,8 @@ public:
     inline void SetError(void) { _error = true; }
     SCPDatabaseMgr dbmgr;
 
-    bool Init();
+    bool Init(void);
+    bool InitGUI(void);
     void SaveAllCache(void);
     inline void Stop(void) { _stop = true; }
     inline bool Stopped(void) { return _stop; }
@@ -108,7 +109,7 @@ private:
     WorldSession *_wsession;
     PseuInstanceConf *_conf;
     DefScriptPackage *_scp;
-    std::string _confdir,_scpdir; // _scpdir is the scipts dir, and NOT where SCP files are stored!!
+    std::string _confdir,_scpdir; // _scpdir is the scripts dir, and NOT where SCP files are stored!!
     bool _initialized;
     bool _stop,_fastquit;
     bool _startrealm;
