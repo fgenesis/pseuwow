@@ -14,9 +14,21 @@ World::World(WorldSession *s)
 
 World::~World()
 {
+    Clear();
     if(_mapmgr)
         delete _mapmgr;
 }
+
+// called on SMSG_NEW_WORLD
+void World::Clear(void)
+{
+    if(_mapmgr)
+    {
+        _mapmgr->Flush();
+    }
+    // TODO: clear WorldStates (-> SMSG_INIT_WORLD_STATES ?) and everything else thats required
+}
+
 
 void World::Update(void)
 {

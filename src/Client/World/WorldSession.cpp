@@ -29,7 +29,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _socket=NULL;
     _myGUID=0; // i dont have a guid yet
     _channels = new Channel(this);
-    _world = NULL;
+    _world = new World(this);
     _sh.SetAutoCloseSockets(false);
     objmgr.SetInstance(in);
     //...
@@ -752,10 +752,11 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     if(GetMyChar())
         GetMyChar()->ClearSpells(); // will be resent by server
     // TODO: clear action buttons
-    if(_world)
-        delete _world;
-    _world = new World(this);
+
+    // clear world data and load required maps
+    _world->Clear();
     _world->UpdatePos(x,y,mapid);
+    _world->Update();
 
     if(GetInstance()->GetScripts()->ScriptExists("_onteleport"))
     {
@@ -948,17 +949,14 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
     float x,y,z,o;
     uint32 m;
     recvPacket >> m >> x >> y >> z >> o;
-    // for now, init the world as soon as the server confirmed that we are where we are.
     logdebug("LoginVerifyWorld: map=%u x=%f y=%f z=%f o=%f",m,x,y,z,o);
     _OnEnterWorld();
-    if(_world)
-        delete _world;
-    _world = new World(this);
+    // update the world as soon as the server confirmed that we are where we are.
     _world->UpdatePos(x,y,m);
+    _world->Update();
 
     // temp. solution to test terrain rendering
-    PseuGUI *gui = GetInstance()->GetGUI();
-    if(gui)
+    if(PseuGUI *gui = GetInstance()->GetGUI())
     {
         gui->SetSceneState(SCENESTATE_WORLD);
     }

@@ -18,6 +18,9 @@ public:
     MapTile *GetNearTile(int32, int32);
     inline bool Loaded(void) { return _mapsLoaded; }
     uint32 GetLoadedMapsCount(void);
+    inline uint32 GetGridX(void) { return _gridx; }
+    inline uint32 GetGridY(void) { return _gridy; }
+
 
 private:
     MapTileStorage *_tiles;

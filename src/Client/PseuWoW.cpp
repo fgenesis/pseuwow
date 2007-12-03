@@ -134,31 +134,10 @@ bool PseuInstance::Init(void)
     // TODO: find a better loaction where to place this block!
     if(GetConf()->enablegui)
     {
-        uint16 x,y,depth;
-        uint8 driver;
-        bool shadows,vsync,win;
-
-        driver=(uint8)atoi(GetScripts()->variables.Get("GUI::DRIVER").c_str());
-        vsync=(bool)atoi(GetScripts()->variables.Get("GUI::VSYNC").c_str());
-        depth=(uint8)atoi(GetScripts()->variables.Get("GUI::DEPTH").c_str());
-        x=(uint16)atoi(GetScripts()->variables.Get("GUI::RESX").c_str());
-        y=(uint16)atoi(GetScripts()->variables.Get("GUI::RESY").c_str());
-        win=(bool)atoi(GetScripts()->variables.Get("GUI::WINDOWED").c_str());
-        shadows=(bool)atoi(GetScripts()->variables.Get("GUI::SHADOWS").c_str());
-        log("GUI settings: driver=%u, depth=%u, res=%ux%u, windowed=%u, shadows=%u",driver,depth,x,y,win,shadows);
-        if(x>0 && y>0 && (depth==16 || depth==32) && driver>0 && driver<=5)
-        {
-            PseuGUIRunnable *rgui = new PseuGUIRunnable();
-            _gui = rgui->GetGUI();
-            _gui->SetInstance(this);
-            _gui->SetDriver(driver);
-            _gui->SetResolution(x,y,depth);
-            _gui->SetVSync(vsync);
-            _gui->UseShadows(shadows);
-            _guithread = new ZThread::Thread(rgui);
-        }
+        if(InitGUI())
+            logdebug("GUI: Init successful.");
         else
-            logerror("GUI: incorrect settings!");
+            logerror("GUI: Init failed!");
     }
 
     if(GetConf()->rmcontrolport)
@@ -182,6 +161,42 @@ bool PseuInstance::Init(void)
     log("Init complete.\n");
     _initialized=true;
     return true;
+}
+
+bool PseuInstance::InitGUI(void)
+{
+    if(GetGUI())
+    {
+        logerror("GUI: Aborting init, GUI already exists!");
+        return false;
+    }
+    uint16 x,y,depth;
+    uint8 driver;
+    bool shadows,vsync,win;
+
+    driver=(uint8)atoi(GetScripts()->variables.Get("GUI::DRIVER").c_str());
+    vsync=(bool)atoi(GetScripts()->variables.Get("GUI::VSYNC").c_str());
+    depth=(uint8)atoi(GetScripts()->variables.Get("GUI::DEPTH").c_str());
+    x=(uint16)atoi(GetScripts()->variables.Get("GUI::RESX").c_str());
+    y=(uint16)atoi(GetScripts()->variables.Get("GUI::RESY").c_str());
+    win=(bool)atoi(GetScripts()->variables.Get("GUI::WINDOWED").c_str());
+    shadows=(bool)atoi(GetScripts()->variables.Get("GUI::SHADOWS").c_str());
+    log("GUI settings: driver=%u, depth=%u, res=%ux%u, windowed=%u, shadows=%u",driver,depth,x,y,win,shadows);
+    if(x>0 && y>0 && (depth==16 || depth==32) && driver>0 && driver<=5)
+    {
+        PseuGUIRunnable *rgui = new PseuGUIRunnable();
+        _gui = rgui->GetGUI();
+        _gui->SetInstance(this);
+        _gui->SetDriver(driver);
+        _gui->SetResolution(x,y,depth);
+        _gui->SetVSync(vsync);
+        _gui->UseShadows(shadows);
+        _guithread = new ZThread::Thread(rgui);
+        return true;
+    }
+    else
+        logerror("GUI: incorrect settings!");
+    return false;
 }
 
 void PseuInstance::Run(void)

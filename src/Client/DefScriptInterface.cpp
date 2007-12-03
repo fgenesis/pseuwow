@@ -55,6 +55,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("getopcodeid",&DefScriptPackage::SCGetOpcodeID);
     AddFunc("bbgetpackedguid",&DefScriptPackage::SCBBGetPackedGuid);
     AddFunc("bbputpackedguid",&DefScriptPackage::SCBBPutPackedGuid);
+    AddFunc("gui",&DefScriptPackage::SCGui);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -956,6 +957,24 @@ DefReturnResult DefScriptPackage::SCBBPutPackedGuid(CmdSet &Set)
 
     return true;
 }
+
+DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
+{
+    PseuInstance *ins = (PseuInstance*)parentMethod;
+    if(ins->InitGUI())
+        logdebug("SCGui: gui created");
+    else
+    {
+        logerror("SCGui: failed");
+        return false;
+    }
+    while(!ins->GetGUI() && !ins->GetGUI()->IsInitialized())
+        Sleep(1);
+    ins->GetGUI()->SetSceneState(SCENESTATE_GUISTART);
+    // TODO: determine which SceneState to use here
+    return true;
+}
+    
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {
