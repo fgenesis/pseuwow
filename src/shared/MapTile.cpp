@@ -24,8 +24,8 @@ void MapTile::ImportFromADT(ADTFile *adt)
     for(uint32 ch=0; ch<CHUNKS_PER_TILE; ch++)
     {
         _chunks[ch].baseheight = adt->_chunks[ch].hdr.zbase; // ADT files store (x/z) as ground coords and (y) as the height!
-        _chunks[ch].basey = adt->_chunks[ch].hdr.xbase; // here converting it to (x/y) on ground and basehight as actual height.
-        _chunks[ch].basex = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
+        _chunks[ch].basex = adt->_chunks[ch].hdr.xbase; // here converting it to (x/y) on ground and basehight as actual height.
+        _chunks[ch].basey = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
         uint32 fcnt=0, rcnt=0;
         while(true) //9*9 + 8*8
         {
@@ -43,6 +43,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
             }
         }
     }
+    DEBUG(logdebug("MapTile first chunk base: h=%f x=%f y=%f",_chunks[0].baseheight,_chunks[0].basex,_chunks[0].basey));
 }
 
 void MapTileStorage::_DebugDump(void)
@@ -65,7 +66,7 @@ void MapTileStorage::_DebugDump(void)
 // TODO: use inner vertices also
 // TODO: interpolate values instead of choosing closest vertex
 // formula taken from BoogieBot, thx!
-float MapTile::GetZ(float x, float y)
+/*float MapTile::GetZ(float x, float y)
 {
     float bx,by;
     bx = _chunks[0].basex; // world base coords of tile
@@ -91,7 +92,7 @@ float MapTile::GetZ(float x, float y)
     float real_z = ch.hmap_rough[vy*9 + vx] + ch.baseheight;
 
     return real_z;
-}
+}*/
 
 void MapTile::DebugDumpToFile(void)
 {

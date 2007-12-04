@@ -4,6 +4,14 @@
 class MapTileStorage;
 class MapTile;
 
+struct GridCoordPair
+{
+    GridCoordPair() {}
+    GridCoordPair(uint32 xu, uint32 yu) { x = xu; y = yu; }
+    uint32 x;
+    uint32 y;
+};
+
 class MapMgr
 {
 public:
@@ -12,7 +20,8 @@ public:
     void Update(float,float,uint32);
     void Flush(void);
     float GetZ(float,float);
-    uint32 GetGridCoord(float f);
+    static uint32 GetGridCoord(float f);
+    static GridCoordPair GetTransformGridCoordPair(float x, float y);
     MapTile *GetTile(uint32 xg, uint32 yg, bool forceLoad = false);
     MapTile *GetCurrentTile(void);
     MapTile *GetNearTile(int32, int32);
@@ -20,7 +29,6 @@ public:
     uint32 GetLoadedMapsCount(void);
     inline uint32 GetGridX(void) { return _gridx; }
     inline uint32 GetGridY(void) { return _gridy; }
-
 
 private:
     MapTileStorage *_tiles;

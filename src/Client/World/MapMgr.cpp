@@ -33,14 +33,12 @@ void MapMgr::Update(float x, float y, uint32 m)
         _mapid = m;
         _gridx = _gridy = (-1); // must load tiles now
     }
-    uint32 xg,yg; // MapTile IDs. Range 0..64
-    xg = GetGridCoord(x);
-    yg = GetGridCoord(y);
-    if(xg != _gridx || yg != _gridy)
+    GridCoordPair gcoords = GetTransformGridCoordPair(x,y);
+    if(gcoords.x != _gridx || gcoords.y != _gridy)
     {
-        _LoadNearTiles(xg,yg,m);
-        _gridx = xg;
-        _gridy = yg;
+        _LoadNearTiles(gcoords.x,gcoords.y,m);
+        _gridx = gcoords.x;
+        _gridy = gcoords.y;
         _UnloadOldTiles();
     }
     _mapid = m;
@@ -145,6 +143,11 @@ uint32 MapMgr::GetGridCoord(float f)
     return (ZEROPOINT - f) / TILESIZE;
 }
 
+GridCoordPair MapMgr::GetTransformGridCoordPair(float x, float y)
+{
+    return GridCoordPair(GetGridCoord(y), GetGridCoord(x)); // i have no idea why they are swapping x and y map coords in ADT files...
+}
+
 uint32 MapMgr::GetLoadedMapsCount(void)
 {
     uint32 counter = 0;
@@ -160,10 +163,9 @@ uint32 MapMgr::GetLoadedMapsCount(void)
 
 float MapMgr::GetZ(float x, float y)
 {
-    uint32 xg,yg; // MapTile IDs. Range 0..64
-    xg = GetGridCoord(x);
-    yg = GetGridCoord(y);
-    MapTile *tile = _tiles->GetTile(xg,yg);
+    return -99999.0f; // for now return lowest possible number, GetZ() will be implemented correctly later
+/*    GridCoordPair gcoords = GetTransformGridCoordPair(x,y);
+    MapTile *tile = _tiles->GetTile(gcoords.x,gcoords.y);
     if(tile)
     {
 #ifdef _DEBUG
@@ -173,7 +175,7 @@ float MapMgr::GetZ(float x, float y)
         return tile->GetZ(x,y);
     }
 
-    logerror("MapMgr::GetZ() called for not loaded MapTile (%u, %u) for (%f, %f)",xg,yg,x,y);
-    return 0;
+    logerror("MapMgr::GetZ() called for not loaded MapTile (%u, %u) for (%f, %f)",gcoords.x,gcoords.y,x,y);
+    return 0;*/
 }
  

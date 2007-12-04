@@ -32,18 +32,21 @@ void World::Clear(void)
 
 void World::Update(void)
 {
+    if(_mapId == uint32(-1)) // to prevent unexpected behaviour
+        return;
+
     if(_mapmgr)
     {
         _mapmgr->Update(_x,_y,_mapId);
     }
 
     // some debug code for testing...
-    if(_mapmgr && _x != _lastx || _y != _lasty)
+    /*if(_mapmgr && _x != _lastx || _y != _lasty)
     {
         logdetail("WORLD: relocation, to x=%f y=%f, calculated z=%f",_x,_y,this->GetPosZ(_x,_y));
         _lastx = _x;
         _lasty = _y;
-    }
+    }*/
         
 }
 
