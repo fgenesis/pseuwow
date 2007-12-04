@@ -27,7 +27,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     mapmgr = wsession->GetWorld()->GetMapMgr();
 
     // TODO: hardcoded for now, make this adjustable later
-    float fogdist = 100;
+    float fogdist = 150;
 
     ILightSceneNode* light = smgr->addLightSceneNode(0, core::vector3df(0,0,0), SColorf(255, 255, 255, 255), 1000.0f);
     SLight ldata = light->getLightData();
@@ -118,6 +118,10 @@ void SceneWorld::OnUpdate(s32 timediff)
             {
                 if(date[i] == ':')
                     date[i] = '_';
+            }
+            if(date[date.length()-1] == ' ')
+            {
+                date = date.substr(0,date.length()-2);
             }
             driver->writeImageToFile(scrnshot, ("screenshots/PseuWoW " + date + ".jpg").c_str(), device->getTimer()->getRealTime());
             scrnshot->drop();
