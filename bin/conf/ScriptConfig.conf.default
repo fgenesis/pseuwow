@@ -15,6 +15,9 @@ cmdchar=.
 // MaNGOS does also accept ! as cmd identifier. put here all identifiers that can trigger a server command!
 other_cmd_chars=.!
 
+// Set to 1 if PseuWoW should exit after the GUI is closed (if there is a GUI)
+ExitOnGUIClose=0
+
 
 
 [#normal]

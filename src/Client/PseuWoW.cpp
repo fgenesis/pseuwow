@@ -371,7 +371,10 @@ void PseuInstance::Sleep(uint32 msecs)
 void PseuInstance::DeleteGUI(void)
 {
     _gui = NULL;
+    delete _guithread; // since it was allocated with new
     _guithread = NULL;
+    if(GetScripts()->ScriptExists("_onguiclose"))
+        AddCliCommand("_onguiclose"); // since this func is called from another thread, use threadsafe variant via CLI
 }
 
 PseuInstanceConf::PseuInstanceConf()
