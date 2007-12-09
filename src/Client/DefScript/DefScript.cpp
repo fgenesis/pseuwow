@@ -943,6 +943,18 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
                     str=pSet->caller;
                 else if(subs=="n")
                     str="\n";
+                else if(subs=="clock")
+                {
+                    std::stringstream clock_s;
+                    clock_s << clock();
+                    str = clock_s.str();
+                }
+                else if(subs=="time")
+                {
+                    std::stringstream time_s;
+                    time_s << time(NULL);
+                    str = time_s.str();
+                }
                 else if(variables.Exists(vname))
                     str=variables.Get(vname);
                 else
