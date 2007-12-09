@@ -19,7 +19,6 @@ struct OpcodeHandler
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
-
 WorldSession::WorldSession(PseuInstance *in)
 {
     logdebug("-> Starting WorldSession 0x%X from instance 0x%X",this,in); // should never output a null ptr
@@ -32,6 +31,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _world = new World(this);
     _sh.SetAutoCloseSockets(false);
     objmgr.SetInstance(in);
+    _lag_ms = 0;
     //...
 
     DEBUG(logdebug("WorldSession 0x%X constructor finished",this));
@@ -113,76 +113,82 @@ void WorldSession::Update(void)
         }
     }
 
-    DefScriptPackage *sc = GetInstance()->GetScripts();
-
-    OpcodeHandler *table = _GetOpcodeHandlerTable();
-
-    uint16 hpos;
-    bool known=false;
-
+    // while there are packets on the queue, handle them
     while(pktQueue.size())
     {
-        WorldPacket *packet = pktQueue.next();
-
-        for (hpos = 0; table[hpos].handler != NULL; hpos++)
-        {
-            if (table[hpos].opcode == packet->GetOpcode())
-            {
-                known=true;
-                break;
-            }
-        }
-
-        bool hideOpcode = false;
-
-        // TODO: Maybe make table or something with all the frequently opcodes
-        if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
-        {
-            hideOpcode = true;
-        }
-
-        if( (known && GetInstance()->GetConf()->showopcodes==1)
-            || ((!known) && GetInstance()->GetConf()->showopcodes==2)
-            || (GetInstance()->GetConf()->showopcodes==3) )
-        {
-            if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode))
-                logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
-        }
-
-        try
-        {
-            // call the opcode handler
-            if(known)
-                (this->*table[hpos].handler)(*packet);
-
-            // if there is a script attached to that opcode, call it now.
-            // note: the pkt rpos needs to be reset in by the scripts!
-            std::string scname = "opcode::";
-            scname += stringToLower(GetOpcodeName(packet->GetOpcode()));
-            if(sc->ScriptExists(scname))
-            {
-                std::string pktname = "PACKET::";
-                pktname += GetOpcodeName(packet->GetOpcode());
-                GetInstance()->GetScripts()->bytebuffers.Assign(pktname,packet);
-                sc->RunScript(scname,NULL);
-                GetInstance()->GetScripts()->bytebuffers.Unlink(pktname);
-            }
-
-        }
-        catch (...)
-        {
-            logerror("Exception while handling opcode %u!",packet->GetOpcode());
-            logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
-        }
-
-        delete packet;
-        known=false;
+        HandleWorldPacket(pktQueue.next());
     }
+
+    // now check if there are packets that couldnt be handled earlier due to missing data
+    _HandleDelayedPackets();
 
     _DoTimedActions();
 
     if(_world)
         _world->Update();
+}
+
+// this func will delete the WorldPacket after it is handled!
+void WorldSession::HandleWorldPacket(WorldPacket *packet)
+{
+    static DefScriptPackage *sc = GetInstance()->GetScripts();
+    static OpcodeHandler *table = _GetOpcodeHandlerTable();
+
+    bool known = false;
+    uint16 hpos;
+
+    for (hpos = 0; table[hpos].handler != NULL; hpos++)
+    {
+        if (table[hpos].opcode == packet->GetOpcode())
+        {
+            known=true;
+            break;
+        }
+    }
+
+    bool hideOpcode = false;
+
+    // TODO: Maybe make table or something with all the frequently opcodes
+    if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
+    {
+        hideOpcode = true;
+    }
+
+    if( (known && GetInstance()->GetConf()->showopcodes==1)
+        || ((!known) && GetInstance()->GetConf()->showopcodes==2)
+        || (GetInstance()->GetConf()->showopcodes==3) )
+    {
+        if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode))
+            logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
+    }
+
+    try
+    {
+        // call the opcode handler
+        if(known)
+            (this->*table[hpos].handler)(*packet);
+
+        // if there is a script attached to that opcode, call it now.
+        // note: the pkt rpos needs to be reset in by the scripts!
+        std::string scname = "opcode::";
+        scname += stringToLower(GetOpcodeName(packet->GetOpcode()));
+        if(sc->ScriptExists(scname))
+        {
+            std::string pktname = "PACKET::";
+            pktname += GetOpcodeName(packet->GetOpcode());
+            GetInstance()->GetScripts()->bytebuffers.Assign(pktname,packet);
+            sc->RunScript(scname,NULL);
+            GetInstance()->GetScripts()->bytebuffers.Unlink(pktname);
+        }
+
+    }
+    catch (...)
+    {
+        logerror("Exception while handling opcode %u!",packet->GetOpcode());
+        logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
+    }
+
+    delete packet;
 }
 
 
@@ -242,6 +248,41 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
     };
     return table;
 }
+
+void WorldSession::_DelayWorldPacket(WorldPacket& pkt, uint32 ms)
+{
+    DEBUG(logdebug("DelayWorldPacket (%s, size: %u, ms: %u)",GetOpcodeName(pkt.GetOpcode()),pkt.size(),ms));
+    // need to copy the packet, because the current packet will be deleted after it got handled
+    WorldPacket *pktcopy = new WorldPacket(pkt.GetOpcode(),pkt.size());
+    pktcopy->append(pkt.contents(),pkt.size());
+    delayedPktQueue.push(DelayedWorldPacket(pktcopy,ms));
+    DEBUG(logdebug("-> WP ptr = 0x%X",pktcopy));
+}
+
+void WorldSession::_HandleDelayedPackets(void)
+{
+    if(delayedPktQueue.size())
+    {
+        DelayedPacketQueue copy(delayedPktQueue);
+        while(delayedPktQueue.size())
+            delayedPktQueue.pop(); // clear original, since it might be filled up by newly delayed packets, which would cause endless loop
+        while(copy.size())
+        {
+            DelayedWorldPacket d = copy.front();
+            copy.c.pop_front(); // remove packet from front, std::queue seems not to have a func for it
+            if(clock() >= d.when) // if its time to handle this packet, do so
+            {
+                DEBUG(logdebug("Handling delayed packet (%s [%u], size: %u, ptr: 0x%X)",GetOpcodeName(d.pkt->GetOpcode()),d.pkt->GetOpcode(),d.pkt->size(),d.pkt));
+                HandleWorldPacket(d.pkt);
+            }
+            else
+            {
+                delayedPktQueue.push(d); // and if not, put it again onto the queue
+            }
+        }
+    }
+}
+    
 
 void WorldSession::SetTarget(uint64 guid)
 {
@@ -482,7 +523,8 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         if(plrname.empty())
         {
             SendQueryPlayerName(source_guid);
-            plrname="Unknown Entity";
+            _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f); // guess time how long it will take until we got player name from the server
+            return; // handle later
         }
     }
     GetInstance()->GetScripts()->variables.Set("@thismsg_name",plrname);
@@ -668,8 +710,9 @@ void WorldSession::_HandlePongOpcode(WorldPacket& recvPacket)
 {
     uint32 pong;
     recvPacket >> pong;
+    _lag_ms = clock() - pong;
     if(GetInstance()->GetConf()->notifyping)
-        log("Recieved Ping reply: %u ms latency.",clock()-pong);
+        log("Recieved Ping reply: %u ms latency.", _lag_ms);
 }
 void WorldSession::_HandleTradeStatusOpcode(WorldPacket& recvPacket)
 {
@@ -964,7 +1007,7 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
 
 ByteBuffer& operator>>(ByteBuffer& bb, WhoListEntry& e)
 {
-    bb >> e.name >> e.level >> e.classId >> e.raceId, e.zoneId;
+    bb >> e.name >> e.gname >> e.level >> e.classId >> e.raceId >> e.zoneId;
     return bb;
 }
 
@@ -974,12 +1017,11 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
     recvPacket >> count >> unk;
 
     log("Got WHO-List, %u players.         (unk=%u)",count,unk);
-    WhoListEntry wle;
 
     if(count >= 1)
     {
-        log("     Name     |Level|  Class   |   Race   |    Zone");
-        log("--------------+-----+----------+----------+----------------");
+        log("     Name     |Level|  Class     |   Race       |    Zone; Guild");
+        log("--------------+-----+------------+--------------+----------------");
         if(count > 1)
         {
             _whoList.clear(); // need to clear current list only if requesting more then one player name
@@ -988,30 +1030,35 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
 
     for(uint32 i = 0; i < count; i++)
     {
+        WhoListEntry wle;
         recvPacket >> wle;
 
         _whoList.push_back(wle);
 
         // original WhoListEntry is saved, now do some formatting
-        while(wle.name.length() < 12)
-            wle.name += ' ';
+        while(wle.name.length() < 13)
+            wle.name.append(" ");
 
         SCPDatabaseMgr& db = GetInstance()->dbmgr;
-        std::string zonename = db.GetZoneName(wle.zoneId);
-        std::string classname = db.GetClassName_(wle.classId);
-        std::string racename = db.GetRaceName(wle.raceId);
+        char classname[20], racename[20];
+        std::string zonename;
+        memset(classname,0,sizeof(classname));
+        memset(racename,0,sizeof(racename));
+        zonename = db.GetZoneName(wle.zoneId);
+        strcpy(classname, db.GetClassName_(wle.classId).c_str());
+        strcpy(racename, db.GetRaceName(wle.raceId).c_str());
 
-        while(classname.length() < 8)
-            classname += ' ';
-        while(racename.length() < 8)
-            racename += ' ';
+        for(uint8 i = strlen(classname); strlen(classname) < 10; i++)
+            classname[i] = ' ';
+        for(uint8 i = strlen(racename); strlen(racename) < 12; i++)
+            racename[i] = ' ';
         char tmp[12];
         sprintf(tmp,"%u",wle.level);
         std::string lvl_str = tmp;
         while(lvl_str.length() < 3)
             lvl_str = " " + lvl_str;
 
-        log("%s | %s | %s | %s | %s", wle.name.c_str(), lvl_str.c_str(), classname.c_str(), racename.c_str(), zonename.c_str() );
+        log("%s | %s | %s | %s | %s; %s", wle.name.c_str(), lvl_str.c_str(), classname, racename, zonename.c_str(), wle.gname.c_str());
     }
 }
 

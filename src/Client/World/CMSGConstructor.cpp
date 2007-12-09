@@ -173,6 +173,8 @@ void WorldSession::SendWhoListRequest(uint32 minlvl, uint32 maxlvl, uint32 racem
     }
     else
         pkt << uint32(0);
+
+    SendWorldPacket(pkt);
 }
 
 
