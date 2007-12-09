@@ -1,6 +1,8 @@
 #ifndef _WORLDSESSION_H
 #define _WORLDSESSION_H
 
+#include <queue>
+
 #include "common.h"
 #include "PseuWoW.h"
 #include "Network/SocketHandler.h"
@@ -20,13 +22,23 @@ class World;
 struct WhoListEntry
 {
     std::string name;
+    std::string gname;
     uint32 level;
     uint32 classId;
     uint32 raceId;
     uint32 zoneId;
 };
 
+struct DelayedWorldPacket
+{
+    DelayedWorldPacket() { pkt = NULL; when = clock(); }
+    DelayedWorldPacket(WorldPacket *p, uint32 ms) { pkt = p; when = ms + clock(); }
+    WorldPacket *pkt;
+    clock_t when;
+};
+
 typedef std::vector<WhoListEntry> WhoList;
+typedef std::queue<DelayedWorldPacket> DelayedPacketQueue;
 
 class WorldSession
 {
@@ -35,23 +47,24 @@ public:
     ~WorldSession();
     void Init(void);
 
-    PseuInstance *GetInstance(void) { return _instance; }
-    SCPDatabaseMgr& GetDBMgr(void) { return GetInstance()->dbmgr; }
+    inline PseuInstance *GetInstance(void) { return _instance; }
+    inline SCPDatabaseMgr& GetDBMgr(void) { return GetInstance()->dbmgr; }
 
     void AddToPktQueue(WorldPacket *pkt);
     void Update(void);
     void Start(void);
-    bool MustDie(void) { return _mustdie; }
-    void SetMustDie(void) { _mustdie = true; }
+    inline bool MustDie(void) { return _mustdie; }
+    inline void SetMustDie(void) { _mustdie = true; }
     void SendWorldPacket(WorldPacket&);
-    bool InWorld(void) { return _logged; }
+    inline bool InWorld(void) { return _logged; }
+    inline uint32 GetLagMS(void) { return _lag_ms; }
 
     void SetTarget(uint64 guid);
-    uint64 GetTarget(void) { return GetMyChar()->GetTarget(); }
-    uint64 GetGuid(void) { return _myGUID; }
-    Channel *GetChannels(void) { return _channels; }
-    MyCharacter *GetMyChar(void) { ASSERT(_myGUID > 0); return (MyCharacter*)objmgr.GetObj(_myGUID); }
-    World *GetWorld(void) { return _world; }
+    inline uint64 GetTarget(void) { return GetMyChar() ? GetMyChar()->GetTarget() : 0; }
+    inline uint64 GetGuid(void) { return _myGUID; }
+    inline Channel *GetChannels(void) { return _channels; }
+    inline MyCharacter *GetMyChar(void) { ASSERT(_myGUID > 0); return (MyCharacter*)objmgr.GetObj(_myGUID); }
+    inline World *GetWorld(void) { return _world; }
 
 
     // CMSGConstructor
@@ -64,6 +77,7 @@ public:
     void SendCastSpell(uint32 spellid, bool nocheck=false);
     void SendWhoListRequest(uint32 minlvl=0, uint32 maxlvl=100, uint32 racemask=-1, uint32 classmask=-1, std::string name="", std::string guildname="", std::vector<uint32> *zonelist=NULL, std::vector<std::string> *strlist=NULL);
 
+    void HandleWorldPacket(WorldPacket*);
 
     PlayerNameCache plrNameCache;
     ObjMgr objmgr;
@@ -75,7 +89,9 @@ private:
     void _OnEnterWorld(void); // = login
     void _OnLeaveWorld(void); // = logout
     void _DoTimedActions(void);
-    
+    void _DelayWorldPacket(WorldPacket&, uint32);
+    void _HandleDelayedPackets(void);
+
     // Opcode Handlers
     void _HandleAuthChallengeOpcode(WorldPacket& recvPacket);
     void _HandleAuthResponseOpcode(WorldPacket& recvPacket);
@@ -117,12 +133,14 @@ private:
     PseuInstance *_instance;
     WorldSocket *_socket;
     ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
+    DelayedPacketQueue delayedPktQueue;
     bool _logged,_mustdie; // world status
     SocketHandler _sh; // handles the WorldSocket
     Channel *_channels;
     uint64 _myGUID;
     World *_world;
     WhoList _whoList;
+    uint32 _lag_ms;
 };
 
 #endif

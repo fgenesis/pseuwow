@@ -56,6 +56,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("bbgetpackedguid",&DefScriptPackage::SCBBGetPackedGuid);
     AddFunc("bbputpackedguid",&DefScriptPackage::SCBBPutPackedGuid);
     AddFunc("gui",&DefScriptPackage::SCGui);
+    AddFunc("sendwho",DefScriptPackage::SCSendWho);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -970,9 +971,49 @@ DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
     }
     while(!ins->GetGUI() && !ins->GetGUI()->IsInitialized())
         Sleep(1);
-    ins->GetGUI()->SetSceneState(SCENESTATE_GUISTART);
-    // TODO: determine which SceneState to use here
+
+    // TODO: not sure if this piece of code will work as intended, needs some testing
+    if(ins->GetWSession() && ins->GetWSession()->InWorld())
+       ins->GetGUI()->SetSceneState(SCENESTATE_WORLD);
+    else
+        ins->GetGUI()->SetSceneState(SCENESTATE_GUISTART);
+
     return true;
+}
+
+DefReturnResult DefScriptPackage::SCSendWho(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCSendWhoListRequest: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    uint32 minlvl = (uint32)DefScriptTools::toUint64(Set.arg[0]);
+    uint32 maxlvl = (uint32)DefScriptTools::toUint64(Set.arg[1]);
+    uint32 racemask = (uint32)DefScriptTools::toUint64(Set.arg[2]);
+    uint32 classmask = (uint32)DefScriptTools::toUint64(Set.arg[3]);
+    std::string name = Set.arg[4];
+    std::string guildname = Set.arg[5];
+    // TODO: implement zonelist
+
+    // convert empty string (default: 0) to default expected by server (-1 = 0xFFFFFFFF = all)
+    // and do some values cleanup
+    if(!racemask)
+        racemask = -1;
+    if(!classmask)
+        classmask = -1;
+    if(!maxlvl)
+        maxlvl = 100;
+    else if(maxlvl > 255)
+        maxlvl = 255;
+    if(minlvl > 255)
+        minlvl = 255;
+    if(minlvl > maxlvl)
+        minlvl = maxlvl;
+
+    ws->SendWhoListRequest(minlvl,maxlvl,racemask,classmask,name,guildname);
+    return "";
 }
     
 

@@ -47,5 +47,6 @@ DefReturnResult SCGetOpcodeID(CmdSet&);
 DefReturnResult SCBBGetPackedGuid(CmdSet&);
 DefReturnResult SCBBPutPackedGuid(CmdSet&);
 DefReturnResult SCGui(CmdSet&);
+DefReturnResult SCSendWho(CmdSet&);
 
 #endif
