@@ -21,9 +21,10 @@ SAY [${@version_short}] login successful.
 EMOTE 126
 
 // join some channels...
-JOINCHANNEL generalchat
-JOINCHANNEL help
-JOINCHANNEL tradee
+//JOINCHANNEL generalchat
+//JOINCHANNEL help
+//JOINCHANNEL tradee
+//listchannel generalchat
 // ...
 
 // Spell 836 = LoginEffect

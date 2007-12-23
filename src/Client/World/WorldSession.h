@@ -54,7 +54,7 @@ public:
     void Update(void);
     void Start(void);
     inline bool MustDie(void) { return _mustdie; }
-    inline void SetMustDie(void) { _mustdie = true; }
+    void SetMustDie(void);
     void SendWorldPacket(WorldPacket&);
     inline bool InWorld(void) { return _logged; }
     inline uint32 GetLagMS(void) { return _lag_ms; }
@@ -107,6 +107,7 @@ private:
 	void _HandleTelePortAckOpcode(WorldPacket& recvPacket);
     void _HandleChannelNotifyOpcode(WorldPacket& recvPacket);
 	void _HandleCastResultOpcode(WorldPacket& recvPacket);
+    void _HandleCastSuccessOpcode(WorldPacket& recvPacket);
     void _HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket);
     void _HandleUpdateObjectOpcode(WorldPacket& recvPacket);
     void _HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket);

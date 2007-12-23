@@ -56,6 +56,12 @@ WorldSession::~WorldSession()
     DEBUG(logdebug("~WorldSession() this=0x%X _instance=0x%X",this,_instance));
 }
 
+void WorldSession::SetMustDie(void)
+{
+    _mustdie = true;
+    logdebug("WorldSession: Must die now.");
+}
+
 void WorldSession::Start(void)
 {
     log("Connecting to '%s' on port %u",GetInstance()->GetConf()->worldhost.c_str(),GetInstance()->GetConf()->worldport);
@@ -70,9 +76,11 @@ void WorldSession::Start(void)
     // if we cant connect, wait until the socket gives up (after 5 secs)
     while( (!MustDie()) && (!_socket->IsOk()) && (!GetInstance()->Stopped()) )
     {
+        logdev("WorldSession::Start(): Socket not ok, waiting...");
         _sh.Select(3,0);
         GetInstance()->Sleep(100);
     }
+    logdev("WorldSession::Start() done, mustdie:%u, socket_ok:%u stopped:%u",MustDie(),_socket->IsOk(),GetInstance()->Stopped()); 
 }
 
 void WorldSession::_LoadCache(void)
@@ -169,7 +177,7 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
             (this->*table[hpos].handler)(*packet);
 
         // if there is a script attached to that opcode, call it now.
-        // note: the pkt rpos needs to be reset in by the scripts!
+        // note: the pkt rpos needs to be reset by the scripts!
         std::string scname = "opcode::";
         scname += stringToLower(GetOpcodeName(packet->GetOpcode()));
         if(sc->ScriptExists(scname))
@@ -186,6 +194,8 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
     {
         logerror("Exception while handling opcode %u!",packet->GetOpcode());
         logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
+        logerror("Packet Hexdump:");
+        logerror("%s",toHexDump((uint8*)packet->contents(),packet->size(),true).c_str());
     }
 
     delete packet;
@@ -229,6 +239,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
         {SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
         {SMSG_CAST_RESULT, &WorldSession::_HandleCastResultOpcode},
+        {SMSG_CAST_SUCCESS, &WorldSession::_HandleCastSuccessOpcode},
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
         {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
@@ -756,15 +767,15 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 {
-        uint32 unk32,time;
-        uint64 guid;
-
-        float x, y, z, o;
+    uint32 unk32,time;
+    uint64 guid;
+    uint8 unk8;
+    float x, y, z, o;
 
     guid = recvPacket.GetPackedGuid();
-        recvPacket >> unk32 >> unk32 >> time >> x >> y >> z >> o >> unk32;
+    recvPacket >> unk32 >> unk32 >> unk8 >> time >> x >> y >> z >> o >> unk32;
 
-        logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
+    logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
     // TODO: put this into a capsule class later, that autodetects movement flags etc.
     WorldPacket response;
@@ -816,18 +827,23 @@ void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 {
-    uint32 spellid;
-    uint8 flag,result;
-    recvPacket >> spellid >> flag;
-    if(flag)
-    {
-        recvPacket >> result;
-        logdetail("Cast of spell %u failed. flag=%u, result=%u",spellid,flag,result);
-    }
-    else
-    {
-        logdetail("Cast of spell %u successful.",spellid);
-    }
+    uint32 spellid,otherr = 0;
+    uint8 result;
+    recvPacket >> spellid >> result;
+    if (recvPacket.rpos()+1 < recvPacket.size())
+        recvPacket >> otherr;
+    logdetail("Cast of spell %u failed. result=%u, additional info=%u",spellid,result,otherr);
+}
+
+void WorldSession::_HandleCastSuccessOpcode(WorldPacket& recvPacket)
+{
+    uint32 spellId;
+    uint64 casterGuid;
+
+    casterGuid = recvPacket.GetPackedGuid();
+
+    recvPacket >> spellId;
+    logdetail("Cast of spell %u successful.",spellId);
 }
 
 void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
@@ -881,7 +897,8 @@ void WorldSession::_HandleEmoteOpcode(WorldPacket& recvPacket)
         if(plrname.empty())
         {
             SendQueryPlayerName(guid);
-            plrname="Unknown Entity";
+            _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f);
+            return;
         }
     }
 
@@ -1064,5 +1081,6 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
 
 
 // TODO: delete world on LogoutComplete once implemented
+
 
 

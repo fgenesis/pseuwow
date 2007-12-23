@@ -37,7 +37,7 @@ PseuGUI::PseuGUI()
     _initialized = false;
     _mustdie = false;
     _driverType = video::EDT_BURNINGSVIDEO; // nulldevice makes not really a sense to display stuff
-    _scenestate = SCENESTATE_NULL;
+    _scenestate = _scenestate_new = SCENESTATE_NULL;
     _smgr = NULL;
     _device = NULL;
     _guienv = NULL;
@@ -49,19 +49,20 @@ PseuGUI::~PseuGUI()
 {
     this->Cancel();
     _instance->DeleteGUI(); // this makes the instance set its gui ptr to NULL
+    logdebug("PseuGUI::~PseuGUI()");
 }
 
 void PseuGUI::SetDriver(uint8 driverId)
 {
     switch(driverId)
     {
-    case DIRECTX9: _driverType = video::EDT_DIRECT3D9;break;
-    case DIRECTX8: _driverType = video::EDT_DIRECT3D8;break;
-    case OPENGL: _driverType = video::EDT_OPENGL;   break;
-    case SOFTWARE:      _driverType = video::EDT_SOFTWARE; break;
-    case BURNINGSVIDEO: _driverType = video::EDT_BURNINGSVIDEO;break;
-    case NULLDEVICE:    _driverType = video::EDT_NULL;     break;
-    default: _driverType = video::EDT_BURNINGSVIDEO; // if no valid driver detected, use software
+    case DIRECTX9:      _driverType = video::EDT_DIRECT3D9;     break;
+    case DIRECTX8:      _driverType = video::EDT_DIRECT3D8;     break;
+    case OPENGL:        _driverType = video::EDT_OPENGL;        break;
+    case SOFTWARE:      _driverType = video::EDT_SOFTWARE;      break;
+    case BURNINGSVIDEO: _driverType = video::EDT_BURNINGSVIDEO; break;
+    case NULLDEVICE:    _driverType = video::EDT_NULL;          break;
+    default:            _driverType = video::EDT_BURNINGSVIDEO; // if no valid driver detected, use software
     }
 
     // TODO: add support for changing driver during runtime?
