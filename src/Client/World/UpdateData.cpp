@@ -208,7 +208,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& recvPacket)
 {
-    uint8 flags;
+    uint8 flags,unk8;
     uint32 unk32,flags2,time,transtime,higuid;
     float unkfx,unkfy,unkfz,x,y,z,o,tx,ty,tz,to;
     uint64 transguid;
@@ -223,7 +223,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 
     if(flags & UPDATEFLAG_LIVING)
     {
-        recvPacket >> flags2 >> time;
+        recvPacket >> flags2 >> unk8 >> time;
     }
 
     logdev("MovementUpdate TypeID=%u GUID="I64FMT" pObj=%X flags=%u flags2=%u",objtypeid,uguid,obj,flags,flags2);

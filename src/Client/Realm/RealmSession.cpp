@@ -140,6 +140,7 @@ void RealmSession::ClearSocket(void)
 void RealmSession::SetMustDie(void)
 {
     _mustdie = true;
+    logdebug("RealmSession: Must die now.");
 }
 
 bool RealmSession::MustDie(void)

@@ -218,22 +218,25 @@ enum INVENTORY_CLASS
 // but this value used in code as implementation workaround
 enum ITEM_SUBCLASS_CONSUMABLE
 {
-    ITEM_SUBCLASS_FOOD                    = 1,
-    ITEM_SUBCLASS_LIQUID                  = 2,
-    ITEM_SUBCLASS_POTION                  = 3,
+    ITEM_SUBCLASS_POTION                  = 1,
+    ITEM_SUBCLASS_ELIXIR                  = 2,
+    ITEM_SUBCLASS_FLASK                   = 3,
     ITEM_SUBCLASS_SCROLL                  = 4,
-    ITEM_SUBCLASS_BANDAGE                 = 5,
-    ITEM_SUBCLASS_HEALTHSTONE             = 6,
-    ITEM_SUBCLASS_COMBAT_EFFECT           = 7
+    ITEM_SUBCLASS_FOOD                    = 5,
+    ITEM_SUBCLASS_ITEM_ENHANCEMENT        = 6,
+    ITEM_SUBCLASS_BANDAGE                 = 7
 };
 
 enum ITEM_SUBCLASS_CONTAINER
 {
-    ITEM_SUBCLASS_CONTAINER               = 0,
-    ITEM_SUBCLASS_SOUL_CONTAINER          = 1,
-    ITEM_SUBCLASS_HERB_CONTAINER          = 2,
-    ITEM_SUBCLASS_ENCHANTING_CONTAINER    = 3,
-    ITEM_SUBCLASS_ENGINEERING_CONTAINER   = 4
+    ITEM_SUBCLASS_CONTAINER                = 0,
+    ITEM_SUBCLASS_SOUL_CONTAINER           = 1,
+    ITEM_SUBCLASS_HERB_CONTAINER           = 2,
+    ITEM_SUBCLASS_ENCHANTING_CONTAINER     = 3,
+    ITEM_SUBCLASS_ENGINEERING_CONTAINER    = 4,
+    ITEM_SUBCLASS_GEM_CONTAINER            = 5,
+    ITEM_SUBCLASS_MINING_CONTAINER         = 6,
+    ITEM_SUBCLASS_LEATHERWORKING_CONTAINER = 7
 };
 
 enum INVENTORY_SUBCLASS_WEAPON
@@ -283,7 +286,16 @@ enum ITEM_SUBCLASS_TRADE_GOODS
     ITEM_SUBCLASS_TRADE_GOODS       = 0,
     ITEM_SUBCLASS_PARTS             = 1,
     ITEM_SUBCLASS_EXPLOSIVES        = 2,
-    ITEM_SUBCLASS_DEVICES           = 3
+    ITEM_SUBCLASS_DEVICES           = 3,
+    ITEM_SUBCLASS_JEWELCRAFTING     = 4, 
+    ITEM_SUBCLASS_CLOTH             = 5, 
+    ITEM_SUBCLASS_LEATHER           = 6, 
+    ITEM_SUBCLASS_METAL_STONE       = 7, 
+    ITEM_SUBCLASS_MEAT              = 8, 
+    ITEM_SUBCLASS_HERB              = 9, 
+    ITEM_SUBCLASS_ELEMENTAZL        = 10, 
+    ITEM_SUBCLASS_TRADE_GOODS_OTHER = 11, 
+    ITEM_SUBCLASS_ENCHANTING        = 12 
 };
 
 enum ITEM_SUBCLASS_BOOK
@@ -399,6 +411,7 @@ struct ItemProto
 	uint32 socketBonus;
 	uint32 GemProperties;
 	uint32 ExtendedCost;
+    uint32 RequiredArenaRank;
 	uint32 RequiredDisenchantSkill;
 	float  ArmorDamageModifier;
 };

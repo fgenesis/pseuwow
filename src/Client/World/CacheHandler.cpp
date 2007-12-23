@@ -11,7 +11,7 @@
 #include "Item.h"
 
 // increase this number whenever you change something that makes old files unusable
-uint32 ITEMPROTOTYPES_CACHE_VERSION = 0x00000001;
+uint32 ITEMPROTOTYPES_CACHE_VERSION = 0x00000002;
 
 PlayerNameCache::~PlayerNameCache()
 {
@@ -261,6 +261,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
 		buf >> proto->socketBonus;
 		buf >> proto->GemProperties;
 		buf >> proto->ExtendedCost;
+        buf >> proto->RequiredArenaRank;
 		buf >> proto->RequiredDisenchantSkill;
 		buf >> proto->ArmorDamageModifier;
 
@@ -378,6 +379,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
 		buf << proto->socketBonus;
 		buf << proto->GemProperties;
 		buf << proto->ExtendedCost;
+        buf << proto->RequiredArenaRank;
 		buf << proto->RequiredDisenchantSkill;
 		buf << proto->ArmorDamageModifier;
 
