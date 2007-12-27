@@ -176,6 +176,9 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("fwritebb",&DefScriptPackage::func_fwritebb);
     AddFunc("fsize",&DefScriptPackage::func_fsize);
     AddFunc("fexists",&DefScriptPackage::func_fileexists); // name alternative for "fileexists"
+    AddFunc("freadline",&DefScriptPackage::func_freadline);
+    AddFunc("fseekw",&DefScriptPackage::func_fseekw);
+    AddFunc("fseekr",&DefScriptPackage::func_fseekr);
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set), bool esc)
