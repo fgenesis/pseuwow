@@ -10,6 +10,7 @@ public:
 	~TypeStorage();
 	bool Exists(std::string);
 	void Delete(std::string);
+    void DeleteByPtr(T*);
 	T *Get(std::string);
     T *GetNoCreate(std::string);
     void Assign(std::string,T*);
@@ -47,6 +48,20 @@ template<class T> void TypeStorage<T>::Delete(std::string s)
     for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end(); it++)
     {
         if(it->first == s)
+        {
+            delete it->second;
+            _storage.erase(it);
+            return;
+        }
+    }
+}
+
+// delete object with that ptr, if present
+template<class T> void TypeStorage<T>::DeleteByPtr(T *ptr)
+{
+    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end(); it++)
+    {
+        if(it->second == ptr)
         {
             delete it->second;
             _storage.erase(it);

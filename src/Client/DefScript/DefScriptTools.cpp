@@ -43,6 +43,7 @@ std::string DefScriptTools::toString(uint64 num)
     ss << num;
     return ss.str();
 }
+
 // convert a string into ldbl
 // valid input formats:
 // normal numbers: 5439

@@ -225,6 +225,9 @@
 					RelativePath=".\Client\DefScript\DefScriptDefines.h">
 				</File>
 				<File
+					RelativePath=".\Client\DefScript\DefScriptFileFunctions.cpp">
+				</File>
+				<File
 					RelativePath=".\Client\DefScript\DefScriptFunctions.cpp">
 				</File>
 				<File

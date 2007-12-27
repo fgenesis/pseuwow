@@ -158,7 +158,24 @@ void DefScriptPackage::_InitFunctions(void)
     AddFunc("bbsetrpos",&DefScriptPackage::func_bbsetrpos);
     AddFunc("bbsetwpos",&DefScriptPackage::func_bbsetwpos);
     AddFunc("bbsize",&DefScriptPackage::func_bbsize);
-	
+
+    // file functions
+    AddFunc("fopen",&DefScriptPackage::func_fopen);
+    AddFunc("fclose",&DefScriptPackage::func_fclose);
+    AddFunc("fisopen",&DefScriptPackage::func_fisopen);
+    AddFunc("feof",&DefScriptPackage::func_feof);
+    AddFunc("frpos",&DefScriptPackage::func_frpos);
+    AddFunc("fwpos",&DefScriptPackage::func_fwpos);
+    AddFunc("fdel",&DefScriptPackage::func_fdel);
+    AddFunc("fflush",&DefScriptPackage::func_fflush);
+    AddFunc("fwrite",&DefScriptPackage::func_fwrite);
+    AddFunc("fread",&DefScriptPackage::func_fread);
+    AddFunc("freadb",&DefScriptPackage::func_freadb);
+    AddFunc("fwriteb",&DefScriptPackage::func_fwriteb);
+    AddFunc("freadbb",&DefScriptPackage::func_freadbb);
+    AddFunc("fwritebb",&DefScriptPackage::func_fwritebb);
+    AddFunc("fsize",&DefScriptPackage::func_fsize);
+    AddFunc("fexists",&DefScriptPackage::func_fileexists); // name alternative for "fileexists"
 }
 
 void DefScriptPackage::AddFunc(std::string n,DefReturnResult (DefScriptPackage::*f)(CmdSet& Set), bool esc)
