@@ -270,6 +270,9 @@ private:
     DefReturnResult DefScriptPackage::func_freadbb(CmdSet&);
     DefReturnResult DefScriptPackage::func_fwritebb(CmdSet&);
     DefReturnResult DefScriptPackage::func_fsize(CmdSet&);
+    DefReturnResult DefScriptPackage::func_freadline(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fseekw(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fseekr(CmdSet&);
 
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"

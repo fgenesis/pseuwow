@@ -113,7 +113,7 @@ DefReturnResult DefScriptPackage::func_fwrite(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::func_fread(CmdSet& Set)
 {
-    std::fstream *fh = files.GetNoCreate(_NormalizeVarName(Set.arg[1],Set.myname));
+    std::fstream *fh = files.GetNoCreate(_NormalizeVarName(Set.arg[0],Set.myname));
     if(fh && fh->is_open())
     {
         uint64 bytes;
@@ -287,4 +287,66 @@ DefReturnResult DefScriptPackage::func_fsize(CmdSet& Set)
     end_pos = f.tellg();
     f.close();
     return toString((uint64)(end_pos - begin_pos));
+}
+
+DefReturnResult DefScriptPackage::func_freadline(CmdSet& Set)
+{
+    std::fstream *fh = files.GetNoCreate(_NormalizeVarName(Set.defaultarg,Set.myname));
+    if(fh && fh->is_open())
+    {
+        char c;
+        std::string line;
+        line.reserve(30); // rough guess to speedup appending
+        while(!fh->eof())
+        {
+            c = fh->get();
+            if(c == '\n' || fh->eof())
+                return line;
+            else
+                line += c;
+        }
+    }
+    return "";
+}
+
+DefReturnResult DefScriptPackage::func_fseekw(CmdSet& Set)
+{
+    std::fstream *fh = files.GetNoCreate(_NormalizeVarName(Set.arg[0],Set.myname));
+    if(fh && fh->is_open())
+    {
+        std::string w = stringToLower(Set.arg[1]);
+        uint32 pos = (uint32)toUint64(Set.defaultarg);
+        if(w.empty() || w == "begin")
+        {
+            fh->seekp(pos, std::ios_base::beg);
+            return true;
+        }
+        else if(w == "end")
+        {
+            fh->seekp(pos, std::ios_base::end);
+            return true;
+        }
+    }
+    return false;
+}
+
+DefReturnResult DefScriptPackage::func_fseekr(CmdSet& Set)
+{
+    std::fstream *fh = files.GetNoCreate(_NormalizeVarName(Set.arg[0],Set.myname));
+    if(fh && fh->is_open())
+    {
+        std::string w = stringToLower(Set.arg[1]);
+        uint32 pos = (uint32)toUint64(Set.defaultarg);
+        if(w.empty() || w == "begin")
+        {
+            fh->seekg(pos, std::ios_base::beg);
+            return true;
+        }
+        else if(w == "end")
+        {
+            fh->seekg(pos, std::ios_base::end);
+            return true;
+        }
+    }
+    return false;
 }
