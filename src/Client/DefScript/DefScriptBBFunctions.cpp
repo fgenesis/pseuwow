@@ -38,7 +38,7 @@ DefReturnResult DefScriptPackage::func_bbdelete(CmdSet& Set)
 // Appends data to ByteBuffer
 // @def - data
 // @0 - bytebuffer identifier
-// @1 - datatype of added data (uint8,uint16,uint32,uint64,float,double,string)
+// @1 - datatype of added data (uint8,uint16,uint32,uint64,float,double,string,strnz)
 DefReturnResult DefScriptPackage::func_bbappend(CmdSet& Set)
 {
     ByteBuffer *bb = bytebuffers.Get(_NormalizeVarName(Set.arg[0],Set.myname));
@@ -173,4 +173,3 @@ DefReturnResult DefScriptPackage::func_bbsize(CmdSet& Set)
 
     return DefScriptTools::toString((uint64)bb->size());
 }
-        

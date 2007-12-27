@@ -137,6 +137,7 @@ public:
     void DelFunc(std::string);
 	TypeStorage<DefList> lists;
     TypeStorage<ByteBuffer> bytebuffers;
+    TypeStorage<std::fstream> files;
     std::string SecureString(std::string);
     std::string EscapeString(std::string);
     std::string UnescapeString(std::string);
@@ -252,6 +253,23 @@ private:
     DefReturnResult func_bbhexlike(CmdSet&);
     DefReturnResult func_bbtextlike(CmdSet&);
     DefReturnResult func_bbsize(CmdSet&);
+
+    // file functions
+    DefReturnResult DefScriptPackage::func_fopen(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fclose(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fisopen(CmdSet&);
+    DefReturnResult DefScriptPackage::func_feof(CmdSet&);
+    DefReturnResult DefScriptPackage::func_frpos(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fwpos(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fdel(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fflush(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fwrite(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fread(CmdSet&);
+    DefReturnResult DefScriptPackage::func_freadb(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fwriteb(CmdSet&);
+    DefReturnResult DefScriptPackage::func_freadbb(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fwritebb(CmdSet&);
+    DefReturnResult DefScriptPackage::func_fsize(CmdSet&);
 
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"
