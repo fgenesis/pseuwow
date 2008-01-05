@@ -184,6 +184,12 @@
 				RelativePath=".\Client\main.h">
 			</File>
 			<File
+				RelativePath=".\Client\MemoryDataHolder.cpp">
+			</File>
+			<File
+				RelativePath=".\Client\MemoryDataHolder.h">
+			</File>
+			<File
 				RelativePath=".\Client\PseuWoW.cpp">
 			</File>
 			<File

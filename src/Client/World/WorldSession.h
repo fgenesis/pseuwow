@@ -42,6 +42,8 @@ typedef std::queue<DelayedWorldPacket> DelayedPacketQueue;
 
 class WorldSession
 {
+    friend class Channel;
+
 public:
     WorldSession(PseuInstance *i);
     ~WorldSession();
@@ -65,6 +67,8 @@ public:
     inline Channel *GetChannels(void) { return _channels; }
     inline MyCharacter *GetMyChar(void) { ASSERT(_myGUID > 0); return (MyCharacter*)objmgr.GetObj(_myGUID); }
     inline World *GetWorld(void) { return _world; }
+
+    std::string GetOrRequestPlayerName(uint64);
 
 
     // CMSGConstructor

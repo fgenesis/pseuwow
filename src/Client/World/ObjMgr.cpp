@@ -84,15 +84,20 @@ ItemProto *ObjMgr::GetItemProtoByPos(uint32 pos)
 
 void ObjMgr::AddNonexistentItem(uint32 id)
 {
-    _noitem.push_back(id);
+    _noitem.insert(id);
 }
 
 bool ObjMgr::ItemNonExistent(uint32 id)
 {
-    for(std::vector<uint32>::iterator i=_noitem.begin(); i != _noitem.end(); i++)
-    {
-        if(*i == id)
-            return true;
-    }
-    return false;
+    return _noitem.find(id) == _noitem.end();
+}
+
+void ObjMgr::AddRequestedPlayerGUID(uint32 loguid)
+{
+    _reqpnames.insert(loguid);
+}
+
+bool ObjMgr::IsRequestedPlayerGUID(uint32 loguid)
+{
+    return _reqpnames.find(loguid) != _reqpnames.end();
 }
