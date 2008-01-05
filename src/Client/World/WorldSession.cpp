@@ -775,14 +775,6 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     std::string plrname;
     guid = recvPacket.GetPackedGuid();
     recvPacket >> flags >> time >> x >> y >> z >> o;
-    /*if(guid){
-        plrname=plrNameCache.GetName(guid);
-        if(plrname.empty())
-        {
-            SendQueryPlayerName(guid);
-            plrname="Unknown Entity";
-        }
-    }*/
 }
 
 void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)

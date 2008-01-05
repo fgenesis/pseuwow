@@ -1,21 +1,6 @@
 #ifndef _UPDATEDATA_H
 #define _UPDATEDATA_H
 
-
-// old code for 1.12.x (and below)
-/*
-enum OBJECT_UPDATE_TYPE
-{
-    UPDATETYPE_VALUES = 0,
-    UPDATETYPE_MOVEMENT = 1,
-    UPDATETYPE_CREATE_OBJECT = 2,
-    UPDATETYPE_CREATE_OBJECT2 = 3,
-    UPDATETYPE_OUT_OF_RANGE_OBJECTS = 4,
-    UPDATETYPE_NEAR_OBJECTS = 5
-
-};
-*/
-
 enum OBJECT_UPDATE_TYPE
 {
 	UPDATETYPE_VALUES               = 0,
@@ -43,5 +28,7 @@ enum FLAGS2_UPDATE_FLAGS
 	FLAGS2_TRANSPORT = 0x200,
 	FLAGS2_SPIRITHEALER = 0x10000000,
 };
+
+bool IsFloatField(uint8, uint32);
 
 #endif

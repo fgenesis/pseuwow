@@ -95,6 +95,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                     case TYPEID_OBJECT: // no data to read
                         {
                             logerror("Recieved wrong UPDATETYPE_CREATE_OBJECT to create Object base type!");
+                            logerror("%s",toHexDump((uint8*)recvPacket.contents(),recvPacket.size(),true).c_str());
                         }
                     case TYPEID_ITEM:
                         {
@@ -199,6 +200,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
             {
                 logerror("UPDATE_OBJECT: Got unk updatetype 0x%X",utype);
                 logerror("UPDATE_OBJECT: Read %u / %u bytes, skipped rest",recvPacket.rpos(),recvPacket.size());
+                logerror("%s",toHexDump((uint8*)recvPacket.contents(),recvPacket.size(),true).c_str());
                 return;
             }
         } // switch
@@ -277,7 +279,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         }
         else
         {
-                logcustom(2,RED,"WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+                logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
         }
     }
 
@@ -311,6 +313,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
     Object *obj = objmgr.GetObj(uguid);
     uint8 blockcount;
     uint32 value, masksize, valuesCount;
+    float fvalue;
 
     if (obj)
     {
@@ -323,37 +326,31 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
         recvPacket.read((uint8*)updateMask, masksize);
         umask.SetMask(updateMask);
         //delete [] updateMask; // will be deleted at ~UpdateMask() !!!!
-                logdev("ValuesUpdate TypeId=%u GUID="I64FMT" pObj=%X Blocks=%u Masksize=%u",obj->GetTypeId(),uguid,obj,blockcount,masksize);
+        logdev("ValuesUpdate TypeId=%u GUID="I64FMT" pObj=%X Blocks=%u Masksize=%u",obj->GetTypeId(),uguid,obj,blockcount,masksize);
 
         for (uint32 i = 0; i < valuesCount; i++)
         {
             if (umask.GetBit(i))
             {
-                recvPacket >> value;
-
-                // TODO: what to do here?!
-                /*if( obj->isType(TYPE_UNIT) && (
-                    i >= UNIT_FIELD_POWER1         && i <= UNIT_FIELD_MAXPOWER5 ||
-                    i >= UNIT_FIELD_BASEATTACKTIME && i <= UNIT_FIELD_RANGEDATTACKTIME ||
-                    i >= UNIT_FIELD_STR            && i <= UNIT_FIELD_RESISTANCES + 6 )
-                    || obj->isType(TYPE_PLAYER) &&
-                    i >= PLAYER_FIELD_POSSTAT0 && i <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6 )
+                if(IsFloatField(obj->GetTypeId(),i))
                 {
-                    obj->SetFloatValue(i, (float)value);
+                    recvPacket >> fvalue;
+                    obj->SetFloatValue(i, fvalue);
+                    logdev("-> Field[%u] = %f",i,fvalue);
                 }
                 else
-                {*/
-
+                {
+                    recvPacket >> value;
                     obj->SetUInt32Value(i, value);
-                //}
-                // still need to find out which values to interpret as floats
-                logdev("-> Field[%u] = %u",i,value);
+                    logdev("-> Field[%u] = %u",i,value);
+                }
+                
             }
         }
     }
     else
     {
-        logcustom(2,RED,"Got UpdateObject_Values for unknown object "I64FMT,uguid);
+        logerror("Got UpdateObject_Values for unknown object "I64FMT,uguid);
     }
 
 }
@@ -383,9 +380,109 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
                 {
                     ((WorldObject*)obj)->SetName(name);
                 }
+                // else: name will be set when server answers (_HandleNameQueryResponseOpcode)
                 break;
             }
         //case...
         }
     }
+}
+
+// helper to determine if an updatefield should store float or int values, depending on TypeId
+bool IsFloatField(uint8 tyid, uint32 f)
+{
+    static bool first_use = true;
+    static uint32 *ty[TYPEID_CORPSE+1];
+
+    static uint32 floats_object[] =
+    {
+        (uint32)OBJECT_FIELD_SCALE_X,
+        (uint32)-1
+    };
+    static uint32 floats_item[] =
+    {
+        (uint32)-1
+    };
+    static uint32 floats_container[] =
+    {
+        (uint32)-1
+    };
+    static uint32 floats_unit[] =
+    {
+        (uint32)UNIT_FIELD_BOUNDINGRADIUS,
+        (uint32)UNIT_FIELD_COMBATREACH,
+        (uint32)UNIT_FIELD_MINDAMAGE,
+        (uint32)UNIT_FIELD_MAXDAMAGE,
+        (uint32)UNIT_FIELD_MINOFFHANDDAMAGE,
+        (uint32)UNIT_FIELD_MINOFFHANDDAMAGE,
+        (uint32)UNIT_MOD_CAST_SPEED,
+        (uint32)UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,
+        (uint32)UNIT_FIELD_ATTACK_POWER_MULTIPLIER,
+        (uint32)UNIT_FIELD_MINRANGEDDAMAGE,
+        (uint32)UNIT_FIELD_MAXRANGEDDAMAGE,
+        (uint32)UNIT_FIELD_POWER_COST_MULTIPLIER,
+        (uint32)-1
+    };
+    static uint32 floats_player[] =
+    {
+        (uint32)PLAYER_BLOCK_PERCENTAGE,
+        (uint32)PLAYER_DODGE_PERCENTAGE,
+        (uint32)PLAYER_PARRY_PERCENTAGE,
+        (uint32)PLAYER_RANGED_CRIT_PERCENTAGE,
+        (uint32)PLAYER_OFFHAND_CRIT_PERCENTAGE,
+        (uint32)PLAYER_SPELL_CRIT_PERCENTAGE1,
+        (uint32)PLAYER_HOLY_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_FIRE_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_NATURE_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_FROST_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_SHADOW_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_ARCANE_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_FIELD_MOD_MANA_REGEN,
+        (uint32)PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,
+        (uint32)-1
+    };
+    static uint32 floats_gameobject[] =
+    {
+        (uint32)GAMEOBJECT_ROTATION,
+        (uint32)GAMEOBJECT_POS_X,
+        (uint32)GAMEOBJECT_POS_Y,
+        (uint32)GAMEOBJECT_POS_Z,
+        (uint32)GAMEOBJECT_FACING,
+        (uint32)-1
+    };
+    static uint32 floats_dynobject[] =
+    {
+        (uint32)DYNAMICOBJECT_RADIUS,
+        (uint32)DYNAMICOBJECT_POS_X,
+        (uint32)DYNAMICOBJECT_POS_Y,
+        (uint32)DYNAMICOBJECT_POS_Z,
+        (uint32)-1
+    };
+    static uint32 floats_corpse[] =
+    {
+        (uint32)CORPSE_FIELD_FACING,
+        (uint32)CORPSE_FIELD_POS_X,
+        (uint32)CORPSE_FIELD_POS_Y,
+        (uint32)CORPSE_FIELD_POS_Z,
+        (uint32)-1
+    };
+
+    if(first_use)
+    {
+        first_use = true;
+        ty[TYPEID_OBJECT] = &floats_object[0];
+        ty[TYPEID_ITEM] = &floats_item[0];
+        ty[TYPEID_CONTAINER] = &floats_container[0];
+        ty[TYPEID_UNIT] = &floats_unit[0];
+        ty[TYPEID_PLAYER] = &floats_player[0];
+        ty[TYPEID_GAMEOBJECT] = &floats_gameobject[0];
+        ty[TYPEID_DYNAMICOBJECT] = &floats_dynobject[0];
+        ty[TYPEID_CORPSE] = &floats_corpse[0];
+    }
+
+    for(uint32 i = 0; ty[tyid][i] != (-1); i++)
+        if(ty[tyid][i] == f)
+            return true;
+    
+    return false;
 }
