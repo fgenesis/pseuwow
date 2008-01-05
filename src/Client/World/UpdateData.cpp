@@ -378,12 +378,8 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
             }
         case TYPEID_PLAYER:
             {
-                std::string name = plrNameCache.GetName(guid);
-                if(name.empty())
-                {
-                    SendQueryPlayerName(guid);
-                }
-                else
+                std::string name = GetOrRequestPlayerName(obj->GetGUID());
+                if(!name.empty())
                 {
                     ((WorldObject*)obj)->SetName(name);
                 }

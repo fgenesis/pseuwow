@@ -137,12 +137,13 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 		// Player joined channel you are on
 		case JOINED:
 			packet >> guid;
-			if(guid){
-				name = _worldSession->plrNameCache.GetName(guid);
+			if(guid)
+            {
+				name = _worldSession->GetOrRequestPlayerName(guid);
 				if (name.empty())
 				{
-					_worldSession->SendQueryPlayerName(guid);
-					name = "Unknown Entity";
+					_worldSession->_DelayWorldPacket(packet,_worldSession->GetLagMS() * 1.2f);
+					return;
 				}
 			}
 
@@ -152,13 +153,14 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 		// Player leaved channel you are on
 		case LEFT:
 			packet >> guid;
-			if(guid){
-				name = _worldSession->plrNameCache.GetName(guid);
-				if (name.empty())
-				{
-					_worldSession->SendQueryPlayerName(guid);
-					name = "Unknown Entity";
-				}
+			if(guid)
+            {
+                name = _worldSession->GetOrRequestPlayerName(guid);
+                if (name.empty())
+                {
+                    _worldSession->_DelayWorldPacket(packet,_worldSession->GetLagMS() * 1.2f);
+                    return;
+                }
 			}
 
 			log("%s left channel %s", name.c_str(), channel.c_str());
@@ -222,28 +224,32 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
     std::string name;
 	recvPacket >> unk >> name >> flags >> size;
 
-    // store list of GUIDs in: @ChannelList
-    DefList *l = _worldSession->GetInstance()->GetScripts()->lists.Get("@ChannelList");
-    l->clear();
 	for(uint32 i = 0; i < size; i++)
 	{
 		recvPacket >> guid >> mode;
+        // all player names in this packet must be known before
+        if(_worldSession->GetOrRequestPlayerName(guid).empty())
+        {
+            _worldSession->_DelayWorldPacket(recvPacket, _worldSession->GetLagMS() * 1.2f);
+            return;
+        }
 		cpl[guid] = mode;
-        l->push_back(DefScriptTools::toString(guid));
 	}
+
+    // store list of GUIDs in: @ChannelList - see below
+    DefList *l = _worldSession->GetInstance()->GetScripts()->lists.Get("@ChannelList");
+    l->clear();
 
 	std::string pname;
 	bool muted,mod;
 	logcustom(0,WHITE,"Player channel list, %u players:",size);
 	for(ChannelPlayerList::iterator i = cpl.begin(); i != cpl.end(); i++)
 	{
-		pname = _worldSession->plrNameCache.GetName(i->first);
+		pname = _worldSession->GetOrRequestPlayerName(i->first); // all names should be known now
 		mode = i->second;
 		if(pname.empty())
-		{
-			pname="<unknown>";
-			_worldSession->SendQueryPlayerName(i->first);
-		}
+            pname = "<unknown>";
+
 		muted = mode & MEMBER_FLAG_MUTED;
 		mod = mode & MEMBER_FLAG_MODERATOR;
 
@@ -251,6 +257,9 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 			pname += " "; // for better formatting
 
 		logcustom(0,WHITE,"%s ["I64FMT"] %s %s",pname.c_str(),i->first,muted?"(muted)":"",mod?"(moderator)":"");
+
+        // DefScript binding
+        l->push_back(DefScriptTools::toString(guid));
 	}
 }
 

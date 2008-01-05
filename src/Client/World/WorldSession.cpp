@@ -335,6 +335,27 @@ void WorldSession::_DoTimedActions(void)
     }
 }
 
+std::string WorldSession::GetOrRequestPlayerName(uint64 guid)
+{
+    if(!guid || GUID_HIPART(guid) != HIGHGUID_PLAYER)
+    {
+        logerror("WorldSession::GetOrRequestObjectName: "I64FMT" is not player",guid);
+        return "<ERR: OBJECT>"; // TODO: temporary, to find bugs with this, if there are any
+    }
+    std::string name = plrNameCache.GetName(guid);
+    if(name.empty())
+    {
+        if(!objmgr.IsRequestedPlayerGUID(guid))
+        {
+            objmgr.AddRequestedPlayerGUID(guid);
+            SendQueryPlayerName(guid);
+        }
+    }
+    return name;
+}
+    
+
+
 
 
 ///////////////////////////////////////////////////////////////
@@ -530,10 +551,9 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     std::string plrname;
     if(source_guid)
     {
-        plrname=plrNameCache.GetName(source_guid);
+        plrname = GetOrRequestPlayerName(source_guid);
         if(plrname.empty())
         {
-            SendQueryPlayerName(source_guid);
             _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f); // guess time how long it will take until we got player name from the server
             return; // handle later
         }
@@ -709,8 +729,8 @@ void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
     if(plrNameCache.AddInfo(pguid,pname))
     {
         logdetail("CACHE: Assigned new player name: '%s' = " I64FMTD ,pname.c_str(),pguid);
-        if(GetInstance()->GetConf()->debug > 1)
-            SendChatMessage(CHAT_MSG_SAY,0,"Player "+pname+" added to cache.","");
+        //if(GetInstance()->GetConf()->debug > 1)
+        //    SendChatMessage(CHAT_MSG_SAY,0,"Player "+pname+" added to cache.","");
     }
     WorldObject *wo = (WorldObject*)objmgr.GetObj(pguid);
     if(wo)
@@ -893,10 +913,9 @@ void WorldSession::_HandleEmoteOpcode(WorldPacket& recvPacket)
     // TODO: check if the emote came from a player or a mob, and query mob name if it was a mob
     if(guid)
     {
-        plrname=plrNameCache.GetName(guid);
+        plrname = GetOrRequestPlayerName(guid);
         if(plrname.empty())
         {
-            SendQueryPlayerName(guid);
             _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f);
             return;
         }
