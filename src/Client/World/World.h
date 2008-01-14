@@ -4,6 +4,15 @@
 class WorldSession;
 class MapMgr;
 
+struct WorldPosition
+{
+    WorldPosition() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {};
+    WorldPosition(float px, float py) : x(px), y(py), z(0.0f), o(0.0f) {};
+    WorldPosition(float px, float py, float pz) : x(px), y(py), z(pz), o(0.0f) {};
+    WorldPosition(float px, float py, float pz, float po) : x(px), y(py), z(pz), o(po) {};
+    float x,y,z,o;
+};
+
 // used as interface for movement, map data,
 class World
 {

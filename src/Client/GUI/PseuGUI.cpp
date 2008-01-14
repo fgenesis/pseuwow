@@ -43,6 +43,7 @@ PseuGUI::PseuGUI()
     _guienv = NULL;
     _scene = NULL;
     _passtime = _lastpasstime = _passtimediff = 0;
+    _updateWorldPos = false;
 }
 
 PseuGUI::~PseuGUI()
@@ -177,7 +178,11 @@ void PseuGUI::Run(void)
             _UpdateSceneState();
 
             if(_scene && _initialized)
+            {
+                if(_updateWorldPos)
+                    SetWorldPosition(_worldpos_tmp);
                 _scene->OnUpdate(_passtimediff);
+            }
 
             _driver->beginScene(true, true, 0);
 
@@ -205,7 +210,6 @@ void PseuGUI::Run(void)
             _device->setWindowCaption(str.c_str());
 
             lastFPS = fps;
-            DEBUG(logdebug("PseuGUI: Current FPS: %u",fps));
         }
 
     }
@@ -258,6 +262,7 @@ void PseuGUI::_UpdateSceneState(void)
             case SCENESTATE_WORLD: _scene = new SceneWorld(this); break;
             default: _scene = new Scene(this); // will draw nothing, just yield the gui
         }
+        _scene->SetState(_scenestate);
 
         logdebug("PseuGUI: scene created.");
     }
@@ -267,6 +272,32 @@ void PseuGUI::DrawCurrentScene(void)
 {
     if(_scene && _initialized)
         _scene->OnDraw();
+}
+
+// used to get our current WorldPosition
+WorldPosition PseuGUI::GetWorldPosition(void)
+{
+    if(_scene && _scene->GetState() == SCENESTATE_WORLD)
+    {
+        return ((SceneWorld*)_scene)->GetWorldPosition();
+    }
+    return WorldPosition();
+}
+
+// used to notify the SceneWorld about a position change the server sent to us
+void PseuGUI::SetWorldPosition(WorldPosition wp)
+{
+    // buffer new position if the scene is not (yet) a world scene
+    _worldpos_tmp = wp;
+    if(_scene && _scene->GetState() == SCENESTATE_WORLD)
+    {
+        _updateWorldPos = false;
+        ((SceneWorld*)_scene)->SetWorldPosition(wp);
+    }
+    else
+    {
+        _updateWorldPos = true;
+    }
 }
 
 void PseuGUI::_HandleWindowResize(void)

@@ -99,7 +99,7 @@ void WorldSession::AddToPktQueue(WorldPacket *pkt)
 void WorldSession::SendWorldPacket(WorldPacket &pkt)
 {
     if(GetInstance()->GetConf()->showmyopcodes)
-        logcustom(0,BROWN,"<< Opcode %u [%s]", pkt.GetOpcode(), GetOpcodeName(pkt.GetOpcode()));
+        logcustom(0,BROWN,"<< Opcode %u [%s] (%u bytes)", pkt.GetOpcode(), GetOpcodeName(pkt.GetOpcode()), pkt.size());
     if(_socket && _socket->IsOk())
         _socket->SendWorldPacket(pkt);
     else
@@ -637,7 +637,6 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     // TODO: also _onwhisper must be replaced by this!
     if(!isCmd && GetInstance()->GetScripts()->GetScript("_onchatmessage"))
     {
-        DEBUG(logdebug("DefScript chat handler found, executing _onchatmessage"));
         CmdSet Set;
         Set.arg[0] = toString(type);
         Set.arg[1] = toString(lang);
@@ -795,8 +794,13 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     response << uint32(0) << (uint32)getMSTime(); // no flags; time correct?
     response << x << y << z << o << uint32(0);
     SendWorldPacket(response);
-    if(_world)
-        _world->UpdatePos(x,y);
+
+    _world->UpdatePos(x,y);
+
+    if(PseuGUI *gui = GetInstance()->GetGUI())
+    {
+        gui->SetWorldPosition(WorldPosition(x,y,z,o));
+    }
 
     if(GetInstance()->GetScripts()->ScriptExists("_onteleport"))
     {
@@ -823,6 +827,14 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     _world->Clear();
     _world->UpdatePos(x,y,mapid);
     _world->Update();
+
+    // TODO: need to switch to SCENESTATE_LOGINSCREEN here, and after everything is loaded, back to SCENESTATE_WORLD
+    if(PseuGUI *gui = GetInstance()->GetGUI())
+    {
+        //gui->SetSceneState(SCENESTATE_WORLD);
+        // commented out, should be world scene anyway at this point...
+        gui->SetWorldPosition(WorldPosition(x,y,z,o));
+    }
 
     if(GetInstance()->GetScripts()->ScriptExists("_onteleport"))
     {
@@ -866,10 +878,9 @@ void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
         logdebug("Got initial spells list, %u spells.",count);
         for(uint16 i = 0; i < count; i++)
         {
-                recvPacket >> spellid >> spellslot;
-                logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
-
-                GetMyChar()->AddSpell(spellid, spellslot);
+            recvPacket >> spellid >> spellslot;
+            logdebug("Initial Spell: id=%u slot=%u",spellid,spellslot);
+            GetMyChar()->AddSpell(spellid, spellslot);
         }
 }
 
@@ -1030,6 +1041,7 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
     if(PseuGUI *gui = GetInstance()->GetGUI())
     {
         gui->SetSceneState(SCENESTATE_WORLD);
+        gui->SetWorldPosition(WorldPosition(x,y,z,o));
     }
 }
 

@@ -36,12 +36,11 @@ void MapMgr::Update(float x, float y, uint32 m)
     GridCoordPair gcoords = GetTransformGridCoordPair(x,y);
     if(gcoords.x != _gridx || gcoords.y != _gridy)
     {
-        _LoadNearTiles(gcoords.x,gcoords.y,m);
         _gridx = gcoords.x;
         _gridy = gcoords.y;
+        _LoadNearTiles(_gridx,_gridy,m);
         _UnloadOldTiles();
     }
-    _mapid = m;
 }
 
 void MapMgr::Flush(void)
@@ -100,9 +99,9 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 
 void MapMgr::_UnloadOldTiles(void)
 {
-    for(uint32 gx=0; gx<64; gx++)
+    for(uint32 gy=0; gy<64; gy++)
     {
-        for(uint32 gy=0; gy<64; gy++)
+        for(uint32 gx=0; gx<64; gx++)
         {
             if( (_gridx < gx-1 || _gridx > gx+1) && (_gridy < gy-1 || _gridy > gy+1) )
             {
@@ -145,7 +144,7 @@ uint32 MapMgr::GetGridCoord(float f)
 
 GridCoordPair MapMgr::GetTransformGridCoordPair(float x, float y)
 {
-    return GridCoordPair(GetGridCoord(y), GetGridCoord(x)); // i have no idea why they are swapping x and y map coords in ADT files...
+    return GridCoordPair(GetGridCoord(x), GetGridCoord(y));
 }
 
 uint32 MapMgr::GetLoadedMapsCount(void)

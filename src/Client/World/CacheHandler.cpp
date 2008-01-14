@@ -151,6 +151,7 @@ uint32 PlayerNameCache::GetSize(void)
 
 void ItemProtoCache_InsertDataToSession(WorldSession *session)
 {
+    logdetail("ItemProtoCache: Loading...");
     char* fn = "./cache/ItemPrototypes.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::in | std::ios_base::binary);
@@ -176,6 +177,11 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf.clear();
         fh.read((char*)&datasize,sizeof(uint32));
         buf.resize(datasize);
+        if(buf.size() < datasize)
+        {
+            logerror("ItemProtoCache: Failed to resize ByteBuffer!");
+            return;
+        }
         fh.read((char*)buf.contents(),datasize);
         ItemProto *proto = new ItemProto;
         buf >> proto->Id;
@@ -274,7 +280,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
             delete proto;
     }
     fh.close();
-    log("ItemProtoCache: Loaded %u Item Prototypes",counter);
+    logdetail("ItemProtoCache: Loaded %u Item Prototypes",counter);
 }
 
 void ItemProtoCache_WriteDataToCache(WorldSession *session)

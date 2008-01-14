@@ -60,7 +60,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 if(obj)
                     this->_MovementUpdate(obj->GetTypeId(),uguid,recvPacket);
                 else
-                    logcustom(2,RED,"Got UpdateObject_Movement for unknown object "I64FMT,uguid);
+                    logerror("Got UpdateObject_Movement for unknown object "I64FMT,uguid);
             }
             break;
 
@@ -77,7 +77,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 {
                     if(uguid != GetGuid())
                     {
-                        logdev("- already exists, deleting old , creating new object");
+                        logdev("- already exists, deleting old, creating new object");
                         objmgr.Remove(uguid);
                         // do not call script here, since the object does not really get deleted
                     }
@@ -332,7 +332,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
         {
             if (umask.GetBit(i))
             {
-                if(IsFloatField(obj->GetTypeId(),i))
+                if(IsFloatField(obj->GetTypeMask(),i))
                 {
                     recvPacket >> fvalue;
                     obj->SetFloatValue(i, fvalue);
@@ -389,16 +389,14 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
 }
 
 // helper to determine if an updatefield should store float or int values, depending on TypeId
-bool IsFloatField(uint8 tyid, uint32 f)
+bool IsFloatField(uint8 ty, uint32 f)
 {
-    static bool first_use = true;
-    static uint32 *ty[TYPEID_CORPSE+1];
-
     static uint32 floats_object[] =
     {
         (uint32)OBJECT_FIELD_SCALE_X,
         (uint32)-1
     };
+    /*
     static uint32 floats_item[] =
     {
         (uint32)-1
@@ -407,6 +405,7 @@ bool IsFloatField(uint8 tyid, uint32 f)
     {
         (uint32)-1
     };
+    */
     static uint32 floats_unit[] =
     {
         (uint32)UNIT_FIELD_BOUNDINGRADIUS,
@@ -467,22 +466,40 @@ bool IsFloatField(uint8 tyid, uint32 f)
         (uint32)-1
     };
 
-    if(first_use)
-    {
-        first_use = true;
-        ty[TYPEID_OBJECT] = &floats_object[0];
-        ty[TYPEID_ITEM] = &floats_item[0];
-        ty[TYPEID_CONTAINER] = &floats_container[0];
-        ty[TYPEID_UNIT] = &floats_unit[0];
-        ty[TYPEID_PLAYER] = &floats_player[0];
-        ty[TYPEID_GAMEOBJECT] = &floats_gameobject[0];
-        ty[TYPEID_DYNAMICOBJECT] = &floats_dynobject[0];
-        ty[TYPEID_CORPSE] = &floats_corpse[0];
-    }
-
-    for(uint32 i = 0; ty[tyid][i] != (-1); i++)
-        if(ty[tyid][i] == f)
-            return true;
+    if(ty & TYPE_OBJECT)
+        for(uint32 i = 0; floats_object[i] != (-1); i++)
+            if(floats_object[i] == f)
+                return true;
+    /*
+    if(ty & TYPE_ITEM)
+        for(uint32 i = 0; floats_item[i] != (-1); i++)
+            if(floats_object[i] == f)
+                return true;
+    if(ty & TYPE_CONTAINER)
+        for(uint32 i = 0; floats_container[i] != (-1); i++)
+            if(floats_object[i] == f)
+                return true;
+    */
+    if(ty & TYPE_UNIT)
+        for(uint32 i = 0; floats_unit[i] != (-1); i++)
+            if(floats_unit[i] == f)
+                return true;
+    if(ty & TYPE_PLAYER)
+        for(uint32 i = 0; floats_player[i] != (-1); i++)
+            if(floats_player[i] == f)
+                return true;
+    if(ty & TYPE_GAMEOBJECT)
+        for(uint32 i = 0; floats_gameobject[i] != (-1); i++)
+            if(floats_gameobject[i] == f)
+                return true;
+    if(ty & TYPE_DYNAMICOBJECT)
+        for(uint32 i = 0; floats_dynobject[i] != (-1); i++)
+            if(floats_dynobject[i] == f)
+                return true;
+    if(ty & TYPE_CORPSE)
+        for(uint32 i = 0; floats_corpse[i] != (-1); i++)
+            if(floats_corpse[i] == f)
+                return true;
     
     return false;
 }
