@@ -44,6 +44,7 @@ public:
     inline uint16 GetValuesCount(void) { return _valuescount; }
 
     inline const uint8 GetTypeId() { return _typeid; }
+    inline const uint8 GetTypeMask() { return _type; }
     inline bool isType(uint8 mask) { return (mask & _type) ? true : false; }
     inline const uint32 GetUInt32Value( uint16 index ) const
     {

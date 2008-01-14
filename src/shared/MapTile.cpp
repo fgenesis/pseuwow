@@ -43,7 +43,10 @@ void MapTile::ImportFromADT(ADTFile *adt)
             }
         }
     }
-    DEBUG(logdebug("MapTile first chunk base: h=%f x=%f y=%f",_chunks[0].baseheight,_chunks[0].basex,_chunks[0].basey));
+    _xbase = _chunks[0].basex;
+    _ybase = _chunks[0].basey;
+    _hbase = _chunks[0].baseheight;
+    DEBUG(logdebug("MapTile first chunk base: h=%f x=%f y=%f",_hbase,_xbase,_ybase));
 }
 
 void MapTileStorage::_DebugDump(void)

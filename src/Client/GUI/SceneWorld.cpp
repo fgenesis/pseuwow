@@ -13,6 +13,9 @@
 #include "World.h"
 
 #define MOUSE_SENSIVITY 0.5f
+#define ANGLE_STEP (M_PI/180) 
+#define DEG_TO_RAD(x) ((x)*ANGLE_STEP)
+#define RAD_TO_DEG(x) ((x)/ANGLE_STEP)
 
 
 
@@ -157,14 +160,19 @@ void SceneWorld::OnUpdate(s32 timediff)
     if (eventrecv->mouse.wheel < 10) eventrecv->mouse.wheel = 10;
     camera->setHeight(  eventrecv->mouse.wheel + terrain->getHeight(camera->getPosition())  );
 
+    WorldPosition wp = GetWorldPosition();
     core::stringw str = L"Camera: pitch:";
     str += camera->getPitch();
     str += L"  dir:";
     str += camera->getDirection().X;
     str += L",";
     str += camera->getDirection().Y;
+    str += L",";
+    str += camera->getDirection().Z;
+    str += " ## o: ";
+    str += DEG_TO_RAD(camera->getHeading());
     str += L"  Pos: ";
-    str = (((((str + camera->getPosition().X) + L" | ") + camera->getPosition().Y) + L" | ") + camera->getPosition().Z); 
+    str = ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | ") + wp.o; 
     str += L"  -- Terrain: Sectors: ";
     str += (int)terrain->getSectorsRendered();
     str += L" / ";
@@ -260,10 +268,10 @@ void SceneWorld::UpdateTerrain(void)
                         {
                             for(uint32 hx = 0; hx < 9; hx++)
                             {
-                                f32 h = chunk->hmap_rough[hx * 9 + hy] + chunk->baseheight; // not sure if hx and hy are used correctly here
-                                u32 terrainx = (144 * tiley) + (9 * chx) + hx;
-                                u32 terrainy = (144 * tilex) + (9 * chy) + hy;
-                                terrain->setHeight(terrainx, terrainy, h);
+                                f32 h = chunk->hmap_rough[hy * 9 + hx] + chunk->baseheight; // not sure if hx and hy are used correctly here
+                                u32 terrainx = (144 * tilex) + (9 * chx) + hx;
+                                u32 terrainy = (144 * tiley) + (9 * chy) + hy;
+                                terrain->setHeight(terrainy, terrainx, h);
                             }
                         }
                     }
@@ -289,7 +297,7 @@ void SceneWorld::UpdateTerrain(void)
         }
     f32 heightdiff = highest - lowest;
 
-    // randomize terrain color dependng on height
+    // randomize terrain color depending on height
     for(s32 j=0; j<terrain->getSize().Height+1; j++)
         for(s32 i=0; i<terrain->getSize().Width+1; i++)
         {
@@ -304,3 +312,47 @@ void SceneWorld::UpdateTerrain(void)
     logdebug("SceneWorld: Smoothing terrain normals...");
     terrain->smoothNormals();
 }
+
+WorldPosition SceneWorld::GetWorldPosition(void)
+{
+    // TODO: later do not use CAMERA, but CHARACTER position, as soon as camera is changed from 1st to 3rd person view
+    // and floating around character in the middle
+    vector3df cam = camera->getPosition();
+    // TODO: need to correct camera values, the coords irrlicht returns are not suitable
+
+    // get the current maptile and use the coords of the top-left corner as relative positions
+    MapTile *tile = mapmgr->GetCurrentTile();
+    float mapx = tile->GetBaseX();
+    float mapy = tile->GetBaseY();
+    return WorldPosition(cam.X + mapx, cam.Z + mapy, cam.Y, DEG_TO_RAD(camera->getHeading()));
+}
+
+void SceneWorld::SetWorldPosition(WorldPosition wp)
+{
+    UpdateTerrain();
+    vector3df cam;
+    dimension2d<s32> tsize = terrain->getSize();
+    MapTile *tile = mapmgr->GetTile(MapMgr::GetGridCoord(wp.x), MapMgr::GetGridCoord(wp.y));
+    ASSERT(tile == mapmgr->GetCurrentTile()); // for debugging; we should already be located on the new tile
+    if(!tile)
+    {
+        logerror("SceneWorld::SetWorldPosition(): MapTile not loaded!");
+        return;
+    }
+    cam.X = tile->GetBaseX() - wp.x + (tsize.Width * UNITSIZE);
+    cam.Y = tile->GetBaseX() - wp.y + (tsize.Height * UNITSIZE);
+    float heading = RAD_TO_DEG(wp.o);
+    float heading_diff = camera->getHeading() - heading; 
+    logdebug("Setting camera to x: %3f y: %3f z:%3f head: %3f", cam.X, cam.Y, cam.Z, heading);
+    
+    // TODO:
+    // - correct the above formulas
+    // - find out terrain height where the camera should be set
+    // - set camera to correct position
+    // - correct camera turning
+    //camera->setPosition(cam);
+    //camera->turnRight(heading_diff);
+}
+
+
+

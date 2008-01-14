@@ -19,6 +19,8 @@ class Scene
 public:
     Scene(PseuGUI *g);
     ~Scene();
+    inline void SetState(SceneState sc) { _scenestate = sc; }
+    inline SceneState GetState(void) { return _scenestate; }
     virtual void OnUpdate(s32);
     virtual void OnDraw(void);
     virtual void OnDelete(void);    
@@ -29,6 +31,7 @@ protected:
     irr::video::IVideoDriver* driver;
     irr::scene::ISceneManager* smgr;
     irr::gui::IGUIEnvironment* guienv;
+    SceneState _scenestate;
 };
 
 class SceneGuiStart : public Scene
@@ -58,6 +61,10 @@ public:
     void OnUpdate(s32);
     void UpdateTerrain(void);
     void InitTerrain(void);
+
+    WorldPosition GetWorldPosition(void);
+    void SetWorldPosition(WorldPosition);
+
 private:
     ShTlTerrainSceneNode *terrain;
     MCameraFPS *camera;

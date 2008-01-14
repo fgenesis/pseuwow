@@ -32,7 +32,10 @@ public:
     void ImportFromADT(ADTFile*);
     float GetZ(float,float);
     void DebugDumpToFile(void);
-    inline MapChunk *GetChunk(uint32 x, uint32 y) { return &_chunks[x * 16 + y]; }
+    inline MapChunk *GetChunk(uint32 x, uint32 y) { return &_chunks[y * 16 + x]; }
+    inline float GetBaseX(void) { return _xbase; }
+    inline float GetBaseY(void) { return _ybase; }
+    inline float GetBaseHeight(void) { return _hbase; }
 
 private:
     MapChunk _chunks[256]; // 16x16
@@ -40,7 +43,7 @@ private:
     std::vector<std::string> _wmos;
     std::vector<std::string> _models;
 
-    float _xbase,_ybase;
+    float _xbase,_ybase,_hbase;
 
 };
 

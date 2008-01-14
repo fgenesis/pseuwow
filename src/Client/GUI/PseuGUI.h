@@ -3,6 +3,7 @@
 
 #include "irrlicht/irrlicht.h"
 #include "DrawObjMgr.h"
+#include "World.h"
 
 class PseuGUI;
 class Object;
@@ -75,6 +76,10 @@ public:
     void DrawCurrentScene(void);
     void SetSceneState(SceneState);
 
+    // helpers
+    WorldPosition GetWorldPosition(void);
+    void SetWorldPosition(WorldPosition);
+
 private:
     void _Init(void);
     void _UpdateSceneState(void);
@@ -94,6 +99,8 @@ private:
     irr::ITimer *_timer;
     uint32 _passtime, _lastpasstime, _passtimediff;
     irr::core::dimension2d<irr::s32> _screendimension;
+    WorldPosition _worldpos_tmp;
+    bool _updateWorldPos;
 
 };
 

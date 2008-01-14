@@ -37,9 +37,11 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
     uint32 texturecnt=0,modelcnt=0,wmocnt=0;
     uint32 size; // used for every chunk
     uint32 mcnkid=0;
-    uint8 *fourcc = new uint8[5]; fourcc[4]=0;
+    uint8 _cc[5];
+    uint8 *fourcc = &_cc[0];
+    fourcc[4]=0;
 
-    while(buf.rpos()<buf.size())
+    while(buf.rpos() < buf.size())
     {
         buf.read(fourcc,4); flipcc(fourcc); 
         buf.read((uint8*)&size,4);
@@ -150,7 +152,9 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
         else if(!strcmp((char*)fourcc,"MCNK"))
         {
             _chunks[mcnkid].hdr = buf.read<ADTMapChunkHeader>();
-            uint8 *mfcc = new uint8[5]; mfcc[4]=0;
+            uint8 _cc2[5];
+            uint8 *mfcc = &_cc2[0];
+            mfcc[4]=0;
             uint32 msize;
             while(buf.rpos()<buf.size())
             {
@@ -204,7 +208,8 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 }
                 else if(!strcmp((char*)mfcc,"MCLQ"))
                 {
-                    uint8 *fcc1 = new uint8[5];
+                    uint8 _cc3[5];
+                    uint8 *fcc1 = &_cc3[0];
                     buf.read(fcc1,4);
                     flipcc(fcc1);
                     fcc1[4]=0;
@@ -213,7 +218,6 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                         _chunks[mcnkid].haswater = false;
                         //DEBUG(printf("ADT: MCNK: MCLQ not present\n"));
                         buf.rpos(buf.rpos()-4);
-                        delete [] fcc1;
                         continue; // next block read will be the MCSE block
                     }
                     else
@@ -248,7 +252,6 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                         diffbytes = (msize-8) - rbytes; // dont forget to skip the 8 initial bytes
                         buf.rpos(buf.rpos()+diffbytes);
                         //DEBUG(printf("ADT: MCNK: MCLQ - %u junk bytes skipped\n",diffbytes));
-                        delete [] fcc1;
                     }
                 }
                 else if(!strcmp((char*)mfcc,"MCSE"))
@@ -266,14 +269,13 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                     if(!(isalnum(mfcc[0]) && isalnum(mfcc[1]) && isalnum(mfcc[2]) && isalnum(mfcc[3])))
                     {
                         printf("Error loading ADT file (chunk %u error).\n",mcnkid);
-                        return false; // dont care about those few mem leaks
+                        return false;
                     }
                         
                     buf.rpos(buf.rpos()+msize);
                 }
 
             }
-            delete [] mfcc;
             mcnkid++;
         }
         else
@@ -282,13 +284,12 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
             if(!(isalnum(fourcc[0]) && isalnum(fourcc[1]) && isalnum(fourcc[2]) && isalnum(fourcc[3])))
             {
                 printf("Error loading ADT file.\n");
-                return false; // dont care about those few mem leaks
+                return false;
             }
             buf.rpos(buf.rpos()+size);
         }
 
     }
-    delete [] fourcc;
     return true;
 }
 
