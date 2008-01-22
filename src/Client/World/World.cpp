@@ -52,14 +52,15 @@ void World::Update(void)
 
 void World::UpdatePos(float x, float y, uint32 m)
 {
-    UpdatePos(x,y);
     _mapId = m;
+    UpdatePos(x,y);
 }
 
 void World::UpdatePos(float x, float y)
 {
     _x = x;
     _y = y;
+    Update();
 }
 
 float World::GetPosZ(float x, float y)
