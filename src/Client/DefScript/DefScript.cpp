@@ -375,6 +375,11 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
         }
         else if(line=="loop")
             Blocks.push_back(BLOCK_LOOP);
+        else if(line=="exitloop" && !Blocks.size()) // TODO: check: at least one BLOCK_LOOP must be opened
+        {
+            cantload=true;
+            break;
+        }
         else if(line=="endloop")
         {
             if(Blocks.empty() || Blocks.back()!=BLOCK_LOOP)
