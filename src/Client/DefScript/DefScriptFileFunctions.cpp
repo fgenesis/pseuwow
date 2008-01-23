@@ -113,13 +113,22 @@ DefReturnResult DefScriptPackage::func_fwrite(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::func_fread(CmdSet& Set)
 {
-    std::fstream *fh = files.GetNoCreate(_NormalizeVarName(Set.arg[0],Set.myname));
+    std::string fn = _NormalizeVarName(Set.arg[0],Set.myname);
+    std::fstream *fh = files.GetNoCreate(fn);
     if(fh && fh->is_open())
     {
         uint64 bytes;
         uint64 read = 0;
         if(stringToLower(Set.defaultarg) == "all")
-            bytes = -1LL;
+        {
+            std::fstream::pos_type begin_pos, end_pos, old_pos = fh->tellg();
+            fh->seekg(0, std::ios_base::beg);
+            begin_pos=fh->tellg();
+            fh->seekg(0, std::ios_base::end);
+            end_pos = fh->tellg();
+            fh->seekg(old_pos, std::ios_base::beg);
+            bytes = (end_pos - begin_pos);
+        }
         else
             bytes = toUint64(Set.defaultarg);
         std::string ret;
