@@ -538,6 +538,10 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     bool isCmd=false;
 
     recvPacket >> type >> lang;
+
+    if(lang == LANG_ADDON && GetInstance()->GetConf()->skipaddonchat)
+        return;
+
     recvPacket >> source_guid >> unk; // added in 2.1.0
     if (type == CHAT_MSG_CHANNEL)
     {	
@@ -692,6 +696,10 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
                     logdebug("Found Item in chat message: %u",id);
                     if(objmgr.GetItemProto(id)==NULL)
                         SendQueryItem(id,0);
+                }
+                else
+                {
+                    logdebug("Tried to find ItemID in chat message, but link seems incorrect");
                 }
             }
         }
