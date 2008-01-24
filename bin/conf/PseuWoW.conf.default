@@ -113,5 +113,9 @@ rmcontrolhost=localhost
 // PseuWoW will need more memory with maps enabled!
 useMaps=0
 
+// Addon language is usually not shown by client
+// Since addons are far from beeing used in PseuWoW, we can completely ignore addon chat messages.
+// Sometimes they even cause problems, like make the console window beep...
+SkipAddonChat=1
 
 

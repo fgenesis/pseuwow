@@ -54,6 +54,7 @@ class PseuInstanceConf
     uint32 rmcontrolport;
     std::string rmcontrolhost;
     bool useMaps;
+    bool skipaddonchat;
 
     // gui related
     bool enablegui;

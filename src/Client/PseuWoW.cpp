@@ -413,6 +413,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     rmcontrolport=atoi(v.Get("RMCONTROLPORT").c_str());
     rmcontrolhost=v.Get("RMCONTROLHOST");
     useMaps=(bool)atoi(v.Get("USEMAPS").c_str());
+    useMaps=(bool)atoi(v.Get("SKIPADDONCHAT").c_str());
 
     // clientversion is a bit more complicated to add
     {
