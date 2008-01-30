@@ -1371,4 +1371,7 @@ enum SpellCastTargetFlags
     TARGET_FLAG_STRING           = 0x2000
 };
 
+#define MAX_PLAYERNAME_LENGTH 12
+#define MIN_PLAYERNAME_LENGTH 2
+
 #endif

@@ -88,7 +88,8 @@ DefReturnResult DefScriptPackage::func_bbread(CmdSet& Set)
         if(bytes)
         {
             std::string g;
-            char *buf = new char[bytes];
+            char *buf = new char[bytes+1]; // +1 for \0
+            buf[bytes] = 0;
             bb->read((uint8*)buf,bytes);
             g = buf;
             delete [] buf;
