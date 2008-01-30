@@ -222,6 +222,8 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 	uint64 guid;
 	uint8 mode, flags; // mode: player flags; flags: channel flags
     std::string name;
+    bool must_delay = false;
+
 	recvPacket >> unk >> name >> flags >> size;
 
 	for(uint32 i = 0; i < size; i++)
@@ -231,10 +233,12 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
         if(_worldSession->GetOrRequestPlayerName(guid).empty())
         {
             _worldSession->_DelayWorldPacket(recvPacket, _worldSession->GetLagMS() * 1.2f);
-            return;
+            must_delay = true;
         }
 		cpl[guid] = mode;
 	}
+    if(must_delay)
+        return;
 
     // store list of GUIDs in: @ChannelList - see below
     DefList *l = _worldSession->GetInstance()->GetScripts()->lists.Get("@ChannelList");
@@ -253,7 +257,7 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 		muted = mode & MEMBER_FLAG_MUTED;
 		mod = mode & MEMBER_FLAG_MODERATOR;
 
-		while(pname.length()<12)
+		while(pname.length() < MAX_PLAYERNAME_LENGTH)
 			pname += " "; // for better formatting
 
 		logcustom(0,WHITE,"%s ["I64FMT"] %s %s",pname.c_str(),i->first,muted?"(muted)":"",mod?"(moderator)":"");
