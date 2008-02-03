@@ -56,7 +56,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("bbgetpackedguid",&DefScriptPackage::SCBBGetPackedGuid);
     AddFunc("bbputpackedguid",&DefScriptPackage::SCBBPutPackedGuid);
     AddFunc("gui",&DefScriptPackage::SCGui);
-    AddFunc("sendwho",DefScriptPackage::SCSendWho);
+    AddFunc("sendwho",&DefScriptPackage::SCSendWho);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
