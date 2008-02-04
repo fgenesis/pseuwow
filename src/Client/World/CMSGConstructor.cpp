@@ -47,6 +47,7 @@ void WorldSession::SendPing(uint32 ping)
         return;
     WorldPacket packet;
     packet << ping;
+    packet << GetLagMS();
     packet.SetOpcode(CMSG_PING);
     SendWorldPacket(packet);
 }
