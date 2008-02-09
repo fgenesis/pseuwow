@@ -72,7 +72,8 @@ private:
     ZThread::FastMutex mutex;
     PseuGUI *gui;
     uint32 map_gridX, map_gridY;
-    s32 mapsize, tilesize, meshsize;
+    s32 mapsize, meshsize;
+    f32 tilesize;
     WorldSession *wsession;
     MapMgr *mapmgr;
     IGUIStaticText *debugText;

@@ -5,6 +5,7 @@
 
 MapMgr::MapMgr()
 {
+    DEBUG(logdebug("Creating MapMgr with TILESIZE=%.3f CHUNKSIZE=%.3f UNITSIZE=%.3f",TILESIZE,CHUNKSIZE,UNITSIZE));
     _tiles = new MapTileStorage();
     _gridx = _gridy = _mapid = (-1);
     _mapsLoaded = false;

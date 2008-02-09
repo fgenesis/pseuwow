@@ -89,7 +89,7 @@ void ObjMgr::AddNonexistentItem(uint32 id)
 
 bool ObjMgr::ItemNonExistent(uint32 id)
 {
-    return _noitem.find(id) == _noitem.end();
+    return _noitem.find(id) != _noitem.end();
 }
 
 void ObjMgr::AddRequestedPlayerGUID(uint32 loguid)
