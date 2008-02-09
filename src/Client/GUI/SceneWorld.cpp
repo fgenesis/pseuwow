@@ -16,6 +16,11 @@
 #define ANGLE_STEP (M_PI/180) 
 #define DEG_TO_RAD(x) ((x)*ANGLE_STEP)
 #define RAD_TO_DEG(x) ((x)/ANGLE_STEP)
+#define RAD_FIX(x) ( (x)>(2*M_PI) ? ((x)-(2*M_PI)) : (x) )
+#define DEG_FIX(x) ( (x)>360 ? ((x)-360) : (x) )
+
+#define COORD_SCALE_VALUE_X 0.336f
+#define COORD_SCALE_VALUE_Y 0.2f
 
 
 
@@ -163,16 +168,16 @@ void SceneWorld::OnUpdate(s32 timediff)
     WorldPosition wp = GetWorldPosition();
     core::stringw str = L"Camera: pitch:";
     str += camera->getPitch();
-    str += L"  dir:";
-    str += camera->getDirection().X;
+    str += L"  c pos:";
+    str += camera->getPosition().X;
     str += L",";
-    str += camera->getDirection().Y;
+    str += camera->getPosition().Y;
     str += L",";
-    str += camera->getDirection().Z;
-    str += " ## o: ";
+    str += camera->getPosition().Z;
+    str += " ## HEAD: ";
     str += DEG_TO_RAD(camera->getHeading());
     str += L"  Pos: ";
-    str = ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | ") + wp.o; 
+    str = ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o; 
     str += L"  -- Terrain: Sectors: ";
     str += (int)terrain->getSectorsRendered();
     str += L" / ";
@@ -201,7 +206,7 @@ void SceneWorld::InitTerrain(void)
         return;
     }
 
-    mapsize = 9 * 16 * 3; // 9 height floats in 16 chunks per tile per axis in 3 MapTiles
+    mapsize = 8 * 16 * 3; // 9-1 height floats in 16 chunks per tile per axis in 3 MapTiles
     tilesize = UNITSIZE;
     meshsize = CHUNKSIZE*3;
     vector3df terrainPos(0.0f, 0.0f, 0.0f); // TODO: use PseuWoW's world coords here?
@@ -264,13 +269,13 @@ void SceneWorld::UpdateTerrain(void)
                     for(uint32 chx = 0; chx < 16; chx++)
                     {
                         MapChunk *chunk = maptile->GetChunk(chx, chy);
-                        for(uint32 hy = 0; hy < 9; hy++)
+                        for(uint32 hy = 0; hy < 8; hy++)
                         {
-                            for(uint32 hx = 0; hx < 9; hx++)
+                            for(uint32 hx = 0; hx < 8; hx++)
                             {
                                 f32 h = chunk->hmap_rough[hy * 9 + hx] + chunk->baseheight; // not sure if hx and hy are used correctly here
-                                u32 terrainx = (144 * tilex) + (9 * chx) + hx;
-                                u32 terrainy = (144 * tiley) + (9 * chy) + hy;
+                                u32 terrainx = (128 * tilex) + (8 * chx) + hx;
+                                u32 terrainy = (128 * tiley) + (8 * chy) + hy;
                                 terrain->setHeight(terrainy, terrainx, h);
                             }
                         }
@@ -324,7 +329,13 @@ WorldPosition SceneWorld::GetWorldPosition(void)
     MapTile *tile = mapmgr->GetCurrentTile();
     float mapx = tile->GetBaseX();
     float mapy = tile->GetBaseY();
-    return WorldPosition(cam.X + mapx, cam.Z + mapy, cam.Y, DEG_TO_RAD(camera->getHeading()));
+
+    // the following formulas are NOT correct, just estimated. in most places they will differ from real expected values a lot!
+    float relx = cam.X * COORD_SCALE_VALUE_X + CHUNKSIZE;
+    float rely = cam.Z * COORD_SCALE_VALUE_Y + CHUNKSIZE;
+
+    float o = DEG_TO_RAD(camera->getHeading()) + ((M_PI*3.0f)/2.0f);
+    return WorldPosition(mapx - relx, mapy - rely, cam.Y, RAD_FIX(o) );
 }
 
 void SceneWorld::SetWorldPosition(WorldPosition wp)
@@ -340,10 +351,11 @@ void SceneWorld::SetWorldPosition(WorldPosition wp)
         return;
     }
     cam.X = tile->GetBaseX() - wp.x + (tsize.Width * UNITSIZE);
-    cam.Y = tile->GetBaseX() - wp.y + (tsize.Height * UNITSIZE);
-    float heading = RAD_TO_DEG(wp.o);
+    cam.Z = tile->GetBaseX() - wp.y + (tsize.Height * UNITSIZE);
+    float heading = RAD_TO_DEG(((M_PI*3.0f)/2.0f) - wp.o);
     float heading_diff = camera->getHeading() - heading; 
     logdebug("Setting camera to x: %3f y: %3f z:%3f head: %3f", cam.X, cam.Y, cam.Z, heading);
+    camera->turnLeft(heading_diff);
     
     // TODO:
     // - correct the above formulas
