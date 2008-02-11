@@ -11,7 +11,8 @@
 #include "Item.h"
 
 // increase this number whenever you change something that makes old files unusable
-uint32 ITEMPROTOTYPES_CACHE_VERSION = 0x00000002;
+uint32 ITEMPROTOTYPES_CACHE_VERSION = 3;
+uint32 CREATURETEMPLATES_CACHE_VERSION = 0;
 
 PlayerNameCache::~PlayerNameCache()
 {
@@ -162,7 +163,11 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         return;
     }
 
-	uint32 cacheversion;
+	uint32 cacheversion, total;
+
+    try
+    {
+
 	fh.read((char*)&cacheversion,4);
 	if(cacheversion != ITEMPROTOTYPES_CACHE_VERSION)
 	{
@@ -170,27 +175,24 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
 		fh.close();
 		return;
 	}
+    fh.read((char*)&total,4);
+    logdetail("ItemProtoCache: %u item prototypes stored",total);
 
-    uint32 datasize,counter=0,unk;
+    uint32 datasize,unk, counter = 0;
     ByteBuffer buf;
-    while(!fh.eof())
+    for(uint32 i = 0; i < total && !fh.eof(); i++)
     {
         buf.clear();
         fh.read((char*)&datasize,sizeof(uint32));
+        DEBUG(logdebug("ItemProtoCache: (%u/%u) - datasize=%u",i,total,datasize));
         buf.resize(datasize);
-        if(buf.size() < datasize)
-        {
-            logerror("ItemProtoCache: Failed to resize ByteBuffer!");
-            return;
-        }
         fh.read((char*)buf.contents(),datasize);
-        ItemProto *proto = new ItemProto;
+        ItemProto *proto = new ItemProto();
         buf >> proto->Id;
         buf >> proto->Class;
         buf >> proto->SubClass;
 		buf >> unk;
-        for(uint8 i=0;i<4;i++)
-            buf >> proto->Name[i];
+        buf >> proto->Name;
         buf >> proto->DisplayInfoID;
         buf >> proto->Quality;
         buf >> proto->Flags;
@@ -280,13 +282,21 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         } else
             delete proto;
     }
+
+    }
+    catch (ByteBufferException bbe)
+    {
+        logerror("ByteBuffer exception: attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)",
+            bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
+    }
+
     fh.close();
-    logdetail("ItemProtoCache: Loaded %u Item Prototypes",counter);
+    logdetail("ItemProtoCache: Loaded %u Item Prototypes",total);
 }
 
 void ItemProtoCache_WriteDataToCache(WorldSession *session)
 {
-	if (session->objmgr.GetItemProtoCount() <= 0)
+	if (!session->objmgr.GetItemProtoCount())
 		return;
 
     char* fn = "./cache/ItemPrototypes.cache";
@@ -297,18 +307,21 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         logerror("ItemProtoCache: Could not write to file '%s'!",fn);
         return;
     }
+
+    uint32 total = session->objmgr.GetItemProtoCount();
 	fh.write((char*)&(uint32)ITEMPROTOTYPES_CACHE_VERSION,4);
+    fh.write((char*)&total,4);
+
     uint32 counter=0;
     ByteBuffer buf;
-    for(uint32 i=0;i<session->objmgr.GetItemProtoCount();i++)
+    for(ItemProtoMap::iterator it = session->objmgr.GetItemProtoStorage()->begin(); it != session->objmgr.GetItemProtoStorage()->end(); it++)
     {
         buf.clear();
-        ItemProto *proto = session->objmgr.GetItemProtoByPos(i);
+        ItemProto *proto = it->second;
         buf << proto->Id;
         buf << proto->Class;
         buf << proto->SubClass;
-        for(uint8 i=0;i<4;i++)
-            buf << proto->Name[i];
+        buf << proto->Name;
         buf << proto->DisplayInfoID;
         buf << proto->Quality;
         buf << proto->Flags;
@@ -398,4 +411,118 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
     }
     fh.close();
     log("ItemProtoCache: Saved %u Item Prototypes",counter);
+}
+
+void CreatureTemplateCache_InsertDataToSession(WorldSession *session)
+{
+    logdetail("CreatureTemplateCache: Loading...");
+    char* fn = "./cache/CreatureTemplates.cache";
+    std::fstream fh;
+    fh.open(fn, std::ios_base::in | std::ios_base::binary);
+    if(!fh)
+    {
+        logerror("CreatureTemplateCache: Could not open file '%s'!",fn);
+        return;
+    }
+
+    uint32 cacheversion, total, counter = 0;
+
+    try
+    {
+
+    fh.read((char*)&cacheversion,4);
+    if(cacheversion != CREATURETEMPLATES_CACHE_VERSION)
+    {
+        logerror("CreatureTemplateCache is outdated! Creating new cache.");
+        fh.close();
+        return;
+    }
+    fh.read((char*)&total,4);
+    logdetail("CreatureTemplateCache: %u creature templates stored",total);
+
+    uint32 datasize;
+    ByteBuffer buf;
+    for(uint32 i = 0; i < total && !fh.eof(); i++)
+    {
+        buf.clear();
+        fh.read((char*)&datasize,sizeof(uint32));
+        buf.resize(datasize);
+        fh.read((char*)buf.contents(),datasize);
+        CreatureTemplate *ct = new CreatureTemplate();
+        buf >> ct->entry;
+        buf >> ct->name;
+        buf >> ct->subname;
+        buf >> ct->flag1;
+        buf >> ct->type;
+        buf >> ct->family;
+        buf >> ct->rank;
+        buf >> ct->SpellDataId;
+        buf >> ct->displayid_A;
+        buf >> ct->displayid_H;
+        buf >> ct->displayid_AF;
+        buf >> ct->displayid_HF;
+        buf >> ct->RacialLeader;
+
+        if(ct->entry)
+        {
+            session->objmgr.Add(ct);
+            counter++;
+        } else
+            delete ct;
+    }
+
+    }
+    catch (ByteBufferException bbe)
+    {
+        logerror("ByteBuffer exception: attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)",
+            bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
+    }
+
+    fh.close();
+    logdetail("CreatureTemplateCache: Loaded %u Creature Templates",counter);
+}
+
+void CreatureTemplateCache_WriteDataToCache(WorldSession *session)
+{
+    if (!session->objmgr.GetCreatureTemplateCount())
+        return;
+
+    char* fn = "./cache/CreatureTemplates.cache";
+    std::fstream fh;
+    fh.open(fn, std::ios_base::out | std::ios_base::binary);
+    if(!fh)
+    {
+        logerror("CreatureTemplateCache: Could not write to file '%s'!",fn);
+        return;
+    }
+    uint32 total = session->objmgr.GetCreatureTemplateCount();
+    fh.write((char*)&(uint32)CREATURETEMPLATES_CACHE_VERSION,4);
+    fh.write((char*)&total,4);
+    uint32 counter=0;
+    ByteBuffer buf;
+    for(CreatureTemplateMap::iterator it = session->objmgr.GetCreatureTemplateStorage()->begin(); it != session->objmgr.GetCreatureTemplateStorage()->end(); it++)
+    {
+        buf.clear();
+        CreatureTemplate *ct = it->second;
+        buf << ct->entry;
+        buf << ct->name;
+        buf << ct->subname;
+        buf << ct->flag1;
+        buf << ct->type;
+        buf << ct->family;
+        buf << ct->rank;
+        buf << ct->SpellDataId;
+        buf << ct->displayid_A;
+        buf << ct->displayid_H;
+        buf << ct->displayid_AF;
+        buf << ct->displayid_HF;
+        buf << ct->RacialLeader;
+
+        uint32 size = buf.size();
+        fh.write((char*)&size,sizeof(uint32));
+        fh.write((char*)buf.contents(),buf.size());
+        counter++;
+    }
+    fh.close();
+    log("CreatureTemplateCache: Saved %u Creature Templates",counter);
 }

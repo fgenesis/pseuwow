@@ -3,10 +3,11 @@
 
 #include "common.h"
 #include <set>
-#include "Object.h"
 #include "Item.h"
+#include "Unit.h"
 
-typedef std::vector<ItemProto*> ItemProtoList;
+typedef std::map<uint32,ItemProto*> ItemProtoMap;
+typedef std::map<uint32,CreatureTemplate*> CreatureTemplateMap;
 typedef std::map<uint64,Object*> ObjectMap;
 
 class PseuInstance;
@@ -22,12 +23,22 @@ public:
     // Item Prototype functions
     uint32 GetItemProtoCount(void) { return _iproto.size(); }
     ItemProto *GetItemProto(uint32);
-    ItemProto *GetItemProtoByPos(uint32);
     void Add(ItemProto*);
+    ItemProtoMap *GetItemProtoStorage(void) { return &_iproto; }
 
     // nonexistent items handler
     void AddNonexistentItem(uint32);
     bool ItemNonExistent(uint32);
+
+    // Creature template functions
+    uint32 GetCreatureTemplateCount(void) { return _creature_templ.size(); }
+    CreatureTemplate *GetCreatureTemplate(uint32);
+    void Add(CreatureTemplate*);
+    CreatureTemplateMap *GetCreatureTemplateStorage(void) { return &_creature_templ; }
+
+    // nonexistent creatures handler
+    void AddNonexistentCreature(uint32);
+    bool CreatureNonExistent(uint32);
 
     // player names related
     void AddRequestedPlayerGUID(uint32);
@@ -41,12 +52,15 @@ public:
     void Remove(uint64); // remove all objects with that guid (should be only 1 object in total anyway)
     Object *GetObj(uint64 guid);
     inline uint32 GetObjectCount(void) { return _obj.size(); }
+    uint32 AssignNameToObj(uint32 entry, uint8 type, std::string name);
 
 private:
-    ItemProtoList _iproto;
+    ItemProtoMap _iproto;
+    CreatureTemplateMap _creature_templ;
     ObjectMap _obj;
     std::set<uint32> _noitem;
     std::set<uint32> _reqpnames;
+    std::set<uint32> _nocreature;
     PseuInstance *_instance;
 
 };

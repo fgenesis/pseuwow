@@ -88,6 +88,7 @@ void WorldSession::_LoadCache(void)
     logdetail("Loading Cache...");
     plrNameCache.ReadFromFile(); // load names/guids of known players
     ItemProtoCache_InsertDataToSession(this);
+    CreatureTemplateCache_InsertDataToSession(this);
     //...
 }
 
@@ -190,6 +191,13 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
         }
 
     }
+    catch (ByteBufferException bbe)
+    {
+        logerror("WorldSession: ByteBufferException");
+        logerror("ByteBuffer reported: attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)",
+            bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
+        throw;
+    }
     catch (...)
     {
         logerror("Exception while handling opcode %u!",packet->GetOpcode());
@@ -253,6 +261,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_MOTD, &WorldSession::_HandleMotdOpcode},
         {SMSG_NOTIFICATION, &WorldSession::_HandleNotificationOpcode},
         {SMSG_WHO, &WorldSession::_HandleWhoOpcode},
+        {SMSG_CREATURE_QUERY_RESPONSE, &WorldSession::_HandleCreatureQueryResponseOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -532,12 +541,23 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     uint32 lang=0;
     uint64 source_guid=0;
     uint64 target_guid=0;
+    uint64 npc_guid=0; // for CHAT_MSG_MONSTER_SAY
     uint32 msglen=0;
     uint32 unk=0;
+    uint32 npc_name_len;
+    std::string npc_name;
     std::string msg,channel="";
     bool isCmd=false;
 
     recvPacket >> type >> lang;
+
+    if(lang == CHAT_MSG_MONSTER_SAY)
+    {
+        recvPacket >> npc_guid;
+        recvPacket >> unk;
+        recvPacket >> npc_name_len;
+        recvPacket >> npc_name;
+    }
 
     if(lang == LANG_ADDON && GetInstance()->GetConf()->skipaddonchat)
         return;
@@ -551,18 +571,24 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 
     std::string langname = GetDBMgr().GetLangName(lang);
     const char* ln = langname.c_str();
+    std::string name;
 
-    std::string plrname;
-    if(source_guid)
+    if(type == CHAT_MSG_MONSTER_SAY)
     {
-        plrname = GetOrRequestPlayerName(source_guid);
-        if(plrname.empty())
+        name = npc_name;
+        source_guid = npc_guid;
+    }
+
+    if(source_guid && IS_PLAYER_GUID(source_guid))
+    {
+        name = GetOrRequestPlayerName(source_guid);
+        if(name.empty())
         {
             _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f); // guess time how long it will take until we got player name from the server
             return; // handle later
         }
     }
-    GetInstance()->GetScripts()->variables.Set("@thismsg_name",plrname);
+    GetInstance()->GetScripts()->variables.Set("@thismsg_name",name);
     GetInstance()->GetScripts()->variables.Set("@thismsg",toString(target_guid));
 
 
@@ -575,39 +601,43 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     }
     else if (type==CHAT_MSG_WHISPER )
     {
-        logcustom(0,WHITE,"WHISP: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"WHISP: %s [%s]: %s",name.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_CHANNEL )
     {
-        logcustom(0,WHITE,"CHANNEL: [%s]: %s [%s]: %s",channel.c_str(),plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"CHANNEL: [%s]: %s [%s]: %s",channel.c_str(),name.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_SAY )
     {
-        logcustom(0,WHITE,"CHAT: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"CHAT: %s [%s]: %s",name.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_YELL )
     {
-        logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",name.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_WHISPER_INFORM )
     {
-        logcustom(0,WHITE,"TO %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"TO %s [%s]: %s",name.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_GUILD )
     {
-        logcustom(0,WHITE,"GUILD: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"GUILD: %s [%s]: %s",name.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_PARTY )
     {
-        logcustom(0,WHITE,"PARTY: %s [%s]: %s",plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"PARTY: %s [%s]: %s",name.c_str(),ln,msg.c_str());
     }
     else if (type==CHAT_MSG_EMOTE )
     {
-        logcustom(0,WHITE,"EMOTE [%s]: %s %s",ln,plrname.c_str(),msg.c_str());
+        logcustom(0,WHITE,"EMOTE [%s]: %s %s",ln,name.c_str(),msg.c_str());
+    }
+    else if (type==CHAT_MSG_MONSTER_SAY)
+    {
+        logcustom(0,WHITE,"NPC: %s [%s]: %s",name.c_str(),ln,msg.c_str());
     }
     else
     {
-        logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,plrname.c_str(),ln,msg.c_str());
+        logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,name.c_str(),ln,msg.c_str());
     }
 
     if(target_guid!=GetGuid() && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
@@ -652,12 +682,12 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 
     if(isCmd)
     {
-        GetInstance()->GetScripts()->variables.Set("@thiscmd_name",plrname);
+        GetInstance()->GetScripts()->variables.Set("@thiscmd_name",name);
         GetInstance()->GetScripts()->variables.Set("@thiscmd",toString(target_guid));
         std::string lin=msg.substr(1,msg.length()-1);
         try
         {
-            GetInstance()->GetScripts()->My_Run(lin,plrname);
+            GetInstance()->GetScripts()->My_Run(lin,name);
         }
         catch (...)
         {
@@ -669,7 +699,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     // TODO: remove this block soon, its obsoelete and has to be done via scripting!
     if(type==CHAT_MSG_WHISPER && (!isCmd) && target_guid!=GetGuid())
     {
-        GetInstance()->GetScripts()->variables.Set("@thiswhisper_name",plrname);
+        GetInstance()->GetScripts()->variables.Set("@thiswhisper_name",name);
         GetInstance()->GetScripts()->variables.Set("@thiswhisper",toString(target_guid));
         GetInstance()->GetScripts()->variables.Set("@thiswhisper_lang",toString((uint64)lang));
         GetInstance()->GetScripts()->RunScript("_onwhisper",NULL);
@@ -860,11 +890,11 @@ void WorldSession::_HandleChannelNotifyOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 {
     uint32 spellid,otherr = 0;
-    uint8 result;
-    recvPacket >> spellid >> result;
-    if (recvPacket.rpos()+1 < recvPacket.size())
+    uint8 result, castCount;
+    recvPacket >> spellid >> result >> castCount;
+    if (recvPacket.rpos()+sizeof(uint32) <= recvPacket.size())
         recvPacket >> otherr;
-    logdetail("Cast of spell %u failed. result=%u, additional info=%u",spellid,result,otherr);
+    logdetail("Cast of spell %u failed. result=%u, cast count=%u, additional info=%u",spellid,result,castCount,otherr);
 }
 
 void WorldSession::_HandleCastSuccessOpcode(WorldPacket& recvPacket)
@@ -873,9 +903,18 @@ void WorldSession::_HandleCastSuccessOpcode(WorldPacket& recvPacket)
     uint64 casterGuid;
 
     casterGuid = recvPacket.GetPackedGuid();
-
     recvPacket >> spellId;
-    logdetail("Cast of spell %u successful.",spellId);
+
+    if (GetMyChar()->GetGUID() == casterGuid)
+        logdetail("Cast of spell %u successful.",spellId);
+    else 
+    {
+        Object *caster = objmgr.GetObj(casterGuid);
+        if(caster)
+            logdetail("%s casted spell %u", caster->GetName(), spellId);
+        else
+            logerror("Caster of spell %u (GUID "I64FMT") is unknown object!");
+    }
 }
 
 void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
@@ -916,24 +955,33 @@ void WorldSession::_HandleChannelListOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleEmoteOpcode(WorldPacket& recvPacket)
 {
-    std::string plrname;
+    std::string name;
     uint32 anim; // animation id?
     uint64 guid; // guid of the unit performing the emote
     recvPacket >> anim >> guid;
 
-    // TODO: check if the emote came from a player or a mob, and query mob name if it was a mob
     if(guid)
     {
-        plrname = GetOrRequestPlayerName(guid);
-        if(plrname.empty())
+        Object *o = objmgr.GetObj(guid);
+        if(o)
         {
-            _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f);
-            return;
+            name = o->GetName();
+        }
+        if(name.empty())
+        {
+            if(o->IsPlayer())
+            {
+                name = GetOrRequestPlayerName(guid);
+                if(name.empty())
+                {
+                    _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f);
+                    return;
+                }
+            }
         }
     }
 
-    // TODO: check for mobs
-    logdebug(I64FMT " / %s performing emote; anim=%u",guid,plrname.c_str(),anim);
+    logdebug(I64FMT " / %s performing emote; anim=%u",guid,name.c_str(),anim);
 
     // TODO: show emote in GUI :P
 }
@@ -1110,8 +1158,60 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
     }
 }
 
+void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
+{
+    uint32 entry;
+    recvPacket >> entry;
+    if( (!entry) || (entry & 0x80000000) ) // last bit marks that entry is invalid / does not exist on server side
+    {
+        uint32 real_entry = entry & ~0x80000000;
+        logerror("Creature %u does not exist!", real_entry);
+        objmgr.AddNonexistentCreature(real_entry);
+        return;
+    }
+
+    CreatureTemplate *ct = new CreatureTemplate();
+    std::string s;
+    uint32 unk;
+    float unkf;
+    ct->entry = entry;
+    recvPacket >> ct->name;
+    recvPacket >> s;
+    recvPacket >> s;
+    recvPacket >> s;
+    recvPacket >> ct->subname;
+    recvPacket >> ct->directions;
+    recvPacket >> ct->flag1;
+    recvPacket >> ct->type;
+    recvPacket >> ct->family;
+    recvPacket >> ct->rank;
+    recvPacket >> unk;
+    recvPacket >> ct->SpellDataId;
+    recvPacket >> ct->displayid_A;
+    recvPacket >> ct->displayid_H;
+    recvPacket >> ct->displayid_AF;
+    recvPacket >> ct->displayid_HF;
+    recvPacket >> unkf;
+    recvPacket >> unkf;
+    recvPacket >> ct->RacialLeader;
+
+    std::stringstream ss;
+    ss << "Got info for creature " << entry << ":" << ct->name;
+    if(!ct->subname.empty())
+        ss << " <" << ct->subname << ">";
+    ss << " type " << ct->type;
+    ss << " flags " << ct->flag1;
+    ss << " models " << ct->displayid_A << "/" << ct->displayid_H;
+    logdetail("%s",ss.str().c_str());
+
+    objmgr.Add(ct);
+    objmgr.AssignNameToObj(entry, TYPEID_UNIT, ct->name);
+}
+    
+
 
 // TODO: delete world on LogoutComplete once implemented
+
 
 
 

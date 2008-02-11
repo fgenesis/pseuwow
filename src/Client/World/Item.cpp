@@ -6,18 +6,19 @@
 
 void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 {
-    ItemProto *proto = new ItemProto;
+    ItemProto *proto = new ItemProto();
     recvPacket >> proto->Id;
     uint8 field[64];
 	uint32 unk;
+    std::string s;
     memset(field,0,64);
     if(memcmp(recvPacket.contents()+sizeof(uint32),field,64))
     {
         recvPacket >> proto->Class;
         recvPacket >> proto->SubClass;
 		recvPacket >> unk; // dont need that value?
-        for(uint8 i=0;i<4;i++)
-            recvPacket >> proto->Name[i];
+        recvPacket >> proto->Name;
+        recvPacket >> s >> s >> s; // strip name1-4
         recvPacket >> proto->DisplayInfoID;
         recvPacket >> proto->Quality;
         recvPacket >> proto->Flags;
@@ -98,8 +99,10 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 		recvPacket >> proto->ArmorDamageModifier; 
 
         logdetail("Got Item Info: Id=%u Name='%s' ReqLevel=%u Armor=%u Desc='%s'",
-            proto->Id, proto->Name[0].c_str(), proto->RequiredLevel, proto->Armor, proto->Description.c_str());
+            proto->Id, proto->Name.c_str(), proto->RequiredLevel, proto->Armor, proto->Description.c_str());
         objmgr.Add(proto);
+        objmgr.AssignNameToObj(proto->Id, TYPEID_ITEM, proto->Name);
+        objmgr.AssignNameToObj(proto->Id, TYPEID_CONTAINER, proto->Name);
     }
     else
     {

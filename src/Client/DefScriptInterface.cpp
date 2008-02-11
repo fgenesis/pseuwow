@@ -98,19 +98,24 @@ DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
 
 DefReturnResult DefScriptPackage::SCsavecache(CmdSet& Set){
    ((PseuInstance*)parentMethod)->SaveAllCache();
-    std::stringstream str;
-    if(((PseuInstance*)parentMethod)->GetWSession())
-    {
-        str << "Cache saved. [ ";
-        str << ((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetSize();
-        str << " Playernames, ";
-        str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProtoCount();
-        str << " Item Prototypes";
-        str << " ]";
+   if(DefScriptTools::isTrue(Set.defaultarg))
+   {
+        std::stringstream str;
+        if(((PseuInstance*)parentMethod)->GetWSession())
+        {
+            str << "Cache saved. [ ";
+            str << ((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetSize();
+            str << " Playernames, ";
+            str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProtoCount();
+            str << " Item Prototypes, ";
+            str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetCreatureTemplateCount();
+            str << " Creature Templates";
+            str << " ]";
 
-        ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str.str(),"");
-    }
-    return true;
+            ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str.str(),"");
+        }
+   }
+   return true;
 }
 
 DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){

@@ -41,6 +41,28 @@ enum UnitFlags
 	UNIT_FLAG_SHEATHE        = 0x40000000
 };
 
+struct CreatureTemplate
+{
+    uint32 entry;
+    std::string name;
+    std::string subname;
+    std::string directions;
+    uint32 flag1;
+    uint32 type;
+    uint32 family;
+    uint32 rank;
+    //uint32 unk1;
+    uint32 SpellDataId;
+    uint32 displayid_A;
+    uint32 displayid_H;
+    uint32 displayid_AF;
+    uint32 displayid_HF;
+    //float unkf1;
+    //float unkf2;
+    uint8 RacialLeader;
+};
+
+
 
 
 class Unit : public WorldObject

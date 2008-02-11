@@ -366,10 +366,14 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
         case TYPEID_CONTAINER:
             {
                 ItemProto *proto = objmgr.GetItemProto(obj->GetEntry());
-                if(!proto)
+                if(proto)
+                {
+                    obj->SetName(proto->Name);
+                }
+                else
                 {
                     logdebug("Found unknown item: GUID="I64FMT" entry=%u",obj->GetGUID(),obj->GetEntry());
-                    SendQueryItem(obj->GetEntry(),obj->GetGUID()); // not sure if sending GUID is correct
+                    SendQueryItem(obj->GetEntry(),guid); // not sure if sending GUID is correct
                 }
                 break;
             }
@@ -378,9 +382,18 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
                 std::string name = GetOrRequestPlayerName(obj->GetGUID());
                 if(!name.empty())
                 {
-                    ((WorldObject*)obj)->SetName(name);
+                    obj->SetName(name);
                 }
                 // else: name will be set when server answers (_HandleNameQueryResponseOpcode)
+                break;
+            }
+        case TYPEID_UNIT: // checked after player; this one here should cover creatures only
+            {
+                CreatureTemplate *ct = objmgr.GetCreatureTemplate(obj->GetEntry());
+                if(ct)
+                    obj->SetName(ct->name);
+                else
+                    SendQueryCreature(obj->GetEntry(),guid);
                 break;
             }
         //case...

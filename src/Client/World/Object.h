@@ -9,7 +9,7 @@ enum TYPE
 {
     TYPE_OBJECT         = 1,
     TYPE_ITEM           = 2,
-    TYPE_CONTAINER      = 6,
+    TYPE_CONTAINER      = 6, // a container is ALWAYS an item!
     TYPE_UNIT           = 8,
     TYPE_PLAYER         = 16,
     TYPE_GAMEOBJECT     = 32,
@@ -45,7 +45,14 @@ public:
 
     inline const uint8 GetTypeId() { return _typeid; }
     inline const uint8 GetTypeMask() { return _type; }
-    inline bool isType(uint8 mask) { return (mask & _type) ? true : false; }
+    inline bool IsType(uint8 mask) { return (mask & _type) ? true : false; }
+    inline bool IsPlayer(void) { return _typeid == TYPEID_PLAYER; }           // specific
+    inline bool IsUnit(void) { return _type & TYPE_UNIT; }                    // generic (unit = creature or player)
+    inline bool IsCreature(void) { return IsUnit() && !IsPlayer(); }          // specific
+    inline bool IsItem(void) { return _type & TYPE_ITEM; }                    // generic (item or container)
+    inline bool IsContainer(void) { return _typeid == TYPEID_CONTAINER; }     // specific
+    inline bool IsCorpse(void) { return _typeid == TYPEID_CORPSE; }           // specific
+    inline bool IsDynObject(void) { return _typeid == TYPEID_DYNAMICOBJECT; } // specific
     inline const uint32 GetUInt32Value( uint16 index ) const
     {
         return _uint32values[ index ];
@@ -73,6 +80,9 @@ public:
         _uint32values[ index ] = value;
     }
 
+    inline void SetName(std::string name) { _name = name; }
+    inline std::string GetName(void) { return _name; }
+
     void Create(uint64 guid);
     
 protected:
@@ -87,6 +97,7 @@ protected:
     };
     uint8 _type;
     uint8 _typeid;
+    std::string _name;
 };
 
 class WorldObject : public Object
@@ -99,13 +110,11 @@ public:
     inline float GetY(void) { return _y; }
     inline float GetZ(void) { return _z; }
     inline float GetO(void) { return _o; }
-    inline void SetName(std::string name) { _name = name; }
-    inline std::string GetName(void) { return _name; }
+
 protected:
     WorldObject();
     float _x,_y,_z,_o; // coords, orientation
     uint16 _m; // map
-    std::string _name;
 
 };
 

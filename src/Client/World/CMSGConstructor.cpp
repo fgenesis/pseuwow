@@ -63,16 +63,16 @@ void WorldSession::SendEmote(uint32 id)
     SendWorldPacket(packet);
 }
 
-void WorldSession::SendQueryItem(uint32 id, uint64 guid) // is it a guid? not sure
+void WorldSession::SendQueryItem(uint32 entry, uint64 guid) // is it a guid? not sure
 {
-    if(objmgr.ItemNonExistent(id))
+    if(objmgr.ItemNonExistent(entry))
     {
-        logdebug("Skipped query of item %u (was marked as nonexistent before)",id);
+        logdebug("Skipped query of item %u (was marked as nonexistent before)",entry);
         return;
     }
-    logdebug("Sending Item query, id=%u",id);
+    logdebug("Sending Item query, id=%u",entry);
     WorldPacket packet;
-    packet << id << guid;
+    packet << entry << guid;
     packet.SetOpcode(CMSG_ITEM_QUERY_SINGLE);
     SendWorldPacket(packet);
 }
@@ -179,7 +179,18 @@ void WorldSession::SendWhoListRequest(uint32 minlvl, uint32 maxlvl, uint32 racem
     SendWorldPacket(pkt);
 }
 
-
+void WorldSession::SendQueryCreature(uint32 entry, uint64 guid)
+{
+    if(objmgr.CreatureNonExistent(entry))
+    {
+        logdebug("Skipped query of creature %u (was marked as nonexistent before)",entry);
+        return;
+    }
+    logdebug("Sending creature query, id=%u",entry);
+    WorldPacket wp(CMSG_CREATURE_QUERY,4+8);
+    wp << entry << guid;
+    SendWorldPacket(wp);
+}
 
 
 
