@@ -913,7 +913,7 @@ void WorldSession::_HandleCastSuccessOpcode(WorldPacket& recvPacket)
         if(caster)
             logdetail("%s casted spell %u", caster->GetName(), spellId);
         else
-            logerror("Caster of spell %u (GUID "I64FMT") is unknown object!");
+            logerror("Caster of spell %u (GUID "I64FMT") is unknown object!",spellId,casterGuid);
     }
 }
 
