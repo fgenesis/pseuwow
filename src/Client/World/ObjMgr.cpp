@@ -94,8 +94,9 @@ void ObjMgr::Add(ItemProto *proto)
 
 ItemProto *ObjMgr::GetItemProto(uint32 entry)
 {
-    if(_iproto.find(entry) != _iproto.end())
-        return _iproto[entry];
+    ItemProtoMap::iterator it = _iproto.find(entry);
+    if(it != _iproto.end())
+        return it->second;
     return NULL;
 }
 
@@ -118,8 +119,9 @@ void ObjMgr::Add(CreatureTemplate *cr)
 
 CreatureTemplate *ObjMgr::GetCreatureTemplate(uint32 entry)
 {
-    if(_creature_templ.find(entry) != _creature_templ.end())
-        return _creature_templ[entry];
+    CreatureTemplateMap::iterator it = _creature_templ.find(entry);
+    if(it != _creature_templ.end())
+        return it->second;
     return NULL;
 }
 
