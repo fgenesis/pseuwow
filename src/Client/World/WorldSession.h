@@ -76,10 +76,11 @@ public:
     void SendQueryPlayerName(uint64 guid);
     void SendPing(uint32);
     void SendEmote(uint32);
-    void SendQueryItem(uint32, uint64);
+    void SendQueryItem(uint32 id, uint64 guid = 0);
     void SendSetSelection(uint64);
     void SendCastSpell(uint32 spellid, bool nocheck=false);
     void SendWhoListRequest(uint32 minlvl=0, uint32 maxlvl=100, uint32 racemask=-1, uint32 classmask=-1, std::string name="", std::string guildname="", std::vector<uint32> *zonelist=NULL, std::vector<std::string> *strlist=NULL);
+    void SendQueryCreature(uint32 entry, uint64 guid = 0);
 
     void HandleWorldPacket(WorldPacket*);
 
@@ -127,6 +128,7 @@ private:
     void _HandleMotdOpcode(WorldPacket& recvPacket);
     void _HandleNotificationOpcode(WorldPacket& recvPacket);
     void _HandleWhoOpcode(WorldPacket& recvPacket);
+    void _HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket);
 
     // helper functions to keep SMSG_(COMPRESSED_)UPDATE_OBJECT easy to handle
 	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode

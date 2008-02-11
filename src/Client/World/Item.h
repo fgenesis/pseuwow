@@ -354,7 +354,7 @@ struct ItemProto
     uint32 Id;
     uint32 Class;
     uint32 SubClass;
-    std::string Name[4];
+    std::string Name;
     uint32 DisplayInfoID;
     uint32 Quality;
     uint32 Flags;

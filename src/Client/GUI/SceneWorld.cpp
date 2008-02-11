@@ -327,6 +327,12 @@ WorldPosition SceneWorld::GetWorldPosition(void)
 
     // get the current maptile and use the coords of the top-left corner as relative positions
     MapTile *tile = mapmgr->GetCurrentTile();
+    if(!tile)
+    {
+        logerror("SceneWorld::GetWorldPosition failed, MapTile not loaded!");
+        return WorldPosition();
+    }
+
     float mapx = tile->GetBaseX();
     float mapy = tile->GetBaseY();
 

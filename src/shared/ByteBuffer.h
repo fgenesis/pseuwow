@@ -23,6 +23,21 @@
 #include <list>
 #include <map>
 
+class ByteBufferException
+{
+public:
+    ByteBufferException(const char *act, uint32 rp, uint32 wp, uint32 rs, uint32 cs)
+    {
+        action = act;
+        rpos = rp;
+        wpos = wp;
+        readsize = rs;
+        cursize = cs;
+    }
+    uint32 rpos, wpos, readsize, cursize;
+    const char *action;
+};
+
 class ByteBuffer
 {
     public:
@@ -188,6 +203,8 @@ class ByteBuffer
         };
         template <typename T> T read(size_t pos) const
         {
+            if(pos + sizeof(T) > size())
+                throw ByteBufferException("read", pos, _wpos, sizeof(T), size());
             return *((T*)&_storage[pos]);
         }
 
@@ -199,7 +216,7 @@ class ByteBuffer
             }
             else
             {
-                throw error();
+                throw ByteBufferException("read-into", _rpos, _wpos, len, size());
             }
             _rpos += len;
         }
