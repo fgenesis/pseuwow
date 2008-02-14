@@ -70,7 +70,7 @@ Object *ObjMgr::GetObj(uint64 guid)
     return NULL;
 }
 
-// iterate over all objects and assign a name to all matching the entry and typemask
+// iterate over all objects and assign a name to all matching the entry and typeid
 uint32 ObjMgr::AssignNameToObj(uint32 entry, uint8 type, std::string name)
 {
     uint32 changed = 0;
