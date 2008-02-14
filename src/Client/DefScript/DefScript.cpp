@@ -258,6 +258,8 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
 	std::string label, value, line, sn;
     std::fstream f;
     bool load_debug=false,load_notify=false,cantload=false;
+    bool line_strip = true; // true by default
+    bool commented = false;
     char z;
     unsigned int absline=0;
     DefScript *curScript = NULL;
@@ -301,12 +303,50 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
 			continue;
 		if(line.at(0)=='/' && line.at(1)=='/') 
 			continue; // line is comment, proceed with next line
-		if(line.at(0)=='#')
+
+        if(line_strip)
         {
-			line.erase(0,1); // remove #
-			label=line.substr(0,line.find('=',0));
-			value=line.substr(line.find('=',0)+1,line.length());
-			if(label=="permission")
+            // strip comments at the end of the line
+            unsigned int cmpos = 0;
+            while(true)
+            {
+                // note: this must also cover lines like: "out blah \// no-comment // comment"
+                cmpos = line.find("//",cmpos+1); // start searching at one position later then previous
+                if(cmpos != std::string::npos)
+                {
+                    if(line[cmpos-1] == '\\')
+                        continue;
+                    line = line.substr(0,cmpos);
+                    break;
+                }
+                else
+                    break;
+            }
+
+            // strip spaces at the end of the line
+            while(line.at(line.length()-1) == ' ' || line.at(line.length()-1) == '\t')
+            {
+                line.erase(line.length()-1,1);
+            }
+        }
+
+        // need to check comments-end seperatedly
+        if(line=="#ce" || line=="#comments-end")
+        {
+            commented = false;
+            continue;
+        }
+        
+        // commented lines will not be loaded nor have any #-tags evaluated (except the one above!)
+        if(commented)
+            continue;
+
+        if(line.at(0)=='#')
+        {
+            line.erase(0,1); // remove #
+            label=line.substr(0,line.find('=',0));
+            value=line.substr(line.find('=',0)+1,line.length());
+            if(label=="permission")
             {
                 scriptPermissionMap[sn] = atoi(value.c_str());
             }
@@ -318,6 +358,10 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                 _UpdateOrCreateScriptByName(sn);
                 _DEFSC_DEBUG(printf("DefScript: now loading '%s'\n",sn.c_str()));
                 curScript=Script[sn];
+            }
+            else if(label=="linestrip")
+            {
+                line_strip = isTrue(value);
             }
             else if(line=="debug")
             {
@@ -334,6 +378,10 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                 RunScript(SN_ONLOAD,NULL,sn);
                 DeleteScript(SN_ONLOAD);
                 curScript=Script[sn];
+            }
+            else if(line=="cs" || line=="comments-start")
+            {
+                commented = true;
             }
             else if(strncmp(line.c_str(),"tag",3)==0 || strncmp(line.c_str(),"mark",4)==0)
             {
@@ -409,7 +457,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
             }
             else if(line[bpos]=='\\')
             {
-                bpos++;
+                bpos++; // skip next char checking
                 continue;
             }
         }
