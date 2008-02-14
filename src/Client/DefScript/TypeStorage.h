@@ -7,6 +7,7 @@
 template <class T> class TypeStorage
 {
 public:
+    TypeStorage() { _keep = false; }
 	~TypeStorage();
 	bool Exists(std::string);
 	void Delete(std::string);
@@ -17,27 +18,27 @@ public:
     void Unlink(std::string);
     void UnlinkByPtr(T*);
     std::string GetNameByPtr(T*);
+    inline std::map<std::string,T*> &GetMap(void) { return _storage; }
+    inline bool SetKeepOnDestruct(bool b = true) { _keep = true; }
+    inline unsigned int Size(void) { return _storage.size(); }
+    void Clear(bool keep = false);
 
 private:
     T *_Create(std::string);
     std::map<std::string,T*> _storage;
+    bool _keep;
 };
 
 // check whether an object with this name is already present
 template<class T> bool TypeStorage<T>::Exists(std::string s)
 {
-    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end(); it++)
-    {
-        if(it->first == s)
-            return true;
-    }
-    return false;
+    return _storage.find(s) != _storage.end();
 }
 
 // helper to create and assign a new object
 template<class T> T *TypeStorage<T>::_Create(std::string s)
 {
-    T *elem = new T();
+    T *elem = new T;
     _storage[s] = elem;
     return elem;
 }
@@ -45,14 +46,11 @@ template<class T> T *TypeStorage<T>::_Create(std::string s)
 // delete object with that name, if present
 template<class T> void TypeStorage<T>::Delete(std::string s)
 {
-    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end(); it++)
+    std::map<std::string,T*>::iterator it = _storage.find(s);
+    if(it != _storage.end())
     {
-        if(it->first == s)
-        {
-            delete it->second;
-            _storage.erase(it);
-            return;
-        }
+        delete it->second;
+        _storage.erase(it);
     }
 }
 
@@ -73,9 +71,9 @@ template<class T> void TypeStorage<T>::DeleteByPtr(T *ptr)
 // return the the object with that name. return NULL if not found
 template <class T> T *TypeStorage<T>::GetNoCreate(std::string s)
 {
-    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end(); it++)
-        if(it->first == s)
-            return it->second;
+    std::map<std::string,T*>::iterator it = _storage.find(s);
+    if(it != _storage.end())
+        return it->second;
     return NULL;
 }
 
@@ -89,6 +87,16 @@ template<class T> T *TypeStorage<T>::Get(std::string s)
 // when destroying the TypeStorage, delete all stored objects
 template<class T> TypeStorage<T>::~TypeStorage()
 {
+    Clear(_keep);
+}
+
+template<class T> void TypeStorage<T>::Clear(bool keep)
+{
+    if(keep)
+    {
+        _storage.clear();
+        return;
+    }
     for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end();)
     {
         delete it->second;

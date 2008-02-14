@@ -18,7 +18,7 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->SubClass;
 		recvPacket >> unk; // dont need that value?
         recvPacket >> proto->Name;
-        recvPacket >> s >> s >> s; // strip name1-4
+        recvPacket >> s >> s >> s; // strip name2-4
         recvPacket >> proto->DisplayInfoID;
         recvPacket >> proto->Quality;
         recvPacket >> proto->Flags;
