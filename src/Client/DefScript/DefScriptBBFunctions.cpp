@@ -11,7 +11,8 @@ using namespace DefScriptTools;
 
 // Helper macros for insert/extract various datatypes that need type casting
 #define BB_CAN_READ(bytebuffer, _ty) ((*(bytebuffer)).size() - (*(bytebuffer)).rpos() >= sizeof(_ty))
-#define BB_MACRO_INSERT(bytebuffer, _sty, _ty) if( (_sty)==(#_ty) ) { *(bytebuffer) << (_ty)toNumber(Set.defaultarg); return true; }
+#define BB_MACRO_INSERT_I(bytebuffer, _sty, _ty) if( (_sty)==(#_ty) ) { *(bytebuffer) << (_ty)toUint64(Set.defaultarg); return true; }
+#define BB_MACRO_INSERT_F(bytebuffer, _sty, _ty) if( (_sty)==(#_ty) ) { *(bytebuffer) << (_ty)toNumber(Set.defaultarg); return true; }
 #define BB_MACRO_EXTRACT_I(bytebuffer, _sty, _ty) if( (_sty)==(#_ty) && BB_CAN_READ(bytebuffer,_ty) ) {_ty _var; *(bytebuffer) >> _var; return DefScriptTools::toString((uint64)_var); }
 #define BB_MACRO_EXTRACT_F(bytebuffer, _sty, _ty) if( (_sty)==(#_ty) && BB_CAN_READ(bytebuffer,_ty) ) {_ty _var; *(bytebuffer) >> _var; return DefScriptTools::toString((ldbl)_var); }
 
@@ -56,12 +57,12 @@ DefReturnResult DefScriptPackage::func_bbappend(CmdSet& Set)
         return true;
     }
 
-    BB_MACRO_INSERT(bb, dtype, uint8);
-    BB_MACRO_INSERT(bb, dtype, uint16);
-    BB_MACRO_INSERT(bb, dtype, uint32);
-    BB_MACRO_INSERT(bb, dtype, uint64);
-    BB_MACRO_INSERT(bb, dtype, float);
-    BB_MACRO_INSERT(bb, dtype, double);
+    BB_MACRO_INSERT_I(bb, dtype, uint8);
+    BB_MACRO_INSERT_I(bb, dtype, uint16);
+    BB_MACRO_INSERT_I(bb, dtype, uint32);
+    BB_MACRO_INSERT_I(bb, dtype, uint64);
+    BB_MACRO_INSERT_F(bb, dtype, float);
+    BB_MACRO_INSERT_F(bb, dtype, double);
 
     return false;
 }	

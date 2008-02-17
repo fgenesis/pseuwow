@@ -110,7 +110,7 @@ bool DefScriptTools::isTrue(std::string s)
 uint64 DefScriptTools::toUint64(std::string str)
 {
     bool negative=false;
-    uint64 num;
+    uint64 num = 0;
     if(str.empty())
         return 0;
     if(str[0]=='-')
