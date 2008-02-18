@@ -53,6 +53,7 @@ public:
     inline bool IsContainer(void) { return _typeid == TYPEID_CONTAINER; }     // specific
     inline bool IsCorpse(void) { return _typeid == TYPEID_CORPSE; }           // specific
     inline bool IsDynObject(void) { return _typeid == TYPEID_DYNAMICOBJECT; } // specific
+    inline bool IsWorldObject(void) { return _type & (TYPE_PLAYER | TYPE_UNIT | TYPE_CORPSE | TYPE_DYNAMICOBJECT | TYPE_GAMEOBJECT); }
     inline const uint32 GetUInt32Value( uint16 index ) const
     {
         return _uint32values[ index ];
@@ -83,6 +84,11 @@ public:
     inline void SetName(std::string name) { _name = name; }
     inline std::string GetName(void) { return _name; }
 
+    inline float GetObjectSize() const
+    {
+        return ( _valuescount > UNIT_FIELD_BOUNDINGRADIUS ) ? _floatvalues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
+    }
+
     void Create(uint64 guid);
     
 protected:
@@ -110,6 +116,11 @@ public:
     inline float GetY(void) { return _y; }
     inline float GetZ(void) { return _z; }
     inline float GetO(void) { return _o; }
+    float GetDistance(WorldObject *obj);
+    float GetDistance2d(float x, float y);
+    float GetDistance(float x, float y, float z);
+    float GetDistance2d(WorldObject *obj);
+    float GetDistanceZ(WorldObject *obj);
 
 protected:
     WorldObject();

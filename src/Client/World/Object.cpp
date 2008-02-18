@@ -57,6 +57,54 @@ void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
     _m = _map;
 }
 
+float WorldObject::GetDistance(WorldObject* obj)
+{
+    float dx = GetX() - obj->GetX();
+    float dy = GetY() - obj->GetY();
+    float dz = GetZ() - obj->GetZ();
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
+    return ( dist > 0 ? dist : 0);
+}
+
+float WorldObject::GetDistance2d(float x, float y)
+{
+    float dx = GetX() - x;
+    float dy = GetY() - y;
+    float sizefactor = GetObjectSize();
+    float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
+    return ( dist > 0 ? dist : 0);
+}
+
+float WorldObject::GetDistance(float x, float y, float z)
+{
+    float dx = GetX() - x;
+    float dy = GetY() - y;
+    float dz = GetZ() - z;
+    float sizefactor = GetObjectSize();
+    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
+    return ( dist > 0 ? dist : 0);
+}
+
+float WorldObject::GetDistance2d(WorldObject* obj)
+{
+    float dx = GetX() - obj->GetX();
+    float dy = GetY() - obj->GetY();
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
+    return ( dist > 0 ? dist : 0);
+}
+
+float WorldObject::GetDistanceZ(WorldObject* obj)
+{
+    float dz = fabs(GetZ() - obj->GetZ());
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float dist = dz - sizefactor;
+    return ( dist > 0 ? dist : 0);
+}
+
+
+
 void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
 {
     uint64 guid;
