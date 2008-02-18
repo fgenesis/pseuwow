@@ -57,6 +57,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("bbputpackedguid",&DefScriptPackage::SCBBPutPackedGuid);
     AddFunc("gui",&DefScriptPackage::SCGui);
     AddFunc("sendwho",&DefScriptPackage::SCSendWho);
+    AddFunc("getobjectdist",&DefScriptPackage::SCGetObjectDistance);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -1034,7 +1035,34 @@ DefReturnResult DefScriptPackage::SCSendWho(CmdSet &Set)
     ws->SendWhoListRequest(minlvl,maxlvl,racemask,classmask,name,guildname);
     return "";
 }
-    
+
+DefReturnResult DefScriptPackage::SCGetObjectDistance(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCSendWhoListRequest: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    uint64 guid1 = DefScriptTools::toUint64(Set.defaultarg);
+    uint64 guid2 = DefScriptTools::toUint64(Set.arg[0]);
+    std::string s = stringToLower(Set.arg[1]);
+    Object *o1, *o2;
+    float dist = 0;
+    o1 = ws->objmgr.GetObj(guid1);
+    o2 = ws->objmgr.GetObj(guid2);
+    if(o1 && o2 && o1->IsWorldObject() && o2->IsWorldObject())
+    {
+        if(s.empty() || s == "2d")
+            dist = ((WorldObject*)o1)->GetDistance2d((WorldObject*)o2);
+        else if(s == "3d")
+            dist = ((WorldObject*)o1)->GetDistance((WorldObject*)o2);
+
+        return toString(ldbl(dist));
+    }
+
+    return "";
+}
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {

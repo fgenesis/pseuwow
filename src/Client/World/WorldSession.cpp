@@ -699,15 +699,6 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 
     }
 
-    // TODO: remove this block soon, its obsoelete and has to be done via scripting!
-    if(type==CHAT_MSG_WHISPER && (!isCmd) && target_guid!=GetGuid())
-    {
-        GetInstance()->GetScripts()->variables.Set("@thiswhisper_name",name);
-        GetInstance()->GetScripts()->variables.Set("@thiswhisper",toString(target_guid));
-        GetInstance()->GetScripts()->variables.Set("@thiswhisper_lang",toString((uint64)lang));
-        GetInstance()->GetScripts()->RunScript("_onwhisper",NULL);
-    }
-
     // the following block searches for items in chat and queries them if they are unknown
     if(!isCmd && target_guid!=_myGUID && msg.length()>strlen(CHAT_ITEM_BEGIN_STRING))
     {

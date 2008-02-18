@@ -48,5 +48,6 @@ DefReturnResult SCBBGetPackedGuid(CmdSet&);
 DefReturnResult SCBBPutPackedGuid(CmdSet&);
 DefReturnResult SCGui(CmdSet&);
 DefReturnResult SCSendWho(CmdSet&);
+DefReturnResult SCGetObjectDistance(CmdSet&);
 
 #endif
