@@ -800,12 +800,18 @@ void WorldSession::_HandleGroupInviteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
 {
-    uint32 flags, time;
+    uint32 flags, time, unk32;
     float x, y, z, o;
     uint64 guid;
-    std::string plrname;
+    uint8 unk8;
     guid = recvPacket.GetPackedGuid();
-    recvPacket >> flags >> time >> x >> y >> z >> o;
+    recvPacket >> flags >> unk8 >> time >> x >> y >> z >> o >> unk32;
+    DEBUG(logdebug("MOVE: "I64FMT" -> time=%u flags=%u x=%.4f y=%.4f z=%.4f o=%.4f",guid,time,flags,x,y,z,o));
+    Object *obj = objmgr.GetObj(guid);
+    if(obj && obj->IsWorldObject())
+    {
+        ((WorldObject*)obj)->SetPosition(x,y,z,o);
+    }
 }
 
 void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
