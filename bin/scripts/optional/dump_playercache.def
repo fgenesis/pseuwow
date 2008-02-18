@@ -1,0 +1,21 @@
+#script=dumppcache
+fopen,fh,rb ./cache/playernames.cache
+freadbb,fh bb
+set,size ?{bbread,bb uint32}
+log PlayerNameCache: ${size} entries.
+set,i 0
+loop
+	if ?{bigger_eq,${i} ${size}}
+		exitloop
+	endif
+	set,guid ?{bbread,bb uint64}
+	set,len ?{bbread,bb uint8}
+	set,name ?{bbread,bb,${len} strnz}
+	log PlayerNameCache[${i}]: ${guid} = ${name} (${len})
+	add,i 1
+endloop
+
+#script=dummy
+#onload
+dumppcache
+#/onload

@@ -442,32 +442,46 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
         logerror("Invalid Script call: SCGetName: WorldSession not valid");
         DEF_RETURN_ERROR;
     }
-    DefReturnResult r;
-    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
-    r.ret="Unknown Entity";
-    Object *o = ws->objmgr.GetObj(guid);
-    if(o)
+    uint64 id = DefScriptTools::toUint64(Set.defaultarg);
+    std::string source = DefScriptTools::stringToLower(Set.arg[0]);
+
+    // "guid" type can be everything - item, player, unit, gameobject... whatever has this guid.
+    if(source.empty() || source == "guid")
     {
-        if(o->GetTypeId()==TYPEID_ITEM || o->GetTypeId()==TYPEID_CONTAINER)
-        {
-            ItemProto *proto=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProto(o->GetEntry());
-            r.ret=proto->Name[0]; // and whats with Name[1] - Name[3]?
-        }
-        else if(o->GetTypeId()==TYPEID_UNIT || o->GetTypeId()==TYPEID_PLAYER || o->GetTypeId()==TYPEID_GAMEOBJECT || o->GetTypeId()==TYPEID_CORPSE)
-        {
-            r.ret=((WorldObject*)o)->GetName();
-        }
-        // TODO: add support for gameobjects etc.
-    }
-    else
-    {
-        // if no object with that guid is near, it might exist in the cache, check it and use that if present
-        if(ws->plrNameCache.IsKnown(guid))
-            r.ret = ws->plrNameCache.GetName(guid);
+        Object *o = ws->objmgr.GetObj(id);
+        if(o)
+            return o->GetName();
         else
-            logerror("SCGetName: Object "I64FMT" not known",guid);
+        {
+            // fallback if that guid is player guid, its maybe stored, so check that
+            if(IS_PLAYER_GUID(id))
+            {
+                if(ws->plrNameCache.IsKnown(id))
+                    return ws->plrNameCache.GetName(id);
+            }
+        }
     }
-    return r;
+    else if(source == "player")
+    {
+        if(ws->plrNameCache.IsKnown(id))
+            return ws->plrNameCache.GetName(id);
+        else
+            return "";
+
+    }
+    else if(source == "item")
+    {
+        ItemProto *iproto = ws->objmgr.GetItemProto((uint32)id);
+        return iproto ? iproto->Name : "";
+    }
+    else if(source == "unit")
+    {
+        CreatureTemplate *ct = ws->objmgr.GetCreatureTemplate((uint32)id);
+        return ct ? ct->name : "";
+    }
+    // TODO: add gameobject, dynamicobject
+
+    return "";
 }
 
 DefReturnResult DefScriptPackage::SCGetEntry(CmdSet& Set)

@@ -103,16 +103,6 @@ LOG * Assigning permissions for internal functions...
 setscriptpermission,emote 0
 // ... set more permissions here ...
 
-//-------------------------------------------------
-#script=register_onguiclose_exit
-//-------------------------------------------------
-if ?{not ?{ScriptHasLine,_onguiclose #tag:hook:${@myname}}}
-	appenddef,_onguiclose #tag:hook:${@myname}
-	appenddef,_onguiclose if ?\{GetVar #EXITONGUICLOSE\}
-	appenddef,_onguiclose exit
-	appenddef,_onguiclose endif
-endif
-
 
 // this dummy script does nothing actually but since its loaded last in this file it causes the config
 // script to be run before all .def files are loaded
@@ -124,6 +114,5 @@ endif
 if ?{not ${#config::DONE}}
 	config
 endif
-register_onguiclose_exit
 #/onload
 
