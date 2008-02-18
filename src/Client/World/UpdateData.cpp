@@ -241,6 +241,8 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         {
             recvPacket >> x >> y >> z >> o;
             logdev("FLOATS: x=%f y=%f z=%f o=%f",x,y,z,o);
+            if(obj->IsWorldObject())
+                ((WorldObject*)obj)->SetPosition(x,y,z,o);
         }
     }
 
