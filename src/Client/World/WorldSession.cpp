@@ -847,6 +847,11 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     {
         CmdSet Set;
         Set.defaultarg = "false"; // teleported to other map = false
+        Set.arg[0] = toString(guid);
+        Set.arg[1] = toString(x);
+        Set.arg[2] = toString(y);
+        Set.arg[3] = toString(z);
+        Set.arg[4] = toString(o);
         GetInstance()->GetScripts()->RunScriptIfExists("_onteleport");
     }
 }
@@ -881,6 +886,11 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     {
         CmdSet Set;
         Set.defaultarg = "true"; // teleported to other map = false
+        Set.arg[0] = toString(mapid);
+        Set.arg[1] = toString(x);
+        Set.arg[2] = toString(y);
+        Set.arg[3] = toString(z);
+        Set.arg[4] = toString(o);
         GetInstance()->GetScripts()->RunScriptIfExists("_onteleport");
     }
 }

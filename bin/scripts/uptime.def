@@ -1,20 +1,13 @@
-#permission=0
-
+#script=getuptime
 // purpose: pseuwow uptime counter
-// args: none
-// usage: - load the script to register the uptime counter
-//        - call the script to say the uptime formatted in hours, mins & secs
+// args: @def: "say", "yell", "chan,General", etc. any command that accepts a string in @def and does something with it.
+
 // returns: uptime formatted as 0h 0m 0s
 
-#onload
-	if ?{not ?{isset #uptime}}
-		set,#uptime 0
-	endif
-	removeevent event_{${@myname}}
-	addevent,event_{${@myname}},1000 add,#uptime 1
-#endonload
-
-set,s ${#uptime}
+set,s ${@clock}
+div,s 1000
+set,s ?{toint ${s}}
+set,secs ${s}
 
 set,h ${s}
 div,h 3600
@@ -27,14 +20,19 @@ toint,m ${m}
 mod,s 60
 toint,s ${s}
 set,str ${h}h ${m}m ${s}s
-out UPTIME: ${#uptime} secs = ${str}
+out UPTIME: ${secs} secs = ${str}
 
-if ${@inworld}
-	say UPTIME: ${h} hours, ${m} minutes, ${s} seconds
+if ?{strlen ${@def}}
+	${@def} UPTIME: ${h} hours, ${m} minutes, ${s} seconds
 endif
 
 unset h
 unset m
 unset s
+unset secs
 
 return ${str}
+
+#script=uptime
+#permission=0
+return ?{getuptime say}

@@ -1,0 +1,96 @@
+
+// ----==== CHAT MESSAGES ====----
+// -------------------------------------------
+#script=_onchatmessage
+// purpose: do something if specific chat messages are recieved.
+// args:
+// @def: chat message text
+// @0: message type id (check ChatMsg enum in src/Client/SharedDefines.h)
+// @1: language id (also defined in SharedDefines.h), alternatively look up bin/data/scp/language.scp
+// @2: GUID of the player or creature this msg came from
+// @3: channel name. empty string if the chat message was not sent in a channel (for example say, yell or whisper)
+//--------------------------------------------
+processchatai,{${@0}},{${@1}},{${@2}},{${@3}} ${@def} // this is required for the ChatAI script to work
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+// ----==== TELEPORTATION ====----
+
+#script=_onteleport
+// @def: [far teleport=true, else false]
+// @0: [far teleport: map ID, else teleported GUID]
+// @1: X position
+// @2: Y position
+// @3: Z position
+// @4: Orientation
+
+//- script content here...
+
+
+// ----==== GUI RELATED ====----
+
+#script=_onguiclose
+// no args. gets called when the GUI is closed.
+if ?{GetVar #EXITONGUICLOSE}
+	exit
+endif
+
+
+// ----==== OBJECT HANDLING ====----
+
+#script=_onobjectcreate
+// @def: GUID of created object
+// @0 TypeID of created object
+// The object can be accessed with GetName, GetEntry, GetObjectType, GetObjectValue, GetRace, GetClass, ... via the guid
+
+//- script content here...
+
+
+
+#script=_onobjectdelete
+// @def: GUID of deleted object
+// @0: [out of range object deletion=true, else false]
+// The object can be accessed with the object handling functions listed above.
+// It will be deleted right after handling this script.
+
+//- script content here...
+
+
+
+
+// ----==== ENTERING/LEAVING WORLD ====----
+
+#script=_leaveworld
+// no args. gets called when the world is left.
+
+//- script content here...
+
+
+#script=_enterworld
+// no args. called when the world is entered
+log * World entered!
+say [${@version_short}] login successful.
+emote 126 // = TEXTEMOTE_READY
+joinchannel General
+joinchannel Trade
+joinchannel LookingForGroup
+castspell 836 // LoginEffect
+
+
+
+// ----==== IN-GAME SCRIPT COMMANDS ====----
+
+#script=_nopermission
+// this script gets executed if a player tries to give pseuwow a command but is not allowed to
+// Arguments:
+// ==========
+// @0 : name of the player who wanted to execute a command
+// @1 : permission level of this user
+// @2 : permission level needed to execute the script
+// @3 : name of the script that should get executed
+
+SAY Forget it, ${@0}, you have only permission ${@1} but need ${@2} to run the script '${@3}'
+LOG Player '${@0}' (p:${@1}) wanted to execute '${@3}' (p:${@2})
+EMOTE 66 // say NO!
+
