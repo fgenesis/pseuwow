@@ -3,7 +3,6 @@
 #include "Auth/Sha1.h"
 #include "Auth/BigNumber.h"
 #include "Auth/AuthCrypt.h"
-#include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSocket.h"
 #include "RealmSocket.h"
@@ -34,16 +33,28 @@ WorldSession::WorldSession(PseuInstance *in)
     _lag_ms = 0;
     //...
 
+    in->GetScripts()->RunScriptIfExists("_onworldsessioncreate");
+
     DEBUG(logdebug("WorldSession 0x%X constructor finished",this));
 }
 
 WorldSession::~WorldSession()
 {
+    _instance->GetScripts()->RunScriptIfExists("_onworldsessiondelete");
+
+    logdebug("~WorldSession(): %u packets left unhandled, and %u delayed. deleting.",pktQueue.size(),delayedPktQueue.size());
     WorldPacket *packet;
     // clear the queue
     while(pktQueue.size())
     {
         packet = pktQueue.next();
+        delete packet;
+    }
+    // clear the delayed queue
+    while(delayedPktQueue.size())
+    {
+        packet = delayedPktQueue.back().pkt;
+        delayedPktQueue.c.pop_back();
         delete packet;
     }
 
@@ -156,27 +167,30 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
     }
 
     bool hideOpcode = false;
+    bool disabledOpcode = IsOpcodeDisabled(packet->GetOpcode());
+    if(disabledOpcode && GetInstance()->GetConf()->hideDisabledOpcodes)
+        hideOpcode = true;
 
     // TODO: Maybe make table or something with all the frequently opcodes
-    if (packet->GetOpcode() == SMSG_MONSTER_MOVE)
+    if (GetInstance()->GetConf()->hidefreqopcodes)
     {
-        hideOpcode = true;
+        switch(packet->GetOpcode())
+        {
+            case SMSG_MONSTER_MOVE:
+            hideOpcode = true;
+        }
     }
 
     if( (known && GetInstance()->GetConf()->showopcodes==1)
         || ((!known) && GetInstance()->GetConf()->showopcodes==2)
         || (GetInstance()->GetConf()->showopcodes==3) )
     {
-        if(!(GetInstance()->GetConf()->hidefreqopcodes && hideOpcode))
-            logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), known ? "Known" : "UNKNOWN", packet->size());
+        if(!hideOpcode)
+            logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), (known ? (disabledOpcode ? "Disabled" : "Known") : "UNKNOWN"), packet->size());
     }
 
     try
     {
-        // call the opcode handler
-        if(known)
-            (this->*table[hpos].handler)(*packet);
-
         // if there is a script attached to that opcode, call it now.
         // note: the pkt rpos needs to be reset by the scripts!
         std::string scname = "opcode::";
@@ -190,6 +204,12 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
             GetInstance()->GetScripts()->bytebuffers.Unlink(pktname);
         }
 
+        // call the opcode handler
+        if(known && !disabledOpcode)
+        {
+            packet->rpos(0);
+            (this->*table[hpos].handler)(*packet);
+        }
     }
     catch (ByteBufferException bbe)
     {

@@ -140,6 +140,7 @@ bool PlayerNameCache::ReadFromFile(void)
     }
     printf("\n");
     delete nameptr;
+    fh.flush();
     fh.close();
     if(success)
         log("PlayerNameCache successfully loaded.");
@@ -409,6 +410,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         fh.write((char*)buf.contents(),buf.size());
         counter++;
     }
+    fh.flush();
     fh.close();
     log("ItemProtoCache: Saved %u Item Prototypes",counter);
 }
@@ -523,6 +525,7 @@ void CreatureTemplateCache_WriteDataToCache(WorldSession *session)
         fh.write((char*)buf.contents(),buf.size());
         counter++;
     }
+    fh.flush();
     fh.close();
     log("CreatureTemplateCache: Saved %u Creature Templates",counter);
 }

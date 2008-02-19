@@ -58,6 +58,9 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("gui",&DefScriptPackage::SCGui);
     AddFunc("sendwho",&DefScriptPackage::SCSendWho);
     AddFunc("getobjectdist",&DefScriptPackage::SCGetObjectDistance);
+    AddFunc("switchopcodehandler",&DefScriptPackage::SCSwitchOpcodeHandler);
+    AddFunc("opcodedisabled",&DefScriptPackage::SCOpcodeDisabled);    
+    AddFunc("spoofworldpacket",&DefScriptPackage::SCSpoofWorldPacket);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -278,16 +281,18 @@ DefReturnResult DefScriptPackage::SCcastspell(CmdSet& Set)
         return true;
 }
 
-DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set){
-    uint32 id = atoi(Set.defaultarg.c_str());
-    if(!id)
-        return false;
-
+DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set)
+{
     if(!(((PseuInstance*)parentMethod)->GetWSession()))
     {
         logerror("Invalid Script call: SCqueryitem: WorldSession not valid");
         DEF_RETURN_ERROR;
     }
+
+    uint32 id = atoi(Set.defaultarg.c_str());
+    if(!id)
+        return false;
+
     ((PseuInstance*)parentMethod)->GetWSession()->SendQueryItem(id,0);
     return true;
 }
@@ -295,9 +300,8 @@ DefReturnResult DefScriptPackage::SCqueryitem(CmdSet& Set){
 DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
 {
     // TODO: special targets: _self _pet _nearest ...
-    DefReturnResult r;
-
-    if(!(((PseuInstance*)parentMethod)->GetWSession()))
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
     {
         logerror("Invalid Script call: SCtarget: WorldSession not valid");
         DEF_RETURN_ERROR;
@@ -309,21 +313,30 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
         return true;
     }
 
-    // TODO: search through all objects. for now only allow to target player
-    uint64 guid = (((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetGuid(Set.defaultarg));
-
-    if( guid && ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid) ) // object must be near
+    std::string what = stringToLower(Set.arg[0]);
+    uint64 guid = 0;
+    if(what == "guid")
     {
-        ((PseuInstance*)parentMethod)->GetWSession()->SendSetSelection(guid); // will also set the target for myCharacter
-        r.ret=toString(guid);
+        guid = DefScriptTools::toUint64(Set.defaultarg);
+    }
+    else if(what.empty() || what == "player")
+    {
+        // TODO: search through all objects. for now only allow to target player
+        guid = ws->plrNameCache.GetGuid(Set.defaultarg);
+    }
+
+    Object *obj = ws->objmgr.GetObj(guid);
+    if(obj && obj->IsUnit() || obj->IsCorpse()) // only units and corpses are targetable
+    {
+        ws->SendSetSelection(guid); // will also set the target for myCharacter
+        return toString(guid);
     }
     else
     {
         logdetail("Target '%s' not found!",Set.defaultarg.c_str());
         return false;
     }
-
-    return r;
+    return "";
 }
 
 DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
@@ -899,10 +912,16 @@ DefReturnResult DefScriptPackage::SCSendWorldPacket(CmdSet &Set)
     ByteBuffer *bb = bytebuffers.GetNoCreate(_NormalizeVarName(Set.defaultarg,Set.myname));
     if(bb)
     {
-        uint32 opcode = (uint32)DefScriptTools::toNumber(Set.arg[0]);
-        if(opcode) // prevent sending CMSG_NULL_ACTION
+        uint16 opc = (uint16)DefScriptTools::toUint64(Set.arg[0]);
+        if(!opc)
         {
-            WorldPacket wp(opcode, bb->size());
+            opc = (uint16)GetOpcodeID(Set.arg[0].c_str());
+            if(opc == uint16(-1))
+                return false;
+        }
+        if(opc) // prevent sending CMSG_NULL_ACTION
+        {
+            WorldPacket wp(opc, bb->size());
             if(bb->size())
                 wp.append(bb->contents(), bb->size());
             ws->SendWorldPacket(wp);
@@ -1062,6 +1081,84 @@ DefReturnResult DefScriptPackage::SCGetObjectDistance(CmdSet &Set)
     }
 
     return "";
+}
+
+DefReturnResult DefScriptPackage::SCSwitchOpcodeHandler(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCRemoveOpcodeHandler: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    uint16 opc = (uint16)DefScriptTools::toUint64(Set.arg[0]);
+    bool switchon = DefScriptTools::isTrue(Set.defaultarg);
+    if(!opc) // ok we cant turn off MSG_NULL_ACTION with this, but who needs it anyway...
+    {
+        opc = (uint16)GetOpcodeID(Set.arg[0].c_str());
+        if(opc == uint16(-1))
+            return false;
+    }
+    else if(opc >= MAX_OPCODE_ID)
+    {
+        logerror("Can't enable/disable opcode handling of %u", opc);
+        return false;
+    }
+    if(switchon)
+        ws->EnableOpcode(opc);
+    else
+        ws->DisableOpcode(opc);
+
+    logdebug("Opcode handler for %s (%u) %s",GetOpcodeName(opc), opc, switchon ? "enabled" : "disabled");
+    return true;
+}
+
+DefReturnResult DefScriptPackage::SCOpcodeDisabled(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCOpcodeDisabled: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    uint16 opc = (uint16)DefScriptTools::toUint64(Set.defaultarg);
+    if(!opc)
+    {
+        opc = (uint16)GetOpcodeID(Set.arg[0].c_str());
+        if(opc == uint16(-1))
+            return false;
+    }
+    else if(opc >= MAX_OPCODE_ID)
+    {
+        logerror("SCOpcodeDisabled: Opcode %u out of range", opc);
+        return false; // we can NEVER handle out of range opcode, but since its not disabled, return false
+    }
+    return ws->IsOpcodeDisabled(opc);
+}
+
+DefReturnResult DefScriptPackage::SCSpoofWorldPacket(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCSpoofWorldPacket: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+    ByteBuffer *bb = bytebuffers.GetNoCreate(_NormalizeVarName(Set.defaultarg,Set.myname));
+    if(bb)
+    {
+        uint32 opcode = (uint32)DefScriptTools::toNumber(Set.arg[0]);
+        if(opcode) // ok, here again CMSG_NULL_ACTION doesnt work, but who cares
+        {
+            WorldPacket *wp = new WorldPacket(opcode, bb->size()); // will be deleted by the opcode handler later
+            if(bb->size())
+                wp->append(bb->contents(), bb->size());
+            logdebug("Spoofing WorldPacket with opcode %s (%u), size %u",GetOpcodeName(opcode),opcode,wp->size());
+            ws->AddToPktQueue(wp); // handle this packet as if it was sent by the server
+            return true;
+        }
+    }
+    return false;
 }
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
