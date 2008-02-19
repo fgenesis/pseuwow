@@ -45,6 +45,7 @@ class PseuInstanceConf
     uint16 networksleeptime;
     uint8 showopcodes;
     bool hidefreqopcodes;
+    bool hideDisabledOpcodes;
     bool allowgamecmd;
     bool enablecli;
     bool enablechatai;

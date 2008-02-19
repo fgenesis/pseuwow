@@ -404,6 +404,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     networksleeptime=atoi(v.Get("NETWORKSLEEPTIME").c_str());
     showopcodes=atoi(v.Get("SHOWOPCODES").c_str());
     hidefreqopcodes=(bool)atoi(v.Get("HIDEFREQOPCODES").c_str());
+    hideDisabledOpcodes=(bool)atoi(v.Get("HIDEDISABLEDOPCODES").c_str());
     enablecli=(bool)atoi(v.Get("ENABLECLI").c_str());
     allowgamecmd=(bool)atoi(v.Get("ALLOWGAMECMD").c_str());
     enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());

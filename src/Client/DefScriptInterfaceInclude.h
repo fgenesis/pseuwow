@@ -49,5 +49,8 @@ DefReturnResult SCBBPutPackedGuid(CmdSet&);
 DefReturnResult SCGui(CmdSet&);
 DefReturnResult SCSendWho(CmdSet&);
 DefReturnResult SCGetObjectDistance(CmdSet&);
+DefReturnResult SCSwitchOpcodeHandler(CmdSet&);
+DefReturnResult SCOpcodeDisabled(CmdSet&);
+DefReturnResult SCSpoofWorldPacket(CmdSet&);
 
 #endif

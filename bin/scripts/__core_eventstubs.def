@@ -94,3 +94,20 @@ SAY Forget it, ${@0}, you have only permission ${@1} but need ${@2} to run the s
 LOG Player '${@0}' (p:${@1}) wanted to execute '${@3}' (p:${@2})
 EMOTE 66 // say NO!
 
+
+
+// ----==== INTERNAL/MISC ====----
+
+#script=_onworldsessioncreate
+// no args. called when an instance of the WorldSession class is created
+
+//- script content here
+
+
+#script=_onworldsessiondelete
+// no args. called when an instance of the WorldSession class is deleted
+
+//- script content here
+
+
+

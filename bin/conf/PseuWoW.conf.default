@@ -35,6 +35,10 @@ showopcodes=3
 // 0 - No
 hidefreqopcodes=1
 
+// Hide disabled (= unhandled, but known) opcodes?
+// 1 - Yes
+// 0 - No
+HideDisabledOpcodes=0
 
 // the IP or hostname the realm server is running on
 realmlist=localhost

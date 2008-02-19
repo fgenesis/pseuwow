@@ -2,6 +2,7 @@
 #define _WORLDSESSION_H
 
 #include <queue>
+#include <bitset>
 
 #include "common.h"
 #include "PseuWoW.h"
@@ -11,6 +12,7 @@
 #include "SharedDefines.h"
 #include "ObjMgr.h"
 #include "CacheHandler.h"
+#include "Opcodes.h"
 
 class WorldSocket;
 class WorldPacket;
@@ -84,10 +86,16 @@ public:
 
     void HandleWorldPacket(WorldPacket*);
 
+    inline void DisableOpcode(uint16 opcode) { _disabledOpcodes[opcode] = true; }
+    inline void EnableOpcode(uint16 opcode) { _disabledOpcodes[opcode] = false; }
+    inline bool IsOpcodeDisabled(uint16 opcode) { return _disabledOpcodes[opcode]; }
+
     PlayerNameCache plrNameCache;
     ObjMgr objmgr;
 
+
 private:
+
     OpcodeHandler *_GetOpcodeHandlerTable(void) const;
 
     // Helpers
@@ -148,6 +156,7 @@ private:
     World *_world;
     WhoList _whoList;
     uint32 _lag_ms;
+    std::bitset<MAX_OPCODE_ID> _disabledOpcodes;
 };
 
 #endif
