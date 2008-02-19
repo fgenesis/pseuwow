@@ -1006,7 +1006,7 @@ DefReturnResult DefScriptPackage::SCSendWho(CmdSet &Set)
     WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
     if(!ws)
     {
-        logerror("Invalid Script call: SCSendWhoListRequest: WorldSession not valid");
+        logerror("Invalid Script call: SCSendWho: WorldSession not valid");
         DEF_RETURN_ERROR;
     }
     uint32 minlvl = (uint32)DefScriptTools::toUint64(Set.arg[0]);
@@ -1041,7 +1041,7 @@ DefReturnResult DefScriptPackage::SCGetObjectDistance(CmdSet &Set)
     WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
     if(!ws)
     {
-        logerror("Invalid Script call: SCSendWhoListRequest: WorldSession not valid");
+        logerror("Invalid Script call: SCGetObjectDistance: WorldSession not valid");
         DEF_RETURN_ERROR;
     }
     uint64 guid1 = DefScriptTools::toUint64(Set.defaultarg);
