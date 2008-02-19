@@ -260,6 +260,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
     bool load_debug=false,load_notify=false,cantload=false;
     bool line_strip = true; // true by default
     bool commented = false;
+    bool escape_all = false;
     char z;
     unsigned int absline=0;
     DefScript *curScript = NULL;
@@ -363,6 +364,10 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
             {
                 line_strip = isTrue(value);
             }
+            else if(label=="escape-all")
+            {
+                escape_all = isTrue(value);
+            }
             else if(line=="debug")
             {
                 if(curScript)
@@ -391,6 +396,11 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
             //...
             continue; // line was an option, not script content
 		}
+
+        if(escape_all)
+        {
+            line = EscapeString(line);
+        }
 
         // help with loading lines where a space or tab have accidently been put after the cmd
         std::string tline=stringToLower(line);
