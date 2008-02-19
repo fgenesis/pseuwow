@@ -1,0 +1,54 @@
+
+#script=IsHooked
+// @def: script name
+return ?{ScriptHasLine,{${@def}} #tag:hook:${@caller}}
+
+#script=HookStart
+// @def: script name
+appenddef,{${@def}} #tag:hook:${@caller}
+set,{#HookHelper::CurScript} ${@def}
+
+#script=HookEnd
+set,sc ${@0}
+default,sc ${#HookHelper::CurScript}
+appenddef,{${sc}} #tag:hook-end:${@caller}
+unset ${sc}
+unset sc
+
+#script=HookAdd
+// @def: script line
+// @0: script name
+set,sc ${@0}
+default,sc ${#HookHelper::CurScript}
+appenddef,{${sc}} ${@def}
+unset sc
+
+#script=HookAddList
+// @def: list name
+// @0: script name
+set,sc ${@0}
+set,l ?{globname,{${@caller}} ${@def}}
+default,sc ${#HookHelper::CurScript}
+set,i 0
+loop
+	if ?{bigger_eq,${i} ?{llen ${l}}}
+		exitloop
+	endif
+	HookAdd,{${sc}} ?{lindex,{${l}} ${i}}
+	add,i 1
+endloop
+unset sc
+
+#script=HookStartOpcode
+// @def: opcode name
+HookStart OPCODE::${@def}
+
+
+//////////////////////////////////////////////////////////
+#comments-start
+TODO:
+- add UnHook[,which_script] hook_name
+- add UnHookAll which_script
+- Add HookStartAfter
+
+#comments-end
