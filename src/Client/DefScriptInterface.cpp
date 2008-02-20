@@ -463,9 +463,15 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
     if(source.empty() || source == "guid")
     {
         Object *o = ws->objmgr.GetObj(id);
+        std::string n;
         if(o)
-            return o->GetName();
-        else
+        {
+            n = o->GetName();
+            if(!n.empty())
+                return n;
+        }
+
+        if(!o || n.empty())
         {
             // fallback if that guid is player guid, its maybe stored, so check that
             if(IS_PLAYER_GUID(id))
@@ -506,7 +512,7 @@ DefReturnResult DefScriptPackage::SCGetEntry(CmdSet& Set)
         DEF_RETURN_ERROR;
     }
     DefReturnResult r;
-    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
+    uint64 guid=DefScriptTools::toUint64(Set.defaultarg);
     r.ret="0";
     Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
     if(o)
@@ -528,7 +534,7 @@ DefReturnResult DefScriptPackage::SCGetObjectType(CmdSet& Set)
         DEF_RETURN_ERROR;
     }
     DefReturnResult r;
-    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
+    uint64 guid=DefScriptTools::toUint64(Set.defaultarg);
     r.ret="0";
     Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
     if(o)
@@ -842,11 +848,11 @@ DefReturnResult DefScriptPackage::SCGetObjectValue(CmdSet &Set)
         DEF_RETURN_ERROR;
     }
 
-    uint64 guid = DefScriptTools::toNumber(Set.defaultarg);
+    uint64 guid = DefScriptTools::toUint64(Set.defaultarg);
     Object *o = ws->objmgr.GetObj(guid);
     if(o)
     {
-        uint32 v = (uint32)DefScriptTools::toNumber(Set.arg[0]);
+        uint32 v = (uint32)DefScriptTools::toUint64(Set.arg[0]);
         if(v > o->GetValuesCount())
         {
             logerror("SCGetObjectValue ["I64FMTD", type %u]: invalid value index: %u",guid,o->GetTypeId(),v);

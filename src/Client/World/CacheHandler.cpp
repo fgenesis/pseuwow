@@ -179,7 +179,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
     fh.read((char*)&total,4);
     logdetail("ItemProtoCache: %u item prototypes stored",total);
 
-    uint32 datasize,unk, counter = 0;
+    uint32 datasize, counter = 0;
     ByteBuffer buf;
     for(uint32 i = 0; i < total && !fh.eof(); i++)
     {
@@ -192,7 +192,6 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->Id;
         buf >> proto->Class;
         buf >> proto->SubClass;
-		buf >> unk;
         buf >> proto->Name;
         buf >> proto->DisplayInfoID;
         buf >> proto->Quality;
