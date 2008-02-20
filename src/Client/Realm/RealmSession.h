@@ -32,6 +32,7 @@ private:
     AuthHandler *_GetAuthHandlerTable(void) const;
     void SendRealmPacket(ByteBuffer&);
     void DumpInvalidPacket(ByteBuffer&);
+    void DieOrReconnect(bool err = false);
 
     SocketHandler _sh;
     PseuInstance *_instance;

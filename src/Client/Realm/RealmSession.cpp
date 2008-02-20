@@ -500,8 +500,7 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
     {
         logerror("AUTH_LOGON_PROOF: Recieved incorrect/unknown packet. Hexdump:");
         DumpInvalidPacket(pkt);
-        if(GetInstance()->GetConf()->reconnect)
-            SetMustDie();
+        DieOrReconnect(true);
         return;
     }
     uint8 error = pkt[1];
@@ -511,11 +510,13 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
     {
         case REALM_AUTH_UPDATE_CLIENT:
             log("The realm server requested client update.");
+            DieOrReconnect(true);
             return;
 
         case REALM_AUTH_NO_MATCH:
         case REALM_AUTH_UNKNOWN2:
             logerror("Wrong password or invalid account information or authentication error");
+            DieOrReconnect(true);
             return;
 
         // cover all other cases. continue only if success. 
@@ -524,7 +525,7 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
             {
                 logerror("AUTH_LOGON_PROOF: unk error = 0x%X",error);
                 pkt.rpos(2);
-                SetMustDie();
+                DieOrReconnect(true);
                 return;
             }
     }
@@ -547,10 +548,7 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
         printf("My M2 :"); printchex((char*)_m2,20,true);
         printf("Srv M2:"); printchex((char*)lp.M2,20,true);
 
-        if(GetInstance()->GetConf()->reconnect)
-            SetMustDie();
-        else
-            GetInstance()->SetError();
+        DieOrReconnect(true);
     }
 }
 
@@ -584,7 +582,7 @@ void RealmSession::_HandleTransferData(ByteBuffer& pkt)
     if(!_file_size)
     {
         logerror("Realm server attempted to transfer a file, but didn't init!");
-        SetMustDie();
+        DieOrReconnect(false);
         return;
     }
 
@@ -693,7 +691,14 @@ void RealmSession::SendRealmPacket(ByteBuffer& pkt)
     }
 }
 
-       
-
-
-
+// err=true will close PseuWoW if ExitOnError=1
+void RealmSession::DieOrReconnect(bool err)
+{
+    if(GetInstance()->GetConf()->reconnect)
+        SetMustDie();
+    else if(err)
+    {
+        SetMustDie();
+        GetInstance()->SetError();
+    }
+}

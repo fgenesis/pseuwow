@@ -213,7 +213,7 @@ void PseuInstance::Run(void)
         logdebug("GUI: switching to startup display...");
         GetGUI()->SetSceneState(SCENESTATE_GUISTART);
     }
-    // TODO: as soon as username ans password can be inputted into the gui, wait until it was set by user.
+    // TODO: as soon as username and password can be inputted into the gui, wait until it was set by user.
 
     if(GetConf()->realmlist.empty() || GetConf()->realmport==0)
     {
@@ -268,9 +268,9 @@ void PseuInstance::Run(void)
 
 void PseuInstance::Update()
 {
-    // if the user typed anything into the console, process it before anything else
-    if(_cli) // need to to process only if cli exists
-        ProcessCliQueue();
+    // if the user typed anything into the console, process it before anything else.
+    // note that it can also be used for simulated cli commands sent by other threads, so it needs to be checked even if cli is disabled
+    ProcessCliQueue();
 
     // delete sessions if they are no longer needed
     if(_rsession && _rsession->MustDie())
