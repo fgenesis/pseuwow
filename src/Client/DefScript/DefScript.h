@@ -84,8 +84,9 @@ class DefScript {
 public:
 	DefScript(DefScriptPackage *p);
 	~DefScript();
-	std::string GetLine(unsigned int);
-	unsigned int GetLines(void);
+
+    inline std::string GetLine(unsigned int id) { return Line[id]; }
+    inline unsigned int DefScript::GetLines(void) { return Line.size(); }
 	bool AddLine(std::string );
 	std::string GetName(void);
 	void SetName(std::string);

@@ -381,7 +381,7 @@ DefReturnResult DefScriptPackage::SCScpSectionExists(CmdSet& Set)
         dbname=Set.arg[0];
     return (!Set.defaultarg.empty()) && (!dbname.empty())
         && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
-        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField((uint32)DefScriptTools::toNumber(Set.defaultarg));
+        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField((uint32)DefScriptTools::toUint64(Set.defaultarg));
 }
 
 DefReturnResult DefScriptPackage::SCScpEntryExists(CmdSet& Set)
@@ -391,7 +391,7 @@ DefReturnResult DefScriptPackage::SCScpEntryExists(CmdSet& Set)
     if(!Set.arg[0].empty())
         dbname=Set.arg[0];
     if(!Set.arg[1].empty())
-        keyid=(uint32)DefScriptTools::toNumber(Set.arg[1]);
+        keyid=(uint32)DefScriptTools::toUint64(Set.arg[1]);
     return (!Set.defaultarg.empty()) && (!dbname.empty())
         && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
         && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField(keyid)
@@ -411,7 +411,7 @@ DefReturnResult DefScriptPackage::SCGetScpValue(CmdSet& Set)
     if(!Set.arg[0].empty())
         dbname=Set.arg[0];
     if(!Set.arg[1].empty())
-        keyid=(uint32)DefScriptTools::toNumber(Set.arg[1]);
+        keyid=(uint32)DefScriptTools::toUint64(Set.arg[1]);
     if(!Set.defaultarg.empty())
         entry=Set.defaultarg;
     if( (!entry.empty()) && (!dbname.empty())
@@ -555,7 +555,7 @@ DefReturnResult DefScriptPackage::SCObjectKnown(CmdSet& Set)
         logerror("Invalid Script call: SCObjectIsKnown: WorldSession not valid");
         DEF_RETURN_ERROR;
     }
-    uint64 guid=DefScriptTools::toNumber(Set.defaultarg);
+    uint64 guid=DefScriptTools::toUint64(Set.defaultarg);
     Object *o=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetObj(guid);
     return o!=NULL;
 }
@@ -590,7 +590,7 @@ DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
         DEF_RETURN_ERROR;
     }
     DefReturnResult r;
-    uint32 entry=DefScriptTools::toNumber(Set.arg[0]);
+    uint32 entry=DefScriptTools::toUint64(Set.arg[0]);
     ItemProto *proto=((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProto(entry);
     if(proto)
     {
@@ -880,7 +880,7 @@ DefReturnResult DefScriptPackage::SCGetRace(CmdSet &Set)
         DEF_RETURN_ERROR;
     }
 
-    uint64 guid = DefScriptTools::toNumber(Set.defaultarg);
+    uint64 guid = DefScriptTools::toUint64(Set.defaultarg);
     Object *o = ws->objmgr.GetObj(guid);
     if(o && (o->GetTypeId() == TYPEID_UNIT || o->GetTypeId() == TYPEID_PLAYER))
     {
@@ -898,7 +898,7 @@ DefReturnResult DefScriptPackage::SCGetClass(CmdSet &Set)
         DEF_RETURN_ERROR;
     }
 
-    uint64 guid = DefScriptTools::toNumber(Set.defaultarg);
+    uint64 guid = DefScriptTools::toUint64(Set.defaultarg);
     Object *o = ws->objmgr.GetObj(guid);
     if(o && (o->GetTypeId() == TYPEID_UNIT || o->GetTypeId() == TYPEID_PLAYER))
     {
@@ -1153,7 +1153,7 @@ DefReturnResult DefScriptPackage::SCSpoofWorldPacket(CmdSet &Set)
     ByteBuffer *bb = bytebuffers.GetNoCreate(_NormalizeVarName(Set.defaultarg,Set.myname));
     if(bb)
     {
-        uint32 opcode = (uint32)DefScriptTools::toNumber(Set.arg[0]);
+        uint32 opcode = (uint32)DefScriptTools::toUint64(Set.arg[0]);
         if(opcode) // ok, here again CMSG_NULL_ACTION doesnt work, but who cares
         {
             WorldPacket *wp = new WorldPacket(opcode, bb->size()); // will be deleted by the opcode handler later

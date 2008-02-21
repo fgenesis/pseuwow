@@ -446,47 +446,50 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
 {
     uint8 num;
-        PlayerEnum plr[10]; // max characters per realm is 10
-        uint8 dummy8;
+    uint8 charId;
+    PlayerEnum plr[10]; // max characters per realm is 10
+    uint8 dummy8;
 
-        recvPacket >> num;
-        if(num==0){
-                logerror("No chars found!");
-                GetInstance()->SetError();
-                return;
-        }
+    recvPacket >> num;
+    if(num==0)
+    {
+        logerror("No chars found!");
+        GetInstance()->SetError();
+        return;
+    }
     
         logdetail("Chars in list: %u\n",num);
         _LoadCache(); // we are about to login, so we need cache data
-        for(unsigned int i=0;i<num;i++){
-                recvPacket >> plr[i]._guid;
-                recvPacket >> plr[i]._name;
-                recvPacket >> plr[i]._race;
-                recvPacket >> plr[i]._class;
-                recvPacket >> plr[i]._gender;
-                recvPacket >> plr[i]._bytes1;
-                recvPacket >> plr[i]._bytes2;
-                recvPacket >> plr[i]._bytes3;
-                recvPacket >> plr[i]._bytes4;
-                recvPacket >> plr[i]._bytesx;
-                recvPacket >> plr[i]._level;
-                recvPacket >> plr[i]._zoneId;
-                recvPacket >> plr[i]._mapId;
-                recvPacket >> plr[i]._x;
-                recvPacket >> plr[i]._y;
-                recvPacket >> plr[i]._z;
-                recvPacket >> plr[i]._guildId;
-                recvPacket >> dummy8;
-                recvPacket >> plr[i]._flags;
-                recvPacket >> dummy8 >> dummy8 >> dummy8;
-                recvPacket >> plr[i]._petInfoId;
-                recvPacket >> plr[i]._petLevel;
-                recvPacket >> plr[i]._petFamilyId;
-                for(unsigned int inv=0;inv<20;inv++)
+        for(unsigned int i=0;i<num;i++)
         {
-                        recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype;
-        }
-        plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
+            recvPacket >> plr[i]._guid;
+            recvPacket >> plr[i]._name;
+            recvPacket >> plr[i]._race;
+            recvPacket >> plr[i]._class;
+            recvPacket >> plr[i]._gender;
+            recvPacket >> plr[i]._bytes1;
+            recvPacket >> plr[i]._bytes2;
+            recvPacket >> plr[i]._bytes3;
+            recvPacket >> plr[i]._bytes4;
+            recvPacket >> plr[i]._bytesx;
+            recvPacket >> plr[i]._level;
+            recvPacket >> plr[i]._zoneId;
+            recvPacket >> plr[i]._mapId;
+            recvPacket >> plr[i]._x;
+            recvPacket >> plr[i]._y;
+            recvPacket >> plr[i]._z;
+            recvPacket >> plr[i]._guildId;
+            recvPacket >> dummy8;
+            recvPacket >> plr[i]._flags;
+            recvPacket >> dummy8 >> dummy8 >> dummy8;
+            recvPacket >> plr[i]._petInfoId;
+            recvPacket >> plr[i]._petLevel;
+            recvPacket >> plr[i]._petFamilyId;
+            for(unsigned int inv=0;inv<20;inv++)
+            {
+                recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype;
+            }
+            plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
         }
         bool char_found=false;
 
@@ -499,31 +502,34 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
                 GetDBMgr().GetClassName_(plr[i]._class).c_str(),
                 GetDBMgr().GetMapName(plr[i]._mapId).c_str(),
                 GetDBMgr().GetZoneName(plr[i]._zoneId).c_str());
+
             logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
             plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
-        for(unsigned int inv=0;inv<20;inv++)
-        {
-            if(plr[i]._items[inv].displayId)
-                logdebug("-> Has Item: Model=%u InventoryType=%u",plr[i]._items[inv].displayId,plr[i]._items[inv].inventorytype);
-        }
-        if(plr[i]._name==GetInstance()->GetConf()->charname)
-        {
-            char_found=true;
-            _myGUID=plr[i]._guid;
-            GetInstance()->GetScripts()->variables.Set("@myguid",toString(plr[i]._guid));
-            GetInstance()->GetScripts()->variables.Set("@myrace",toString(plr[i]._race));
-        }
+
+            for(unsigned int inv=0;inv<20;inv++)
+            {
+                if(plr[i]._items[inv].displayId)
+                    logdebug("-> Has Item: Model=%u InventoryType=%u",plr[i]._items[inv].displayId,plr[i]._items[inv].inventorytype);
+            }
+            if(plr[i]._name==GetInstance()->GetConf()->charname)
+            {
+                charId = i;
+                char_found=true;
+                _myGUID=plr[i]._guid;
+                GetInstance()->GetScripts()->variables.Set("@myguid",toString(plr[i]._guid));
+                GetInstance()->GetScripts()->variables.Set("@myrace",toString(plr[i]._race));
+            }
 
         }
         if(!char_found)
         {
-            logerror("Character \"%s\" was not found on char list!",GetInstance()->GetConf()->charname.c_str());
+            logerror("Character \"%s\" was not found on char list!", plr[charId]._name.c_str());
             GetInstance()->SetError();
             return;
         }
         else
         {
-            log("Entering World with Character \"%s\"...",GetInstance()->GetConf()->charname.c_str());
+            log("Entering World with Character \"%s\"...", plr[charId]._name.c_str());
 
             // create the character and add it to the objmgr.
             // note: this is the only object that has to stay in memory unless its explicitly deleted by the server!
@@ -531,6 +537,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             MyCharacter *my = new MyCharacter();
             my->Create(_myGUID);
             objmgr.Add(my);
+            my->SetName(plr[charId]._name);
 
             // TODO: initialize the world here, and load required maps.
             // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!

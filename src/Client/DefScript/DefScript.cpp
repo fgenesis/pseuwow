@@ -531,16 +531,6 @@ std::string DefScript::GetName(void)
 	return scriptname;
 }
 
-unsigned int DefScript::GetLines(void)
-{
-    return Line.size();
-}
-
-std::string DefScript::GetLine(unsigned int id)
-{
-	return Line[id];
-}
-
 bool DefScript::AddLine(std::string l){
 	if(l.empty())
 		return false;
@@ -703,7 +693,7 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
             if(!b.istrue)
             {
                 unsigned int other_ifs=0;
-                for(i=b.startline+1;;i++)
+                for(i=b.startline+1; i < sc->GetLines() ;i++)
                 {
                     if(!memcmp(sc->GetLine(i).c_str(),"if ",3))
                         other_ifs++;
