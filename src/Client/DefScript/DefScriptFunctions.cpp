@@ -180,7 +180,7 @@ DefReturnResult DefScriptPackage::func_setscriptpermission(CmdSet& Set)
 DefReturnResult DefScriptPackage::func_toint(CmdSet& Set)
 {
     DefReturnResult r;
-    std::string num=toString(floor(toNumber(Set.defaultarg)));
+    std::string num=toString(toUint64(Set.defaultarg));
     if(!Set.arg[0].empty())
     {
         std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);

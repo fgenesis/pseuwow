@@ -1,0 +1,113 @@
+// Item/Inventory debugger
+// Using Player/Item fields
+// Works for 2.3.x
+// Usage: As soon as this file is loaded, the debugger will be attached automatically (put this file in /scripts/ directory)
+// Known problems: If player/item names are not yet known, this script will display empty names. At second time everything will be fine.
+
+#script=itemdebugger_loader
+#onload
+if ?{not ?{ishooked _onobjectcreate}}
+	hookstart _onobjectcreate
+#escape-all=1
+	hookadd if ?{equal,4 ${@0}} // MaNGOS creates the player object after all items are created, so just need to check for that and read everything out of the player fields
+	hookadd playeritemdebugger ${@def}
+	hookadd endif
+#escape-all=0	
+	hookend
+endif
+if ?{not ?{ishooked _onobjectdelete}}
+	hookstart _onobjectdelete
+#escape-all=1
+	hookadd if ?{or,?{equal,1 ${@0}} ?{equal,2 ${@0}}}
+	hookadd itemdebugger_del ${@def}
+	hookadd endif
+#escape-all=0	
+	hookend
+endif
+#/onload
+logdetail Item debugger attached
+
+
+
+#script=playeritemdebugger
+// @def: player guid
+
+set,pguid ${@def}
+set,pname ?{getname,guid ${pguid}}
+
+// between these fields all item guids are stored (check UpdateFields.h)
+set,fstart 0x26E // PLAYER_FIELD_INV_SLOT_HEAD
+set,fend 0x35A // PLAYER_FIELD_KEYRING_SLOT_1 + 64
+
+set,f ${fstart}
+set,slot 0
+loop
+	if ?{bigger_eq,${f} ${fend}}
+		exitloop
+	endif
+	set,iguid ?{getobjectvalue,${f},i64 ${pguid}}
+	if ${iguid}
+		//-- show info about item
+		itemdebugger,{Player '${pname}' Slot ${slot} (field ${f}): } ${iguid}
+		
+		//-- Iterate over bags --
+		if ?{equal,2 ?{getobjecttype ${iguid}}}
+			bagitemdebugger ${iguid}
+		endif
+	endif
+
+	add,f 2
+	add,slot 1
+endloop
+
+
+#script=bagitemdebugger
+set,bagslots ?{getobjectvalue,60 ${@def}} // CONTAINER_FIELD_NUM_SLOTS
+set,j 0
+loop
+	set,t ${j}
+	mul,t 2
+	if ?{bigger,${t} ${bagslots}} // max. bag size = 36 slots
+		exitloop
+	endif
+	set,field 62 // CONTAINER_FIELD_SLOT_1 - 36
+	add,field ${t}
+	set,itemguid ?{getobjectvalue,${field},i64 ${@def}}
+	itemdebugger,{Bag slot ${j} (field: ${field}) -> } ${itemguid}
+	
+	add,j 1
+endloop
+
+
+#script=itemdebugger
+// @def: item guid
+// @0: text prefix
+set,itemguid ${@def}
+if ?{not ?{objectknown ${itemguid}}}
+	return
+endif
+
+if ${itemguid}
+	set,itemname ?{getname,guid ${itemguid}}
+	set,itementry ?{getentry ${itemguid}}
+	log ${@0}Item: '${itemname}' (${itementry}) [${itemguid}]
+endif
+
+
+#script=itemdebugger_del
+// @def: item guid
+
+set,itemguid ${@def}
+//if ?{not ?{objectknown ${itemguid}}}
+//	return
+//endif
+
+if ${itemguid}
+	set,itemname ?{getname,guid ${itemguid}}
+	set,itementry ?{getentry ${itemguid}}
+	set,owner ?{getobjectvalue,6,i64 ${itemguid}}	
+	set,ownername ?{getname,guid ${owner}}
+
+	log Delete Item: '${itemname}' (${itementry}) (${ownername}) [${itemguid}]
+endif
+

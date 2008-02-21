@@ -114,9 +114,11 @@ void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
     // call script just before object removal
     if(GetInstance()->GetScripts()->ScriptExists("_onobjectdelete"))
     {
+        Object *o = objmgr.GetObj(guid);
         CmdSet Set;
         Set.defaultarg = toString(guid);
-        Set.arg[0] = "false"; // out of range = false
+        Set.arg[0] = o ? toString(o->GetTypeId()) : "";
+        Set.arg[1] = "false"; // out of range = false
         GetInstance()->GetScripts()->RunScript("_onobjectdelete", &Set);
     }
 

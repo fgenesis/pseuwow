@@ -50,7 +50,8 @@ endif
 
 #script=_onobjectdelete
 // @def: GUID of deleted object
-// @0: [out of range object deletion=true, else false]
+// @0: TypeID of deleted object
+// @1: [out of range object deletion=true, else false]
 // The object can be accessed with the object handling functions listed above.
 // It will be deleted right after handling this script.
 
