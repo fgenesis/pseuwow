@@ -3,7 +3,7 @@
 
 Unit::Unit() : WorldObject()
 {
-    _type = TYPE_UNIT;
+    _type |= TYPE_UNIT;
     _typeid = TYPEID_UNIT;
     _valuescount = UNIT_END;
 }

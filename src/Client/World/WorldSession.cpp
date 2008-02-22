@@ -854,10 +854,10 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
     // TODO: put this into a capsule class later, that autodetects movement flags etc.
-    WorldPacket response;
-    response.SetOpcode(MSG_MOVE_FALL_LAND);
-    response << uint32(0) << (uint32)getMSTime(); // no flags; time correct?
-    response << x << y << z << o << uint32(0);
+    WorldPacket response(MSG_MOVE_FALL_LAND,4+1+4+4+4+4+4+4);
+    response << uint32(0) << (uint8)0; // no flags; unk
+    response <<(uint32)getMSTime(); // time correct?
+    response << x << y << z << o << uint32(100); // simulate 100 msec fall time
     SendWorldPacket(response);
 
     _world->UpdatePos(x,y);
@@ -891,6 +891,28 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     recvPacket >> mapid >> x >> y >> z >> o;
     if(GetMyChar())
         GetMyChar()->ClearSpells(); // will be resent by server
+
+    // when getting teleported, the client sends CMSG_CANCEL_TRADE 2 times.. dont ask me why.
+    WorldPacket wp(CMSG_CANCEL_TRADE,8);
+    SendWorldPacket(wp);
+    SendWorldPacket(wp);
+
+    wp.SetOpcode(MSG_MOVE_WORLDPORT_ACK);
+    SendWorldPacket(wp);
+
+    wp.SetOpcode(CMSG_SET_ACTIVE_MOVER);
+    wp << GetGuid();
+    SendWorldPacket(wp);
+
+    // TODO: put this into a capsule class later, that autodetects movement flags etc.
+    WorldPacket response(MSG_MOVE_FALL_LAND,4+1+4+4+4+4+4+4);
+    response << uint32(0) << (uint8)0; // no flags; unk
+    response <<(uint32)getMSTime(); // time correct?
+    response << x << y << z << o << uint32(100); // simulate 100 msec fall time
+    SendWorldPacket(response);
+
+
+
     // TODO: clear action buttons
 
     // clear world data and load required maps
