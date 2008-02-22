@@ -351,7 +351,7 @@ DefReturnResult DefScriptPackage::func_bitxor(CmdSet& Set)
 
 DefReturnResult DefScriptPackage::func_addevent(CmdSet& Set)
 {
-    GetEventMgr()->Add(Set.arg[0],Set.defaultarg,(clock_t)toNumber(Set.arg[1]),Set.myname.c_str());
+    GetEventMgr()->Add(Set.arg[0],Set.defaultarg,(clock_t)toNumber(Set.arg[1]),Set.myname.c_str(),isTrue(Set.arg[2]));
     return true;
 }
 

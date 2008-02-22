@@ -326,7 +326,7 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
     }
 
     Object *obj = ws->objmgr.GetObj(guid);
-    if(obj && obj->IsUnit() || obj->IsCorpse()) // only units and corpses are targetable
+    if(obj && (obj->IsUnit() || obj->IsCorpse())) // only units and corpses are targetable
     {
         ws->SendSetSelection(guid); // will also set the target for myCharacter
         return toString(guid);

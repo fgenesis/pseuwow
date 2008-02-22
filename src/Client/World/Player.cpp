@@ -11,7 +11,7 @@
 
 Player::Player() : Unit()
 {
-    _type = TYPE_PLAYER;
+    _type |= TYPE_PLAYER;
     _typeid = TYPEID_PLAYER;
     _valuescount = PLAYER_END;
 }

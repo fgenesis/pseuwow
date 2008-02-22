@@ -16,20 +16,29 @@ inline void flipcc(uint8 *fcc)
 
 bool ADTFile::Load(std::string fn)
 {
-    uint32 fs = GetFileSize(fn.c_str());
-    if(!fs)
-        return false;
-    std::fstream fh;
-    fh.open(fn.c_str(), std::ios_base::in | std::ios_base::binary);
-    if(!fh.is_open())
-        return false;
+    try
+    {
+        uint32 fs = GetFileSize(fn.c_str());
+        if(!fs)
+            return false;
+        std::fstream fh;
+        fh.open(fn.c_str(), std::ios_base::in | std::ios_base::binary);
+        if(!fh.is_open())
+            return false;
 
-    ByteBuffer buf(fs);
-    buf.resize(fs);
-    fh.read((char*)buf.contents(),fs);
-    fh.close();
-    buf.rpos(0);
-    return LoadMem(buf);
+        ByteBuffer buf(fs);
+        buf.resize(fs);
+        fh.read((char*)buf.contents(),fs);
+        fh.close();
+        buf.rpos(0);
+        return LoadMem(buf);
+    }
+    catch (...)
+    {
+        printf("ADTFile::Load() Exception\n");
+        return false;                
+    }
+    
 }
 
 bool ADTFile::LoadMem(ByteBuffer& buf)
