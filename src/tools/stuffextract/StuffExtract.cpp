@@ -26,7 +26,8 @@ bool doMaps=true, doSounds=false, doTextures=false, doWmos=false, doModels=false
 int main(int argc, char *argv[])
 {
     char input[200];
-    printf("StuffExtract [version %u]\n\n",SE_VERSION);
+    printf("StuffExtract [version %u]\n",SE_VERSION);
+    printf("Use -help or -? to display help about command line arguments and config.\n\n",SE_VERSION);
     ProcessCmdArgs(argc, argv);
     PrintConfig();
     if(!GetLocale())
