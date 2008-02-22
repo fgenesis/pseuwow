@@ -26,7 +26,7 @@ reconnect=5000
 // 1 - show only known/handled
 // 2 - show only unknown/unhandled
 // 3 - show all
-showopcodes=3
+showopcodes=0
 
 
 // Hide opcodes which is coming very frequently?
@@ -62,8 +62,8 @@ charname=Pseuwow
 
 
 // Client emulation configuration
-ClientVersion=2.3.0
-ClientBuild=7561
+ClientVersion=2.3.3
+ClientBuild=7799
 ClientLanguage=enUS
 // or change to enGB, deDE, ...
 
@@ -71,7 +71,7 @@ ClientLanguage=enUS
 // packets get fetched every xx msecs. default=50
 // setting this to 0 will let PseuWoW eat up all CPU power
 // 1 is a good setting for maximum network performance and lowest ping times
-NetworkSleepTime=50
+NetworkSleepTime=1
 
 // defines if players may say/yell/whisper commands to PseuWoW
 // set this to 0 and PseuWoW will not react to given commands
