@@ -42,6 +42,11 @@ return ${amount}
 // returns: false if the incoming chatmessage was invalid, else true
 // TODO: get object name (player or creature) and pass it to the called scripts
 
+// if the list doesnt exist, it will return "", but this counts as false also
+if ?{not ?{llen pattern_list}}
+	return
+endif
+
 // filter out chat messages that came from us
 if ?{equal,${@myguid} ${@2}}
     return false
@@ -72,7 +77,7 @@ set,i 0
 set,len ?{llen pattern_list}
 
 loop
-    if ?{equal,${i} ${len}}
+    if ?{bigger_eq,${i} ${len}}
         exitloop
     endif
     
