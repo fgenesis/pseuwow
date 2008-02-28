@@ -112,15 +112,15 @@ void WorldSession::SendCastSpell(uint32 spellid, bool nocheck)
 
     Object *target = objmgr.GetObj(my->GetTarget());
 
-    if(!target) // this is wrong, some spells dont require a target (areaspells, self-only spells)
-        return; // but for now, this should be ok, until a db is used that provides spell info
+    //if(!target) // this is wrong, some spells dont require a target (areaspells, self-only spells)
+    //    return; // but for now, this should be ok, until a db is used that provides spell info
 
     WorldPacket packet;
     ByteBuffer temp;
     uint16 flags=TARGET_FLAG_SELF; // target mask. spellcast implementeation needs to be changed if TARGET_MASK_SELF is != 0
     packet << spellid;
     packet << (uint8)0; // unk
-    if(my->GetTarget() != GetGuid()) // self cast?
+    if(target && my->GetTarget() != GetGuid()) // self cast?
     {
         if(target->GetTypeId() == TYPEID_PLAYER || target->GetTypeId() == TYPEID_UNIT)
         {
@@ -145,7 +145,7 @@ void WorldSession::SendCastSpell(uint32 spellid, bool nocheck)
     SendWorldPacket(packet);
     logdetail("Casting spell %u on target "I64FMT,spellid,my->GetTarget());
     if(!known)
-        logerror(" - WARNING: spell is NOT known!");
+        logcustom(1,RED," - WARNING: spell is NOT known!");
 }
 
 void WorldSession::SendWhoListRequest(uint32 minlvl, uint32 maxlvl, uint32 racemask, uint32 classmask, std::string name, std::string guildname, std::vector<uint32> *zonelist, std::vector<std::string> *strlist)

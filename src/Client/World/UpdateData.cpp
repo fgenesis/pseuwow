@@ -56,11 +56,18 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
             case UPDATETYPE_MOVEMENT:
             {
                 recvPacket >> uguid; // the guid is NOT packed here!
+                uint8 tyid;
                 Object *obj = objmgr.GetObj(uguid);
                 if(obj)
-                    this->_MovementUpdate(obj->GetTypeId(),uguid,recvPacket);
-                else
-                    logerror("Got UpdateObject_Movement for unknown object "I64FMT,uguid);
+                    tyid = obj->GetTypeId();
+                else // sometimes objects get deleted BEFORE a last update packet arrives, this must be handled also
+                {
+                    tyid = GetTypeIdByGuid(uguid);
+                    logerror("Got UpdateObject_Movement for unknown object "I64FMT". Using typeid %u",uguid,(uint32)tyid);
+                }
+
+                if(obj)
+                    this->_MovementUpdate(tyid,uguid,recvPacket);
             }
             break;
 
@@ -315,30 +322,46 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
 {
     Object *obj = objmgr.GetObj(uguid);
-    uint8 blockcount;
+    uint8 blockcount,tyid;
     uint32 value, masksize, valuesCount;
     float fvalue;
 
-    if (obj)
+    if(obj)
     {
         valuesCount = obj->GetValuesCount();
-        recvPacket >> blockcount;
-        masksize = blockcount << 2; // each sizeof(uint32) == <4> * sizeof(uint8) // 1<<2 == <4>
-        UpdateMask umask;
-        uint32 *updateMask = new uint32[blockcount];
-        umask.SetCount(masksize);
-        recvPacket.read((uint8*)updateMask, masksize);
-        umask.SetMask(updateMask);
-        //delete [] updateMask; // will be deleted at ~UpdateMask() !!!!
-        logdev("ValuesUpdate TypeId=%u GUID="I64FMT" pObj=%X Blocks=%u Masksize=%u",obj->GetTypeId(),uguid,obj,blockcount,masksize);
+        tyid = obj->GetTypeId();
+    }
+    else
+    {
+        logcustom(1,RED,"Got UpdateObject_Values for unknown object "I64FMT,uguid);
+        tyid = GetTypeIdByGuid(uguid); // can cause problems with TYPEID_CONTAINER!!
+        valuesCount = GetValuesCountByTypeId(tyid);
+    }
 
-        for (uint32 i = 0; i < valuesCount; i++)
+
+    recvPacket >> blockcount;
+    masksize = blockcount << 2; // each sizeof(uint32) == <4> * sizeof(uint8) // 1<<2 == <4>
+    UpdateMask umask;
+    uint32 *updateMask = new uint32[blockcount];
+    umask.SetCount(masksize);
+    recvPacket.read((uint8*)updateMask, masksize);
+    umask.SetMask(updateMask);
+    //delete [] updateMask; // will be deleted at ~UpdateMask() !!!!
+    logdev("ValuesUpdate TypeId=%u GUID="I64FMT" pObj=%X Blocks=%u Masksize=%u",tyid,uguid,obj,blockcount,masksize);
+
+    // just in case the object does not exist, and we have really a container instead of an item, and a value in
+    // the container fields is set, THEN we have a problem. this should never be the case; it can be fixed in a
+    // more correct way if there is the need.
+    // (-> valuesCount smaller then it should be might skip a few bytes and corrupt the packet)
+    for (uint32 i = 0; i < valuesCount; i++)
+    {
+        if (umask.GetBit(i))
         {
-            if (umask.GetBit(i))
+            if(obj)
             {
                 if(IsFloatField(obj->GetTypeMask(),i))
                 {
-                    recvPacket >> fvalue;
+                    recvPacket >> fvalue;                    
                     obj->SetFloatValue(i, fvalue);
                     logdev("-> Field[%u] = %f",i,fvalue);
                 }
@@ -348,15 +371,13 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
                     obj->SetUInt32Value(i, value);
                     logdev("-> Field[%u] = %u",i,value);
                 }
-                
             }
+            else
+            {
+                recvPacket >> value; // drop the value, since object doesnt exist (always 4 bytes)
+            }            
         }
     }
-    else
-    {
-        logerror("Got UpdateObject_Values for unknown object "I64FMT,uguid);
-    }
-
 }
 
 void WorldSession::_QueryObjectInfo(uint64 guid)
