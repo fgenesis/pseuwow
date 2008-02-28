@@ -598,10 +598,7 @@ DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
         uint32 tmp=0;
         if(t=="class")     r.ret=toString(proto->Class);
         else if(t=="subclass")  r.ret=toString(proto->SubClass);
-        else if(t=="name1" || t=="name") r.ret=proto->Name[0];
-        else if(t=="name2") r.ret=proto->Name[1];
-        else if(t=="name3") r.ret=proto->Name[2];
-        else if(t=="name4") r.ret=proto->Name[3];
+        else if(t=="name") r.ret=proto->Name;
         else if(t=="model" || t=="displayid")  r.ret=toString(proto->DisplayInfoID);
         else if(t=="quality")  r.ret=toString(proto->Quality);
         else if(t=="flags")  r.ret=toString(proto->Flags);

@@ -1028,7 +1028,7 @@ void WorldSession::_HandleEmoteOpcode(WorldPacket& recvPacket)
         }
         if(name.empty())
         {
-            if(o->IsPlayer())
+            if(IS_PLAYER_GUID(guid))
             {
                 name = GetOrRequestPlayerName(guid);
                 if(name.empty())

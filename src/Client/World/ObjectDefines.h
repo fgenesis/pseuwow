@@ -19,17 +19,18 @@
 #ifndef MANGOS_OBJECTDEFINES_H
 #define MANGOS_OBJECTDEFINES_H
 
-enum HIGHGUID
+enum HighGuid
 {
-    HIGHGUID_ITEM          = 0x40000070,
-    HIGHGUID_CONTAINER     = 0x40000070,
-    HIGHGUID_UNIT          = 0xF0001000,
-    HIGHGUID_PLAYER        = 0x00000000,
-    HIGHGUID_GAMEOBJECT    = 0xF0004000,
-    HIGHGUID_DYNAMICOBJECT = 0xF000A000,
-    HIGHGUID_CORPSE        = 0xF0007000,
-    HIGHGUID_PLAYER_CORPSE = 0x80000001,                    // ??
-    HIGHGUID_TRANSPORT     = 0x80000000
+    HIGHGUID_ITEM           = 0x40000000,                   // blizz 40000000
+    HIGHGUID_CONTAINER      = 0x40000000,                   // blizz 40000000
+    HIGHGUID_UNIT           = 0xF0070000,                   // blizz F009????, where "????" is unit entry
+    HIGHGUID_PLAYER         = 0x00000000,                   // blizz 00000000
+    HIGHGUID_GAMEOBJECT     = 0xF0060000,                   // blizz F0090000
+    HIGHGUID_DYNAMICOBJECT  = 0xF00A0000,                   // blizz F0090000, F0320000
+    HIGHGUID_CORPSE         = 0xF0090000,                   // blizz F0090000, F0320000
+    HIGHGUID_PLAYER_CORPSE  = 0xF0080000,                   // blizz F0090000, F0320000
+    HIGHGUID_MO_TRANSPORT   = 0x1FC00000,                   // blizz 1FC00000 (type 15)
+    HIGHGUID_TRANSPORT      = 0x1FA70000                    // blizz 1FA70000 (type 11)
 };
 
 #define IS_CREATURE_GUID(Guid)       ( GUID_HIPART(Guid) == HIGHGUID_UNIT )

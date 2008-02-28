@@ -4,6 +4,7 @@
 #include "UpdateFields.h"
 #include "ObjectDefines.h"
 #include "common.h"
+#include "HelperDefs.h"
 
 enum TYPE
 {
@@ -143,6 +144,28 @@ inline uint32 GetValuesCountByTypeId(uint8 tid)
     case TYPEID_CORPSE: return CORPSE_END;
     }
     return 0;
+}
+
+inline uint8 GetTypeIdByGuid(uint64 guid)
+{
+    switch(GUID_HIPART(guid))
+    {
+    case HIGHGUID_PLAYER:
+        return TYPEID_PLAYER;
+    case HIGHGUID_CORPSE:
+    case HIGHGUID_PLAYER_CORPSE: // not sure
+        return TYPEID_CORPSE;
+    case HIGHGUID_ITEM: // == HIGHGUID_CONTAINER
+        return TYPEID_ITEM;
+    case HIGHGUID_DYNAMICOBJECT:
+        return TYPEID_DYNAMICOBJECT;
+    case HIGHGUID_GAMEOBJECT:
+    case HIGHGUID_TRANSPORT: // not sure
+        return TYPEID_GAMEOBJECT;
+    case HIGHGUID_UNIT:
+        return TYPEID_UNIT;
+    }
+    return TYPEID_OBJECT;
 }
 
 
