@@ -26,7 +26,7 @@ set,sc ${@def}
 default,sc ${#hookhelper::CurScript}
 set,c ${@0}
 default,c ${@caller}
-appenddef,{${sc}} #tag:hook-end:${c}
+appenddef,{${sc}} #tag:hook-end
 set,#hookhelper::CurScript
 unset ${sc}
 unset sc
@@ -74,19 +74,30 @@ HookStart,{${c}} OPCODE::${@def}
 #script=UnHook
 // @def: name of script where to remove hook from
 // [@0: hook name (usually name of script that installed the hook). default: name of calling script]
+set,target ?{lowercase ${@def}}
+if ?{not ?{scriptexists ${target}}}
+	logerror UnHook called for nonexisting script '${target}' by '${@caller}'
+endif
 set,sc ${@0}
 default,sc ${@caller}
-set,sl #DEFSCRIPT::SCRIPT::${@def}
+set,sc ?{lowercase ${sc}}
+set,sl ?{sclistname ${target}}
 set,hn #tag:hook:${sc}
-set,hne #tag:hook-end:${sc}
+set,hne #tag:hook-end
+//logdebug -- sl='${sl}' hn='${hn}' hne='${hne}'
 loop
-	if ?{not ?{IsHooked,{${sc}} ${@def}}}
+	if ?{not ?{IsHooked,{${sc}} ${target}}}
+		//logdebug -- unhook done
 		exitloop
 	endif
 	set,p ?{lfind,{${sl}} ${hn}}
-	if ?{strlen ${p}}
+	set,line ?{lindex,{${sl}} ${p}}
+	//logdebug -- line[${p}] = ${line}
+	if ?{strlen ${p}} // p is empty string if the line wasnt found
 		loop
-			if ?{equal,{?{lerase,{${sl}} ${p}}} ${hne}}
+			set,line2 ?{lerase,{${sl}} ${p}}
+			//logdebug -- removed: '${line2}'
+			if ?{equal,{${line2}} ${hne}}
 				exitloop
 			endif
 		endloop
@@ -100,7 +111,7 @@ unset sc
 #script=UnHookOpcode
 // @def: opcode name
 // [@0: name of calling script]
-set,sc ?{@0}
+set,sc ${@0}
 default,sc ${@caller}
 UnHook,{${sc}} OPCODE::${@def}
 
@@ -108,9 +119,9 @@ UnHook,{${sc}} OPCODE::${@def}
 // @def: name of script to remove all hooks from
 // [@0: name of calling script]
 set,sc ${@0}
-set,sl #DEFSCRIPT::SCRIPT::${@def}
+set,sl ?{sclistname ${@def}}
 set,hn #tag:hook:
-set,hne #tag:hook-end:
+set,hne #tag:hook-end
 set,i 0
 set,hookcode false
 loop
