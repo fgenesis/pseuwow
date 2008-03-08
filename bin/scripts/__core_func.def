@@ -101,6 +101,17 @@ set,top ${@0}
 default,top ${@caller}
 return #${top}::${@def}
 
+//---------------------------------------------------------
+#script=sclistname
+//---------------------------------------------------------
+// purpose: returns the global name of a script list
+// args: @def: script name
+set,c ?{substr,1 ${@def}}
+// it is a global name already if the script name starts with # or there is no caller script
+if ?{or,?{equal,# ${c}} ?{not ${@caller}}}
+        return ${@def}
+endif
+return #DEFSCRIPT::SCRIPT::${@def}
 
 //---------------------------------------------------------
 #script=getvar
@@ -149,7 +160,7 @@ if ?{and,{?{strlen ${@def}}} ?{strlen ${sc}}}
 		createdef ${sc}
 	endif
 		
-	lpushback,{#DEFSCRIPT::SCRIPT::${sc}} ${@def}
+	lpushback,{?{sclistname ${sc}}} ${@def}
 	unset cmd
 endif
 
@@ -161,5 +172,5 @@ endif
 //  @0: script name
 //  @def: line of text to look for
 
-return ?{lcontains,{#DEFSCRIPT::SCRIPT::?{lowercase ${@0}}} ${@def}}
+return ?{lcontains,{?{sclistname ?{lowercase ${@0}}}} ${@def}}
 
