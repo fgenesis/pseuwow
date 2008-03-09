@@ -307,8 +307,8 @@ DefReturnResult DefScriptPackage::func_bitor(CmdSet& Set)
     }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg);
+    uint64 a=toUint64(variables.Get(vname));
+    uint64 b=toUint64(Set.defaultarg);
     a|=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -324,8 +324,8 @@ DefReturnResult DefScriptPackage::func_bitand(CmdSet& Set)
     }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg);
+    uint64 a=toUint64(variables.Get(vname));
+    uint64 b=toUint64(Set.defaultarg);
     a&=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -341,8 +341,8 @@ DefReturnResult DefScriptPackage::func_bitxor(CmdSet& Set)
     }
 
     std::string vname=_NormalizeVarName(Set.arg[0], Set.myname);
-    uint64 a=(uint64)toNumber(variables.Get(vname));
-    uint64 b=(uint64)toNumber(Set.defaultarg);
+    uint64 a=toUint64(variables.Get(vname));
+    uint64 b=toUint64(Set.defaultarg);
     a^=b;
     variables.Set(vname,toString(a));
     r.ret=toString(a);
@@ -375,7 +375,10 @@ DefReturnResult DefScriptPackage::func_equal(CmdSet& Set)
     {
         result=stringToLower(Set.defaultarg)==stringToLower(Set.arg[0]);
     }
-    result=Set.defaultarg==Set.arg[0];
+    else
+    {
+        result=Set.defaultarg==Set.arg[0];
+    }
 
     // for debugging
     _DEFSC_DEBUG
