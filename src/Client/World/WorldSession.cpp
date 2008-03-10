@@ -213,6 +213,7 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
     }
     catch (ByteBufferException bbe)
     {
+        logerror("Exception while handling opcode %u [%s]!",packet->GetOpcode(),GetOpcodeName(packet->GetOpcode()));
         logerror("WorldSession: ByteBufferException");
         logerror("ByteBuffer reported: attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)",
             bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
@@ -223,7 +224,7 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
     }
     catch (...)
     {
-        logerror("Exception while handling opcode %u!",packet->GetOpcode());
+        logerror("Exception while handling opcode %u [%s]!",packet->GetOpcode(),GetOpcodeName(packet->GetOpcode()));
         logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
         logerror("Packet Hexdump:");
         logerror("%s",toHexDump((uint8*)packet->contents(),packet->size(),true).c_str());

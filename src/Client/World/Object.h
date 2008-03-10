@@ -5,6 +5,7 @@
 #include "ObjectDefines.h"
 #include "common.h"
 #include "HelperDefs.h"
+#include "World.h"
 
 enum TYPE
 {
@@ -113,10 +114,13 @@ public:
     virtual ~WorldObject ( ) {}
     void SetPosition(float x, float y, float z, float o, uint16 _map);
     void SetPosition(float x, float y, float z, float o);
-    inline float GetX(void) { return _x; }
-    inline float GetY(void) { return _y; }
-    inline float GetZ(void) { return _z; }
-    inline float GetO(void) { return _o; }
+    inline void SetPosition(WorldPosition& wp) { _wpos = wp; }
+    inline void SetPosition(WorldPosition& wp, uint16 mapid) { SetPosition(wp); _m = mapid; }
+    inline WorldPosition GetPosition(void) {return _wpos; }
+    inline float GetX(void) { return _wpos.x; }
+    inline float GetY(void) { return _wpos.y; }
+    inline float GetZ(void) { return _wpos.z; }
+    inline float GetO(void) { return _wpos.o; }
     float GetDistance(WorldObject *obj);
     float GetDistance2d(float x, float y);
     float GetDistance(float x, float y, float z);
@@ -125,7 +129,7 @@ public:
 
 protected:
     WorldObject();
-    float _x,_y,_z,_o; // coords, orientation
+    WorldPosition _wpos; // coords, orientation
     uint16 _m; // map
 
 };

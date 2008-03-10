@@ -1215,7 +1215,7 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
     }
 
 
-    if(scperm > 0) // skip "invisible" scripts (without any permission set) completely.
+    if(scperm >= 0) // skip "invisible" scripts (without any permission set) completely.
     {
         if(usrperm < scperm)
         {
@@ -1227,10 +1227,12 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
             RunScript("_nopermission",&Set);
             return;
         }
+        else
+        {
+            Interpret(curSet);
+        }
     }
 
-
-    Interpret(curSet);
 }
 
 
