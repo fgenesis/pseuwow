@@ -333,7 +333,7 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
     }
     else
     {
-        logcustom(1,RED,"Got UpdateObject_Values for unknown object "I64FMT,uguid);
+        logcustom(1,LRED,"Got UpdateObject_Values for unknown object "I64FMT,uguid);
         tyid = GetTypeIdByGuid(uguid); // can cause problems with TYPEID_CONTAINER!!
         valuesCount = GetValuesCountByTypeId(tyid);
     }

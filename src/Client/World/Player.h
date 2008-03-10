@@ -120,25 +120,6 @@
 #define TRADE_SLOT_TRADED_COUNT      6
 #define TRADE_SLOT_NONTRADED         6
 
-enum MovementFlags
-{
-    MOVEMENTFLAG_FORWARD        = 0x1,
-    MOVEMENTFLAG_BACKWARD       = 0x2,
-    MOVEMENTFLAG_STRAFE_LEFT    = 0x4,
-    MOVEMENTFLAG_STRAFE_RIGHT   = 0x8,
-    MOVEMENTFLAG_LEFT           = 0x10,
-    MOVEMENTFLAG_RIGHT          = 0x20,
-    MOVEMENTFLAG_PITCH_UP       = 0x40,
-    MOVEMENTFLAG_PITCH_DOWN     = 0x80,
-
-    MOVEMENTFLAG_WALK           = 0x100,
-    MOVEMENTFLAG_JUMPING        = 0x2000,
-    MOVEMENTFLAG_FALLING        = 0x4000,
-    MOVEMENTFLAG_SWIMMING       = 0x200000,
-    MOVEMENTFLAG_ONTRANSPORT    = 0x2000000,
-    MOVEMENTFLAG_SPLINE         = 0x4000000
-};
-
 struct PlayerEnumItem
 {
 	uint32 displayId;
@@ -208,7 +189,7 @@ public:
     void ClearSpells(void) { _spells.clear(); }
     uint64 GetTarget(void) { return _target; }
     void SetTarget(uint64 guid) { _target = guid; } // should only be called by WorldSession::SendSetSelection() !!
-    bool HasSpell(uint32 spellid) { return GetSpellSlot(spellid) != 0; }
+    bool HasSpell(uint32 spellid);
     uint16 GetSpellSlot(uint32 spellid);
 
 private:

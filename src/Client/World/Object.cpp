@@ -39,16 +39,15 @@ void Object::Create( uint64 guid )
    
 WorldObject::WorldObject()
 {
-    _x = _y = _z = _o = 0;
     _m = 0;
 }
 
 void WorldObject::SetPosition(float x, float y, float z, float o)
 {
-    _x = x;
-    _y = y;
-    _z = z;
-    _o = o;
+    _wpos.x = x;
+    _wpos.y = y;
+    _wpos.z = z;
+    _wpos.o = o;
 }
 
 void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)

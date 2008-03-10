@@ -56,6 +56,15 @@ void MyCharacter::RemoveSpell(uint32 spellid)
         }
 }
 
+bool MyCharacter::HasSpell(uint32 spellid)
+{
+    for(std::vector<SpellBookEntry>::iterator i=_spells.begin(); i != _spells.end(); i++)
+        if(i->id == spellid)
+            return true;
+    return false;
+}
+
+
 uint16 MyCharacter::GetSpellSlot(uint32 spellid)
 {
     for(std::vector<SpellBookEntry>::iterator i=_spells.begin(); i != _spells.end(); i++)

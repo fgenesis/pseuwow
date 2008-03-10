@@ -145,7 +145,7 @@ void WorldSession::SendCastSpell(uint32 spellid, bool nocheck)
     SendWorldPacket(packet);
     logdetail("Casting spell %u on target "I64FMT,spellid,my->GetTarget());
     if(!known)
-        logcustom(1,RED," - WARNING: spell is NOT known!");
+        logcustom(1,LRED," - WARNING: spell is NOT known!");
 }
 
 void WorldSession::SendWhoListRequest(uint32 minlvl, uint32 maxlvl, uint32 racemask, uint32 classmask, std::string name, std::string guildname, std::vector<uint32> *zonelist, std::vector<std::string> *strlist)

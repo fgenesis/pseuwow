@@ -47,6 +47,11 @@ void ObjMgr::Remove(uint64 guid)
         _obj.erase(guid); // now delete the obj from the mgr
         delete o; // and delete the obj itself
     }
+    else
+    {
+        _obj.erase(guid);
+        logcustom(2,LRED,"ObjMgr::Remove("I64FMT") - not existing",guid); 
+    }        
 }
 
 // -- Object part --
