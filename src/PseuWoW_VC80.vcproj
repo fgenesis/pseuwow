@@ -252,6 +252,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Client\MemoryDataHolder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Client\MemoryDataHolder.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Client\PseuWoW.cpp"
 				>
 			</File>
@@ -303,6 +311,10 @@
 				</File>
 				<File
 					RelativePath=".\Client\DefScript\DefScriptDefines.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\DefScript\DefScriptFileFunctions.cpp"
 					>
 				</File>
 				<File
