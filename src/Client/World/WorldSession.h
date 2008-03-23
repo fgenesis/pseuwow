@@ -1,7 +1,7 @@
 #ifndef _WORLDSESSION_H
 #define _WORLDSESSION_H
 
-#include <queue>
+#include <deque>
 #include <bitset>
 
 #include "common.h"
@@ -40,7 +40,7 @@ struct DelayedWorldPacket
 };
 
 typedef std::vector<WhoListEntry> WhoList;
-typedef std::queue<DelayedWorldPacket> DelayedPacketQueue;
+typedef std::deque<DelayedWorldPacket> DelayedPacketQueue;
 
 class WorldSession
 {
