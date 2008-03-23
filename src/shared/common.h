@@ -23,8 +23,11 @@
 # include "zthread/Thread.h"
 #endif
 
+#define STRINGIZE(a) #a
+
 #include "SysDefs.h"
 #include "DebugStuff.h"
+#include "Widen.h"
 #include "tools.h"
 #include "log.h"
 

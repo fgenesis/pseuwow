@@ -13,6 +13,17 @@ struct WorldPosition
     float x,y,z,o;
 };
 
+inline ByteBuffer& operator<<(ByteBuffer& bb, WorldPosition& p)
+{
+    bb << p.x << p.y << p.z << p.o;
+    return bb;
+}
+inline ByteBuffer& operator>>(ByteBuffer& bb, WorldPosition& p)
+{
+    bb >> p.x >> p.y >> p.z >> p.o;
+    return bb;
+}
+
 // used as interface for movement, map data,
 class World
 {

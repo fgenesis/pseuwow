@@ -495,7 +495,7 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
 
 void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
 {
-    logdebug("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]\n",pkt.size(),26);
+    logdebug("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]",pkt.size(),26);
     if(pkt.size() < 2)
     {
         logerror("AUTH_LOGON_PROOF: Recieved incorrect/unknown packet. Hexdump:");

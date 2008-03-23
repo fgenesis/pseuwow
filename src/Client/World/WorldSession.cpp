@@ -459,7 +459,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         return;
     }
     
-        logdetail("Chars in list: %u\n",num);
+        logdetail("Chars in list: %u",num);
         _LoadCache(); // we are about to login, so we need cache data
         for(unsigned int i=0;i<num;i++)
         {

@@ -7,6 +7,8 @@
 template <class T> class TypeStorage
 {
 public:
+    typedef typename std::map<std::string,T*> _TypeMap;
+    typedef typename _TypeMap::iterator _TypeIter;
     TypeStorage() { _keep = false; }
 	~TypeStorage();
 	bool Exists(std::string);
@@ -25,7 +27,7 @@ public:
 
 private:
     T *_Create(std::string);
-    std::map<std::string,T*> _storage;
+    _TypeMap _storage;
     bool _keep;
 };
 
@@ -46,7 +48,7 @@ template<class T> T *TypeStorage<T>::_Create(std::string s)
 // delete object with that name, if present
 template<class T> void TypeStorage<T>::Delete(std::string s)
 {
-    std::map<std::string,T*>::iterator it = _storage.find(s);
+    _TypeIter it = _storage.find(s);
     if(it != _storage.end())
     {
         delete it->second;
@@ -57,7 +59,7 @@ template<class T> void TypeStorage<T>::Delete(std::string s)
 // delete object with that ptr, if present
 template<class T> void TypeStorage<T>::DeleteByPtr(T *ptr)
 {
-    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end(); it++)
+    for(_TypeIter it = _storage.begin(); it != _storage.end(); it++)
     {
         if(it->second == ptr)
         {
@@ -71,7 +73,7 @@ template<class T> void TypeStorage<T>::DeleteByPtr(T *ptr)
 // return the the object with that name. return NULL if not found
 template <class T> T *TypeStorage<T>::GetNoCreate(std::string s)
 {
-    std::map<std::string,T*>::iterator it = _storage.find(s);
+    _TypeIter it = _storage.find(s);
     if(it != _storage.end())
         return it->second;
     return NULL;
@@ -97,7 +99,7 @@ template<class T> void TypeStorage<T>::Clear(bool keep)
         _storage.clear();
         return;
     }
-    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end();)
+    for(_TypeIter it = _storage.begin(); it != _storage.end();)
     {
         delete it->second;
         _storage.erase(it++);
@@ -121,7 +123,7 @@ template<class T> void TypeStorage<T>::Unlink(std::string s)
 // removes the pointer from the storage without deleting it, if name is unknown
 template<class T> void TypeStorage<T>::UnlinkByPtr(T *ptr)
 {
-    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end();)
+    for(_TypeIter it = _storage.begin(); it != _storage.end();)
     {
         if(it->second == ptr)
         {
@@ -133,7 +135,7 @@ template<class T> void TypeStorage<T>::UnlinkByPtr(T *ptr)
 
 template<class T> std::string TypeStorage<T>::GetNameByPtr(T *ptr)
 {
-    for(std::map<std::string,T*>::iterator it = _storage.begin(); it != _storage.end();)
+    for(_TypeIter it = _storage.begin(); it != _storage.end();)
     {
         if(it->second == ptr)
         {

@@ -310,6 +310,12 @@
 					RelativePath=".\Client\World\Item.h">
 				</File>
 				<File
+					RelativePath=".\Client\World\MovementMgr.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\World\MovementMgr.h">
+				</File>
+				<File
 					RelativePath=".\Client\World\Object.cpp">
 				</File>
 				<File
