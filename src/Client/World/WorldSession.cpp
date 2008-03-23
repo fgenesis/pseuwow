@@ -54,7 +54,7 @@ WorldSession::~WorldSession()
     while(delayedPktQueue.size())
     {
         packet = delayedPktQueue.back().pkt;
-        delayedPktQueue.c.pop_back();
+        delayedPktQueue.pop_back();
         delete packet;
     }
 
@@ -299,7 +299,7 @@ void WorldSession::_DelayWorldPacket(WorldPacket& pkt, uint32 ms)
     // need to copy the packet, because the current packet will be deleted after it got handled
     WorldPacket *pktcopy = new WorldPacket(pkt.GetOpcode(),pkt.size());
     pktcopy->append(pkt.contents(),pkt.size());
-    delayedPktQueue.push(DelayedWorldPacket(pktcopy,ms));
+    delayedPktQueue.push_back(DelayedWorldPacket(pktcopy,ms));
     DEBUG(logdebug("-> WP ptr = 0x%X",pktcopy));
 }
 
@@ -308,12 +308,11 @@ void WorldSession::_HandleDelayedPackets(void)
     if(delayedPktQueue.size())
     {
         DelayedPacketQueue copy(delayedPktQueue);
-        while(delayedPktQueue.size())
-            delayedPktQueue.pop(); // clear original, since it might be filled up by newly delayed packets, which would cause endless loop
+        delayedPktQueue.clear(); // clear original, since it might be filled up by newly delayed packets, which would cause endless loop
         while(copy.size())
         {
             DelayedWorldPacket d = copy.front();
-            copy.c.pop_front(); // remove packet from front, std::queue seems not to have a func for it
+            copy.pop_front(); // remove packet from front
             if(clock() >= d.when) // if its time to handle this packet, do so
             {
                 DEBUG(logdebug("Handling delayed packet (%s [%u], size: %u, ptr: 0x%X)",GetOpcodeName(d.pkt->GetOpcode()),d.pkt->GetOpcode(),d.pkt->size(),d.pkt));
@@ -321,7 +320,7 @@ void WorldSession::_HandleDelayedPackets(void)
             }
             else
             {
-                delayedPktQueue.push(d); // and if not, put it again onto the queue
+                delayedPktQueue.push_back(d); // and if not, put it again onto the queue
             }
         }
     }
