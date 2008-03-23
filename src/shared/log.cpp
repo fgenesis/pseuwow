@@ -14,6 +14,11 @@ void log_prepare(char *fn, char *mode = NULL)
 {
     if(!mode)
         mode = "a";
+    if(logfile)
+    {
+        fflush(logfile);
+        fclose(logfile);
+    }
     logfile = fopen(fn,mode);
 }
 

@@ -81,12 +81,14 @@ int main(int argc, char* argv[]) {
     try 
     {
         set_new_handler(_new_handler);
-        _log_setcolor(true,LGREEN);
-        printf("+----------------------------------+\n"
-               "| (C) 2006,2007 Snowstorm Software |\n"
-               "|  http://www.mangosclient.org     |\n"
-               "+----------------------------------+\n");
-        _log_resetcolor(true);
+        log_prepare("logfile.txt","a");
+        logcustom(0,LGREEN,"+----------------------------------+");
+        logcustom(0,LGREEN,"| (C) 2006-2008 Snowstorm Software |");
+        logcustom(0,LGREEN,"|  http://www.mangosclient.org     |");
+        logcustom(0,LGREEN,"+----------------------------------+");
+        logcustom(0,GREEN,"Platform: %s",PLATFORM_NAME);
+        logcustom(0,GREEN,"Compiler: %s ("COMPILER_VERSION_OUT")",COMPILER_NAME,COMPILER_VERSION);
+        logcustom(0,GREEN,"Compiled: %s  %s",__DATE__,__TIME__);
         
         _HookSignals();
 
@@ -98,6 +100,7 @@ int main(int argc, char* argv[]) {
         //...
         t.wait();
         //...
+        log_close();
         _UnhookSignals();
         raise(SIGABRT);  // this way to terminate is not nice but the only way to quit the CLI thread
         raise(SIGQUIT);

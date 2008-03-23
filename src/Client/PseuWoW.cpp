@@ -89,12 +89,10 @@ PseuInstance::~PseuInstance()
     delete _conf;
 
     log("--- Instance shut down ---");
-    log_close();
 }
 
 bool PseuInstance::Init(void)
 {
-    log_prepare("logfile.txt","a");
     log_setloglevel(0);
     log("");
     log("--- Initializing Instance ---");
