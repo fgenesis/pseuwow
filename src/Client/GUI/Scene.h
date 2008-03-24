@@ -10,6 +10,7 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
+
 class PseuGUI;
 
 // base class

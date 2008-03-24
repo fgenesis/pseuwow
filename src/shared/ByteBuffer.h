@@ -239,7 +239,7 @@ class ByteBuffer
 
         void append(const std::string& str)
         {
-            append((uint8 *)str.c_str(),str.size() + 1);
+            append((const uint8 *)str.c_str(),str.size() + 1);
         }
         void append(const char *src, size_t cnt)
         {

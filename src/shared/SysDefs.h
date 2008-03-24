@@ -100,6 +100,14 @@
 #define SIGQUIT 3
 #endif
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 #if COMPILER == COMPILER_MICROSOFT
 #  if _MSC_VER >= 1500
 #    define COMPILER_NAME "VC90"

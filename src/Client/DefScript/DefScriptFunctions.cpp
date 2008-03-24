@@ -173,7 +173,7 @@ DefReturnResult DefScriptPackage::func_setscriptpermission(CmdSet& Set)
     if(Set.defaultarg.empty() || Set.arg[0].empty())
         return r;
 
-    scriptPermissionMap[Set.arg[0]] = (unsigned char)toUint64(Set.defaultarg.c_str());
+    scriptPermissionMap[Set.arg[0]] = (unsigned char)toUint64(Set.defaultarg);
     return r;
 }
 

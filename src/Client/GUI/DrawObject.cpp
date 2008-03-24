@@ -1,5 +1,5 @@
 #include "common.h"
-#include "PseuGui.h"
+#include "PseuGUI.h"
 #include "DrawObject.h"
 #include "PseuWoW.h"
 

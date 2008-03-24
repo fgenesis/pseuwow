@@ -12,6 +12,7 @@
 #   include <time.h>
 #else
 #   include <sys/dir.h>
+#   include <sys/stat.h>
 #   if defined(__FreeBSD__) || defined(__APPLE_CC__)
 #       include <time.h>
 #   endif
@@ -25,9 +26,9 @@ void printchex(std::string in, bool spaces=true)
     len=in.length();
 	printf("[");
 	if(spaces)
-		for(i=0;i<len;i++)printf("%x ",(unsigned char)in[i]); 
+		for(i=0;i<len;i++)printf("%x ",(unsigned char)in[i]);
 	else
-		for(i=0;i<len;i++)printf("%x",(unsigned char)in[i]); 
+		for(i=0;i<len;i++)printf("%x",(unsigned char)in[i]);
 	printf("]\n");
 }
 
@@ -36,21 +37,21 @@ void printchex(char *in, uint32 len, bool spaces=true)
 	unsigned int i;
 	printf("[");
 	if(spaces)
-		for(i=0;i<len;i++)printf("%x ",(unsigned char)in[i]); 
+		for(i=0;i<len;i++)printf("%x ",(unsigned char)in[i]);
 	else
-		for(i=0;i<len;i++)printf("%x",(unsigned char)in[i]); 
+		for(i=0;i<len;i++)printf("%x",(unsigned char)in[i]);
 	printf("]\n");
 }
 
 std::string stringToLower(std::string s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), std::tolower);
+	std::transform(s.begin(), s.end(), s.begin(), tolower);
 	return s;
 }
 
 std::string stringToUpper(std::string s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), std::toupper);
+	std::transform(s.begin(), s.end(), s.begin(), toupper);
 	return s;
 }
 
@@ -171,7 +172,7 @@ bool CreateDir(const char *dir)
 # else
 	// NOT tested for Linux!! whats the return value on success?
 	// TODO: fix me!
-	result = mkdir(dir);
+	result = mkdir(dir,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
 	return result;
 }
