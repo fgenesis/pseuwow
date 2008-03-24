@@ -71,4 +71,3 @@ float World::GetPosZ(float x, float y)
     logdebug("WORLD: GetPosZ() called, but no MapMgr exists (do you really use maps?)");
     return 0;
 }
-    

@@ -329,7 +329,7 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
     if(obj && (obj->IsUnit() || obj->IsCorpse())) // only units and corpses are targetable
     {
         ws->SendSetSelection(guid); // will also set the target for myCharacter
-        return toString(guid);
+        return DefScriptTools::toString(guid);
     }
     else
     {
@@ -366,7 +366,7 @@ DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
             logerror("Failed to load SCP: \"%s\" [%s]",dbname.c_str(),Set.defaultarg.c_str());
         }
     }
-    return toString((uint64)sections);;
+    return DefScriptTools::toString((uint64)sections);;
 }
 
 DefReturnResult DefScriptPackage::SCScpExists(CmdSet& Set)
@@ -443,7 +443,7 @@ DefReturnResult DefScriptPackage::SCGetPlayerGuid(CmdSet& Set)
     else
     {
         uint64 guid=((PseuInstance*)parentMethod)->GetWSession()->plrNameCache.GetGuid(Set.defaultarg);
-        r.ret=toString(guid);
+        r.ret=DefScriptTools::toString(guid);
     }
     return r;
 }
@@ -1221,8 +1221,8 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
         {
             CmdSet Set;
             Set.arg[0] = username;
-            Set.arg[1] = toString(usrperm);
-            Set.arg[2] = toString(scperm);
+            Set.arg[1] = DefScriptTools::toString(usrperm);
+            Set.arg[2] = DefScriptTools::toString(scperm);
             Set.arg[3] = curSet.cmd;
             RunScript("_nopermission",&Set);
             return;

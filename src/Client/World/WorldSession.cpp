@@ -409,7 +409,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         uint32 clientseed_uint32=clientseed.AsDword();
         digest.UpdateData((uint8*)&clientseed_uint32,sizeof(uint32));
         digest.UpdateData((uint8*)&serverseed,sizeof(uint32));
-        digest.UpdateBigNumbers(&(GetInstance()->GetSessionKey()),NULL);
+        digest.UpdateBigNumbers(GetInstance()->GetSessionKey(),NULL);
         digest.Finalize();
         WorldPacket auth;
         auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<clientseed_uint32;
@@ -424,7 +424,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
 
         // note that if the sessionkey/auth is wrong or failed, the server sends the following packet UNENCRYPTED!
         // so its not 100% correct to init the crypt here, but it should do the job if authing was correct
-        _socket->InitCrypt(GetInstance()->GetSessionKey().AsByteArray(), 40);
+        _socket->InitCrypt(GetInstance()->GetSessionKey()->AsByteArray(), 40);
 
 }
 
@@ -516,8 +516,8 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
                 charId = i;
                 char_found=true;
                 _myGUID=plr[i]._guid;
-                GetInstance()->GetScripts()->variables.Set("@myguid",toString(plr[i]._guid));
-                GetInstance()->GetScripts()->variables.Set("@myrace",toString(plr[i]._race));
+                GetInstance()->GetScripts()->variables.Set("@myguid",DefScriptTools::toString(plr[i]._guid));
+                GetInstance()->GetScripts()->variables.Set("@myrace",DefScriptTools::toString((uint64)plr[i]._race));
             }
 
         }
@@ -614,12 +614,12 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         name = GetOrRequestPlayerName(source_guid);
         if(name.empty())
         {
-            _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f); // guess time how long it will take until we got player name from the server
+            _DelayWorldPacket(recvPacket, uint32(GetLagMS() * 1.2f)); // guess time how long it will take until we got player name from the server
             return; // handle later
         }
     }
     GetInstance()->GetScripts()->variables.Set("@thismsg_name",name);
-    GetInstance()->GetScripts()->variables.Set("@thismsg",toString(target_guid));
+    GetInstance()->GetScripts()->variables.Set("@thismsg",DefScriptTools::toString(target_guid));
 
 
     DEBUG(logdebug("Chat packet recieved, type=%u lang=%u src="I64FMT" dst="I64FMT" chn='%s' len=%u",
@@ -696,15 +696,12 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         }
     }
 
-    // temporaray implementation of custom script to handle recieved chat messages
-    // TODO: needs to be replaced later by script hooks
-    // TODO: also _onwhisper must be replaced by this!
     if(!isCmd && GetInstance()->GetScripts()->GetScript("_onchatmessage"))
     {
         CmdSet Set;
-        Set.arg[0] = toString(type);
-        Set.arg[1] = toString(lang);
-        Set.arg[2] = toString(target_guid);
+        Set.arg[0] = DefScriptTools::toString(type);
+        Set.arg[1] = DefScriptTools::toString(lang);
+        Set.arg[2] = DefScriptTools::toString(target_guid);
         Set.arg[3] = channel;
         Set.defaultarg = GetInstance()->GetScripts()->SecureString(msg);
         GetInstance()->GetScripts()->RunScript("_onchatmessage",&Set);
@@ -713,7 +710,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     if(isCmd)
     {
         GetInstance()->GetScripts()->variables.Set("@thiscmd_name",name);
-        GetInstance()->GetScripts()->variables.Set("@thiscmd",toString(target_guid));
+        GetInstance()->GetScripts()->variables.Set("@thiscmd",DefScriptTools::toString(target_guid));
         std::string lin=msg.substr(1,msg.length()-1);
         try
         {
@@ -871,11 +868,11 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     {
         CmdSet Set;
         Set.defaultarg = "false"; // teleported to other map = false
-        Set.arg[0] = toString(guid);
-        Set.arg[1] = toString(x);
-        Set.arg[2] = toString(y);
-        Set.arg[3] = toString(z);
-        Set.arg[4] = toString(o);
+        Set.arg[0] = DefScriptTools::toString(guid);
+        Set.arg[1] = DefScriptTools::toString(x);
+        Set.arg[2] = DefScriptTools::toString(y);
+        Set.arg[3] = DefScriptTools::toString(z);
+        Set.arg[4] = DefScriptTools::toString(o);
         GetInstance()->GetScripts()->RunScriptIfExists("_onteleport");
     }
 }
@@ -932,11 +929,11 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     {
         CmdSet Set;
         Set.defaultarg = "true"; // teleported to other map = false
-        Set.arg[0] = toString(mapid);
-        Set.arg[1] = toString(x);
-        Set.arg[2] = toString(y);
-        Set.arg[3] = toString(z);
-        Set.arg[4] = toString(o);
+        Set.arg[0] = DefScriptTools::toString(mapid);
+        Set.arg[1] = DefScriptTools::toString(x);
+        Set.arg[2] = DefScriptTools::toString(y);
+        Set.arg[3] = DefScriptTools::toString(z);
+        Set.arg[4] = DefScriptTools::toString(o);
         GetInstance()->GetScripts()->RunScriptIfExists("_onteleport");
     }
 }
@@ -1033,7 +1030,7 @@ void WorldSession::_HandleEmoteOpcode(WorldPacket& recvPacket)
                 name = GetOrRequestPlayerName(guid);
                 if(name.empty())
                 {
-                    _DelayWorldPacket(recvPacket, GetLagMS() * 1.2f);
+                    _DelayWorldPacket(recvPacket, uint32(GetLagMS() * 1.2f));
                     return;
                 }
             }

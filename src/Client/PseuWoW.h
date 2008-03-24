@@ -85,7 +85,7 @@ public:
     inline std::string GetConfDir(void) { return _confdir; }
     inline void SetScpDir(std::string dir) { _scpdir = dir; }
     inline void SetSessionKey(BigNumber key) { _sessionkey = key; }
-    inline BigNumber GetSessionKey(void) { return _sessionkey; }
+    inline BigNumber *GetSessionKey(void) { return &_sessionkey; }
     inline void SetError(void) { _error = true; }
     SCPDatabaseMgr dbmgr;
 
