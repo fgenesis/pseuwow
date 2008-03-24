@@ -289,7 +289,7 @@ void RealmSession::_HandleRealmList(ByteBuffer& pkt)
     GetInstance()->GetConf()->worldport=atoi(realmAddr.substr(colonpos+1,realmAddr.length()-colonpos-1).c_str());
     // set vars
     GetInstance()->GetScripts()->variables.Set("WORLDHOST",GetInstance()->GetConf()->worldhost);
-    GetInstance()->GetScripts()->variables.Set("WORLDPORT",toString((uint64)(GetInstance()->GetConf()->worldport)));
+    GetInstance()->GetScripts()->variables.Set("WORLDPORT",DefScriptTools::toString((uint64)(GetInstance()->GetConf()->worldport)));
 
     // now we have the correct addr/port, time to create the WorldSession
     GetInstance()->CreateWorldSession(); // will be done at next PseuInstance::Update()

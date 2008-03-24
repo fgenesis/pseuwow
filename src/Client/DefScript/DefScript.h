@@ -86,7 +86,7 @@ public:
 	~DefScript();
 
     inline std::string GetLine(unsigned int id) { return Line[id]; }
-    inline unsigned int DefScript::GetLines(void) { return Line.size(); }
+    inline unsigned int GetLines(void) { return Line.size(); }
 	bool AddLine(std::string );
 	std::string GetName(void);
 	void SetName(std::string);
@@ -256,24 +256,24 @@ private:
     DefReturnResult func_bbsize(CmdSet&);
 
     // file functions
-    DefReturnResult DefScriptPackage::func_fopen(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fclose(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fisopen(CmdSet&);
-    DefReturnResult DefScriptPackage::func_feof(CmdSet&);
-    DefReturnResult DefScriptPackage::func_frpos(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fwpos(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fdel(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fflush(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fwrite(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fread(CmdSet&);
-    DefReturnResult DefScriptPackage::func_freadb(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fwriteb(CmdSet&);
-    DefReturnResult DefScriptPackage::func_freadbb(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fwritebb(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fsize(CmdSet&);
-    DefReturnResult DefScriptPackage::func_freadline(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fseekw(CmdSet&);
-    DefReturnResult DefScriptPackage::func_fseekr(CmdSet&);
+    DefReturnResult func_fopen(CmdSet&);
+    DefReturnResult func_fclose(CmdSet&);
+    DefReturnResult func_fisopen(CmdSet&);
+    DefReturnResult func_feof(CmdSet&);
+    DefReturnResult func_frpos(CmdSet&);
+    DefReturnResult func_fwpos(CmdSet&);
+    DefReturnResult func_fdel(CmdSet&);
+    DefReturnResult func_fflush(CmdSet&);
+    DefReturnResult func_fwrite(CmdSet&);
+    DefReturnResult func_fread(CmdSet&);
+    DefReturnResult func_freadb(CmdSet&);
+    DefReturnResult func_fwriteb(CmdSet&);
+    DefReturnResult func_freadbb(CmdSet&);
+    DefReturnResult func_fwritebb(CmdSet&);
+    DefReturnResult func_fsize(CmdSet&);
+    DefReturnResult func_freadline(CmdSet&);
+    DefReturnResult func_fseekw(CmdSet&);
+    DefReturnResult func_fseekr(CmdSet&);
 
     // setup own function declarations here
 #   include "DefScriptInterfaceInclude.h"

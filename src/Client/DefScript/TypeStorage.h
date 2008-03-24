@@ -21,7 +21,7 @@ public:
     void UnlinkByPtr(T*);
     std::string GetNameByPtr(T*);
     inline std::map<std::string,T*> &GetMap(void) { return _storage; }
-    inline bool SetKeepOnDestruct(bool b = true) { _keep = true; }
+    inline void SetKeepOnDestruct(bool b = true) { _keep = true; }
     inline unsigned int Size(void) { return _storage.size(); }
     void Clear(bool keep = false);
 

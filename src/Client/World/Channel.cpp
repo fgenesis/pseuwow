@@ -142,7 +142,7 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
 				name = _worldSession->GetOrRequestPlayerName(guid);
 				if (name.empty())
 				{
-					_worldSession->_DelayWorldPacket(packet,_worldSession->GetLagMS() * 1.2f);
+					_worldSession->_DelayWorldPacket(packet, uint32(_worldSession->GetLagMS() * 1.2f));
 					return;
 				}
 			}
@@ -158,7 +158,7 @@ void Channel::HandleNotifyOpcode(WorldPacket &packet)
                 name = _worldSession->GetOrRequestPlayerName(guid);
                 if (name.empty())
                 {
-                    _worldSession->_DelayWorldPacket(packet,_worldSession->GetLagMS() * 1.2f);
+                    _worldSession->_DelayWorldPacket(packet, uint32(_worldSession->GetLagMS() * 1.2f));
                     return;
                 }
 			}
@@ -232,7 +232,7 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
         // all player names in this packet must be known before
         if(_worldSession->GetOrRequestPlayerName(guid).empty())
         {
-            _worldSession->_DelayWorldPacket(recvPacket, _worldSession->GetLagMS() * 1.2f);
+            _worldSession->_DelayWorldPacket(recvPacket, uint32(_worldSession->GetLagMS() * 1.2f));
             must_delay = true;
         }
 		cpl[guid] = mode;

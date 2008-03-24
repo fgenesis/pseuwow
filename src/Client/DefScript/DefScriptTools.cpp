@@ -23,27 +23,6 @@ std::string DefScriptTools::stringToUpper(std::string s)
     return s;
 }
 
-std::string DefScriptTools::toString(ldbl num)
-{
-    std::stringstream ss;
-    ss.setf(std::ios_base::fixed);
-    ss.precision(15);
-    ss << Round(num,15);
-    std::string s(ss.str());
-    while(s[s.length()-1]=='0')
-        s.erase(s.length()-1,1);
-    if(s[s.length()-1]=='.')
-        s.erase(s.length()-1,1);
-    return s;
-}
-
-std::string DefScriptTools::toString(uint64 num)
-{
-    std::stringstream ss;
-    ss << num;
-    return ss.str();
-}
-
 // convert a string into ldbl
 // valid input formats:
 // normal numbers: 5439
