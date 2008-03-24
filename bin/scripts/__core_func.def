@@ -52,7 +52,7 @@ LOADSCP,race data/scp/race.scp
 // load extended databases if present.
 EXLOADSCP,sound data/scp/sound.scp
 EXLOADSCP,emote data/scp/emote.scp
-EXLOADSCP,area data/scp/area.scp
+EXLOADSCP,zone data/scp/zone.scp
 
 LOG * SCP loaded.
 

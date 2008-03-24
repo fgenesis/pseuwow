@@ -1,3 +1,4 @@
+#dbname=map
 [0]
 name_general=Azeroth
 name=Eastern Kingdoms
@@ -281,4 +282,40 @@ name=Zul'Aman
 [572]
 name_general=PVPLordaeron
 name=Ruins of Lordaeron
+
+[582]
+name_general=Transport176244
+name=Transport: Rut'theran to Auberdine
+
+[584]
+name_general=Transport176231
+name=Transport: Menethil to Theramore
+
+[586]
+name_general=Transport181645
+name=Transport: Exodar to Auberdine
+
+[587]
+name_general=Transport177233
+name=Transport: Feathermoon Ferry
+
+[588]
+name_general=Transport176310
+name=Transport: Menethil to Auberdine
+
+[589]
+name_general=Transport175080
+name=Transport: Orgrimmar to Grom'Gol
+
+[590]
+name_general=Transport176495
+name=Transport: Grom'Gol to Undercity
+
+[591]
+name_general=Transport164871
+name=Transport: Undercity to Orgrimmar
+
+[593]
+name_general=Transport20808
+name=Transport: Booty Bay to Ratchet
 
