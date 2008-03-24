@@ -974,7 +974,7 @@ DefReturnResult DefScriptPackage::SCBBGetPackedGuid(CmdSet &Set)
 DefReturnResult DefScriptPackage::SCBBPutPackedGuid(CmdSet &Set)
 {
     ByteBuffer *bb = bytebuffers.Get(_NormalizeVarName(Set.arg[0],Set.myname));
-    
+
     uint64 guid = DefScriptTools::toUint64(Set.defaultarg);
     if (!guid) // fast check if guid is empty (in this case mask must be 0 with no extra data)
     {
@@ -1012,7 +1012,7 @@ DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
         return false;
     }
     while(!ins->GetGUI() && !ins->GetGUI()->IsInitialized())
-        Sleep(1);
+        ins->GetRunnable()->sleep(1);
 
     // TODO: not sure if this piece of code will work as intended, needs some testing
     if(ins->GetWSession() && ins->GetWSession()->InWorld())

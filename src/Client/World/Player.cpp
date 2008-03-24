@@ -72,5 +72,3 @@ uint16 MyCharacter::GetSpellSlot(uint32 spellid)
             return i->slot;
     return 0;
 }
-
-    

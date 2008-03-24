@@ -13,13 +13,27 @@
 
 std::string DefScriptTools::stringToLower(std::string s)
 {
-    std::transform(s.begin(), s.end(), s.begin(), std::tolower);
+    std::transform(s.begin(), s.end(), s.begin(), tolower);
     return s;
 }
 
 std::string DefScriptTools::stringToUpper(std::string s)
 {
-    std::transform(s.begin(), s.end(), s.begin(), std::toupper);
+    std::transform(s.begin(), s.end(), s.begin(), toupper);
+    return s;
+}
+
+std::string DefScriptTools::toString(ldbl num)
+{
+    std::stringstream ss;
+    ss.setf(std::ios_base::fixed);
+    ss.precision(15);
+    ss << Round(num,15);
+    std::string s(ss.str());
+    while(s[s.length()-1]=='0')
+        s.erase(s.length()-1,1);
+    if(s[s.length()-1]=='.')
+        s.erase(s.length()-1,1);
     return s;
 }
 
@@ -29,7 +43,7 @@ std::string DefScriptTools::stringToUpper(std::string s)
 // hex numbers: 0xa56ff, 0XFF, 0xDEADBABE, etc (must begin with 0x)
 // float numbers: 99.65, 0.025
 // negative numbers: -100, -0x3d, -55.123
-ldbl DefScriptTools::toNumber(std::string str)
+ldbl DefScriptTools::toNumber(std::string& str)
 {
     ldbl num=0;
     uint64 u=0;
@@ -61,32 +75,32 @@ ldbl DefScriptTools::toNumber(std::string str)
         u|=lobits;
     }
 	else
-		u = atoi64(str.c_str());
+		u = atoi64(str);
 
     if(ppos!=std::string::npos)
     {
 		std::string mantissa("0");
 		mantissa+=str.c_str()+ppos;
-		num=(ldbl)atof(mantissa.c_str());		
+		num=(ldbl)atof(mantissa.c_str());
     }
-   
-    num=(unsigned long double)num + u;
+
+    num=(long double)num + u;
 	num=Round(num,10);
-	
+
 
     if(negative)
         num = -num;
     return num;
 }
 
-bool DefScriptTools::isTrue(std::string s)
+bool DefScriptTools::isTrue(std::string& s)
 {
     if(s.empty() || s=="false" || s=="0")
         return false;
     return true;
 }
 
-uint64 DefScriptTools::toUint64(std::string str)
+uint64 DefScriptTools::toUint64(std::string& str)
 {
     bool negative=false;
     uint64 num = 0;
@@ -115,21 +129,20 @@ uint64 DefScriptTools::toUint64(std::string str)
         num|=lobits;
     }
     else
-        num = atoi64(str.c_str());
+        num = atoi64(str);
     if(negative)
         num = (uint64)(-1) - num; // is this correct?
     return num;
 }
 
-uint64 DefScriptTools::atoi64(const char *str)
+uint64 DefScriptTools::atoi64(std::string& str)
 {
-#if COMPILER == COMPILER_MICROSOFT
-    __int64 tmp = _atoi64(str);
-    return tmp;
-#else
-#error "Fix Me!"
-    //return _atoi64(str);
-#endif
+    uint64 l = 0;
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        l = l * 10 + str[i] - 48;
+    }
+    return l;
 }
 
 inline long double DefScriptTools::Round(long double z,unsigned int n)

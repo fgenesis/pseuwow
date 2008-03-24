@@ -60,7 +60,7 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->Delay;
         recvPacket >> proto->Ammo_type;
 
-        recvPacket >> (float)proto->RangedModRange;
+        recvPacket >> proto->RangedModRange;
         for(int s = 0; s < 5; s++)
         {
             recvPacket >> proto->Spells[s].SpellId;

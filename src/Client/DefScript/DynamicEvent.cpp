@@ -100,4 +100,3 @@ void DefScript_DynamicEventMgr::Update(void)
         }
     }
 }
-	

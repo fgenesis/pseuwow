@@ -173,16 +173,12 @@ bool VarSet::ReadVarsFromFile(std::string fn)
 
 std::string VarSet::toLower(std::string s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), std::tolower);
+	std::transform(s.begin(), s.end(), s.begin(), tolower);
 	return s;
 }
 
 std::string VarSet::toUpper(std::string s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), std::toupper);
+	std::transform(s.begin(), s.end(), s.begin(), toupper);
 	return s;
 }
-	
-	
-	
-	

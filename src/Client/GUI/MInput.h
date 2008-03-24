@@ -22,7 +22,7 @@ struct IKeys
     {
         return code[keycode];
     }
-    
+
     bool pressed_once(EKEY_CODE keycode)
     {
         if(code[keycode])
@@ -32,14 +32,14 @@ struct IKeys
         }
         return false;
     }
-    
+
     void reset()
     {
          for(s32 i=0; i<KEY_KEY_CODES_COUNT; i++) code[i] = false;
     }
-    
+
     bool code[KEY_KEY_CODES_COUNT];
-    
+
 };
 
 struct IMouse
@@ -48,17 +48,17 @@ struct IMouse
     {
         return left;
     }
-    
+
     bool middle_pressed()
     {
         return middle;
     }
-    
+
     bool right_pressed()
     {
         return right;
     }
-    
+
     bool left_pressed_once()
     {
         if(left)
@@ -68,7 +68,7 @@ struct IMouse
         }
         return false;
     }
-    
+
     bool middle_pressed_once()
     {
         if(middle)
@@ -78,7 +78,7 @@ struct IMouse
         }
         return false;
     }
-    
+
     bool right_pressed_once()
     {
         if(right)
@@ -88,7 +88,7 @@ struct IMouse
         }
         return false;
     }
-    
+
     void reset()
     {
         X = 0;
@@ -98,14 +98,14 @@ struct IMouse
         middle = false;
         right = false;
     }
-    
+
     s32 X;
     s32 Y;
     f32 wheel;
     bool left;
     bool middle;
     bool right;
-    
+
 };
 
 class MyEventReceiver : public IEventReceiver
@@ -115,7 +115,7 @@ public:
     {
         for(s32 i=0; i<KEY_KEY_CODES_COUNT; i++)
             key.code[i] = false;
-        
+
         mouse.X = 0;
         mouse.Y = 0;
         mouse.wheel = 0.0f;
@@ -123,17 +123,17 @@ public:
         mouse.middle = false;
         mouse.right = false;
     }
-    
+
 	virtual bool OnEvent(SEvent event)
 	{
         bool value = false;
-        
+
 		if (event.EventType == irr::EET_KEY_INPUT_EVENT)
 		{
 			key.code[event.KeyInput.Key] = event.KeyInput.PressedDown;
 			value = true;
 		}
-		
+
 		if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
 		{
             switch(event.MouseInput.Event)
@@ -149,7 +149,7 @@ public:
             }
 			value = true;
 		}
-		
+
 		return value;
 	}
 

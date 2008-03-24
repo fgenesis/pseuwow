@@ -208,7 +208,7 @@ void SceneWorld::InitTerrain(void)
 
     mapsize = 8 * 16 * 3; // 9-1 height floats in 16 chunks per tile per axis in 3 MapTiles
     tilesize = UNITSIZE;
-    meshsize = CHUNKSIZE*3;
+    meshsize = (s32)CHUNKSIZE*3;
     vector3df terrainPos(0.0f, 0.0f, 0.0f); // TODO: use PseuWoW's world coords here?
 
     camera->setPosition(core::vector3df(mapsize*tilesize/2, 0, mapsize*tilesize/2) + terrainPos);
@@ -300,16 +300,16 @@ void SceneWorld::UpdateTerrain(void)
             highest = max(highest,curheight);
             lowest = min(lowest,curheight);
         }
-    f32 heightdiff = highest - lowest;
+//    f32 heightdiff = highest - lowest;
 
     // randomize terrain color depending on height
     for(s32 j=0; j<terrain->getSize().Height+1; j++)
         for(s32 i=0; i<terrain->getSize().Width+1; i++)
         {
             curheight = terrain->getHeight(i,j);
-            u32 g = (curheight / highest * 120) + 125;
-            u32 r = (curheight / highest * 120) + 60;
-            u32 b = (curheight / highest * 120) + 60;
+            u32 g = (u32)(curheight / highest * 120) + 125;
+            u32 r = (u32)(curheight / highest * 120) + 60;
+            u32 b = (u32)(curheight / highest * 120) + 60;
 
             terrain->setColor(i,j, video::SColor(255,r,g,b));
         }

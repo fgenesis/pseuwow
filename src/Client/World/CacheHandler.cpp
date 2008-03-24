@@ -234,7 +234,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->Delay;
         buf >> proto->Ammo_type;
 
-        buf >> (float)proto->RangedModRange;
+        buf >> proto->RangedModRange;
         for(int s = 0; s < 5; s++)
         {
             buf >> proto->Spells[s].SpellId;
@@ -309,7 +309,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
     }
 
     uint32 total = session->objmgr.GetItemProtoCount();
-	fh.write((char*)&(uint32)ITEMPROTOTYPES_CACHE_VERSION,4);
+	fh.write((char*)&ITEMPROTOTYPES_CACHE_VERSION,4);
     fh.write((char*)&total,4);
 
     uint32 counter=0;
@@ -497,7 +497,7 @@ void CreatureTemplateCache_WriteDataToCache(WorldSession *session)
         return;
     }
     uint32 total = session->objmgr.GetCreatureTemplateCount();
-    fh.write((char*)&(uint32)CREATURETEMPLATES_CACHE_VERSION,4);
+    fh.write((char*)&CREATURETEMPLATES_CACHE_VERSION,4);
     fh.write((char*)&total,4);
     uint32 counter=0;
     ByteBuffer buf;

@@ -290,4 +290,3 @@ void _log_resetcolor(bool stdout_stream)
     fprintf(( stdout_stream ? stdout : stderr ), "\x1b[0m");
 #endif
 }
-    

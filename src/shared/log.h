@@ -37,4 +37,3 @@ void _log_resetcolor(bool);
 const int Color_count = int(WHITE)+1;
 
 #endif
-    
