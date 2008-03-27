@@ -37,10 +37,11 @@ void WorldSession::_HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 {
     uint8 utype;
-    uint8 unk8;
+    uint8 hasTransport;
     uint32 usize, ublocks;
     uint64 uguid;
-    recvPacket >> ublocks >> unk8;
+    recvPacket >> ublocks >> hasTransport;
+    logdev("UpdateObject: hasTransport = %u", hasTransport);
     while(recvPacket.rpos() < recvPacket.size())
     {
         recvPacket >> utype;
@@ -210,6 +211,16 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 logerror("UPDATE_OBJECT: Got unk updatetype 0x%X",utype);
                 logerror("UPDATE_OBJECT: Read %u / %u bytes, skipped rest",recvPacket.rpos(),recvPacket.size());
                 logerror("%s",toHexDump((uint8*)recvPacket.contents(),recvPacket.size(),true).c_str());
+                char buf[100];
+                sprintf(buf,"Got unk updatetype=0x%X, read %u / %u bytes",utype,recvPacket.rpos(),recvPacket.size());
+
+                if(GetInstance()->GetConf()->dumpPackets)
+                {
+                    char buf[100];
+                    sprintf(buf,"Got unk updatetype=0x%X, read %u / %u bytes",utype,recvPacket.rpos(),recvPacket.size());
+                    DumpPacket(recvPacket, recvPacket.rpos(),buf);
+                }
+
                 return;
             }
         } // switch
@@ -219,66 +230,94 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& recvPacket)
 {
-    uint8 flags,unk8;
-    uint32 unk32,flags2,time,transtime,higuid;
-    float unkfx,unkfy,unkfz,x,y,z,o,tx,ty,tz,to;
-    uint64 transguid;
+    MovementInfo mi; // TODO: use a reference to a MovementInfo in Unit/Player class once implemented
+    uint8 flags;
+    float unkfx,unkfy,unkfz;
     // uint64 fullguid; // see below
     float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack;
+    uint32 unk32;
 
     Object *obj = (Object*)objmgr.GetObj(uguid);
-    Unit *u = (Unit*)obj; // only use for Unit:: functions!!
-
-    recvPacket >> flags;
-    flags2 = 0; // not sure if its correct to set it to 0 (needs some starting flag?)
-
-    if(flags & UPDATEFLAG_LIVING)
+    Unit *u = NULL;
+    if(obj)
     {
-        recvPacket >> flags2 >> unk8 >> time;
+        if(obj->IsUnit())
+            u = (Unit*)obj; // only use for Unit:: functions!!
+        else
+            logdev("MovementUpdate: object "I64FMT" is not Unit (typeId=%u)",obj->GetGUID(),obj->GetTypeId());
+    }
+    else
+    {
+        logerror("MovementUpdate for unknown object "I64FMT" typeid=%u",uguid,objtypeid);
     }
 
-    logdev("MovementUpdate TypeID=%u GUID="I64FMT" pObj=%X flags=%u flags2=%u",objtypeid,uguid,obj,flags,flags2);
+    recvPacket >> flags;
+
+    mi.flags = 0; // not sure if its correct to set it to 0 (needs some starting flag?)
+    if(flags & UPDATEFLAG_LIVING)
+    {
+        recvPacket >> mi.flags >> mi.unk1 >> mi.time;
+    }
+    else
+    {
+        logdev("MovementUpdate: UPDATEFLAG_LIVING *NOT* set! (no MovementInfo)");
+    }
+
+    logdev("MovementUpdate: TypeID=%u GUID="I64FMT" pObj=%X flags=%u mi.flags=%u",objtypeid,uguid,obj,flags,mi.flags);
 
     if(flags & UPDATEFLAG_HASPOSITION)
     {
         if(flags & UPDATEFLAG_TRANSPORT)
         {
-            recvPacket >> unkfx >> unkfy >> unkfz >> o; // 3x (float)0 followed by orientation
-            logdev("TRANSPORT_FLOATS @ flags: x=%f y=%f z=%f o=%f",unkfx,unkfy,unkfz,o);
+            recvPacket >> unkfx >> unkfy >> unkfz >> mi.o; // 3x (float)0 followed by orientation
+            logdev("TRANSPORT_FLOATS @ flags: x=%f y=%f z=%f o=%f", unkfx, unkfy, unkfz, mi.o);
         }
         else
         {
-            recvPacket >> x >> y >> z >> o;
-            logdev("FLOATS: x=%f y=%f z=%f o=%f",x,y,z,o);
+            recvPacket >> mi.x >> mi.y >> mi.z >> mi.o;
+            logdev("FLOATS: x=%f y=%f z=%f o=%f",mi.x, mi.y, mi.z ,mi.o);
             if(obj->IsWorldObject())
-                ((WorldObject*)obj)->SetPosition(x,y,z,o);
+                ((WorldObject*)obj)->SetPosition(mi.x, mi.y, mi.z, mi.o);
         }
     }
 
     if(flags & UPDATEFLAG_LIVING)
     {
-        if(flags2 & FLAGS2_TRANSPORT)
+        if(mi.flags & MOVEMENTFLAG_ONTRANSPORT)
         {
-            recvPacket >> transguid >> tx >> ty >> tz >> to;
-            recvPacket >> unk32; // added in 2.0.3
-            logdev("TRANSPORT_FLOATS @ flags2: x=%f y=%f z=%f o=%f",tx,ty,tz,to);
+            recvPacket >> mi.t_guid >> mi.t_x >> mi.t_y >> mi.t_z >> mi.t_o;
+            recvPacket >> mi.t_time; // added in 2.0.3
+            logdev("TRANSPORT @ mi.flags: guid="I64FMT" x=%f y=%f z=%f o=%f", mi.t_guid, mi.t_x, mi.t_y, mi.t_z, mi.t_o);
         }
 
-        recvPacket >> unk32;
+        if(mi.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
+        {
+            recvPacket >>  mi.s_angle;
+            logdev("MovementUpdate: MOVEMENTFLAG_SWIMMING is set, angle = %f!", mi.s_angle);
+        }
 
-        /*
-        // not sure if this is/was correct, MaNGOS doesnt use it anymore
-                if(flags2 & 0x2000) // 0x2000 = ??
-                {
-                        recvPacket >> unkf >> unkf >> unkf >> unkf;
-                }
-        */
+        recvPacket >> mi.fallTime;
+        logdev("MovementUpdate: FallTime = %u", mi.fallTime);
 
-        recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim;
+        if(mi.flags & MOVEMENTFLAG_JUMPING)
+        {
+            recvPacket >> mi.j_unk >> mi.j_sinAngle >> mi.j_cosAngle >> mi.j_xyspeed;
+            logdev("MovementUpdate: MOVEMENTFLAG_JUMPING is set, unk=%f sinA=%f cosA=%f xyspeed=%f = %u", mi.j_unk, mi.j_sinAngle, mi.j_cosAngle, mi.j_xyspeed);
+        }
+
+        if(mi.flags & MOVEMENTFLAG_SPLINE)
+        {
+            recvPacket >> mi.u_unk1;
+            logdev("MovementUpdate: MOVEMENTFLAG_SPLINE is set, got %u", mi.u_unk1);
+        }
+
+
+        recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim; // speedRun can also be mounted speed if player is mounted
         recvPacket >> speedWalkBack >> speedFly >> speedFlyBack >> speedTurn; // fly added in 2.0.x
+        logdev("MovementUpdate: Got speeds, walk=%f run=%f turn=%f", speedWalk, speedRun, speedTurn);
         if(u)
         {
-                u->SetPosition(x,y,z,o);
+                u->SetPosition(mi.x, mi.y, mi.z, mi.o);
                 u->SetSpeed(MOVE_WALK,speedWalk);
                 u->SetSpeed(MOVE_RUN,speedRun);
                 u->SetSpeed(MOVE_SWIMBACK,speedSwimBack);
@@ -288,33 +327,39 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
                 u->SetSpeed(MOVE_FLY,speedFly);
                 u->SetSpeed(MOVE_FLYBACK,speedFlyBack);
         }
-        else
+
+        // TODO: correct this one as soon as its meaning is known OR if it appears often and needs to be fixed
+        if(mi.flags & MOVEMENTFLAG_SPLINE2)
         {
-                logerror("WorldSession::_MovementUpdate for unknown guid "I64FMT" typeid=%u",uguid,objtypeid);
+            logerror("MovementUpdate: MOVEMENTFLAG_SPLINE2 is set, if you see this message please report it!");
+            return;
         }
     }
 
-    if(flags & UPDATEFLAG_ALL)
+    if(flags & UPDATEFLAG_LOWGUID)
     {
         recvPacket >> unk32;
+        logdev("MovementUpdate: UPDATEFLAG_LOWGUID is set, got %X", unk32);
     }
 
     if(flags & UPDATEFLAG_HIGHGUID)
     {
-        recvPacket >>  higuid;             // 2.0.6 - high guid was there, unk for 2.0.12
+        recvPacket >> unk32;             // 2.0.6 - high guid was there, unk for 2.0.12
         // not sure if this is correct, MaNGOS sends 0 always.
         //obj->SetUInt32Value(OBJECT_FIELD_GUID+1,higuid); // note that this sets only the high part of the guid
+        logdev("MovementUpdate: UPDATEFLAG_HIGHGUID is set, got %X", unk32);
     }
 
     if(flags & UPDATEFLAG_FULLGUID)
     {
-        // unused in mangos? but what if its needed?
-        // recvPacket >> fullguid;
+        uint64 unkguid = recvPacket.GetPackedGuid(); // MaNGOS sends uint8(0) always, but its probably be a packed guid
+        logdev("MovementUpdate: UPDATEFLAG_FULLGUID is set, got "I64FMT, unkguid);
     }
 
     if(flags & UPDATEFLAG_TRANSPORT)
     {
-        recvPacket >>  transtime; // whats this used for?
+        recvPacket >> unk32; // whats this used for?
+        logdev("MovementUpdate: UPDATEFLAG_TRANSPORT is set, got %u", unk32);
     }
 
 }

@@ -87,7 +87,7 @@ uint64 toInt(std::string str)
         return strtoul(str.c_str(),NULL,10);
 }
 
-std::string toHexDump(uint8* array,uint32 size,bool spaces)
+std::string toHexDump(uint8* array, uint32 size, bool spaces, uint32 per_line)
 {
     std::stringstream ss;
     char buf[5];
@@ -100,6 +100,12 @@ std::string toHexDump(uint8* array,uint32 size,bool spaces)
         }
         else
             ss << "00"; // little hacklike fix
+
+        if(per_line && !((i+1) % per_line))
+        {
+            ss << "\n";
+            continue;
+        }
 
         if(spaces)
             ss << ' ';

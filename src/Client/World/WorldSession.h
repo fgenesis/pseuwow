@@ -71,6 +71,7 @@ public:
     inline World *GetWorld(void) { return _world; }
 
     std::string GetOrRequestPlayerName(uint64);
+    std::string DumpPacket(WorldPacket& pkt, int errpos = -1, char *errstr = NULL);
 
 
     // CMSGConstructor
