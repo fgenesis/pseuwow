@@ -189,6 +189,11 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
             logcustom(1,YELLOW,">> Opcode %u [%s] (%s, %u bytes)", packet->GetOpcode(), GetOpcodeName(packet->GetOpcode()), (known ? (disabledOpcode ? "Disabled" : "Known") : "UNKNOWN"), packet->size());
     }
 
+    if( (!known) && GetInstance()->GetConf()->dumpPackets > 1)
+    {
+        DumpPacket(*packet);
+    }
+
     try
     {
         // if there is a script attached to that opcode, call it now.
@@ -213,14 +218,18 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
     }
     catch (ByteBufferException bbe)
     {
+        char errbuf[200];
+        sprintf(errbuf,"attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)", bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
         logerror("Exception while handling opcode %u [%s]!",packet->GetOpcode(),GetOpcodeName(packet->GetOpcode()));
         logerror("WorldSession: ByteBufferException");
-        logerror("ByteBuffer reported: attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)",
-            bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
+        logerror("ByteBuffer reported: %s", errbuf);
         // copied from below
         logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
         logerror("Packet Hexdump:");
         logerror("%s",toHexDump((uint8*)packet->contents(),packet->size(),true).c_str());
+
+        if(GetInstance()->GetConf()->dumpPackets)
+            DumpPacket(*packet, bbe.rpos, errbuf);
     }
     catch (...)
     {
@@ -228,6 +237,9 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
         logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
         logerror("Packet Hexdump:");
         logerror("%s",toHexDump((uint8*)packet->contents(),packet->size(),true).c_str());
+        
+        if(GetInstance()->GetConf()->dumpPackets)
+            DumpPacket(*packet, packet->rpos(), "unknown exception");
     }
 
     delete packet;
@@ -365,6 +377,55 @@ void WorldSession::_DoTimedActions(void)
         }
         //...
     }
+}
+
+std::string WorldSession::DumpPacket(WorldPacket& pkt, int errpos, char *errstr)
+{
+    static std::map<uint32,uint32> opstore;
+    std::stringstream s;
+    s << "TIMESTAMP: " << getDateString() << "\n";
+    s << "OPCODE: " << pkt.GetOpcode() << " " << GetOpcodeName(pkt.GetOpcode()) << "\n";
+    s << "SIZE: " << pkt.size() << "\n";
+    if(errpos > 0)
+        s << "ERROR-AT: " << errpos << "\n";
+    if(errstr)
+        s << "ERROR: " << errstr << "\n";
+    if(pkt.size())
+    {
+        s << "DATA-HEX:\n";
+        s << toHexDump((uint8*)pkt.contents(),pkt.size(),true,32);
+        s << "\n";
+        
+        s << "DATA-TEXT:\n";
+        for(uint32 i = 0; i < pkt.size(); i++)
+        {
+            s << (isprint(pkt[i]) ? (char)pkt[i] : '.');
+            if((i+1) % 32 == 0)
+                s << "\n";
+        }
+        s << "\n";
+
+    }
+    s << "\n";
+
+    CreateDir("packetdumps");
+    if(opstore.find(pkt.GetOpcode()) == opstore.end())
+        opstore[pkt.GetOpcode()] = 0;
+    else
+        opstore[pkt.GetOpcode()]++;
+    std::fstream fh;
+    std::stringstream fn;
+    fn << "./packetdumps/" << GetOpcodeName(pkt.GetOpcode()) << "_" << opstore[pkt.GetOpcode()] << ".txt";
+    fh.open(fn.str().c_str(), std::ios_base::out);
+    if(!fh.is_open())
+    {
+        logerror("Packet dump failed! (%s)",fn.str().c_str());
+        return fn.str();
+    }
+    fh << s.str();
+    fh.close();
+    logdetail("Packet successfully dumped to '%s'", fn.str().c_str());
+    return fn.str();
 }
 
 std::string WorldSession::GetOrRequestPlayerName(uint64 guid)

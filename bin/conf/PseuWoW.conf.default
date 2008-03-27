@@ -122,4 +122,14 @@ useMaps=0
 // Sometimes they even cause problems, like make the console window beep...
 SkipAddonChat=1
 
+// Dump invalid packets or those which caused an error/exception for further analyis.
+// Directory is "./packetdumps/"
+// Note that packet dumps are valid for 1 session only, the counter gets reset when the WorldSession is destroyed.
+// This means they get overwritten if not saved!
+// 0 - no packet dumping
+// 1 - dump packets that caused an excpetion or object update error
+// 2 - like [1] + all packets with opcodes not handled by the core
+//     (doesn't matter if they have scripts attached or not, they will be dumped always)
+DumpPackets=1
+
 

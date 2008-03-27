@@ -14,7 +14,7 @@ std::string stringToLower(std::string);
 std::string toString(uint64);
 std::string getDateString(void);
 uint64 toInt(std::string);
-std::string toHexDump(uint8* array,uint32 size,bool spaces=true);
+std::string toHexDump(uint8* array,uint32 size,bool spaces=true,uint32 per_line=0);
 std::deque<std::string> GetFileList(std::string);
 bool FileExists(std::string);
 bool CreateDir(const char*);
