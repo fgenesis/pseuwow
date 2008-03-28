@@ -15,8 +15,6 @@
 class DefScriptPackage;
 class DefScript;
 
-typedef void (*_slog_func)(const char*,...);
-
 // general struct for if..else..endif / loop..endloop blocks
 struct Def_Block
 {
@@ -143,18 +141,6 @@ public:
     std::string EscapeString(std::string);
     std::string UnescapeString(std::string);
     std::string GetUnescapedVar(std::string);
-
-
-    // own logging functions. default is printf.
-    // DO NOT USE THEM YET! THEY DO NOT WORK CORRECTLY!
-    // need some help with this [FG]
-    inline void SetLog(void *ptr) { _slog=(_slog_func)ptr; }
-    inline void SetDebugLog(void *ptr) { _sdebuglog=(_slog_func)ptr; }
-    inline void SetErrorLog(void *ptr) { _serrorlog=(_slog_func)ptr; }
-    void Log(const char*,...);
-    void DebugLog(const char*,...);
-    void ErrorLog(const char*,...);
-
     
     std::string scPath;
 
@@ -171,12 +157,12 @@ private:
     void RemoveBrackets(CmdSet&);
     void UnescapeSet(CmdSet&);
     std::string RemoveBracketsFromString(std::string);
+    void def_print(const char *fmt, ...);
     void *parentMethod;
     DefScript_DynamicEventMgr *_eventmgr;
     std::map<std::string,DefScript*> Script;
     std::map<std::string,unsigned char> scriptPermissionMap;
     DefScriptFunctionTable _functable;
-    _slog_func _slog,_serrorlog,_sdebuglog;
     _DEFSC_DEBUG(std::fstream hLogfile);
 
     // Usable internal basic functions:

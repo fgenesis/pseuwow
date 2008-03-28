@@ -11,12 +11,12 @@ SceneGuiStart::SceneGuiStart(PseuGUI *gui) : Scene(gui)
     char *fn;
     switch(gui->_driverType)
     {
-        case DIRECTX8:
-        case DIRECTX9:
+        case video::EDT_DIRECT3D8:
+        case video::EDT_DIRECT3D9:
         fn = "data/misc/directxlogo.png";
         break;
 
-        case OPENGL:
+        case video::EDT_OPENGL:
         fn = "data/misc/opengllogo.png";
         break;
 

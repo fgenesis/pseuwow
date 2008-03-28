@@ -54,7 +54,7 @@ void _OnSignal(int s)
 
 void quitproc(void)
 {
-    printf("Waiting for all instances to finish... [%u]\n",instanceList.size());
+    log("Waiting for all instances to finish... [%u]\n",instanceList.size());
     for(std::list<PseuInstanceRunnable*>::iterator i=instanceList.begin();i!=instanceList.end();i++)
     {
         (*i)->GetInstance()->Stop();
@@ -63,7 +63,7 @@ void quitproc(void)
 
 void abortproc(void)
 {
-    printf("Terminating all instances... [%u]\n",instanceList.size());
+    log("Terminating all instances... [%u]\n",instanceList.size());
     for(std::list<PseuInstanceRunnable*>::iterator i=instanceList.begin();i!=instanceList.end();i++)
     {
         (*i)->GetInstance()->SetFastQuit(true);

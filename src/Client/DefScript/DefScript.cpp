@@ -12,6 +12,7 @@ using namespace DefScriptTools;
 
 #define SN_ONLOAD "?onload?"
 
+
 enum DefScriptBlockType
 {
     BLOCK_IF,
@@ -21,9 +22,6 @@ enum DefScriptBlockType
 // --- SECTION FOR SCRIPT PACKAGES ---
 DefScriptPackage::DefScriptPackage()
 {
-    SetLog(printf);
-    SetDebugLog(printf);
-    SetErrorLog(printf);
     _DEFSC_DEBUG
     (
         hLogfile.open("DefScriptLog.txt",std::ios_base::out);
@@ -42,30 +40,6 @@ DefScriptPackage::~DefScriptPackage()
         delete _eventmgr;
 	Clear();
     _DEFSC_DEBUG(hLogfile.close());
-}
-
-void DefScriptPackage::Log(const char* fmt,...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    (*_slog)(fmt,ap);
-    va_end(ap);
-}
-
-void DefScriptPackage::DebugLog(const char* fmt,...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    (*_sdebuglog)(fmt,ap);
-    va_end(ap);
-}
-
-void DefScriptPackage::ErrorLog(const char* fmt,...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    (*_serrorlog)(fmt,ap);
-    va_end(ap);
 }
 
 void DefScriptPackage::SetParentMethod(void *p)
@@ -293,7 +267,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
         while (true)
         {
             f.get(z);
-            if(z=='\n' || f.eof())
+            if(z=='\n' || z==10 || z==13 || f.eof()) // checking for all just to be sure
                 break;
             line+=z;
         }
@@ -303,6 +277,8 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
 
 		while( !line.empty() && (line.at(0)==' ' || line.at(0)=='\t') )
 			line.erase(0,1);
+        //while( !line.empty() && (line.at(line.length()-1)==13 || line.at(line.length()-1)==10) )
+        //    line.erase(line.length()-1);
 		if(line.empty())
 			continue;
 		if(line.at(0)=='/' && line.at(1)=='/') 
@@ -360,7 +336,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
                     DeleteScript(curScript->GetName());
                 sn = stringToLower(value);
                 _UpdateOrCreateScriptByName(sn);
-                _DEFSC_DEBUG(printf("DefScript: now loading '%s'\n",sn.c_str()));
+                _DEFSC_DEBUG(PRINT_DEBUG("DefScript: now loading '%s'",sn.c_str()));
                 curScript=Script[sn];
             }
             else if(label=="linestrip")
@@ -476,7 +452,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
         }
         if(mismatch || bopen) // no bracket must be left open now
         {
-            printf("DefScript [%s:%u]: Bracket mismatch at line '%s'\n",sn.c_str(),absline,line.c_str());
+            PRINT_ERROR("DefScript [%s:%u]: Bracket mismatch at line '%s'",sn.c_str(),absline,line.c_str());
             continue; // continue with next line without adding the current line to script
         }
 
@@ -485,7 +461,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
 	f.close();
     if(cantload || Blocks.size())
     {
-        printf("DefScript: Error loading file '%s'. block mismatch?\n",fn.c_str());
+        PRINT_ERROR("DefScript: Error loading file '%s'. block mismatch?",fn.c_str());
         DeleteScript(sn);
         return false;
     }
@@ -615,7 +591,7 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
         {
             if(!Blocks.size())
             {
-                printf("DEBUG: else-block without any block?! [%s:%u]\n",name.c_str(),i);
+                PRINT_ERROR("DEBUG: else-block without any block?! [%s:%u]",name.c_str(),i);
                 r.ok=false;
                 break;
             }
@@ -642,13 +618,13 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
         {
             if(!Blocks.size())
             {
-                printf("DEBUG: endif without any block [%s:%u]\n",name.c_str(),i);
+                PRINT_ERROR("DEBUG: endif without any block [%s:%u]",name.c_str(),i);
                 r.ok=false;
                 break;
             }
             if(Blocks.back().type!=BLOCK_IF)
             {
-                printf("DEBUG: endif: closed block is not an if block! [%s:%u]\n",name.c_str(),i);
+                PRINT_ERROR("DEBUG: endif: closed block is not an if block! [%s:%u]",name.c_str(),i);
                 r.ok=false;
                 break;
             }
@@ -668,13 +644,13 @@ DefReturnResult DefScriptPackage::RunScript(std::string name, CmdSet *pSet,std::
         {
             if(!Blocks.size())
             {
-                printf("DEBUG: endloop without any block [%s:%u]\n",name.c_str(),i);
+                PRINT_ERROR("DEBUG: endloop without any block [%s:%u]",name.c_str(),i);
                 r.ok=false;
                 break;
             }
             if(Blocks.back().type!=BLOCK_LOOP)
             {
-                printf("DEBUG: endloop: closed block is not a loop block! [%s:%u]\n",name.c_str(),i);
+                PRINT_ERROR("DEBUG: endloop: closed block is not a loop block! [%s:%u]",name.c_str(),i);
                 r.ok=false;
                 break;
             }
@@ -1262,4 +1238,15 @@ bool DefScriptPackage::RunScriptIfExists(std::string name,CmdSet *pSet)
         return BoolRunScript(name,pSet);
     }
     return false;
+}
+
+void DefScriptPackage::def_print(const char *fmt, ...)
+{
+    if(!fmt)
+        return;
+    va_list ap;
+    va_start(ap, fmt);
+    vprintf( fmt, ap );
+    va_end(ap);
+    printf("\n");
 }

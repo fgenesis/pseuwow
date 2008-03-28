@@ -1235,7 +1235,41 @@ void DefScriptPackage::My_Run(std::string line, std::string username)
 
 }
 
+void DefScriptPackage::my_print(const char *fmt, ...)
+{
+    if(!fmt)
+        return;
+    char buf[1000];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf,1000, fmt, ap);
+    va_end(ap);
+    log(buf);
+}
 
+void DefScriptPackage::my_print_error(const char *fmt, ...)
+{
+    if(!fmt)
+        return;
+    char buf[1000];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf,1000, fmt, ap);
+    va_end(ap);
+    logerror(buf);
+}
+
+void DefScriptPackage::my_print_debug(const char *fmt, ...)
+{
+    if(!fmt)
+        return;
+    char buf[1000];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf,1000, fmt, ap);
+    va_end(ap);
+    logdebug(buf);
+}
 
 
 

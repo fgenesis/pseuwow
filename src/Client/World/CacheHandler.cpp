@@ -185,7 +185,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
     {
         buf.clear();
         fh.read((char*)&datasize,sizeof(uint32));
-        DEBUG(logdebug("ItemProtoCache: (%u/%u) - datasize=%u",i,total,datasize));
+        //DEBUG(logdebug("ItemProtoCache: (%u/%u) - datasize=%u",i,total,datasize));
         buf.resize(datasize);
         fh.read((char*)buf.contents(),datasize);
         ItemProto *proto = new ItemProto();

@@ -473,8 +473,8 @@ DefReturnResult DefScriptPackage::func_substr(CmdSet& Set)
     else
     {
         unsigned int start,len;
-        len=(unsigned int)toNumber(Set.arg[0]);
-        start=(unsigned int)toNumber(Set.arg[1]);
+        len=(unsigned int)toUint64(Set.arg[0]);
+        start=(unsigned int)toUint64(Set.arg[1]);
         if(start+len>Set.defaultarg.length())
             len=Set.defaultarg.length()-start;
         r.ret=Set.defaultarg.substr(start,len);
@@ -502,7 +502,7 @@ DefReturnResult DefScriptPackage::func_random(CmdSet& Set)
     int min,max;
     min=(int)toUint64(Set.arg[0]);
     max=(int)toUint64(Set.defaultarg);
-    r.ret=toString(ldbl( min + ( rand() % (max - min + 1)) ));
+    r.ret=toString(min + ( rand() % (max - min + 1)) );
     return r;
 }
 
