@@ -59,7 +59,7 @@ void MovementMgr::Update(bool calcpos)
 
     if(_movemode == MOVEMODE_AUTO)
     {
-        WorldPosition& pos = _mychar->GetPosition();
+        WorldPosition pos = _mychar->GetPosition();
         float turnspeed = _mychar->GetSpeed(MOVE_TURN) / 1000.0f * timediff;
         float runspeed = _mychar->GetSpeed(MOVE_RUN) / 1000.0f * timediff;
         float movespeed = runspeed; // or use walkspeed, depending on setting. for now use only runspeed
