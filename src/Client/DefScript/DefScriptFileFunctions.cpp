@@ -17,7 +17,7 @@ DefReturnResult DefScriptPackage::func_fopen(CmdSet& Set)
     if(fh->is_open())
         return "";
     std::string mode = stringToLower(Set.arg[1]);
-    std::ios::openmode m = 0;
+    std::ios::openmode m = (std::ios::openmode)(0);
     if(mode.find('b') != std::string::npos)
         m |= std::ios_base::binary;
     if(mode.find('a') != std::string::npos)

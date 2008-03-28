@@ -87,13 +87,8 @@
 #define SIGQUIT 3
 #endif
 
-#ifndef min
-#define min(a, b) ((a < b) ? a : b)
-#endif
-
-#ifndef max
-#define max(a, b) ((a > b) ? a : b)
-#endif
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 #if COMPILER == COMPILER_MICROSOFT
 #  if _MSC_VER >= 1500

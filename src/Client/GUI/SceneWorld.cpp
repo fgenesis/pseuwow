@@ -297,8 +297,8 @@ void SceneWorld::UpdateTerrain(void)
         for(s32 i=0; i<terrain->getSize().Width+1; i++)
         {
             curheight = terrain->getHeight(i,j);
-            highest = max(highest,curheight);
-            lowest = min(lowest,curheight);
+            highest = MAX(highest,curheight);
+            lowest = MIN(lowest,curheight);
         }
 //    f32 heightdiff = highest - lowest;
 
