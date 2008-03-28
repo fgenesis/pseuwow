@@ -1,4 +1,4 @@
-
+#include <stdarg.h>
 #include "common.h"
 #include "PseuWoW.h"
 #include "DefScript/DefScript.h"

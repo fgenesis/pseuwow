@@ -71,41 +71,28 @@
     #define I64FMT "%016llX"
     #define I64FMTD "%llu"
     #define SI64FMTD "%lld"
-#   if PLATFORM == PLATFORM_UNIX
-        typedef __int64_t   int64;
-        typedef __int32_t   int32;
-        typedef __int16_t   int16;
-        typedef __int8_t    int8;
-        typedef __uint64_t  uint64;
-        typedef __uint32_t  uint32;
-        typedef __uint16_t  uint16;
-        typedef __uint8_t   uint8;
-        typedef uint16      WORD;
-        typedef uint32      DWORD;
-#   else
-        typedef long long int64;
-        typedef long int32;
-        typedef short int16;
-        typedef char int8;
-        typedef unsigned long long uint64;
-        typedef unsigned long uint32;
-        typedef unsigned short uint16;
-        typedef unsigned char uint8;
-        typedef unsigned short WORD;
-        typedef uint32 DWORD;
-#   endif
+    typedef long long int64;
+    typedef long int32;
+    typedef short int16;
+    typedef char int8;
+    typedef unsigned long long uint64;
+    typedef unsigned long uint32;
+    typedef unsigned short uint16;
+    typedef unsigned char uint8;
+    typedef unsigned short WORD;
+    typedef uint32 DWORD;
 #endif
 
 #ifndef SIGQUIT
 #define SIGQUIT 3
 #endif
 
-#ifdef min
-#undef min
+#ifndef min
+#define min(a, b) ((a < b) ? a : b)
 #endif
 
-#ifdef max
-#undef max
+#ifndef max
+#define max(a, b) ((a > b) ? a : b)
 #endif
 
 #if COMPILER == COMPILER_MICROSOFT
@@ -120,12 +107,11 @@
 #  define COMPILER_VERSION_OUT "%u"
 #elif COMPILER == COMPILER_GNU
 #  define COMPILER_NAME "GCC"
-#  ifdef __GNUC_PATCHLEVEL__
-#    define COMPILER_VERSION STRINGIZE(__GNUC__) "." STRINGIZE(__GNUC_MINOR__) "." STRINGIZE(__GNUC_PATCHLEVEL__)
-#  else
-#    define COMPILER_VERSION STRINGIZE(__GNUC__) "." STRINGIZE(__GNUC_MINOR__)
+#  ifndef __GNUC_PATCHLEVEL__
+#    define __GNUC_PATCHLEVEL__ 0
 #  endif
-#  define COMPILER_VERSION_OUT "%s"
+#  define COMPILER_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#  define COMPILER_VERSION_OUT "%u"
 // TODO: add more compilers here when necessary
 #else
 #  define COMPILER_NAME "unknown"

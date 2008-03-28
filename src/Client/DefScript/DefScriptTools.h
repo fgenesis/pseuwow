@@ -18,10 +18,10 @@ namespace DefScriptTools
         return ss.str();
     }
 
-    ldbl toNumber(std::string&);
-    bool isTrue(std::string&);
-    uint64 toUint64(std::string&);
-    uint64 atoi64(std::string&);
+    ldbl toNumber(std::string);
+    bool isTrue(std::string);
+    uint64 toUint64(std::string);
+    uint64 atoi64(std::string);
 	inline long double Round(long double z,unsigned int n);
 }
 
