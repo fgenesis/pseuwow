@@ -110,9 +110,6 @@ bool PseuInstance::Init(void)
     _conf=new PseuInstanceConf();
 
     _scp->SetPath(_scpdir);
-    _scp->SetLog(logdetail); // does anyone have an idea why log() is not accepted here? 
-    _scp->SetDebugLog(logdebug);
-    _scp->SetErrorLog(logerror);
 
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);

@@ -92,7 +92,7 @@ bool VarSet::ReadVarsFromFile(std::string fn)
     while(!fh.eof())
     {
         c=fh.get();
-        if(c=='\n' || fh.eof())
+        if(c=='\n' || c==13 || c==10 || fh.eof())
         {
             if(line.empty())
                 continue;

@@ -37,4 +37,8 @@ typedef long double ldbl;
 
 #define SCRIPT_NAMESPACE "DEFSCRIPT::SCRIPT::"
 
+#define PRINT def_print
+#define PRINT_DEBUG def_print
+#define PRINT_ERROR def_print
+
 #endif

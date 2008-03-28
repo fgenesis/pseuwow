@@ -839,7 +839,7 @@ void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
     uint64 pguid;
     std::string pname;
     recvPacket >> pguid >> pname;
-    if(pname.length()>12 || pname.length()<2)
+    if(pname.length()>MAX_PLAYERNAME_LENGTH || pname.length()<MIN_PLAYERNAME_LENGTH)
         return; // playernames maxlen=12, minlen=2
     // rest of the packet is not interesting for now
     if(plrNameCache.AddInfo(pguid,pname))
