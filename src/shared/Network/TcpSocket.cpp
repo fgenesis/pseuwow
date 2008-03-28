@@ -740,7 +740,7 @@ bool TcpSocket::OnSocks4Read()
     return false;
 }
 
-
+/*
 void TcpSocket::Sendf(char const *format, ...)
 {
     va_list ap;
@@ -750,7 +750,7 @@ void TcpSocket::Sendf(char const *format, ...)
     va_end(ap);
     Send( slask );
 }
-
+*/
 
 void TcpSocket::OnSSLConnect()
 {

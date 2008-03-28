@@ -43,7 +43,7 @@ std::string DefScriptTools::toString(ldbl num)
 // hex numbers: 0xa56ff, 0XFF, 0xDEADBABE, etc (must begin with 0x)
 // float numbers: 99.65, 0.025
 // negative numbers: -100, -0x3d, -55.123
-ldbl DefScriptTools::toNumber(std::string& str)
+ldbl DefScriptTools::toNumber(std::string str)
 {
     ldbl num=0;
     uint64 u=0;
@@ -93,14 +93,14 @@ ldbl DefScriptTools::toNumber(std::string& str)
     return num;
 }
 
-bool DefScriptTools::isTrue(std::string& s)
+bool DefScriptTools::isTrue(std::string s)
 {
     if(s.empty() || s=="false" || s=="0")
         return false;
     return true;
 }
 
-uint64 DefScriptTools::toUint64(std::string& str)
+uint64 DefScriptTools::toUint64(std::string str)
 {
     bool negative=false;
     uint64 num = 0;
@@ -135,7 +135,7 @@ uint64 DefScriptTools::toUint64(std::string& str)
     return num;
 }
 
-uint64 DefScriptTools::atoi64(std::string& str)
+uint64 DefScriptTools::atoi64(std::string str)
 {
     uint64 l = 0;
     for (size_t i = 0; i < str.size(); i++)
