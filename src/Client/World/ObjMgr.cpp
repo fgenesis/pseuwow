@@ -32,24 +32,29 @@ void ObjMgr::RemoveAll(void)
     }
     while(_obj.size())
     {
-        Remove(_obj.begin()->first);
+        Remove(_obj.begin()->first, true);
     }
 }
 
-void ObjMgr::Remove(uint64 guid)
+void ObjMgr::Remove(uint64 guid, bool del)
 {
-    Object *o = GetObj(guid);
+    Object *o = GetObj(guid, true); // here get also depleted objs and delete if necessary
     if(o) 
     {
+        o->_SetDepleted();
         PseuGUI *gui = _instance->GetGUI();
         if(gui)
             gui->NotifyObjectDeletion(guid); // we have a gui, which must delete linked DrawObject
-        _obj.erase(guid); // now delete the obj from the mgr
-        delete o; // and delete the obj itself
+        if(del)
+        {
+            _obj.erase(guid); // now delete the obj from the mgr
+            delete o; // and delete the obj itself
+        }
     }
     else
     {
-        _obj.erase(guid);
+        _obj.erase(guid); // we can safely erase an object that does not exist
+                          // - if we reach this point there was a bug anyway
         logcustom(2,LRED,"ObjMgr::Remove("I64FMT") - not existing",guid); 
     }        
 }
@@ -58,20 +63,29 @@ void ObjMgr::Remove(uint64 guid)
 
 void ObjMgr::Add(Object *o)
 {
-    _obj[o->GetGUID()] = o;
+    Object *ox = GetObj(o->GetGUID(),true); // if an object already exists in the mgr, store old ptr...
+    _obj[o->GetGUID()] = o; // ...assign new one...
+    if(ox) // and if != NULL, delete the old object (completely, from memory)
+    {
+        Remove(ox->GetGUID(),true);
+    }
 
     PseuGUI *gui = _instance->GetGUI();
     if(gui)
         gui->NotifyObjectCreation(o);
 }
 
-Object *ObjMgr::GetObj(uint64 guid)
+Object *ObjMgr::GetObj(uint64 guid, bool also_depleted)
 {
     if(!guid)
         return NULL;
     for(ObjectMap::iterator i = _obj.begin(); i!=_obj.end(); i++)
         if(i->second->GetGUID() == guid)
+        {
+            if(i->second->_IsDepleted() && !also_depleted)
+                return NULL;
             return i->second;
+        }
     return NULL;
 }
 
@@ -89,6 +103,22 @@ uint32 ObjMgr::AssignNameToObj(uint32 entry, uint8 type, std::string name)
     }
     return changed;
 }
+
+void ObjMgr::ReNotifyGUI(void)
+{
+    PseuGUI *gui = _instance->GetGUI();
+    if(!gui)
+        return;
+    for(ObjectMap::iterator it = _obj.begin(); it != _obj.end(); it++)
+    {
+        Object *o = it->second;
+        if(o->_IsDepleted())
+            continue;
+        gui->NotifyObjectCreation(o);
+    }
+}
+
+
 
 // -- Item part --
 

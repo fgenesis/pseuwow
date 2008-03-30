@@ -226,7 +226,7 @@ void PseuGUI::NotifyObjectDeletion(uint64 guid)
 // called from ObjMgr::Add(Object*)
 void PseuGUI::NotifyObjectCreation(Object *o)
 {
-    DrawObject *d = new DrawObject(_smgr,o);
+    DrawObject *d = new DrawObject(_device,o);
     domgr.Add(o->GetGUID(),d);
 }
 

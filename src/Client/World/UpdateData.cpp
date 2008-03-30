@@ -86,7 +86,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                     if(uguid != GetGuid())
                     {
                         logdev("- already exists, deleting old, creating new object");
-                        objmgr.Remove(uguid);
+                        objmgr.Remove(uguid, false);
                         // do not call script here, since the object does not really get deleted
                     }
                     else
@@ -128,6 +128,8 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                         }
                     case TYPEID_PLAYER:
                         {
+                            if(GetGuid() == uguid) // objmgr.Add() would cause quite some trouble if we added ourself again
+                                break;
                             Player *player = new Player();
                             player->Create(uguid);
                             objmgr.Add(player);
@@ -201,7 +203,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                         GetInstance()->GetScripts()->RunScript("_onobjectdelete", &Set);
                     }
 
-                    objmgr.Remove(uguid);
+                    objmgr.Remove(uguid, false);
                 }
             }
             break;

@@ -114,6 +114,7 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 
 Item::Item()
 {
+    _depleted = false;
     _type |= TYPE_ITEM;
     _typeid = TYPEID_ITEM;
 

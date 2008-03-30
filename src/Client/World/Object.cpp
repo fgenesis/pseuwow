@@ -5,6 +5,7 @@
 
 Object::Object()
 {
+    _depleted = false;
     _uint32values=NULL;
     _type=TYPE_OBJECT;
     _typeid=TYPEID_OBJECT;
@@ -39,6 +40,7 @@ void Object::Create( uint64 guid )
    
 WorldObject::WorldObject()
 {
+    _depleted = false;
     _m = 0;
 }
 
@@ -121,7 +123,7 @@ void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
         GetInstance()->GetScripts()->RunScript("_onobjectdelete", &Set);
     }
 
-    objmgr.Remove(guid);
+    objmgr.Remove(guid, false);
 }
 
 

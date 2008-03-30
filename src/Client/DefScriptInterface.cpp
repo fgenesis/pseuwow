@@ -1016,7 +1016,10 @@ DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
 
     // TODO: not sure if this piece of code will work as intended, needs some testing
     if(ins->GetWSession() && ins->GetWSession()->InWorld())
+    {
        ins->GetGUI()->SetSceneState(SCENESTATE_WORLD);
+       ins->GetWSession()->objmgr.ReNotifyGUI();
+    }
     else
         ins->GetGUI()->SetSceneState(SCENESTATE_GUISTART);
 

@@ -1,6 +1,6 @@
 #include "GameObject.h"
 
-GameObject::GameObject()
+GameObject::GameObject() : WorldObject()
 {
     _uint32values=NULL;
     _type=TYPE_GAMEOBJECT;
