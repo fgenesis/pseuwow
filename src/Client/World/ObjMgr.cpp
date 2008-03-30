@@ -81,7 +81,7 @@ uint32 ObjMgr::AssignNameToObj(uint32 entry, uint8 type, std::string name)
     uint32 changed = 0;
     for(ObjectMap::iterator it = _obj.begin(); it != _obj.end(); it++)
     {
-        if(it->second->GetEntry() && (it->second->GetTypeId() == type))
+        if(it->second->GetEntry() == entry && (it->second->GetTypeId() == type))
         {
             it->second->SetName(name);
             changed++;
