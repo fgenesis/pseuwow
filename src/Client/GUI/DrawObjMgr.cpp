@@ -46,6 +46,7 @@ void DrawObjMgr::Update(void)
     while(_add.size())
     {
         std::pair<uint64,DrawObject*> p = _add.next();
+        DEBUG(logdebug("DrawObjMgr: adding DrawObj 0x%X guid "I64FMT" to main storage",p.second,p.first));
         _storage[p.first] = p.second;
     }
 
@@ -55,9 +56,15 @@ void DrawObjMgr::Update(void)
         uint64 guid = _del.next();
         if(_storage.find(guid) != _storage.end())
         {
+            
             DrawObject *o = _storage[guid];
+            DEBUG(logdebug("DrawObjMgr: removing DrawObj 0x%X guid "I64FMT" from main storage",o,guid));
             _storage.erase(guid);
             delete o;
+        }
+        else
+        {
+            DEBUG(logdebug("DrawObjMgr: ERROR: removable DrawObject "I64FMT" not exising",guid));
         }
     }
 

@@ -30,6 +30,16 @@ enum DriverIDs
     DIRECTX9 = 5,
 };
 
+#define MOUSE_SENSIVITY 0.5f
+#define ANGLE_STEP (M_PI/180.0f) 
+#define DEG_TO_RAD(x) ((x)*ANGLE_STEP)
+#define RAD_TO_DEG(x) ((x)/ANGLE_STEP)
+#define RAD_FIX(x) ( (x)>(2*M_PI) ? ((x)-(2*M_PI)) : (x) )
+#define DEG_FIX(x) ( (x)>360 ? ((x)-360) : (x) )
+
+#define COORD_SCALE_VALUE_X 0.336f
+#define COORD_SCALE_VALUE_Y 0.2f
+
 class PseuGUIRunnable : public ZThread::Runnable
 {
 public:

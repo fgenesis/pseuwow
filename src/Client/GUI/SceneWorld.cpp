@@ -12,18 +12,6 @@
 #include "WorldSession.h"
 #include "World.h"
 
-#define MOUSE_SENSIVITY 0.5f
-#define ANGLE_STEP (M_PI/180) 
-#define DEG_TO_RAD(x) ((x)*ANGLE_STEP)
-#define RAD_TO_DEG(x) ((x)/ANGLE_STEP)
-#define RAD_FIX(x) ( (x)>(2*M_PI) ? ((x)-(2*M_PI)) : (x) )
-#define DEG_FIX(x) ( (x)>360 ? ((x)-360) : (x) )
-
-#define COORD_SCALE_VALUE_X 0.336f
-#define COORD_SCALE_VALUE_Y 0.2f
-
-
-
 SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 {
     DEBUG(logdebug("SceneWorld: Initializing..."));
@@ -360,8 +348,8 @@ void SceneWorld::SetWorldPosition(WorldPosition wp)
     cam.Z = tile->GetBaseX() - wp.y + (tsize.Height * UNITSIZE);
     float heading = RAD_TO_DEG(((M_PI*3.0f)/2.0f) - wp.o);
     float heading_diff = camera->getHeading() - heading; 
-    logdebug("Setting camera to x: %3f y: %3f z:%3f head: %3f", cam.X, cam.Y, cam.Z, heading);
-    camera->turnLeft(heading_diff);
+    //logdebug("Setting camera to x: %3f y: %3f z:%3f head: %3f", cam.X, cam.Y, cam.Z, heading);
+    //camera->turnLeft(heading_diff);
     
     // TODO:
     // - correct the above formulas

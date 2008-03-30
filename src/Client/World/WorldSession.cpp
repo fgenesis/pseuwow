@@ -597,8 +597,8 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             // that means even if the server sends create object with that guid, do NOT recreate it!!
             MyCharacter *my = new MyCharacter();
             my->Create(_myGUID);
-            objmgr.Add(my);
             my->SetName(plr[charId]._name);
+            objmgr.Add(my);
 
             // TODO: initialize the world here, and load required maps.
             // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!

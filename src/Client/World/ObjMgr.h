@@ -49,10 +49,11 @@ public:
 
     // Object functions
     void Add(Object*);
-    void Remove(uint64); // remove all objects with that guid (should be only 1 object in total anyway)
-    Object *GetObj(uint64 guid);
+    void Remove(uint64 guid, bool del); // remove all objects with that guid (should be only 1 object in total anyway)
+    Object *GetObj(uint64 guid, bool also_depleted = false);
     inline uint32 GetObjectCount(void) { return _obj.size(); }
     uint32 AssignNameToObj(uint32 entry, uint8 type, std::string name);
+    void ReNotifyGUI(void);
 
 private:
     ItemProtoMap _iproto;

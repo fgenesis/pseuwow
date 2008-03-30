@@ -1,6 +1,6 @@
 #include "DynamicObject.h"
 
-DynamicObject::DynamicObject()
+DynamicObject::DynamicObject() : WorldObject()
 {
     _uint32values=NULL;
     _type=TYPE_DYNAMICOBJECT;

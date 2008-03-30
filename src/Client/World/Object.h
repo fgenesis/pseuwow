@@ -92,6 +92,8 @@ public:
     }
 
     void Create(uint64 guid);
+    inline bool _IsDepleted(void) { return _depleted; }
+    inline void _SetDepleted(void) { _depleted = true; }
     
 protected:
     Object();
@@ -106,6 +108,7 @@ protected:
     uint8 _type;
     uint8 _typeid;
     std::string _name;
+    bool _depleted : 1; // true if the object was deleted from the objmgr, but not from memory
 };
 
 class WorldObject : public Object
