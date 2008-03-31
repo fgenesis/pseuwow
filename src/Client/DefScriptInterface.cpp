@@ -1011,9 +1011,11 @@ DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
         logerror("SCGui: failed");
         return false;
     }
-    while(!ins->GetGUI() && !ins->GetGUI()->IsInitialized())
+    while(!ins->GetGUI() || !ins->GetGUI()->IsInitialized())
         ins->GetRunnable()->sleep(1);
 
+    ZThread::FastMutex mut;
+    mut.acquire();
     // TODO: not sure if this piece of code will work as intended, needs some testing
     if(ins->GetWSession() && ins->GetWSession()->InWorld())
     {
@@ -1022,6 +1024,7 @@ DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
     }
     else
         ins->GetGUI()->SetSceneState(SCENESTATE_GUISTART);
+    mut.release();
 
     return true;
 }

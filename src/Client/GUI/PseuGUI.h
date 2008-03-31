@@ -74,7 +74,7 @@ public:
     void UseShadows(bool);
     void Cancel(void);
     void Shutdown(void);
-    inline bool IsInitialized(void) { return _initialized; }
+    inline bool IsInitialized(void) { return _initialized && _device; }
 
     inline bool MustDie(void) { return _mustdie; }
 

@@ -10,12 +10,18 @@ DrawObjMgr::DrawObjMgr()
 
 DrawObjMgr::~DrawObjMgr()
 {
-    DEBUG( logdebug("~DrawObjMgr(), deleting %u DrawObjects...", _storage.size() ) );
+    Clear();
+}
+
+void DrawObjMgr::Clear(void)
+{
+    DEBUG( logdebug("DrawObjMgr::Clear(), deleting %u DrawObjects...", _storage.size() ) );
     for(DrawObjStorage::iterator i = _storage.begin(); i != _storage.end(); i++)
     {
         DEBUG( logdebug("del for guid "I64FMT, i->first) );
         delete i->second; // this can be done safely, since the object ptrs are not accessed
     }
+    _storage.clear();
 
     while(_add.size())
     {
@@ -31,6 +37,15 @@ void DrawObjMgr::Add(uint64 objguid, DrawObject *o)
 void DrawObjMgr::Delete(uint64 guid)
 {
     _del.add(guid);
+}
+
+void DrawObjMgr::UnlinkAll(void)
+{
+    DEBUG( logdebug("DrawObjMgr::UnlinkAll(), %u DrawObjects...", _storage.size() ) );
+    for(DrawObjStorage::iterator i = _storage.begin(); i != _storage.end(); i++)
+    {
+        i->second->Unlink();
+    }
 }
 
 void DrawObjMgr::Update(void)

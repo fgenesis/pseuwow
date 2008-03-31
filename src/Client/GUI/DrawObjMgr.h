@@ -14,8 +14,10 @@ public:
     ~DrawObjMgr();
     void Add(uint64,DrawObject*);
     void Delete(uint64);
+    void Clear(void);
     void Update(void); // Threadsafe! delete code must be called from here!
     uint32 StorageSize(void) { return _storage.size(); }
+    void UnlinkAll(void);
 
 private:
     DrawObjStorage _storage;
