@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="pseuwow" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option platforms="Unix;" />
+				<Option output="bin/Debug/pseuwow" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/pseuwow" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-O2" />
+			<Add option="-Wall" />
+			<Add directory="shared" />
+			<Add directory="Client" />
+			<Add directory="Client/World" />
+			<Add directory="Client/Realm" />
+			<Add directory="Client/GUI" />
+		</Compiler>
+		<Linker>
+			<Add option="-pthread" />
+			<Add library="Irrlicht" />
+			<Add library="ZThread" />
+			<Add library="GLU" />
+			<Add library="GL" />
+			<Add library="Xxf86vm" />
+			<Add library="/usr/local/ssl/lib/libssl.a" />
+			<Add library="/usr/local/ssl/lib/libcrypto.a" />
+		</Linker>
+		<Unit filename="Client/Cli.cpp" />
+		<Unit filename="Client/Cli.h" />
+		<Unit filename="Client/ControlSocket.cpp" />
+		<Unit filename="Client/ControlSocket.h" />
+		<Unit filename="Client/DefScript/DefScript.cpp" />
+		<Unit filename="Client/DefScript/DefScript.h" />
+		<Unit filename="Client/DefScript/DefScriptBBFunctions.cpp" />
+		<Unit filename="Client/DefScript/DefScriptDefines.h" />
+		<Unit filename="Client/DefScript/DefScriptFileFunctions.cpp" />
+		<Unit filename="Client/DefScript/DefScriptFunctions.cpp" />
+		<Unit filename="Client/DefScript/DefScriptListFunctions.cpp" />
+		<Unit filename="Client/DefScript/DefScriptTools.cpp" />
+		<Unit filename="Client/DefScript/DefScriptTools.h" />
+		<Unit filename="Client/DefScript/DynamicEvent.cpp" />
+		<Unit filename="Client/DefScript/DynamicEvent.h" />
+		<Unit filename="Client/DefScript/TypeStorage.h" />
+		<Unit filename="Client/DefScript/VarSet.cpp" />
+		<Unit filename="Client/DefScript/VarSet.h" />
+		<Unit filename="Client/DefScriptInterface.cpp" />
+		<Unit filename="Client/DefScriptInterface.h" />
+		<Unit filename="Client/DefScriptInterfaceInclude.h" />
+		<Unit filename="Client/GUI/DrawObjMgr.cpp" />
+		<Unit filename="Client/GUI/DrawObjMgr.h" />
+		<Unit filename="Client/GUI/DrawObject.cpp" />
+		<Unit filename="Client/GUI/DrawObject.h" />
+		<Unit filename="Client/GUI/MCamera.h" />
+		<Unit filename="Client/GUI/MInput.h" />
+		<Unit filename="Client/GUI/PseuGUI.cpp" />
+		<Unit filename="Client/GUI/PseuGUI.h" />
+		<Unit filename="Client/GUI/Scene.cpp" />
+		<Unit filename="Client/GUI/Scene.h" />
+		<Unit filename="Client/GUI/SceneGuiStart.cpp" />
+		<Unit filename="Client/GUI/SceneWorld.cpp" />
+		<Unit filename="Client/GUI/ShTlTerrainSceneNode.cpp" />
+		<Unit filename="Client/GUI/ShTlTerrainSceneNode.h" />
+		<Unit filename="Client/GUI/TlTMesh.h" />
+		<Unit filename="Client/HelperDefs.h" />
+		<Unit filename="Client/MemoryDataHolder.cpp" />
+		<Unit filename="Client/MemoryDataHolder.h" />
+		<Unit filename="Client/PseuWoW.cpp" />
+		<Unit filename="Client/PseuWoW.h" />
+		<Unit filename="Client/Realm/RealmSession.cpp" />
+		<Unit filename="Client/Realm/RealmSession.h" />
+		<Unit filename="Client/Realm/RealmSocket.cpp" />
+		<Unit filename="Client/Realm/RealmSocket.h" />
+		<Unit filename="Client/RemoteController.cpp" />
+		<Unit filename="Client/RemoteController.h" />
+		<Unit filename="Client/SCPDatabase.cpp" />
+		<Unit filename="Client/SCPDatabase.h" />
+		<Unit filename="Client/World/Bag.cpp" />
+		<Unit filename="Client/World/Bag.h" />
+		<Unit filename="Client/World/CMSGConstructor.cpp" />
+		<Unit filename="Client/World/CacheHandler.cpp" />
+		<Unit filename="Client/World/CacheHandler.h" />
+		<Unit filename="Client/World/Channel.cpp" />
+		<Unit filename="Client/World/Channel.h" />
+		<Unit filename="Client/World/Corpse.cpp" />
+		<Unit filename="Client/World/Corpse.h" />
+		<Unit filename="Client/World/DynamicObject.cpp" />
+		<Unit filename="Client/World/DynamicObject.h" />
+		<Unit filename="Client/World/GameObject.cpp" />
+		<Unit filename="Client/World/GameObject.h" />
+		<Unit filename="Client/World/Item.cpp" />
+		<Unit filename="Client/World/Item.h" />
+		<Unit filename="Client/World/MapMgr.cpp" />
+		<Unit filename="Client/World/MapMgr.h" />
+		<Unit filename="Client/World/MovementMgr.cpp" />
+		<Unit filename="Client/World/MovementMgr.h" />
+		<Unit filename="Client/World/ObjMgr.cpp" />
+		<Unit filename="Client/World/ObjMgr.h" />
+		<Unit filename="Client/World/Object.cpp" />
+		<Unit filename="Client/World/Object.h" />
+		<Unit filename="Client/World/ObjectDefines.h" />
+		<Unit filename="Client/World/Opcodes.cpp" />
+		<Unit filename="Client/World/Opcodes.h" />
+		<Unit filename="Client/World/Player.cpp" />
+		<Unit filename="Client/World/Player.h" />
+		<Unit filename="Client/World/SharedDefines.h" />
+		<Unit filename="Client/World/Unit.cpp" />
+		<Unit filename="Client/World/Unit.h" />
+		<Unit filename="Client/World/UpdateData.cpp" />
+		<Unit filename="Client/World/UpdateData.h" />
+		<Unit filename="Client/World/UpdateFields.h" />
+		<Unit filename="Client/World/UpdateMask.h" />
+		<Unit filename="Client/World/World.cpp" />
+		<Unit filename="Client/World/World.h" />
+		<Unit filename="Client/World/WorldPacket.cpp" />
+		<Unit filename="Client/World/WorldPacket.h" />
+		<Unit filename="Client/World/WorldSession.cpp" />
+		<Unit filename="Client/World/WorldSession.h" />
+		<Unit filename="Client/World/WorldSocket.cpp" />
+		<Unit filename="Client/World/WorldSocket.h" />
+		<Unit filename="Client/main.cpp" />
+		<Unit filename="Client/main.h" />
+		<Unit filename="Client/resource.h" />
+		<Unit filename="shared/ADTFile.cpp" />
+		<Unit filename="shared/ADTFile.h" />
+		<Unit filename="shared/ADTFileStructs.h" />
+		<Unit filename="shared/Auth/AuthCrypt.cpp" />
+		<Unit filename="shared/Auth/AuthCrypt.h" />
+		<Unit filename="shared/Auth/BigNumber.cpp" />
+		<Unit filename="shared/Auth/BigNumber.h" />
+		<Unit filename="shared/Auth/MD5Hash.h" />
+		<Unit filename="shared/Auth/Sha1.cpp" />
+		<Unit filename="shared/Auth/Sha1.h" />
+		<Unit filename="shared/Auth/md5.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="shared/Auth/md5.h" />
+		<Unit filename="shared/ByteBuffer.h" />
+		<Unit filename="shared/DebugStuff.h" />
+		<Unit filename="shared/MapTile.cpp" />
+		<Unit filename="shared/MapTile.h" />
+		<Unit filename="shared/Network/Base64.cpp" />
+		<Unit filename="shared/Network/Base64.h" />
+		<Unit filename="shared/Network/CircularBuffer.cpp" />
+		<Unit filename="shared/Network/CircularBuffer.h" />
+		<Unit filename="shared/Network/ListenSocket.h" />
+		<Unit filename="shared/Network/Parse.cpp" />
+		<Unit filename="shared/Network/Parse.h" />
+		<Unit filename="shared/Network/PoolSocket.cpp" />
+		<Unit filename="shared/Network/PoolSocket.h" />
+		<Unit filename="shared/Network/ResolvServer.cpp" />
+		<Unit filename="shared/Network/ResolvServer.h" />
+		<Unit filename="shared/Network/ResolvSocket.cpp" />
+		<Unit filename="shared/Network/ResolvSocket.h" />
+		<Unit filename="shared/Network/Socket.cpp" />
+		<Unit filename="shared/Network/Socket.h" />
+		<Unit filename="shared/Network/SocketHandler.cpp" />
+		<Unit filename="shared/Network/SocketHandler.h" />
+		<Unit filename="shared/Network/SocketThread.cpp" />
+		<Unit filename="shared/Network/SocketThread.h" />
+		<Unit filename="shared/Network/StdLog.h" />
+		<Unit filename="shared/Network/StdoutLog.cpp" />
+		<Unit filename="shared/Network/StdoutLog.h" />
+		<Unit filename="shared/Network/TcpSocket.cpp" />
+		<Unit filename="shared/Network/TcpSocket.h" />
+		<Unit filename="shared/Network/Thread.cpp" />
+		<Unit filename="shared/Network/Thread.h" />
+		<Unit filename="shared/Network/UdpSocket.cpp" />
+		<Unit filename="shared/Network/UdpSocket.h" />
+		<Unit filename="shared/Network/Utility.cpp" />
+		<Unit filename="shared/Network/Utility.h" />
+		<Unit filename="shared/Network/socket_include.cpp" />
+		<Unit filename="shared/Network/socket_include.h" />
+		<Unit filename="shared/SysDefs.h" />
+		<Unit filename="shared/WDTFile.cpp" />
+		<Unit filename="shared/WDTFile.h" />
+		<Unit filename="shared/Widen.h" />
+		<Unit filename="shared/ZCompressor.cpp" />
+		<Unit filename="shared/ZCompressor.h" />
+		<Unit filename="shared/common.h" />
+		<Unit filename="shared/log.cpp" />
+		<Unit filename="shared/log.h" />
+		<Unit filename="shared/tools.cpp" />
+		<Unit filename="shared/tools.h" />
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
