@@ -48,6 +48,7 @@ PseuGUI::PseuGUI()
 
 PseuGUI::~PseuGUI()
 {
+    domgr.Clear();
     this->Cancel();
     _instance->DeleteGUI(); // this makes the instance set its gui ptr to NULL
     logdebug("PseuGUI::~PseuGUI()");
@@ -213,6 +214,8 @@ void PseuGUI::Run(void)
         }
 
     }
+    domgr.UnlinkAll(); // At this point the irr::device is probably closed and deleted already, which means it deleted
+                       // all SceneNodes and everything. the ptrs are still stored in the DrawObjects, means they need to be unlinked now not to cause a crash.
     DEBUG(logdebug("PseuGUI::Run() finished"));
     Cancel(); // already got shut down somehow, we can now safely cancel and drop the device
 }
