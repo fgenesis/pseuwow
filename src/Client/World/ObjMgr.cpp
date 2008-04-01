@@ -64,14 +64,15 @@ void ObjMgr::Remove(uint64 guid, bool del)
 void ObjMgr::Add(Object *o)
 {
     Object *ox = GetObj(o->GetGUID(),true); // if an object already exists in the mgr, store old ptr...
+    if(o == ox)
+        return; // if both pointers are the same, do nothing (already added and happy)
     _obj[o->GetGUID()] = o; // ...assign new one...
     if(ox) // and if != NULL, delete the old object (completely, from memory)
     {
-        Remove(ox->GetGUID(),true);
+        delete ox; // only delete pointer, everything else is already reserved for the just added new obj
     }
 
-    PseuGUI *gui = _instance->GetGUI();
-    if(gui)
+    if(PseuGUI *gui = _instance->GetGUI())
         gui->NotifyObjectCreation(o);
 }
 
