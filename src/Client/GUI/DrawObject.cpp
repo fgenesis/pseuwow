@@ -34,7 +34,7 @@ void DrawObject::_Init(void)
 {
     if(!cube && _obj->IsWorldObject()) // only world objects have coords and can be drawn
     {
-        cube = _smgr->addCubeSceneNode(10);
+        cube = _smgr->addCubeSceneNode(2);
         cube->setName("CUBE");
         //cube->setPosition(irr::core::vector3di(100,100,100));
         cube->setRotation(irr::core::vector3df(0,0,0));
@@ -63,13 +63,7 @@ void DrawObject::Draw(void)
     if(cube)
     {
         WorldPosition pos = ((WorldObject*)_obj)->GetPosition();
-        // TODO: these formulas are horribly wrong! FIXME ASAP!
-        // they work best for ".tele dunmorogh"
-        float dx=pos.x * -5.0f - 26830.0f;
-        float dy=pos.z;
-        float dz=pos.y * -3.5f - 566.0f;
-
-        cube->setPosition(irr::core::vector3df(dx,dy,dz));
+        cube->setPosition(irr::core::vector3df(-pos.x,pos.z,-pos.y));
         if(_obj->IsPlayer())
         {
             cube->getMaterial(0).DiffuseColor.set(255,255,0,0);

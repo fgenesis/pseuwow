@@ -20,7 +20,8 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     // store some pointers right now to prevent repeated ptr dereferencing later (speeds up code)
     gui = g;
     wsession = gui->GetInstance()->GetWSession();
-    mapmgr = wsession->GetWorld()->GetMapMgr();
+    world = wsession->GetWorld();
+    mapmgr = world->GetMapMgr();
 
     // TODO: hardcoded for now, make this adjustable later
     float fogdist = 150;
@@ -51,6 +52,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     InitTerrain();
     UpdateTerrain();
+    RelocateCamera();
 
     DEBUG(logdebug("SceneWorld: Init done!"));
 }
@@ -123,6 +125,9 @@ void SceneWorld::OnUpdate(s32 timediff)
             scrnshot->drop();
         }
     }
+    
+    if(camera->getPitch() < 270 && camera->getPitch() > 90)
+        camera->turnUp(90);
 
     if(mouse_pressed_left || mouse_pressed_right)
     {
@@ -150,7 +155,8 @@ void SceneWorld::OnUpdate(s32 timediff)
     }
     
     // camera height control
-    if (eventrecv->mouse.wheel < 10) eventrecv->mouse.wheel = 10;
+    if (eventrecv->mouse.wheel < 10)
+        eventrecv->mouse.wheel = 10;
     camera->setHeight(  eventrecv->mouse.wheel + terrain->getHeight(camera->getPosition())  );
 
     WorldPosition wp = GetWorldPosition();
@@ -162,6 +168,7 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += camera->getPosition().Y;
     str += L",";
     str += camera->getPosition().Z;
+    str += L"\n";
     str += " ## HEAD: ";
     str += DEG_TO_RAD(camera->getHeading());
     str += L"  Pos: ";
@@ -194,12 +201,11 @@ void SceneWorld::InitTerrain(void)
         return;
     }
 
-    mapsize = 8 * 16 * 3; // 9-1 height floats in 16 chunks per tile per axis in 3 MapTiles
+    mapsize = (8 * 16 * 3) - 1; // 9-1 height floats in 16 chunks per tile per axis in 3 MapTiles
     tilesize = UNITSIZE;
     meshsize = (s32)CHUNKSIZE*3;
-    vector3df terrainPos(0.0f, 0.0f, 0.0f); // TODO: use PseuWoW's world coords here?
 
-    camera->setPosition(core::vector3df(mapsize*tilesize/2, 0, mapsize*tilesize/2) + terrainPos);
+    //camera->setPosition(core::vector3df(mapsize*tilesize/2, 0, mapsize*tilesize/2) + terrainPos);
 
     terrain = new ShTlTerrainSceneNode(smgr,mapsize,mapsize,tilesize,meshsize);
     terrain->drop();
@@ -207,7 +213,7 @@ void SceneWorld::InitTerrain(void)
     terrain->setMaterialTexture(0, driver->getTexture("data/misc/dirt_test.jpg"));
     terrain->setMaterialFlag(video::EMF_LIGHTING, true);
     terrain->setMaterialFlag(video::EMF_FOG_ENABLE, true);
-    terrain->setPosition(terrainPos);
+
 
 }
 
@@ -302,8 +308,40 @@ void SceneWorld::UpdateTerrain(void)
             terrain->setColor(i,j, video::SColor(255,r,g,b));
         }
 
+    // to set the correct position of the terrain, we have to use the top-left tile's coords as terrain base pos
+    MapTile *maptile = mapmgr->GetNearTile(-1, -1);
+    if(maptile)
+    {
+        vector3df tpos;
+        tpos.X = -maptile->GetBaseX();
+        tpos.Y = 0; // height already managed when building up terrain
+        tpos.Z = -maptile->GetBaseY();
+        logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z); 
+        terrain->setPosition(tpos);
+    }
+
     logdebug("SceneWorld: Smoothing terrain normals...");
     terrain->smoothNormals();
+
+    // TODO: check if camera should really be relocated -> in case we got teleported
+    // do NOT relocate camera if we moved around and triggered the map loading code by ourself!
+    RelocateCamera();
+}
+
+void SceneWorld::RelocateCamera(void)
+{
+
+    MyCharacter *my = wsession->GetMyChar();
+    if(my)
+    {
+        logdebug("SceneWorld: Relocating camera to MyCharacter");
+        camera->setPosition(vector3df(-my->GetX(),my->GetZ(),-my->GetY()));
+        camera->turnLeft(camera->getHeading() - O_TO_IRR(my->GetO()));
+    }
+    else
+    {
+        logerror("SceneWorld: Relocating camera to MyCharacter - not found!");
+    }
 }
 
 WorldPosition SceneWorld::GetWorldPosition(void)
@@ -328,12 +366,13 @@ WorldPosition SceneWorld::GetWorldPosition(void)
     float relx = cam.X * COORD_SCALE_VALUE_X + CHUNKSIZE;
     float rely = cam.Z * COORD_SCALE_VALUE_Y + CHUNKSIZE;
 
-    float o = DEG_TO_RAD(camera->getHeading()) + ((M_PI*3.0f)/2.0f);
+    float o = IRR_TO_O(camera->getHeading()) + ((M_PI*3.0f)/2.0f);
     return WorldPosition(mapx - relx, mapy - rely, cam.Y, RAD_FIX(o) );
 }
 
 void SceneWorld::SetWorldPosition(WorldPosition wp)
 {
+    return;
     UpdateTerrain();
     vector3df cam;
     dimension2d<s32> tsize = terrain->getSize();
@@ -346,7 +385,7 @@ void SceneWorld::SetWorldPosition(WorldPosition wp)
     }
     cam.X = tile->GetBaseX() - wp.x + (tsize.Width * UNITSIZE);
     cam.Z = tile->GetBaseX() - wp.y + (tsize.Height * UNITSIZE);
-    float heading = RAD_TO_DEG(((M_PI*3.0f)/2.0f) - wp.o);
+    float heading = O_TO_IRR(wp.o);
     float heading_diff = camera->getHeading() - heading; 
     //logdebug("Setting camera to x: %3f y: %3f z:%3f head: %3f", cam.X, cam.Y, cam.Z, heading);
     //camera->turnLeft(heading_diff);

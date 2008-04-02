@@ -36,6 +36,8 @@ enum DriverIDs
 #define RAD_TO_DEG(x) ((x)/ANGLE_STEP)
 #define RAD_FIX(x) ( (x)>(2*M_PI) ? ((x)-(2*M_PI)) : (x) )
 #define DEG_FIX(x) ( (x)>360 ? ((x)-360) : (x) )
+#define IRR_TO_O(x) (DEG_TO_RAD(x) + ((M_PI*3.0f)/2.0f))
+#define O_TO_IRR(x) (((M_PI/3.0f)*2.0f) - DEG_TO_RAD(x))
 
 #define COORD_SCALE_VALUE_X 0.336f
 #define COORD_SCALE_VALUE_Y 0.2f

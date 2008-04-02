@@ -919,10 +919,11 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     SendWorldPacket(response);
 
     _world->UpdatePos(x,y);
+    _world->Update();
 
-    if(PseuGUI *gui = GetInstance()->GetGUI())
+    if(MyCharacter *my = GetMyChar())
     {
-        gui->SetWorldPosition(WorldPosition(x,y,z,o));
+        my->SetPosition(x,y,z,o);
     }
 
     if(GetInstance()->GetScripts()->ScriptExists("_onteleport"))
@@ -947,8 +948,6 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     // else we had to do the following before:
     // recvPacket >> tmapid >> tx >> ty >> tz >> to;
     recvPacket >> mapid >> x >> y >> z >> o;
-    if(GetMyChar())
-        GetMyChar()->ClearSpells(); // will be resent by server
 
     // when getting teleported, the client sends CMSG_CANCEL_TRADE 2 times.. dont ask me why.
     WorldPacket wp(CMSG_CANCEL_TRADE,8);
@@ -978,13 +977,13 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     _world->UpdatePos(x,y,mapid);
     _world->Update();
 
-    // TODO: need to switch to SCENESTATE_LOGINSCREEN here, and after everything is loaded, back to SCENESTATE_WORLD
-    if(PseuGUI *gui = GetInstance()->GetGUI())
+    if(MyCharacter *my = GetMyChar())
     {
-        //gui->SetSceneState(SCENESTATE_WORLD);
-        // commented out, should be world scene anyway at this point...
-        gui->SetWorldPosition(WorldPosition(x,y,z,o));
+        my->ClearSpells(); // will be resent by server
+        my->SetPosition(x,y,z,o,mapid);
     }
+
+    // TODO: need to switch to SCENESTATE_LOGINSCREEN here, and after everything is loaded, back to SCENESTATE_WORLD
 
     if(GetInstance()->GetScripts()->ScriptExists("_onteleport"))
     {

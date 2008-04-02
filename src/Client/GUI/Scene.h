@@ -62,6 +62,7 @@ public:
     void OnUpdate(s32);
     void UpdateTerrain(void);
     void InitTerrain(void);
+    void RelocateCamera(void);
 
     WorldPosition GetWorldPosition(void);
     void SetWorldPosition(WorldPosition);
@@ -76,6 +77,7 @@ private:
     s32 mapsize, meshsize;
     f32 tilesize;
     WorldSession *wsession;
+    World *world;
     MapMgr *mapmgr;
     IGUIStaticText *debugText;
     bool debugmode;
