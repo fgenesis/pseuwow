@@ -3,6 +3,19 @@
 #include "MapTile.h"
 #include "MapMgr.h"
 
+void MakeMapFilename(char *fn, uint32 m, uint32 x, uint32 y)
+{
+    sprintf(fn,"./data/maps/%u_%u_%u.adt",m,x,y);
+}
+
+bool TileExistsInFile(uint32 m, uint32 x, uint32 y)
+{
+    char buf[50];
+    MakeMapFilename(buf,m,x,y);
+    return GetFileSize(buf);
+}
+
+
 MapMgr::MapMgr()
 {
     DEBUG(logdebug("Creating MapMgr with TILESIZE=%.3f CHUNKSIZE=%.3f UNITSIZE=%.3f",TILESIZE,CHUNKSIZE,UNITSIZE));
@@ -69,15 +82,23 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 {
     if(!_tiles->TileExists(gx,gy))
     {
-        logerror("MAPMGR: Not loading MapTile (%u, %u) map %u, no entry in WDT tile map",gx,gy,m);
-        return;
+        if(TileExistsInFile(m,gx,gy))
+        {
+            logerror("MapMgr: Tile (%u, %u) exists not in WDT, but as file?!",gx,gy);
+            // continue loading...
+        }
+        else
+        {
+            logerror("MAPMGR: Not loading MapTile (%u, %u) map %u, no entry in WDT tile map",gx,gy,m);
+            return;
+        }
     }
 
     if( !_tiles->GetTile(gx,gy) )
     {
         ADTFile *adt = new ADTFile();
         char buf[300];
-        sprintf(buf,"data/maps/%u_%u_%u.adt",m,gx,gy);
+        MakeMapFilename(buf,m,gx,gy);
         if(adt->Load(buf))
         {
             logdebug("MAPMGR: Loaded ADT '%s'",buf);
@@ -120,7 +141,7 @@ void MapMgr::_UnloadOldTiles(void)
 MapTile *MapMgr::GetTile(uint32 xg, uint32 yg, bool forceLoad)
 {
     MapTile *tile = _tiles->GetTile(xg,yg);
-    if(!tile)
+    if(!tile && forceLoad)
     {
         _LoadTile(xg,yg,_mapid);
         tile = _tiles->GetTile(xg,yg);
@@ -145,7 +166,7 @@ uint32 MapMgr::GetGridCoord(float f)
 
 GridCoordPair MapMgr::GetTransformGridCoordPair(float x, float y)
 {
-    return GridCoordPair(GetGridCoord(x), GetGridCoord(y));
+    return GridCoordPair(GetGridCoord(y), GetGridCoord(x)); // yes, they are reversed. definitely.
 }
 
 uint32 MapMgr::GetLoadedMapsCount(void)

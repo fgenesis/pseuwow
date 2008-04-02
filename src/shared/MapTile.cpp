@@ -24,8 +24,8 @@ void MapTile::ImportFromADT(ADTFile *adt)
     for(uint32 ch=0; ch<CHUNKS_PER_TILE; ch++)
     {
         _chunks[ch].baseheight = adt->_chunks[ch].hdr.zbase; // ADT files store (x/z) as ground coords and (y) as the height!
-        _chunks[ch].basex = adt->_chunks[ch].hdr.ybase; // here converting it to (x/y) on ground and basehight as actual height.
-        _chunks[ch].basey = adt->_chunks[ch].hdr.xbase; // strange coords they use... :S
+        _chunks[ch].basex = adt->_chunks[ch].hdr.xbase; // here converting it to (x/y) on ground and basehight as actual height.
+        _chunks[ch].basey = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
         uint32 fcnt=0, rcnt=0;
         while(true) //9*9 + 8*8
         {
@@ -128,3 +128,4 @@ void MapTile::DebugDumpToFile(void)
     fprintf(fh, out.c_str());
     fclose(fh);
 }
+
