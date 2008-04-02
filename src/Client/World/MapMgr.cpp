@@ -55,6 +55,7 @@ void MapMgr::Update(float x, float y, uint32 m)
         _LoadNearTiles(_gridx,_gridy,m);
         _UnloadOldTiles();
     }
+    _mapsLoaded = true; // at this point, everything should be loaded (if maps existing)
 }
 
 void MapMgr::Flush(void)
@@ -67,6 +68,7 @@ void MapMgr::Flush(void)
 
 void MapMgr::_LoadNearTiles(uint32 gx, uint32 gy, uint32 m)
 {
+    _mapsLoaded = false;
     logdebug("MAPMGR: Loading near tiles for (%u, %u) map %u",gx,gy,m);
     for(uint32 v = gy-1; v <= gy+1; v++)
     {
@@ -75,11 +77,11 @@ void MapMgr::_LoadNearTiles(uint32 gx, uint32 gy, uint32 m)
             _LoadTile(h,v,m);
         }
     }
-    _mapsLoaded = true;
 }
 
 void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 {
+    _mapsLoaded = false;
     if(!_tiles->TileExists(gx,gy))
     {
         if(TileExistsInFile(m,gx,gy))
@@ -121,11 +123,11 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 
 void MapMgr::_UnloadOldTiles(void)
 {
-    for(uint32 gy=0; gy<64; gy++)
+    for(int32 gy=0; gy<64; gy++)
     {
-        for(uint32 gx=0; gx<64; gx++)
+        for(int32 gx=0; gx<64; gx++)
         {
-            if( (_gridx < gx-1 || _gridx > gx+1) && (_gridy < gy-1 || _gridy > gy+1) )
+            if( (int32(_gridx) < gx-1 || int32(_gridx) > gx+1) && (int32(_gridy) < gy-1 || int32(_gridy) > gy+1) )
             {
                 if(_tiles->GetTile(gx,gy))
                 {
@@ -199,4 +201,16 @@ float MapMgr::GetZ(float x, float y)
     logerror("MapMgr::GetZ() called for not loaded MapTile (%u, %u) for (%f, %f)",gcoords.x,gcoords.y,x,y);
     return 0;*/
 }
- 
+
+std::string MapMgr::GetLoadedTilesString(void)
+{
+    std::stringstream s;
+    for(uint32 x = 0; x < 64; x++)
+    {
+        for(uint32 y = 0; y < 64; y++)
+            if(_tiles->GetTile(x,y))
+                s << "(" << x << "|" << y << ") ";
+    }
+    return s.str();
+}
+

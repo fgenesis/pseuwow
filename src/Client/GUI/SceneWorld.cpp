@@ -234,6 +234,7 @@ void SceneWorld::UpdateTerrain(void)
         logdebug("SceneWorld: Waiting until maps are loaded...");
         while(!mapmgr->Loaded())
             device->sleep(1);
+        logdebug("SceneWorld: ... maps done loading");
     }
 
     // TODO: as soon as WMO-only worlds are implemented, remove this!!
@@ -251,6 +252,7 @@ void SceneWorld::UpdateTerrain(void)
     // EDIT: it seems to display fine now, but i am still not sure if the way it is done is correct...
     mutex.acquire(); // prevent other threads from deleting the maptile
     logdebug("SceneWorld: Displaying MapTiles near grids x:%u y:%u",mapmgr->GetGridX(),mapmgr->GetGridY());
+    logdebug("Loaded maps: %u: %s",mapmgr->GetLoadedMapsCount(), mapmgr->GetLoadedTilesString().c_str());
     for(s32 tiley = 0; tiley < 3; tiley++)
     {
         for(s32 tilex = 0; tilex < 3; tilex++)
@@ -277,7 +279,7 @@ void SceneWorld::UpdateTerrain(void)
             }
             else
             {
-                logerror("SceneWorld: MapTile not loaded, can't apply heightmap!");
+                logerror("SceneWorld: MapTile (%u, %u) not loaded, can't apply heightmap!", mapmgr->GetGridX()+tilex, mapmgr->GetGridY()+tiley);
             }
         }
     }
@@ -310,15 +312,20 @@ void SceneWorld::UpdateTerrain(void)
 
     // to set the correct position of the terrain, we have to use the top-left tile's coords as terrain base pos
     MapTile *maptile = mapmgr->GetNearTile(-1, -1);
+    vector3df tpos(0,0,0); // height already managed when building up terrain (-> Y = always 0)
     if(maptile)
     {
-        vector3df tpos;
         tpos.X = -maptile->GetBaseX();
-        tpos.Y = 0; // height already managed when building up terrain
         tpos.Z = -maptile->GetBaseY();
-        logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z); 
-        terrain->setPosition(tpos);
     }
+    else if(maptile = mapmgr->GetCurrentTile()) // this is tile (0, 0) in relative coords
+    {
+        logdebug("SceneWorld: Using alternative coords due to missing MapTile");
+        tpos.X = -(maptile->GetBaseX() + TILESIZE);
+        tpos.Y = -(maptile->GetBaseY() + TILESIZE);
+    }
+    logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z); 
+    terrain->setPosition(tpos);
 
     logdebug("SceneWorld: Smoothing terrain normals...");
     terrain->smoothNormals();

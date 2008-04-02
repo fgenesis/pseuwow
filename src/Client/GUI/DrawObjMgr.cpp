@@ -50,12 +50,12 @@ void DrawObjMgr::UnlinkAll(void)
 
 void DrawObjMgr::Update(void)
 {
-    ZThread::FastMutex mut;
+    //ZThread::FastMutex mut;
 
     // now for the threadsafe part: lock every thread except this one
     // to prevent obj ptr corruption caused by other running threads
     // TODO: lock only main thread (that should be the only one to delete objects anyway!)
-    mut.acquire();
+    //mut.acquire();
 
     // add objects waiting on the add queue to the real storage
     while(_add.size())
@@ -89,6 +89,6 @@ void DrawObjMgr::Update(void)
         i->second->Draw();
     }
 
-    mut.release();
+    //mut.release();
 
 }
