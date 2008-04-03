@@ -304,4 +304,75 @@ static const char *ItemDisplayInfoFormat = {
     "ssi"
 };
 
+enum CreatureModelDataEnum
+{
+    CREATUREMODELDATA_ID = 0,
+    CREATUREMODELDATA_FILE = 2,
+    // other fields unknown
+    CREATUREMODELDATA_END = 24
+};
+
+static const char *CreatureModelDataFieldNames[] = {
+    "","","file","","","","","","", // 0-9
+    "","","","","","","","","", // 10-19
+    "","","","","",
+    ""
+};
+
+static const char *CreatureModelDataFormat = {
+    "ixsxxxxxx" // 0-9
+    "xxxxxxxxx" // 10-19
+    "xxxxx"
+};
+
+enum CreatureDisplayInfoEnum
+{
+    CREATUREDISPLAYINFO_ID = 0, // <<-- this is the so-called DisplayID!!
+    CREATUREDISPLAYINFO_MODEL = 1, // id from CreatureModelData
+    CREATUREDISPLAYINFO_UNK = 2,
+    CREATUREDISPLAYINFO_EXTRA = 3, // id from CreatureDisplayInfoExtra
+    CREATUREDISPLAYINFO_SCALE = 4, // default scale, float
+    CREATUREDISPLAYINFO_OPACITY = 5, // 0 = 100% tansparent, 255 = 100% solid
+    CREATUREDISPLAYINFO_NAME1 = 6, // next 3 fields are some names, not always present
+    CREATUREDISPLAYINFO_NAME2 = 7,
+    CREATUREDISPLAYINFO_NAME3 = 8, 
+    CREATUREDISPLAYINFO_NPCSOUNDS = 11, // id from NPCSounds
+    CREATUREDISPLAYINFO_END = 21
+};
+
+static const char *CreatureDisplayInfoFieldNames[] = {
+    "","model","unk","extra","scale","opacity","name1","name2","name3","", // 0-9
+    "","sound","","","","","","","","", // 10-19
+    "",
+    ""
+};
+
+static const char *CreatureDisplayInfoFormat = {
+    "iiiifisssx" // 0-9
+    "xixxxxxxxx" // 10-19
+    "x"
+};
+
+enum NPCSoundsEnum
+{
+    NPCSOUNDS_ID = 0,
+    NPCSOUNDS_GREETINGS = 1,
+    NPCSOUNDS_FAREWELLS = 2,
+    NPCSOUNDS_PISSED = 3,
+    NPCSOUNDS_UNK = 4, // always 0
+    NPCSOUNDS_END = 5
+};
+
+static const char *NPCSoundsFieldNames[] = {
+    "","greet","bye","pissed","",
+    ""
+};
+
+static const char *NPCSoundsFormat = {
+    "iiiix"
+};
+
+
+
+
 #endif

@@ -119,7 +119,6 @@ void ProcessCmdArgs(int argc, char *argv[])
     {
         doTextures = false;
         doWmos = false;
-        doModels = false;
     }
     if(help)
     {
@@ -149,7 +148,7 @@ void PrintHelp(void)
     printf("maps      - map extraction\n");
     printf("textures  - extract textures (requires maps extraction, for now)\n");
     printf("wmos      - extract map WMOs (requires maps extraction)\n");
-    printf("models    - extract models   (required maps extraction, for now)\n");
+    printf("models    - extract models\n");
     printf("sounds    - extract sound files (wav/mp3)\n");
     printf("md5       - write MD5 checksum lists of extracted files\n");
     printf("autoclose - close program when done\n");
@@ -250,8 +249,10 @@ void OutMD5(char *path, MD5FileMap& fm)
 bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
-    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,ZoneDataStorage,ItemDisplayInfoStorage; // will store the converted data from dbc files
-    DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo;
+    SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,ZoneDataStorage,ItemDisplayInfoStorage,
+        CreatureModelStorage,CreatureDisplayInfoStorage,NPCSoundStorage; // will store the converted data from dbc files
+    DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo,
+        CreatureModelData,CreatureDisplayInfo,NPCSounds;
     printf("Opening DBC archive...\n");
     MPQHelper mpq("dbc");
 
@@ -264,6 +265,9 @@ bool ConvertDBC(void)
     Map.openmem(mpq.ExtractFile("DBFilesClient\\Map.dbc"));
     AreaTable.openmem(mpq.ExtractFile("DBFilesClient\\AreaTable.dbc"));
     ItemDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\ItemDisplayInfo.dbc"));
+    CreatureModelData.openmem(mpq.ExtractFile("DBFilesClient\\CreatureModelData.dbc"));
+    CreatureDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\CreatureDisplayInfo.dbc"));
+    NPCSounds.openmem(mpq.ExtractFile("DBFilesClient\\NPCSounds.dbc"));
     //...
     printf("DBC files opened.\n");
     //...
@@ -409,6 +413,57 @@ bool ConvertDBC(void)
         }
     }
 
+    printf("creaturemodeldata..");
+    for(DBCFile::Iterator it = CreatureModelData.begin(); it != CreatureModelData.end(); ++it)
+    {
+        uint32 id = it->getUInt(CREATUREMODELDATA_ID);
+        for(uint32 field=CREATUREMODELDATA_ID; field < CREATUREMODELDATA_END; field++)
+        {
+            if(strlen(CreatureModelDataFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,CreatureModelDataFormat,field);
+                if(value.size()) // only store if not null
+                {
+                    modelNames.insert(value); // we need to extract model later, store it
+                    std::string fn = _PathToFileName(value);
+                    if(stricmp(fn.c_str()+fn.length()-4, "mdx"))
+                        fn = fn.substr(0,fn.length()-3) + "m2";
+                    CreatureModelStorage[id].push_back(std::string(CreatureModelDataFieldNames[field]) + "=" + fn);
+                }
+            }
+        }
+    }
+
+    printf("creaturedisplayinfo..");
+    for(DBCFile::Iterator it = CreatureDisplayInfo.begin(); it != CreatureDisplayInfo.end(); ++it)
+    {
+        uint32 id = it->getUInt(CREATUREDISPLAYINFO_ID);
+        for(uint32 field=CREATUREDISPLAYINFO_ID; field < CREATUREDISPLAYINFO_END; field++)
+        {
+            if(strlen(CreatureDisplayInfoFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,CreatureDisplayInfoFormat,field);
+                if(value.size()) // only store if not null
+                    CreatureDisplayInfoStorage[id].push_back(std::string(CreatureDisplayInfoFieldNames[field]) + "=" + value);
+            }
+        }
+    }
+
+    printf("npcsounds..");
+    for(DBCFile::Iterator it = NPCSounds.begin(); it != NPCSounds.end(); ++it)
+    {
+        uint32 id = it->getUInt(NPCSOUNDS_ID);
+        for(uint32 field=NPCSOUNDS_ID; field < NPCSOUNDS_END; field++)
+        {
+            if(strlen(NPCSoundsFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,NPCSoundsFormat,field);
+                if(value.size()) // only store if not null
+                    NPCSoundStorage[id].push_back(std::string(NPCSoundsFieldNames[field]) + "=" + value);
+            }
+        }
+    }
+
 
 
     //...
@@ -423,7 +478,10 @@ bool ConvertDBC(void)
     printf("sound.."); OutSCP(SCPDIR "/sound.scp",SoundDataStorage, "sound");
     printf("map.."); OutSCP(SCPDIR "/map.scp",MapDataStorage, "map");
     printf("area.."); OutSCP(SCPDIR "/zone.scp",ZoneDataStorage, "zone");
-    printf("itemdisplayinfo."); OutSCP(SCPDIR "/itemdisplayinfo.scp",ItemDisplayInfoStorage, "itemdisplayinfo");
+    printf("itemdisplayinfo.."); OutSCP(SCPDIR "/itemdisplayinfo.scp",ItemDisplayInfoStorage, "itemdisplayinfo");
+    printf("creaturemodeldata.."); OutSCP(SCPDIR "/creaturemodeldata.scp",CreatureModelStorage,"creaturemodeldata");
+    printf("creaturedisplayinfo.."); OutSCP(SCPDIR "/creaturedisplayinfo.scp",CreatureDisplayInfoStorage,"creaturedisplayinfo");
+    printf("npcsound.."); OutSCP(SCPDIR "/npcsound.scp",NPCSoundStorage,"npcsound");
     //...
     printf("DONE!\n");
 

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "irrlicht/irrlicht.h"
+#include "CM2MeshFileLoader.h"
 #include "Object.h"
 #include "DrawObject.h"
 #include "PseuWoW.h"
@@ -119,6 +120,11 @@ void PseuGUI::_Init(void)
     _guienv = _device->getGUIEnvironment();
     _timer = _device->getTimer();
     //...
+
+    // register external loaders for not supported filetypes
+    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device);
+    _smgr->addExternalMeshLoader(m2loader);
+
     _initialized = true;
 }
 
@@ -229,7 +235,7 @@ void PseuGUI::NotifyObjectDeletion(uint64 guid)
 // called from ObjMgr::Add(Object*)
 void PseuGUI::NotifyObjectCreation(Object *o)
 {
-    DrawObject *d = new DrawObject(_device,o);
+    DrawObject *d = new DrawObject(_device,o,_instance);
     domgr.Add(o->GetGUID(),d);
 }
 
