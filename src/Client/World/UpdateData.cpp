@@ -58,7 +58,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
             {
                 recvPacket >> uguid; // the guid is NOT packed here!
                 uint8 tyid;
-                Object *obj = objmgr.GetObj(uguid);
+                Object *obj = objmgr.GetObj(uguid, true); // here we update also depleted objects, its just safer
                 if(obj)
                     tyid = obj->GetTypeId();
                 else // sometimes objects get deleted BEFORE a last update packet arrives, this must be handled also
@@ -239,7 +239,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
     float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack;
     uint32 unk32;
 
-    Object *obj = (Object*)objmgr.GetObj(uguid);
+    Object *obj = (Object*)objmgr.GetObj(uguid, true); // also depleted objects
     Unit *u = NULL;
     if(obj)
     {
