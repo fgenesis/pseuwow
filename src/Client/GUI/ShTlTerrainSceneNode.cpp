@@ -182,14 +182,8 @@ ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* pSceneManager,
 
     driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, mmflag);
 
-    // irrlicht 1.4
-    /*
     Material[0].TextureLayer[1].Texture = CTexture;
     Material[0].TextureLayer[1].TextureWrap = video::ETC_CLAMP_TO_EDGE;
-    */
-    // irrlicht 1.3:
-    Material[0].Textures[1] = CTexture;
-    Material[0].TextureWrap[1] = video::ETC_CLAMP_TO_EDGE;
 
     // setup UV coordinates of vertices on 2nd texture layer
     f32 ax = (f32)MeshSize.Width / CTexture->getSize().Width / MeshSize.Width;
