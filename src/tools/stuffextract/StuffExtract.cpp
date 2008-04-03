@@ -424,7 +424,8 @@ bool ConvertDBC(void)
                 std::string value = AutoGetDataString(it,CreatureModelDataFormat,field);
                 if(value.size()) // only store if not null
                 {
-                    modelNames.insert(value); // we need to extract model later, store it
+                    if(doModels)
+                        modelNames.insert(value); // we need to extract model later, store it
                     std::string fn = _PathToFileName(value);
                     if(stricmp(fn.c_str()+fn.length()-4, "mdx"))
                         fn = fn.substr(0,fn.length()-3) + "m2";
@@ -622,7 +623,8 @@ void ExtractMapDependencies(void)
         fh.close();
     }
     printf("\n");
-    OutMD5((char*)pathtex.c_str(),md5Tex);
+    if(texNames.size() && doTextures)
+        OutMD5((char*)pathtex.c_str(),md5Tex);
 
     for(std::set<std::string>::iterator i = modelNames.begin(); i != modelNames.end(); i++)
     {
@@ -669,7 +671,8 @@ void ExtractMapDependencies(void)
         fh.close();
     }
     printf("\n");
-    OutMD5((char*)pathmodel.c_str(),md5Model);
+    if(modelNames.size() && doModels)
+        OutMD5((char*)pathmodel.c_str(),md5Model);
 
     for(std::set<std::string>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
     {
@@ -700,7 +703,8 @@ void ExtractMapDependencies(void)
         fh.close();
     }
     printf("\n");
-    OutMD5((char*)pathwmo.c_str(),md5Wmo);
+    if(wmoNames.size() && doWmos)
+        OutMD5((char*)pathwmo.c_str(),md5Wmo);
 
 }
 
