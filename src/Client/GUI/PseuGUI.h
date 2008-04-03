@@ -34,13 +34,21 @@ enum DriverIDs
 #define ANGLE_STEP (M_PI/180.0f) 
 #define DEG_TO_RAD(x) ((x)*ANGLE_STEP)
 #define RAD_TO_DEG(x) ((x)/ANGLE_STEP)
-#define RAD_FIX(x) ( (x)>(2*M_PI) ? ((x)-(2*M_PI)) : (x) )
-#define DEG_FIX(x) ( (x)>360 ? ((x)-360) : (x) )
-#define IRR_TO_O(x) (DEG_TO_RAD(x) + ((M_PI*3.0f)/2.0f))
-#define O_TO_IRR(x) (((M_PI/3.0f)*2.0f) - DEG_TO_RAD(x))
+#define RAD_FIX(x) ( (x)>(2*M_PI) ? ((x)-(2*M_PI)) : ( ((x)<0) ? ((x)+(2*M_PI)) : (x) ) )
+#define DEG_FIX(x) ( (x)>360 ? ((x)-360) : ( ((x)<0) ? ((x)+360) : (x) ) )
+#define IRR_TO_O(x) RAD_FIX(M_PI-DEG_TO_RAD(x)) // convert World orientation (rad) into irrlicht rotation (deg)
+#define O_TO_IRR(x) DEG_FIX(180-RAD_TO_DEG(x)) // ... and the other way around
 
-#define COORD_SCALE_VALUE_X 0.336f
-#define COORD_SCALE_VALUE_Y 0.2f
+inline irr::core::vector3df WPToIrr(WorldPosition wp)
+{
+    return irr::core::vector3df(-wp.x, wp.z, -wp.y);
+}
+
+inline WorldPosition IrrToWP(irr::core::vector3df v, float o_rad)
+{
+    return WorldPosition(-v.X, v.Z, -v.Y, RAD_FIX(IRR_TO_O(o_rad))); // rotate by 90° and fix value
+}
+
 
 class PseuGUIRunnable : public ZThread::Runnable
 {
@@ -90,7 +98,6 @@ public:
 
     // helpers
     WorldPosition GetWorldPosition(void);
-    void SetWorldPosition(WorldPosition);
 
 private:
     void _Init(void);
@@ -111,8 +118,6 @@ private:
     irr::ITimer *_timer;
     uint32 _passtime, _lastpasstime, _passtimediff;
     irr::core::dimension2d<irr::s32> _screendimension;
-    WorldPosition _worldpos_tmp;
-    bool _updateWorldPos;
 
 };
 

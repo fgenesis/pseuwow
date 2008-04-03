@@ -44,7 +44,6 @@ PseuGUI::PseuGUI()
     _guienv = NULL;
     _scene = NULL;
     _passtime = _lastpasstime = _passtimediff = 0;
-    _updateWorldPos = false;
 }
 
 PseuGUI::~PseuGUI()
@@ -186,8 +185,6 @@ void PseuGUI::Run(void)
 
             if(_scene && _initialized)
             {
-                if(_updateWorldPos)
-                    SetWorldPosition(_worldpos_tmp);
                 _scene->OnUpdate(_passtimediff);
             }
 
@@ -291,22 +288,6 @@ WorldPosition PseuGUI::GetWorldPosition(void)
         return ((SceneWorld*)_scene)->GetWorldPosition();
     }
     return WorldPosition();
-}
-
-// used to notify the SceneWorld about a position change the server sent to us
-void PseuGUI::SetWorldPosition(WorldPosition wp)
-{
-    // buffer new position if the scene is not (yet) a world scene
-    _worldpos_tmp = wp;
-    if(_scene && _scene->GetState() == SCENESTATE_WORLD)
-    {
-        _updateWorldPos = false;
-        ((SceneWorld*)_scene)->SetWorldPosition(wp);
-    }
-    else
-    {
-        _updateWorldPos = true;
-    }
 }
 
 void PseuGUI::_HandleWindowResize(void)

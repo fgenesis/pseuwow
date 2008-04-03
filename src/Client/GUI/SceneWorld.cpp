@@ -170,7 +170,7 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += camera->getPosition().Z;
     str += L"\n";
     str += " ## HEAD: ";
-    str += DEG_TO_RAD(camera->getHeading());
+    str += IRR_TO_O(camera->getHeading());
     str += L"  Pos: ";
     str = ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o; 
     str += L"  -- Terrain: Sectors: ";
@@ -210,9 +210,9 @@ void SceneWorld::InitTerrain(void)
     terrain = new ShTlTerrainSceneNode(smgr,mapsize,mapsize,tilesize,meshsize);
     terrain->drop();
     terrain->follow(camera->getNode());
-    terrain->setMaterialTexture(0, driver->getTexture("data/misc/dirt_test.jpg"));
-    terrain->setMaterialFlag(video::EMF_LIGHTING, true);
-    terrain->setMaterialFlag(video::EMF_FOG_ENABLE, true);
+    terrain->getMaterial(0).setTexture(0, driver->getTexture("data/misc/dirt_test.jpg"));
+    terrain->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
+    terrain->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
 
 
 }
@@ -355,55 +355,7 @@ WorldPosition SceneWorld::GetWorldPosition(void)
 {
     // TODO: later do not use CAMERA, but CHARACTER position, as soon as camera is changed from 1st to 3rd person view
     // and floating around character in the middle
-    vector3df cam = camera->getPosition();
-    // TODO: need to correct camera values, the coords irrlicht returns are not suitable
-
-    // get the current maptile and use the coords of the top-left corner as relative positions
-    MapTile *tile = mapmgr->GetCurrentTile();
-    if(!tile)
-    {
-        logerror("SceneWorld::GetWorldPosition failed, MapTile not loaded!");
-        return WorldPosition();
-    }
-
-    float mapx = tile->GetBaseX();
-    float mapy = tile->GetBaseY();
-
-    // the following formulas are NOT correct, just estimated. in most places they will differ from real expected values a lot!
-    float relx = cam.X * COORD_SCALE_VALUE_X + CHUNKSIZE;
-    float rely = cam.Z * COORD_SCALE_VALUE_Y + CHUNKSIZE;
-
-    float o = IRR_TO_O(camera->getHeading()) + ((M_PI*3.0f)/2.0f);
-    return WorldPosition(mapx - relx, mapy - rely, cam.Y, RAD_FIX(o) );
-}
-
-void SceneWorld::SetWorldPosition(WorldPosition wp)
-{
-    return;
-    UpdateTerrain();
-    vector3df cam;
-    dimension2d<s32> tsize = terrain->getSize();
-    MapTile *tile = mapmgr->GetTile(MapMgr::GetGridCoord(wp.x), MapMgr::GetGridCoord(wp.y));
-    ASSERT(tile == mapmgr->GetCurrentTile()); // for debugging; we should already be located on the new tile
-    if(!tile)
-    {
-        logerror("SceneWorld::SetWorldPosition(): MapTile not loaded!");
-        return;
-    }
-    cam.X = tile->GetBaseX() - wp.x + (tsize.Width * UNITSIZE);
-    cam.Z = tile->GetBaseX() - wp.y + (tsize.Height * UNITSIZE);
-    float heading = O_TO_IRR(wp.o);
-    float heading_diff = camera->getHeading() - heading; 
-    //logdebug("Setting camera to x: %3f y: %3f z:%3f head: %3f", cam.X, cam.Y, cam.Z, heading);
-    //camera->turnLeft(heading_diff);
-    
-    // TODO:
-    // - correct the above formulas
-    // - find out terrain height where the camera should be set
-    // - set camera to correct position
-    // - correct camera turning
-    //camera->setPosition(cam);
-    //camera->turnRight(heading_diff);
+    return IrrToWP(camera->getPosition(), IRR_TO_O(DEG_TO_RAD(camera->getHeading())));
 }
 
 

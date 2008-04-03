@@ -26,6 +26,7 @@ private:
     irr::scene::ISceneNode* cube;
     irr::scene::ITextSceneNode *text;
     PseuInstance *_instance;
+    irr::core::vector3df rotation;
 
 };
 

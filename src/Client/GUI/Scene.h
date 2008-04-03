@@ -65,7 +65,6 @@ public:
     void RelocateCamera(void);
 
     WorldPosition GetWorldPosition(void);
-    void SetWorldPosition(WorldPosition);
 
 private:
     ShTlTerrainSceneNode *terrain;
