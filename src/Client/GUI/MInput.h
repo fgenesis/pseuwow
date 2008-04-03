@@ -124,7 +124,7 @@ public:
         mouse.right = false;
     }
 
-	bool OnEvent(SEvent event)
+	virtual bool OnEvent(const SEvent& event)
 	{
         bool value = false;
 

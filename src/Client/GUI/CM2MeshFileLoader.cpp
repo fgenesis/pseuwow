@@ -18,7 +18,7 @@ namespace irr
         }
 
 
-        bool CM2MeshFileLoader::isALoadableFileExtension(const c8* filename)
+        bool CM2MeshFileLoader::isALoadableFileExtension(const c8* filename) const
         {
             return strstr(filename, ".m2")!=0;
         }
