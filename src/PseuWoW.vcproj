@@ -29,7 +29,7 @@
 				ImproveFloatingPointConsistency="FALSE"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="shared;Client;Client/World;Client/Realm;dep/include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_IRR_STATIC_LIB_"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="FALSE"
@@ -98,7 +98,7 @@
 				ImproveFloatingPointConsistency="FALSE"
 				OptimizeForProcessor="0"
 				AdditionalIncludeDirectories="shared;Client;Client/World;Client/Realm;dep/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_IRR_STATIC_LIB_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=""
@@ -490,16 +490,40 @@
 				RelativePath=".\dep\include\irrlicht\aabbox3d.h">
 			</File>
 			<File
+				RelativePath=".\dep\include\irrlicht\CMeshBuffer.h">
+			</File>
+			<File
 				RelativePath=".\dep\include\irrlicht\coreutil.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\dimension2d.h">
 			</File>
 			<File
+				RelativePath=".\dep\include\irrlicht\ECullingTypes.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\EDebugSceneTypes.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\EDriverFeatures.h">
+			</File>
+			<File
 				RelativePath=".\dep\include\irrlicht\EDriverTypes.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\EGUIElementTypes.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\EMaterialFlags.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\EMaterialTypes.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\EMeshWriterEnums.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\EMessageBoxFlags.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\ESceneNodeAnimatorTypes.h">
@@ -520,22 +544,13 @@
 				RelativePath=".\dep\include\irrlicht\IAnimatedMesh.h">
 			</File>
 			<File
-				RelativePath=".\dep\include\irrlicht\IAnimatedMeshB3d.h">
-			</File>
-			<File
 				RelativePath=".\dep\include\irrlicht\IAnimatedMeshMD2.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\IAnimatedMeshMD3.h">
 			</File>
 			<File
-				RelativePath=".\dep\include\irrlicht\IAnimatedMeshMS3D.h">
-			</File>
-			<File
 				RelativePath=".\dep\include\irrlicht\IAnimatedMeshSceneNode.h">
-			</File>
-			<File
-				RelativePath=".\dep\include\irrlicht\IAnimatedMeshX.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\IAttributeExchangingObject.h">
@@ -545,6 +560,9 @@
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\IBillboardSceneNode.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IBoneSceneNode.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\ICameraSceneNode.h">
@@ -622,6 +640,9 @@
 				RelativePath=".\dep\include\irrlicht\IGUISkin.h">
 			</File>
 			<File
+				RelativePath=".\dep\include\irrlicht\IGUISpinBox.h">
+			</File>
+			<File
 				RelativePath=".\dep\include\irrlicht\IGUISpriteBank.h">
 			</File>
 			<File
@@ -676,6 +697,9 @@
 				RelativePath=".\dep\include\irrlicht\IMeshSceneNode.h">
 			</File>
 			<File
+				RelativePath=".\dep\include\irrlicht\IMeshWriter.h">
+			</File>
+			<File
 				RelativePath=".\dep\include\irrlicht\IMetaTriangleSelector.h">
 			</File>
 			<File
@@ -685,7 +709,37 @@
 				RelativePath=".\dep\include\irrlicht\IParticleAffector.h">
 			</File>
 			<File
+				RelativePath=".\dep\include\irrlicht\IParticleAnimatedMeshSceneNodeEmitter.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleAttractionAffector.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleBoxEmitter.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleCylinderEmitter.h">
+			</File>
+			<File
 				RelativePath=".\dep\include\irrlicht\IParticleEmitter.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleFadeOutAffector.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleGravityAffector.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleMeshEmitter.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleRingEmitter.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleRotationAffector.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IParticleSphereEmitter.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\IParticleSystemSceneNode.h">
@@ -698,6 +752,9 @@
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\IReadFile.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\IReferenceCounted.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\irrAllocator.h">
@@ -763,6 +820,9 @@
 				RelativePath=".\dep\include\irrlicht\IShadowVolumeSceneNode.h">
 			</File>
 			<File
+				RelativePath=".\dep\include\irrlicht\ISkinnedMesh.h">
+			</File>
+			<File
 				RelativePath=".\dep\include\irrlicht\ITerrainSceneNode.h">
 			</File>
 			<File
@@ -776,9 +836,6 @@
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\ITriangleSelector.h">
-			</File>
-			<File
-				RelativePath=".\dep\include\irrlicht\IUnknown.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\IVideoDriver.h">
@@ -847,6 +904,9 @@
 				RelativePath=".\dep\include\irrlicht\SMaterial.h">
 			</File>
 			<File
+				RelativePath=".\dep\include\irrlicht\SMaterialLayer.h">
+			</File>
+			<File
 				RelativePath=".\dep\include\irrlicht\SMesh.h">
 			</File>
 			<File
@@ -860,6 +920,12 @@
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\SParticle.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\SSharedMeshBuffer.h">
+			</File>
+			<File
+				RelativePath=".\dep\include\irrlicht\SSkinMeshBuffer.h">
 			</File>
 			<File
 				RelativePath=".\dep\include\irrlicht\SViewFrustum.h">
