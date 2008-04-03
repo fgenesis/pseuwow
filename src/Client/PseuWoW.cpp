@@ -75,6 +75,10 @@ PseuInstance::~PseuInstance()
 
     if(_gui)
         _gui->Shutdown();
+    logdebug("Waiting for GUI to quit...");
+    while(_gui)
+        Sleep(1);
+
     if(_guithread)
         _guithread->wait();
 

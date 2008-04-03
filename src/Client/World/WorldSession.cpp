@@ -1213,7 +1213,6 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
     if(PseuGUI *gui = GetInstance()->GetGUI())
     {
         gui->SetSceneState(SCENESTATE_WORLD);
-        gui->SetWorldPosition(WorldPosition(x,y,z,o));
     }
 }
 
