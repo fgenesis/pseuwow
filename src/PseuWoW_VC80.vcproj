@@ -558,6 +558,14 @@
 				Name="GUI"
 				>
 				<File
+					RelativePath=".\Client\Gui\CM2MeshFileLoader.cpp"
+                    >
+				</File>
+				<File
+					RelativePath=".\Client\Gui\CM2MeshFileLoader.h"
+                    >
+				</File>
+				<File
 					RelativePath=".\Client\Gui\DrawObject.cpp"
 					>
 				</File>

@@ -4,13 +4,17 @@
 #include "PseuWoW.h"
 #include "Object.h"
 
-DrawObject::DrawObject(irr::IrrlichtDevice *device, Object *obj)
+using namespace irr;
+
+DrawObject::DrawObject(irr::IrrlichtDevice *device, Object *obj, PseuInstance *ins)
 {
     _initialized = false;
     Unlink();
+    _device = device;
     _smgr = device->getSceneManager();
     _guienv = device->getGUIEnvironment();
     _obj = obj;
+    _instance = ins;
     DEBUG( logdebug("create DrawObject() this=%X obj=%X name='%s' smgr=%X",this,_obj,_obj->GetName().c_str(),_smgr) );
 }
 
@@ -34,10 +38,26 @@ void DrawObject::_Init(void)
 {
     if(!cube && _obj->IsWorldObject()) // only world objects have coords and can be drawn
     {
-        cube = _smgr->addCubeSceneNode(2);
-        cube->setName("CUBE");
+        uint32 displayid = _obj->IsUnit() ? _obj->GetUInt32Value(UNIT_FIELD_DISPLAYID) : 0; // TODO: in case its GO get it from proto data
+        uint32 modelid = _instance->dbmgr.GetDB("creaturedisplayinfo").GetField(displayid).GetInteger("model");
+        std::string modelfile = std::string("data/model/") + _instance->dbmgr.GetDB("creaturemodeldata").GetField(modelid).GetString("file");
+        //scene::IAnimatedMesh *mesh = _smgr->getMesh(modelfile.c_str());
+        // ok we use a model that works for sure until crashs with some M2 files, especially character models, are fixed
+        /*scene::IAnimatedMesh *mesh = _smgr->getMesh("data/model/gyrocopter.m2");
+        if(mesh)
+        {
+            cube = _smgr->addAnimatedMeshSceneNode(mesh);
+            //video::ITexture *tex = _device->getVideoDriver()->getTexture("data/misc/square.jpg");
+            //cube->setMaterialTexture(0, tex);
+            //tex->drop();
+        }
+        else
+        {*/
+            cube = _smgr->addCubeSceneNode(2);
+        //}
+        cube->setName("OBJECT");
         //cube->setPosition(irr::core::vector3di(100,100,100));
-        cube->setRotation(irr::core::vector3df(0,0,0));
+        cube->setRotation(core::vector3df(0,0,0));
 
         if(_obj->IsPlayer())
         {

@@ -53,6 +53,9 @@ LOADSCP,race data/scp/race.scp
 EXLOADSCP,sound data/scp/sound.scp
 EXLOADSCP,emote data/scp/emote.scp
 EXLOADSCP,zone data/scp/zone.scp
+EXLOADSCP,creaturedisplayinfo data/scp/creaturedisplayinfo.scp
+EXLOADSCP,creaturemodeldata data/scp/creaturemodeldata.scp
+EXLOADSCP,npcsound data/scp/npcsound.scp
 
 LOG * SCP loaded.
 
