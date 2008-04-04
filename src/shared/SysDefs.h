@@ -53,9 +53,11 @@
     #define I64FMT "%016I64X"
     #define I64FMTD "%I64u"
     #define SI64FMTD "%I64d"
-    #define snprintf _snprintf
+    #if _MSC_VER < 1500
+        #define snprintf _snprintf
+        #define vsnprintf _vsnprintf
+	#endif
     #define atoll __atoi64
-    #define vsnprintf _vsnprintf
     #define strdup _strdup
     typedef __int64            int64;
     typedef long               int32;
