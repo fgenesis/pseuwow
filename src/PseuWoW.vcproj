@@ -424,6 +424,12 @@
 					RelativePath=".\Client\Gui\CCursorController.h">
 				</File>
 				<File
+					RelativePath=".\Client\Gui\CImageLoaderBLP.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\CImageLoaderBLP.h">
+				</File>
+				<File
 					RelativePath=".\Client\Gui\CM2MeshFileLoader.cpp">
 				</File>
 				<File
@@ -470,6 +476,12 @@
 				</File>
 				<File
 					RelativePath=".\Client\Gui\ShTlTerrainSceneNode.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\SImage.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\SImage.h">
 				</File>
 				<File
 					RelativePath=".\Client\Gui\TlTMesh.h">
