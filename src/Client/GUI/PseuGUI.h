@@ -93,7 +93,6 @@ public:
     void NotifyObjectCreation(Object *o);
 
     // scenes
-    void DrawCurrentScene(void);
     void SetSceneState(SceneState);
 
     // helpers

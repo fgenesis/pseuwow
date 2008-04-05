@@ -11,6 +11,7 @@
 #include "MInput.h"
 #include "WorldSession.h"
 #include "World.h"
+#include "CCursorController.h"
 
 SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 {
@@ -48,7 +49,10 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     driver->setFog(video::SColor(0,100,101,190), true, fogdist, fogdist + 30, 0.02f);
 
     // setup cursor
-    device->getCursorControl()->setVisible(false);
+
+    cursor->setOSCursorVisible(false);
+    cursor->addMouseCursorTexture("data/misc/cursor.png", true);
+    cursor->setVisible(true);
 
     InitTerrain();
     UpdateTerrain();
@@ -66,6 +70,17 @@ void SceneWorld::OnUpdate(s32 timediff)
     bool mouse_pressed_left = eventrecv->mouse.left_pressed();
     bool mouse_pressed_right = eventrecv->mouse.right_pressed();
     float timediff_f = timediff / 1000.0f;
+
+    if( (mouse_pressed_right || mouse_pressed_left) && cursor->isVisible())
+    {
+        // TODO: if mouse is hovering over a gui element, do not hide
+        cursor->setVisible(false);
+    }
+    else if( !(mouse_pressed_right || mouse_pressed_left) && !cursor->isVisible())
+    {
+        cursor->setVisible(true);
+    }
+
 
     if(eventrecv->key.pressed(KEY_KEY_W) || (mouse_pressed_left && mouse_pressed_right))
         camera->moveForward(50 * timediff_f);
@@ -131,9 +146,7 @@ void SceneWorld::OnUpdate(s32 timediff)
 
     if(mouse_pressed_left || mouse_pressed_right)
     {
-        //if(device->getCursorControl()->isVisible())
-            //device->getCursorControl()->setVisible(false);
-        if(mouse_pos != device->getCursorControl()->getPosition())
+        if(mouse_pos != cursor->getMousePos())
         {
             camera->turnRight(MOUSE_SENSIVITY * (device->getCursorControl()->getPosition().X - mouse_pos.X));
             // check if new camera pitch would cause camera to flip over; if thats the case keep current pitch
@@ -148,9 +161,7 @@ void SceneWorld::OnUpdate(s32 timediff)
     }
     else
     {
-        device->getCursorControl()->setPosition(device->getCursorControl()->getPosition());
-        //if(!device->getCursorControl()->isVisible())
-            //device->getCursorControl()->setVisible(true);
+        //device->getCursorControl()->setPosition(device->getCursorControl()->getPosition());
         mouse_pos = device->getCursorControl()->getPosition();
     }
     
@@ -177,14 +188,18 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += (int)terrain->getSectorsRendered();
     str += L" / ";
     str += (int)terrain->getSectorCount();
+    str += L"\n";
+    str += device->getCursorControl()->isVisible() ? L"Cursor: VISIBLE" : L"Cursor: HIDDEN";
     debugText->setText(str.c_str());
+
+
+    gui->domgr.Update(); // iterate over DrawObjects, draw them and clean up
 
 }
 
 void SceneWorld::OnDraw(void)
 {
-    // draw all objects
-    gui->domgr.Update(); // iterate over DrawObjects, draw them and clean up
+    cursor->render();
 }
 
 void SceneWorld::OnDelete(void)
@@ -213,7 +228,6 @@ void SceneWorld::InitTerrain(void)
     terrain->getMaterial(0).setTexture(0, driver->getTexture("data/misc/dirt_test.jpg"));
     terrain->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
     terrain->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
-
 
 }
 

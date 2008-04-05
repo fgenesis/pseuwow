@@ -11,14 +11,18 @@
 #include "StuffExtract.h"
 #include "DBCFieldData.h"
 #include "Locale.h"
+#include "ProgressBar.h"
+
 
 std::map<uint32,std::string> mapNames;
-std::set<std::string> texNames;
-std::set<std::string> modelNames;
-std::set<std::string> wmoNames;
-std::set<std::string> soundFileSet;
 
-// default config; SCPs are dont always
+std::set<NameAndAlt> texNames;
+std::set<NameAndAlt> modelNames;
+std::set<NameAndAlt> wmoNames;
+std::set<NameAndAlt> soundFileSet;
+
+
+// default config; SCPs are done always
 bool doMaps=true, doSounds=false, doTextures=false, doWmos=false, doModels=false, doMd5=true, doAutoclose=false;
 
 
@@ -117,7 +121,6 @@ void ProcessCmdArgs(int argc, char *argv[])
     // TODO: as soon as M2 model or WMO reading is done, extract those textures to, but independent from maps!!
     if(!doMaps)
     {
-        doTextures = false;
         doWmos = false;
     }
     if(help)
@@ -146,7 +149,7 @@ void PrintHelp(void)
     printf("Use + or - to turn a feature on or off.\n");
     printf("Features are:\n");
     printf("maps      - map extraction\n");
-    printf("textures  - extract textures (requires maps extraction, for now)\n");
+    printf("textures  - extract textures\n");
     printf("wmos      - extract map WMOs (requires maps extraction)\n");
     printf("models    - extract models\n");
     printf("sounds    - extract sound files (wav/mp3)\n");
@@ -250,9 +253,9 @@ bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
     SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,ZoneDataStorage,ItemDisplayInfoStorage,
-        CreatureModelStorage,CreatureDisplayInfoStorage,NPCSoundStorage; // will store the converted data from dbc files
+        CreatureModelStorage,CreatureDisplayInfoStorage,NPCSoundStorage,CharSectionStorage; // will store the converted data from dbc files
     DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo,
-        CreatureModelData,CreatureDisplayInfo,NPCSounds;
+        CreatureModelData,CreatureDisplayInfo,NPCSounds,CharSections;
     printf("Opening DBC archive...\n");
     MPQHelper mpq("dbc");
 
@@ -268,6 +271,7 @@ bool ConvertDBC(void)
     CreatureModelData.openmem(mpq.ExtractFile("DBFilesClient\\CreatureModelData.dbc"));
     CreatureDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\CreatureDisplayInfo.dbc"));
     NPCSounds.openmem(mpq.ExtractFile("DBFilesClient\\NPCSounds.dbc"));
+    CharSections.openmem(mpq.ExtractFile("DBFilesClient\\CharSections.dbc"));
     //...
     printf("DBC files opened.\n");
     //...
@@ -361,7 +365,7 @@ bool ConvertDBC(void)
 
                     // fill up file storage. not necessary if we dont want to extract sounds
                     if(doSounds && field >= SOUNDENTRY_FILE_1 && field <= SOUNDENTRY_FILE_10)
-                        soundFileSet.insert(path + value);
+                        soundFileSet.insert(NameAndAlt(path + value));
                 }
             }
         }
@@ -406,6 +410,7 @@ bool ConvertDBC(void)
         {
             if(strlen(ItemDisplayInfoFieldNames[field]))
             {
+                // TODO: need to get
                 std::string value = AutoGetDataString(it,ItemDisplayInfoFormat,field);
                 if(value.size()) // only store if not null
                     ItemDisplayInfoStorage[id].push_back(std::string(ItemDisplayInfoFieldNames[field]) + "=" + value);
@@ -425,7 +430,7 @@ bool ConvertDBC(void)
                 if(value.size()) // only store if not null
                 {
                     if(doModels)
-                        modelNames.insert(value); // we need to extract model later, store it
+                        modelNames.insert(NameAndAlt(value)); // we need to extract model later, store it
                     std::string fn = _PathToFileName(value);
                     if(stricmp(fn.c_str()+fn.length()-4, "mdx"))
                         fn = fn.substr(0,fn.length()-3) + "m2";
@@ -465,6 +470,41 @@ bool ConvertDBC(void)
         }
     }
 
+    printf("charsections..");
+    for(DBCFile::Iterator it = CharSections.begin(); it != CharSections.end(); ++it)
+    {
+        uint32 id = it->getUInt(CHARSECTIONS_ID);
+        for(uint32 field=CHARSECTIONS_ID; field < CHARSECTIONS_END; field++)
+        {
+            if(strlen(CharSectionsFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,CharSectionsFormat,field);
+                if(value.size()) // only store if not null
+                {
+                    // ok we have a little problem here:
+                    // some textures used for different races have the same file name, but we are storing them all
+                    // in one directory. Texture path format is: "Character\<race>\<texture>
+                    // so we have to use good names to store all textures without overwriting each other
+                    if(field >= CHARSECTIONS_TEXTURE1 && field <= CHARSECTIONS_TEXTURE3)
+                    {
+                        char buf[100];
+                        sprintf(buf,"charsection_%u_%u_%u_%u_%u_%u.blp",
+                            it->getUInt(CHARSECTIONS_RACE_ID),
+                            it->getUInt(CHARSECTIONS_GENDER),
+                            it->getUInt(CHARSECTIONS_TYPE),
+                            it->getUInt(CHARSECTIONS_SECTION),
+                            it->getUInt(CHARSECTIONS_COLOR),
+                            field - CHARSECTIONS_TEXTURE1); // texture ID
+                        texNames.insert(NameAndAlt(value,buf));
+                        value = buf;
+
+                    }
+                    CharSectionStorage[id].push_back(std::string(CharSectionsFieldNames[field]) + "=" + value);
+                }
+            }
+        }
+    }
+
 
 
     //...
@@ -483,6 +523,7 @@ bool ConvertDBC(void)
     printf("creaturemodeldata.."); OutSCP(SCPDIR "/creaturemodeldata.scp",CreatureModelStorage,"creaturemodeldata");
     printf("creaturedisplayinfo.."); OutSCP(SCPDIR "/creaturedisplayinfo.scp",CreatureDisplayInfoStorage,"creaturedisplayinfo");
     printf("npcsound.."); OutSCP(SCPDIR "/npcsound.scp",NPCSoundStorage,"npcsound");
+    printf("charsections.."); OutSCP(SCPDIR "/charsections.scp",CharSectionStorage,"charsections");
     //...
     printf("DONE!\n");
 
@@ -579,6 +620,7 @@ void ExtractMaps(void)
 
 void ExtractMapDependencies(void)
 {
+    barGoLink *bar;
     printf("\nExtracting map dependencies...\n\n");
     printf("- Preparing to read MPQ arcives...\n");
     MPQHelper mpqmodel("model");
@@ -588,124 +630,149 @@ void ExtractMapDependencies(void)
     std::string pathtex = path + "/texture";
     std::string pathmodel = path + "/model";
     std::string pathwmo = path + "/wmo";
-    std::string mpqfn,realfn;
+    std::string mpqfn,realfn,altfn;
     MD5FileMap md5Tex, md5Wmo, md5Model;
     CreateDir(pathtex.c_str());
     CreateDir(pathmodel.c_str());
     CreateDir(pathwmo.c_str());
     uint32 wmosdone=0,texdone=0,mdone=0;
 
-    for(std::set<std::string>::iterator i = texNames.begin(); i != texNames.end(); i++)
+    if(doTextures)
     {
-        mpqfn = *i;
-        if(!mpqtex.FileExists((char*)mpqfn.c_str()))
-            continue;
-        realfn = pathtex + "/" + _PathToFileName(mpqfn);
-        std::fstream fh;
-        fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
-        if(fh.is_open())
+        printf("Extracting textures...\n");
+        bar = new barGoLink(texNames.size(), true);
+        for(std::set<NameAndAlt>::iterator i = texNames.begin(); i != texNames.end(); i++)
         {
-            ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
-            fh.write((const char*)bb.contents(),bb.size());
-            if(doMd5)
-            {
-                MD5Hash h;
-                h.Update((uint8*)bb.contents(), bb.size());
-                h.Finalize();
-                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                md5Tex[_PathToFileName(realfn)] = md5ptr;
-                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
-            }
-            texdone++;
-            printf("- textures... %u\r",texdone);
-        }
-        else
-            printf("Could not write texture %s\n",realfn.c_str());
-        fh.close();
-    }
-    printf("\n");
-    if(texNames.size() && doTextures)
-        OutMD5((char*)pathtex.c_str(),md5Tex);
-
-    for(std::set<std::string>::iterator i = modelNames.begin(); i != modelNames.end(); i++)
-    {
-        mpqfn = *i;
-        // no idea what bliz intended by this. the ADT files refer to .mdx models,
-        // however there are only .m2 files in the MPQ archives.
-        // so we just need to check if there is a .m2 file instead of the .mdx file, and load that one.
-        if(!mpqmodel.FileExists((char*)mpqfn.c_str()))
-        {
-            std::string alt = i->substr(0,i->length()-3) + "m2";
-            DEBUG(printf("MDX model not found, trying M2 file."));
-            if(!mpqmodel.FileExists((char*)alt.c_str()))
-            {
-                DEBUG(printf(" fail.\n"));
+            bar->step();
+            mpqfn = i->name;
+            altfn = i->alt;
+            if(altfn.empty())
+                altfn = mpqfn;
+            if(!mpqtex.FileExists((char*)mpqfn.c_str()))
                 continue;
+            realfn = pathtex + "/" + _PathToFileName(altfn);
+            std::fstream fh;
+            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+            if(fh.is_open())
+            {
+                ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
+                fh.write((const char*)bb.contents(),bb.size());
+                if(doMd5)
+                {
+                    MD5Hash h;
+                    h.Update((uint8*)bb.contents(), bb.size());
+                    h.Finalize();
+                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                    md5Tex[_PathToFileName(realfn)] = md5ptr;
+                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                }
+                texdone++;
             }
             else
-            {
-                mpqfn = alt;
-                DEBUG(printf(" success.\n"));
-            }
+                printf("Could not write texture %s\n",realfn.c_str());
+            fh.close();
         }
-        realfn = pathmodel + "/" + _PathToFileName(mpqfn);
-        std::fstream fh;
-        fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
-        if(fh.is_open())
-        {
-            ByteBuffer& bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
-            fh.write((const char*)bb.contents(),bb.size());
-            if(doMd5)
-            {
-                MD5Hash h;
-                h.Update((uint8*)bb.contents(), bb.size());
-                h.Finalize();
-                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                md5Model[_PathToFileName(realfn)] = md5ptr;
-                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
-            }
-            mdone++;
-            printf("- models... %u\r",mdone);
-        }
-        else
-            printf("Could not write model %s\n",realfn.c_str());
-        fh.close();
+        printf("\n");
+        if(texNames.size())
+            OutMD5((char*)pathtex.c_str(),md5Tex);
+        delete bar;
     }
-    printf("\n");
-    if(modelNames.size() && doModels)
-        OutMD5((char*)pathmodel.c_str(),md5Model);
 
-    for(std::set<std::string>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
+    if(doModels)
     {
-        mpqfn = *i;
-        if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
-            continue;
-        realfn = pathwmo + "/" + _PathToFileName(mpqfn);
-        std::fstream fh;
-        fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
-        if(fh.is_open())
+        printf("Extracting models...\n");
+        bar = new barGoLink(modelNames.size(),true);
+        for(std::set<NameAndAlt>::iterator i = modelNames.begin(); i != modelNames.end(); i++)
         {
-            ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
-            fh.write((const char*)bb.contents(),bb.size());
-            if(doMd5)
+            bar->step();
+            mpqfn = i->name;
+            // no idea what bliz intended by this. the ADT files refer to .mdx models,
+            // however there are only .m2 files in the MPQ archives.
+            // so we just need to check if there is a .m2 file instead of the .mdx file, and load that one.
+            if(!mpqmodel.FileExists((char*)mpqfn.c_str()))
             {
-                MD5Hash h;
-                h.Update((uint8*)bb.contents(), bb.size());
-                h.Finalize();
-                uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                md5Wmo[_PathToFileName(realfn)] = md5ptr;
-                memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                std::string alt = mpqfn.substr(0,mpqfn.length()-3) + "m2";
+                if(!mpqmodel.FileExists((char*)alt.c_str()))
+                {
+                    printf("Failed to extract model: '%s'\n",alt.c_str());
+                    continue;
+                }
+                else
+                {
+                    mpqfn = alt;
+                }
             }
-            wmosdone++;
-            printf("- WMOs... %u\r",wmosdone);
+            altfn = i->alt;
+            if(altfn.empty())
+                altfn = mpqfn;
+            realfn = pathmodel + "/" + _PathToFileName(altfn);
+            std::fstream fh;
+            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+            if(fh.is_open())
+            {
+                ByteBuffer& bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
+                fh.write((const char*)bb.contents(),bb.size());
+                if(doMd5)
+                {
+                    MD5Hash h;
+                    h.Update((uint8*)bb.contents(), bb.size());
+                    h.Finalize();
+                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                    md5Model[_PathToFileName(realfn)] = md5ptr;
+                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                }
+                mdone++;
+            }
+            else
+                printf("Could not write model %s\n",realfn.c_str());
+            fh.close();
         }
-        else
-            printf("Could not write WMO %s\n",realfn.c_str());
-        fh.close();
+        printf("\n");
+        if(modelNames.size())
+            OutMD5((char*)pathmodel.c_str(),md5Model);
+        delete bar;
     }
-    printf("\n");
-    if(wmoNames.size() && doWmos)
-        OutMD5((char*)pathwmo.c_str(),md5Wmo);
+
+    if(doWmos)
+    {
+        printf("Extracting textures...\n");
+        bar = new barGoLink(wmoNames.size(),true);
+        for(std::set<NameAndAlt>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
+        {
+            bar->step();
+            mpqfn = i->name;
+            altfn = i->alt;
+            if(altfn.empty())
+                altfn = mpqfn;
+            if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
+                continue;
+            realfn = pathwmo + "/" + _PathToFileName(altfn);
+            std::fstream fh;
+            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+            if(fh.is_open())
+            {
+                ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
+                fh.write((const char*)bb.contents(),bb.size());
+                if(doMd5)
+                {
+                    MD5Hash h;
+                    h.Update((uint8*)bb.contents(), bb.size());
+                    h.Finalize();
+                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                    md5Wmo[_PathToFileName(realfn)] = md5ptr;
+                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                }
+                wmosdone++;
+            }
+            else
+                printf("Could not write WMO %s\n",realfn.c_str());
+            fh.close();
+        }
+        printf("\n");
+        if(wmoNames.size())
+            OutMD5((char*)pathwmo.c_str(),md5Wmo);
+        delete bar;
+    }
 
 }
 
@@ -716,21 +783,24 @@ void ExtractSoundFiles(void)
     printf("\nExtracting game audio files, %u found in DBC...\n",soundFileSet.size());
     CreateDir(SOUNDDIR);
     MPQHelper smpq("sound");
-    std::string outfn;
-    for(std::set<std::string>::iterator i = soundFileSet.begin(); i != soundFileSet.end(); i++)
+    std::string outfn, altfn;
+    barGoLink bar(soundFileSet.size(),true);
+    for(std::set<NameAndAlt>::iterator i = soundFileSet.begin(); i != soundFileSet.end(); i++)
     {
-        if(!smpq.FileExists((char*)(*i).c_str()))
+        bar.step();
+        if(!smpq.FileExists((char*)i->name.c_str()))
         {
-            DEBUG( printf("MPQ: File not found: '%s'\n",(*i).c_str()) );
+            DEBUG( printf("MPQ: File not found: '%s'\n",i->name.c_str()) );
             continue;
         }
+        altfn = i->alt.empty() ? _PathToFileName(i->name) : i->alt;
 
-        outfn = std::string(SOUNDDIR) + "/" + _PathToFileName(*i);
+        outfn = std::string(SOUNDDIR) + "/" + altfn;
         std::fstream fh;
         fh.open(outfn.c_str(), std::ios_base::out | std::ios_base::binary);
         if(fh.is_open())
         {
-            ByteBuffer& bb = smpq.ExtractFile((char*)(*i).c_str());
+            ByteBuffer& bb = smpq.ExtractFile((char*)i->name.c_str());
             if(bb.size())
             {
                 fh.write((const char*)bb.contents(),bb.size());
@@ -740,11 +810,10 @@ void ExtractSoundFiles(void)
                     h.Update((uint8*)bb.contents(), bb.size());
                     h.Finalize();
                     uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                    md5data[_PathToFileName(*i)] = md5ptr;
+                    md5data[altfn] = md5ptr;
                     memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
                 }
                 done++;
-                printf("- %u files done.\r",done);
             }
         }
         else
@@ -757,6 +826,44 @@ void ExtractSoundFiles(void)
     printf("\n");
 }
 
+void ADT_ExportStringSetByOffset(const uint8* data, uint32 off, std::set<NameAndAlt>& st, char* stop)
+{
+    data += ((uint32*)data)[off]; // seek to correct absolute offset
+    data += 28; // move ptr to real start of data
+    uint32 offset=0;
+    std::string s;
+    char c;
+    while(memcmp(data+offset,stop,4))
+    {
+        c = data[offset];
+        if(!c)
+        {
+            if(s.length())
+            {
+                DEBUG(printf("DEP: %s\n",s.c_str()));
+                st.insert(NameAndAlt(s));
+                s.clear();
+            }
+        }
+        else
+            s += c;
+        offset++;
+    }
+}
 
+void ADT_FillTextureData(const uint8* data,std::set<NameAndAlt>& st)
+{
+    ADT_ExportStringSetByOffset(data,OFFSET_TEXTURES,st,"XDMM");
+}
+
+void ADT_FillWMOData(const uint8* data,std::set<NameAndAlt>& st)
+{
+    ADT_ExportStringSetByOffset(data,OFFSET_WMOS,st,"DIWM");
+}
+
+void ADT_FillModelData(const uint8* data,std::set<NameAndAlt>& st)
+{
+    ADT_ExportStringSetByOffset(data,OFFSET_MODELS,st,"DIMM");
+}
 
 

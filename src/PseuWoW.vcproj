@@ -418,6 +418,12 @@
 				Name="GUI"
 				Filter="">
 				<File
+					RelativePath=".\Client\Gui\CCursorController.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\CCursorController.h">
+				</File>
+				<File
 					RelativePath=".\Client\Gui\CM2MeshFileLoader.cpp">
 				</File>
 				<File

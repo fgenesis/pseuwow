@@ -26,6 +26,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
         _chunks[ch].baseheight = adt->_chunks[ch].hdr.zbase; // ADT files store (x/z) as ground coords and (y) as the height!
         _chunks[ch].basex = adt->_chunks[ch].hdr.xbase; // here converting it to (x/y) on ground and basehight as actual height.
         _chunks[ch].basey = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
+        _chunks[ch].lqheight = adt->_chunks[ch].waterlevel;
         uint32 fcnt=0, rcnt=0;
         while(true) //9*9 + 8*8
         {
@@ -41,6 +42,10 @@ void MapTile::ImportFromADT(ADTFile *adt)
                 _chunks[ch].hmap_fine[fcnt] = adt->_chunks[ch].vertices[fcnt+rcnt];
                 fcnt++;
             }
+        }
+        for(uint32 i = 0; i < 81; i++)
+        {
+            _chunks[ch].hmap_lq[i] = adt->_chunks[ch].lqvertex[i].h;
         }
     }
     _xbase = _chunks[0].basex;

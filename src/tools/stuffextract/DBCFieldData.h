@@ -270,30 +270,31 @@ enum ItemDisplayInfoEnum
     ITEMDISPLAYINFO_NAME_L = 3, // (internal name?)
     ITEMDISPLAYINFO_NAME_R = 4, // (internal name?)
     ITEMDISPLAYINFO_ICON = 5, // icon filename
-    ITEMDISPLAYINFO_FLAG1 = 6, // must be some kind of flag. 0 - 5.
-    ITEMDISPLAYINFO_FLAG2 = 7, // some flag? 0, 1 or 2.
-    ITEMDISPLAYINFO_FLAG3 = 8, // some flag? 0 or 1.
-    ITEMDISPLAYINFO_FLAG4 = 9, // some flag? 0, 1 or 2.
-    ITEMDISPLAYINFO_FLAG5 = 10, // some flag? mostly 0, sometimes other values (for ex. polearms have 4081 ?!)
-    ITEMDISPLAYINFO_FLAGS = 11, // these is NOT the inventorytype...
-    ITEMDISPLAYINFO_HELM1 = 12, // only set if model is a helm. might be related to hair/ears/traits showing on or off.
-    ITEMDISPLAYINFO_HELM2 = 13, // ^ same.
-    ITEMDISPLAYINFO_AU = 14, // the following fields contain strings that end with AU, AL, HA, TU, etc.
-    ITEMDISPLAYINFO_AL = 15, // sometimes they are set, sometimes not.
-    ITEMDISPLAYINFO_HA = 16,
-    ITEMDISPLAYINFO_TU = 17,
-    ITEMDISPLAYINFO_TL = 18,
-    ITEMDISPLAYINFO_LU = 19,
-    ITEMDISPLAYINFO_LL = 20,
-    ITEMDISPLAYINFO_FO = 21,
-    ITEMDISPLAYINFO_UNK = 22, // mostly 0. quite sure this is not a string.
+    ITEMDISPLAYINFO_GEOSET_1 = 6, // Geoset, which M2 submeshes this item will cover when equipped, depeding on type
+    ITEMDISPLAYINFO_GEOSET_2 = 7, 
+    ITEMDISPLAYINFO_GEOSET_3 = 8, 
+    ITEMDISPLAYINFO_GEOSET_4 = 9, // some flag? 0, 1 or 2.
+    ITEMDISPLAYINFO_FLAG1 = 10, // some flag? mostly 0, sometimes other values (for ex. polearms have 4081 ?!)
+    ITEMDISPLAYINFO_ITEMGROUPSOUND = 11, // these is NOT the inventorytype...
+    ITEMDISPLAYINFO_HELM1 = 12, // reference to HelmetGeosetVisData. only set if item is a helm
+    ITEMDISPLAYINFO_HELM2 = 13, // ^ - (this ID points to a nearer specification which face parts are covered by a helm)
+                             // -- the following fields store texture names for different body parts
+    ITEMDISPLAYINFO_AU = 14, // arm upper
+    ITEMDISPLAYINFO_AL = 15, // arm lower
+    ITEMDISPLAYINFO_HA = 16, // hand
+    ITEMDISPLAYINFO_TU = 17, // torso upper
+    ITEMDISPLAYINFO_TL = 18, // torso lower
+    ITEMDISPLAYINFO_LU = 19, // leg upper
+    ITEMDISPLAYINFO_LL = 20, // leg lower
+    ITEMDISPLAYINFO_FO = 21, // foot
+    ITEMDISPLAYINFO_VISUAL = 22, // reference to ItemVisuals: specifies the ID of up to 5 glow effects
 
     ITEMDISPLAYINFO_END = 23
 };
 
 static const char *ItemDisplayInfoFieldNames[] = {
-    "","model_l","model_r","name_l","name_r","icon","flag1","flag2","flag3","flag4", // 0-9
-    "flag5","flags","helm1","helm2","AU","AL","HA","TU","TL","LU", // 10-19
+    "","model_l","model_r","tex_l","tex_r","icon","geo1","geo2","geo3","geo4", // 0-9
+    "flag1","sound","helm1","helm2","AU","AL","HA","TU","TL","LU", // 10-19
     "LL","FO","unk", // 20-22
     ""
 };
@@ -371,6 +372,40 @@ static const char *NPCSoundsFieldNames[] = {
 static const char *NPCSoundsFormat = {
     "iiiix"
 };
+
+enum CharSectionsEnum
+{
+    CHARSECTIONS_ID = 0, // the sectionID, not sure if this is a reference from/to other fields
+    CHARSECTIONS_RACE_ID = 1,
+    CHARSECTIONS_GENDER = 2, // 0=male, 1=female
+    CHARSECTIONS_TYPE = 3, // 0=base skin, 1=face, 2=facial traits, 3=hair, 4=underwear
+    CHARSECTIONS_SECTION = 4, // depends, see table below
+    CHARSECTIONS_COLOR = 5, // skin/hair color
+    CHARSECTIONS_TEXTURE1 = 6, 
+    CHARSECTIONS_TEXTURE2 = 7,
+    CHARSECTIONS_TEXTURE3 = 8,
+    CHARSECTIONS_IS_SPECIAL_NPC = 9, // 0=player, 1=special npc
+    CHARSECTIONS_END
+};
+/*
+Type 	 Description 	           Section 	        Color 	     Texture 1            Texture 2                    Texture 3
+0 	     Base skin 	               -                Skin color   Skin texture 	      Fur texture (Tauren only) 	-
+1 	     Face 	                   Face type        Skin color   Face lower texture   Face upper texture            -
+2 	     Facial hair / decoration  Facial hair type Hair color 	 Face lower texture   Face upper texture            -
+3 	     Hair 	                   Hair style 	    Hair color   Hair texture         Face lower texture           Face upper texture
+4 	     Underwear 	               -                Skin color   Legs upper texture   Chest upper texture           -
+The textures are all overlaid on the base skin texture, according to the alpha channel in the sub textures. The texture region positions and sizes are fixed.
+*/
+
+static const char *CharSectionsFieldNames[] = {
+    "","race","gender","type","section","color","tex1","tex2","tex3","special", // 0-9
+    ""
+};
+
+static const char *CharSectionsFormat = {
+    "iiiiiisssi"
+};
+
 
 
 
