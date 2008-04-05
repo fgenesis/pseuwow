@@ -515,7 +515,8 @@ void ExtractMaps(void)
             printf("\nERROR: Map extraction failed: could not save file %s\n",wdt_out);
             return;
         }
-        wdt_fh.write((char*)wdt_bb.contents(),wdt_bb.size());
+        if (wdt_bb.size())
+            wdt_fh.write((char*)wdt_bb.contents(),wdt_bb.size());
         wdt_fh.close();
 
         printf("Extracted WDT '%s'\n",wdt_name);
