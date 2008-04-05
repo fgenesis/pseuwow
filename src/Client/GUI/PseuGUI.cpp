@@ -190,10 +190,11 @@ void PseuGUI::Run(void)
 
             _driver->beginScene(true, true, 0);
 
-            DrawCurrentScene();
-
             _smgr->drawAll();
             _guienv->drawAll();
+
+            if(_scene)
+                _scene->OnDraw();
 
             _driver->endScene();
         }
@@ -272,12 +273,6 @@ void PseuGUI::_UpdateSceneState(void)
 
         logdebug("PseuGUI: scene created.");
     }
-}
-
-void PseuGUI::DrawCurrentScene(void)
-{
-    if(_scene && _initialized)
-        _scene->OnDraw();
 }
 
 // used to get our current WorldPosition

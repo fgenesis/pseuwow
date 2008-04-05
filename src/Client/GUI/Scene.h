@@ -12,6 +12,7 @@ using namespace gui;
 
 
 class PseuGUI;
+class CCursorController;
 
 // base class
 class Scene
@@ -32,6 +33,7 @@ protected:
     irr::video::IVideoDriver* driver;
     irr::scene::ISceneManager* smgr;
     irr::gui::IGUIEnvironment* guienv;
+    CCursorController *cursor;
     SceneState _scenestate;
 };
 
@@ -80,6 +82,7 @@ private:
     MapMgr *mapmgr;
     IGUIStaticText *debugText;
     bool debugmode;
+    gui::IGUIImage *icursor;
 };
 
 

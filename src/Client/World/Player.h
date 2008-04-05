@@ -167,7 +167,12 @@ class Player : public Unit
 public:
     Player();
     void Create(uint64);
-    uint8 GetGender() { return GetUInt32Value(PLAYER_BYTES_3); }
+    inline uint8 GetGender() { return GetUInt32Value(PLAYER_BYTES_3); }
+    inline uint8 GetSkinId() { return (GetUInt32Value(PLAYER_BYTES) & 0x000000FF); }
+    inline uint8 GetFaceId() { return (GetUInt32Value(PLAYER_BYTES) & 0x0000FF00) >> 8; }
+    inline uint8 GetHairStyleId() { return (GetUInt32Value(PLAYER_BYTES) & 0x00FF0000) >> 16; }
+    inline uint8 GetHairColorId() { return (GetUInt32Value(PLAYER_BYTES) & 0xFF000000) >> 24; }
+    inline uint8 GetFaceTraitsId() { return (GetUInt32Value(PLAYER_BYTES_2) & 0x000000FF); }
 
 private:
 

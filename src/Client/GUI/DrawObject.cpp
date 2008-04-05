@@ -3,6 +3,7 @@
 #include "DrawObject.h"
 #include "PseuWoW.h"
 #include "Object.h"
+#include "Player.h"
 
 using namespace irr;
 
@@ -36,6 +37,13 @@ void DrawObject::Unlink(void)
 
 void DrawObject::_Init(void)
 {
+    if(_obj->IsPlayer())
+    {
+        Player *p = (Player*)_obj;
+        DEBUG(logdebug("Player: race=%u gender=%u face=%u skin=%u traits=%u hair=%u haircol=%u",
+            p->GetRace(),p->GetGender(),p->GetFaceId(),p->GetSkinId(),p->GetFaceTraitsId(),p->GetHairStyleId(),p->GetHairColorId()));
+    }
+
     if(!cube && _obj->IsWorldObject()) // only world objects have coords and can be drawn
     {
         uint32 displayid = _obj->IsUnit() ? _obj->GetUInt32Value(UNIT_FIELD_DISPLAYID) : 0; // TODO: in case its GO get it from proto data

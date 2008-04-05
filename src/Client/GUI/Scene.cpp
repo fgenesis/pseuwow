@@ -1,6 +1,7 @@
 #include "common.h"
 #include "PseuGUI.h"
 #include "PseuWoW.h"
+#include "CCursorController.h"
 #include "Scene.h"
 
 Scene::Scene(PseuGUI *g)
@@ -10,6 +11,9 @@ Scene::Scene(PseuGUI *g)
     driver = gui->_driver;
     smgr = gui->_smgr;
     guienv = gui->_guienv;
+    cursor = new CCursorController(device->getCursorControl(), driver);
+    cursor->setOSCursorVisible(true);
+    cursor->setVisible(false);
 }
 
 void Scene::OnDraw(void)
