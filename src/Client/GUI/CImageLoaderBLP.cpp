@@ -120,7 +120,7 @@ IImage* CImageLoaderBLP::loadImage(io::IReadFile* file) const
         u32 alpha=255;
         u32 a[8];
         u32  r1, g1,b1,r2,g2,b2;
-        u64 temptransp;
+        u64 temptransp=0;
         bool transparency_bit=false;
         for(u32 y=0;y<header.y_res;y=y+4)
         {
