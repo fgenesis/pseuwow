@@ -210,6 +210,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 }
                 else if(!strcmp((char*)mfcc,"MCAL"))
                 {
+                    // we can NOT use _chunks[mcnkid].hdr.nLayers here... so we use: (full block size - header size) / single block size
                     for(uint32 i = 0; i < (_chunks[mcnkid].hdr.sizeAlpha - 8) / 2048; i++)
                     {
                         buf.read((uint8*)(_chunks[mcnkid].alphamap[i]),2048);
