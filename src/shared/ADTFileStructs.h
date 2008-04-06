@@ -7,6 +7,8 @@
 #define OFFSET_MODELS 8
 #define OFFSET_WMOS 10
 
+#define ADT_MAXLAYERS 4
+
 struct MHDR_chunk
 {
     uint32 pad;
@@ -195,10 +197,10 @@ struct ADTMapChunk
     ADTMapChunkHeader hdr;
     float vertices[145];
     NormalVector normalvecs[145];
-    MCLY_chunk layer[4]; // can be less
+    MCLY_chunk layer[ADT_MAXLAYERS]; // can be less
     uint32 nTextures;
     uint8 shadowmap[512]; // 1 bit 64x64
-    uint8 alphamap[4][2048]; // 4 bits, 64x64. max 4, 1 per layer
+    uint8 alphamap[ADT_MAXLAYERS][2048]; // 4 bits, 64x64. max 4, 1 per layer
     bool haswater;
     float waterlevel;
     LiquidVertex lqvertex[81];

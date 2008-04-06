@@ -27,6 +27,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
         _chunks[ch].basex = adt->_chunks[ch].hdr.xbase; // here converting it to (x/y) on ground and basehight as actual height.
         _chunks[ch].basey = adt->_chunks[ch].hdr.ybase; // strange coords they use... :S
         _chunks[ch].lqheight = adt->_chunks[ch].waterlevel;
+        // extract heightmap
         uint32 fcnt=0, rcnt=0;
         while(true) //9*9 + 8*8
         {
@@ -43,14 +44,34 @@ void MapTile::ImportFromADT(ADTFile *adt)
                 fcnt++;
             }
         }
+        // extract water heightmap
         for(uint32 i = 0; i < 81; i++)
         {
             _chunks[ch].hmap_lq[i] = adt->_chunks[ch].lqvertex[i].h;
+        }
+        // extract map layers with texture filenames
+        for(uint32 ly = 0; ly < adt->_chunks[ch].hdr.nLayers; ly++)
+        {
+            uint32 texoffs = adt->_chunks[ch].layer[ly].textureId;
+            _chunks[ch].texlayer.push_back(std::string("data/texture/") + _PathToFileName(adt->_textures[texoffs]));
+        }
+        // extract alpha maps. in adt they are stored in 4-bit encoding, which makes 4096 entries in 64x32 values
+        for(uint32 al = 0; al < (adt->_chunks[ch].hdr.sizeAlpha - 8) / 2048; al++) // see comment in ADTFile.cpp when loading MCAL chunk for explanation
+        {
+            for(uint32 aly = 0; aly < 64; aly++)
+            {
+                for(uint32 alx = 0; alx < 32; alx++)
+                {
+                    _chunks[ch].alphamap[al][aly*64 + (alx*2)]   = adt->_chunks[ch].alphamap[al][aly*64 + alx] & 0xF0; // first 4 bits
+                    _chunks[ch].alphamap[al][aly*64 + (alx*2)+1] = adt->_chunks[ch].alphamap[al][aly*64 + alx] & 0x0F; // second
+                }
+            }
         }
     }
     _xbase = _chunks[0].basex;
     _ybase = _chunks[0].basey;
     _hbase = _chunks[0].baseheight;
+
     DEBUG(logdebug("MapTile first chunk base: h=%f x=%f y=%f",_hbase,_xbase,_ybase));
 }
 

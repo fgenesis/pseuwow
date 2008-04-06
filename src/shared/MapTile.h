@@ -20,6 +20,8 @@ public:
     float hmap[17*17]; // combined rough and fine hmap
     float basex,basey,baseheight,lqheight;
     float hmap_lq[9*9]; // liquid (water, lava) height map
+    std::vector<std::string> texlayer;
+    uint8 alphamap[ADT_MAXLAYERS][64*64]; // TODO: make this a vector also
     //... TODO: implement the rest of this
 };
 
