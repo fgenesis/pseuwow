@@ -231,4 +231,19 @@ std::string _PathToFileName(std::string str)
     return str;
 }
 
+std::string NormalizeFilename(std::string s)
+{
+    uint32 p;
+    while( (p = s.find('\\')) != std::string::npos)//Replace \ by /
+    {
+        s.replace(p,1,"/");
+    }
+    while( (p = s.find(' ')) != std::string::npos)//Replace space by _
+    {
+        s.replace(p,1,"_");
+    }
+    std::transform(s.begin(), s.end(), s.begin(), tolower);
+    return s;
+}
+
 

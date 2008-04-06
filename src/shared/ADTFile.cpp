@@ -142,7 +142,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
         }*/
         else if(!strcmp((char*)fourcc,"MDDF"))
         {
-            uint32 ndoodads = size / 36;
+            uint32 ndoodads = size / sizeof(MDDF_chunk);
             //DEBUG(printf("ADT: Loading %u doodads.\n",ndoodads));
             for(uint32 i = 0; i<ndoodads; i++)
             {

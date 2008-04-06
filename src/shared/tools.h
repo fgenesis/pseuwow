@@ -22,5 +22,6 @@ uint32 getMSTime(void);
 uint32 GetFileSize(const char*);
 void _FixFileName(std::string&);
 std::string _PathToFileName(std::string);
+std::string NormalizeFilename(std::string);
 
 #endif
