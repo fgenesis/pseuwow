@@ -32,7 +32,6 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-O2" />
 			<Add option="-Wall" />
 			<Add directory="shared" />
 			<Add directory="Client" />
@@ -71,6 +70,12 @@
 		<Unit filename="Client/DefScriptInterface.cpp" />
 		<Unit filename="Client/DefScriptInterface.h" />
 		<Unit filename="Client/DefScriptInterfaceInclude.h" />
+		<Unit filename="Client/GUI/CCursorController.cpp" />
+		<Unit filename="Client/GUI/CCursorController.h" />
+		<Unit filename="Client/GUI/CImageLoaderBLP.cpp" />
+		<Unit filename="Client/GUI/CImageLoaderBLP.h" />
+		<Unit filename="Client/GUI/CM2MeshFileLoader.cpp" />
+		<Unit filename="Client/GUI/CM2MeshFileLoader.h" />
 		<Unit filename="Client/GUI/DrawObjMgr.cpp" />
 		<Unit filename="Client/GUI/DrawObjMgr.h" />
 		<Unit filename="Client/GUI/DrawObject.cpp" />
@@ -79,6 +84,8 @@
 		<Unit filename="Client/GUI/MInput.h" />
 		<Unit filename="Client/GUI/PseuGUI.cpp" />
 		<Unit filename="Client/GUI/PseuGUI.h" />
+		<Unit filename="Client/GUI/SImage.cpp" />
+		<Unit filename="Client/GUI/SImage.h" />
 		<Unit filename="Client/GUI/Scene.cpp" />
 		<Unit filename="Client/GUI/Scene.h" />
 		<Unit filename="Client/GUI/SceneGuiStart.cpp" />

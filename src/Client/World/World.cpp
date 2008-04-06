@@ -47,7 +47,7 @@ void World::Update(void)
         _lastx = _x;
         _lasty = _y;
     }*/
-        
+
 }
 
 void World::UpdatePos(float x, float y, uint32 m)
@@ -71,4 +71,3 @@ float World::GetPosZ(float x, float y)
     logdebug("WORLD: GetPosZ() called, but no MapMgr exists (do you really use maps?)");
     return 0;
 }
-    

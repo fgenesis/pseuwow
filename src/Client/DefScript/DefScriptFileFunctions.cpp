@@ -232,7 +232,7 @@ DefReturnResult DefScriptPackage::func_fwriteb(CmdSet& Set)
             fh->write((char*)&o,sizeof(double));
             return true;
         }
-        
+
     }
     return false;
 }
