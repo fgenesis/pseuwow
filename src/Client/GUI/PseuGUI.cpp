@@ -1,6 +1,7 @@
 #include "common.h"
 #include "irrlicht/irrlicht.h"
 #include "CM2MeshFileLoader.h"
+#include "CImageLoaderBLP.h"
 #include "Object.h"
 #include "DrawObject.h"
 #include "PseuWoW.h"
@@ -121,7 +122,9 @@ void PseuGUI::_Init(void)
     //...
 
     // register external loaders for not supported filetypes
-    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device, "./data/textures");
+    video::CImageLoaderBLP* BLPloader = new video::CImageLoaderBLP();
+	_driver->addExternalImageLoader(BLPloader);
+    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device, "./data/texture");
     _smgr->addExternalMeshLoader(m2loader);
 
     _initialized = true;
