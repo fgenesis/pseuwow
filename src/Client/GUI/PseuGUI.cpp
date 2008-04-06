@@ -121,7 +121,7 @@ void PseuGUI::_Init(void)
     //...
 
     // register external loaders for not supported filetypes
-    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device, "data");
+    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device, "./data/textures");
     _smgr->addExternalMeshLoader(m2loader);
 
     _initialized = true;

@@ -105,7 +105,7 @@ class CM2MeshFileLoader : public IMeshLoader
 public:
 
 	//! Constructor
-	CM2MeshFileLoader(IrrlichtDevice* device, c8* basedir);
+	CM2MeshFileLoader(IrrlichtDevice* device, c8* texdir);
 
 	//! destructor
 	virtual ~CM2MeshFileLoader();
@@ -175,7 +175,7 @@ struct RenderFlags{
 	IrrlichtDevice* Device;
 //    scene::IMeshManipulator* Manipulator;
     core::stringc M2MeshName;
-    core::stringc Basedir;
+    core::stringc Texdir;
     SAnimatedMesh* aniMesh;
     SMesh* Mesh;
     SMeshBuffer* IMB;

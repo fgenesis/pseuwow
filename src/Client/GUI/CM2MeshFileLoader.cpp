@@ -8,7 +8,7 @@ namespace irr
 namespace scene
 {
 
-CM2MeshFileLoader::CM2MeshFileLoader(IrrlichtDevice* device, c8* basedir):Device(device), Basedir(basedir)
+CM2MeshFileLoader::CM2MeshFileLoader(IrrlichtDevice* device, c8* texdir):Device(device), Texdir(texdir)
 {
 
 }
@@ -248,9 +248,10 @@ IMB->recalculateBoundingBox();
 //IMB->getMaterial().DiffuseColor.set(255,(M2MSubmeshes[i].meshpartId==0?0:255),(M2MSubmeshes[i].meshpartId==0?255:0),0);
 
 
-std::string TexName=Basedir.c_str();
+std::string TexName=Texdir.c_str();
 TexName+="/";
-TexName+=M2MTextureFiles[M2MTextureUnit[i].textureIndex].c_str();
+if(i<M2MTextureUnit.size())
+    TexName+=M2MTextureFiles[M2MTextureUnit[i].textureIndex].c_str();
 
 while(TexName.find('\\')<TexName.size())//Replace \ by /
     {
@@ -263,10 +264,13 @@ while(TexName.find(' ')<TexName.size())//Replace space by _
 std::transform(TexName.begin(), TexName.end(), TexName.begin(), tolower);
 
 IMB->getMaterial().setTexture(0,Device->getVideoDriver()->getTexture(TexName.c_str()));
-std::cout<<M2MRenderFlags[i].flags<<"--"<<M2MRenderFlags[i].blending<<"\n";
-IMB->getMaterial().BackfaceCulling=(M2MRenderFlags[i].flags & 0x04)?false:true;
-if(M2MRenderFlags[i].blending==1)
-    IMB->getMaterial().MaterialType=video::EMT_TRANSPARENT_ALPHA_CHANNEL;
+if(i<M2MRenderFlags.size())
+{
+    std::cout<<M2MRenderFlags[i].flags<<"--"<<M2MRenderFlags[i].blending<<"\n";
+    IMB->getMaterial().BackfaceCulling=(M2MRenderFlags[i].flags & 0x04)?false:true;
+    if(M2MRenderFlags[i].blending==1)
+        IMB->getMaterial().MaterialType=video::EMT_TRANSPARENT_ALPHA_CHANNEL;
+}
     Mesh->addMeshBuffer(IMB);
 IMB->drop();
 //std::cout << "Mesh now has "<<Mesh->getMeshBufferCount()<<" Buffers\n";
