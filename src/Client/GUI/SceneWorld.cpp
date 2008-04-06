@@ -276,6 +276,7 @@ void SceneWorld::UpdateTerrain(void)
             {
                 // apply map height data
                 for(uint32 chy = 0; chy < 16; chy++)
+                {
                     for(uint32 chx = 0; chx < 16; chx++)
                     {
                         MapChunk *chunk = maptile->GetChunk(chx, chy);
@@ -290,6 +291,22 @@ void SceneWorld::UpdateTerrain(void)
                             }
                         }
                     }
+                }
+                // create doodads
+                for(uint32 i = 0; i < maptile->GetDoodadCount(); i++)
+                {
+                    Doodad *d = maptile->GetDoodad(i);
+                    scene::IAnimatedMesh *mesh = smgr->getMesh(d->model.c_str());
+                    if(mesh)
+                    {
+                        scene::ISceneNode *doodad = smgr->addAnimatedMeshSceneNode(mesh);
+                        if(doodad)
+                        {
+                            doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
+                            doodad->setRotation(core::vector3df(d->ox + 270.0f, d->oy, d->oz)); // +270 solves M2 models lying on the side
+                        }
+                    }
+                }
             }
             else
             {

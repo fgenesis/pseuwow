@@ -96,7 +96,7 @@ void DrawObject::Draw(void)
     if(cube)
     {
         WorldPosition pos = ((WorldObject*)_obj)->GetPosition();
-        cube->setPosition(irr::core::vector3df(-pos.x,pos.z,-pos.y));
+        cube->setPosition(WPToIrr(pos));
         rotation.Y = O_TO_IRR(pos.o);
 
         float s = _obj->GetFloatValue(OBJECT_FIELD_SCALE_X);

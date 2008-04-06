@@ -51,12 +51,12 @@ struct MDDF_chunk
 {
     uint32 id; // position in the MMDX list
     uint32 uniqueid; // unique instance id (?)
-    float x;
+    float x; // position (quaternion)
     float y;
     float z;
-    float oy;
-    float oz;
-    float ox;
+    float a; // rotatation
+    float b;
+    float c;
     uint16 flags;
     uint16 scale;
 };

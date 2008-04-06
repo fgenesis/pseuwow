@@ -82,7 +82,6 @@ private:
     MapMgr *mapmgr;
     IGUIStaticText *debugText;
     bool debugmode;
-    gui::IGUIImage *icursor;
 };
 
 

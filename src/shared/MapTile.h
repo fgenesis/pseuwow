@@ -25,6 +25,13 @@ public:
     //... TODO: implement the rest of this
 };
 
+struct Doodad
+{
+    float x,y,z,ox,oy,oz,scale;
+    uint16 flags;
+    std::string model;
+};
+
 // generic map tile class. stores the information previously stored in an ADT file
 // in an easier to use form.
 class MapTile
@@ -39,12 +46,15 @@ public:
     inline float GetBaseX(void) { return _xbase; }
     inline float GetBaseY(void) { return _ybase; }
     inline float GetBaseHeight(void) { return _hbase; }
+    inline uint32 GetDoodadCount(void) { return _doodads.size(); }
+    inline Doodad *GetDoodad(uint32 i) { return &_doodads[i]; }
 
 private:
     MapChunk _chunks[256]; // 16x16
     std::vector<std::string> _textures;
     std::vector<std::string> _wmos;
     std::vector<std::string> _models;
+    std::vector<Doodad> _doodads;
 
     float _xbase,_ybase,_hbase;
 

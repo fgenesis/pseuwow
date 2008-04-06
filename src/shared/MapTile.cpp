@@ -68,6 +68,30 @@ void MapTile::ImportFromADT(ADTFile *adt)
             }
         }
     }
+
+    // copy over doodads and do some transformations
+    DEBUG(logdebug("%u doodads", adt->_doodadsp.size()));
+    for(uint32 i = 0; i < adt->_doodadsp.size(); i++)
+    {
+        Doodad d;
+        MDDF_chunk& mddf = adt->_doodadsp[i];
+        // and yet another coordinate system...
+        d.y = -(mddf.x - ZEROPOINT);
+        d.z = mddf.y;
+        d.x = -(mddf.z - ZEROPOINT);
+        d.ox = mddf.c;
+        d.oy = mddf.b - 90.0f; // wowdev states Y=B-90, but this doesnt really look as expected...
+        d.oz = -mddf.a;
+        d.flags = mddf.flags;
+        d.model = std::string("./data/model/") + NormalizeFilename(_PathToFileName(adt->_models[mddf.id]));
+        // this .mdx -> .m2 transformation is annoying >.< - replace "mdx" and end of string with "m2\0"
+        memcpy(&d.model[0] + d.model.size() - 3, "m2\0", 3);
+        d.scale = mddf.scale / 1024.0f;
+        if(d.scale < 0.00001f)
+            d.scale = 1;
+        _doodads.push_back(d);
+    }
+
     _xbase = _chunks[0].basex;
     _ybase = _chunks[0].basey;
     _hbase = _chunks[0].baseheight;

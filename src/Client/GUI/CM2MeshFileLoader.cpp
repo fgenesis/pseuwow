@@ -77,7 +77,7 @@ for(u32 i =0;i<header.nViews;i++)
     file->read(&tempM2MView,sizeof(ModelView));
     M2MViews.push_back(tempM2MView);
 }
-std::cout << "Read "<<M2MViews.size()<<"/"<<header.nViews<<" Views\n";
+//std::cout << "Read "<<M2MViews.size()<<"/"<<header.nViews<<" Views\n";
 
 logger->log("Using View 0 for all further operations",ELL_INFORMATION);
 std::cout<<"This View has "<<M2MViews[0].nSub<<" Submeshes\n";
@@ -195,7 +195,8 @@ for(u32 i=0; i<M2MTextureDef.size(); i++)
 {
     tempTexFileName.reserve(M2MTextureDef[i].texFileLen + 1);
     file->seek(M2MTextureDef[i].texFileOfs);
-    file->read(&tempTexFileName[0],M2MTextureDef[i].texFileLen);
+    file->read((void*)tempTexFileName.c_str(),M2MTextureDef[i].texFileLen);
+    std::cout << "texture: '" << tempTexFileName << "'\n";
     M2MTextureFiles.push_back(tempTexFileName.c_str());
     std::cout<<M2MTextureFiles.size()<<"-"<<M2MTextureFiles[i].c_str()<<"\n";
 }
