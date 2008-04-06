@@ -10,6 +10,7 @@ namespace scene
 
 CM2MeshFileLoader::CM2MeshFileLoader(IrrlichtDevice* device, c8* texdir):Device(device), Texdir(texdir)
 {
+    Mesh = NULL;
 
 }
 
@@ -192,6 +193,7 @@ std::string tempTexFileName="";
 M2MTextureFiles.reallocate(M2MTextureDef.size());
 for(u32 i=0; i<M2MTextureDef.size(); i++)
 {
+    tempTexFileName.reserve(M2MTextureDef[i].texFileLen + 1);
     file->seek(M2MTextureDef[i].texFileOfs);
     file->read(&tempTexFileName[0],M2MTextureDef[i].texFileLen);
     M2MTextureFiles.push_back(tempTexFileName.c_str());

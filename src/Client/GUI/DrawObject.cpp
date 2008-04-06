@@ -66,10 +66,10 @@ void DrawObject::_Init(void)
         {
             cube = _smgr->addCubeSceneNode(2);
         }
-        cube->getMaterial(0).DiffuseColor.setAlpha(opacity);
+        //cube->getMaterial(0).DiffuseColor.setAlpha(opacity);
         cube->setName("OBJECT");
-        cube->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
-        cube->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
+        //cube->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
+        //cube->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
 
         text=_smgr->addTextSceneNode(_guienv->getBuiltInFont(), L"TestText" , irr::video::SColor(255,255,255,255),cube, irr::core::vector3df(0,5,0));
         if(_obj->IsPlayer())        
