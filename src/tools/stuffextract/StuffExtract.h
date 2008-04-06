@@ -39,6 +39,7 @@ void ExtractMaps(void);
 void ExtractMapDependencies(void);
 void ExtractSoundFiles(void);
 
+void FetchTexturesFromModel(ByteBuffer&);
 
 void ADT_ExportStringSetByOffset(const uint8*, uint32, std::set<NameAndAlt>&, char*);
 void ADT_FillTextureData(const uint8*,std::set<NameAndAlt>&);

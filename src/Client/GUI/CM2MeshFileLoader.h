@@ -2,33 +2,12 @@
 #include "irrlicht/IMeshLoader.h"
 #include <string>
 #include <vector>
+#include <algorithm>
 
 namespace irr
 {
 namespace scene
 {
-
-class CM2MeshFileLoader : public IMeshLoader
-{
-public:
-
-	//! Constructor
-	CM2MeshFileLoader(IrrlichtDevice* device, c8* basedir);
-
-	//! destructor
-	virtual ~CM2MeshFileLoader();
-
-	//! returns true if the file maybe is able to be loaded by this class
-	//! based on the file extension (e.g. ".cob")
-	virtual bool isALoadableFileExtension(const c8* fileName)const;
-
-	//! creates/loads an animated mesh from the file.
-	//! \return Pointer to the created mesh. Returns 0 if loading failed.
-	//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
-	//! See IUnknown::drop() for more information.
-	virtual scene::IAnimatedMesh* createMesh(irr::io::IReadFile* file);
-private:
-
 
 struct ModelHeader {
 	c8 id[4];
@@ -111,8 +90,37 @@ struct ModelHeader {
 	u32 nParticleEmitters; // V
 	u32 ofsParticleEmitters;
 
-} header;
+};
 
+struct TextureDefinition {
+    u32 texType;
+    u16 unk;
+    u16 texFlags;
+    u32 texFileLen;
+    u32 texFileOfs;
+};
+
+class CM2MeshFileLoader : public IMeshLoader
+{
+public:
+
+	//! Constructor
+	CM2MeshFileLoader(IrrlichtDevice* device, c8* basedir);
+
+	//! destructor
+	virtual ~CM2MeshFileLoader();
+
+	//! returns true if the file maybe is able to be loaded by this class
+	//! based on the file extension (e.g. ".cob")
+	virtual bool isALoadableFileExtension(const c8* fileName)const;
+
+	//! creates/loads an animated mesh from the file.
+	//! \return Pointer to the created mesh. Returns 0 if loading failed.
+	//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
+	//! See IUnknown::drop() for more information.
+	virtual scene::IAnimatedMesh* createMesh(irr::io::IReadFile* file);
+private:
+    ModelHeader header;
 
 struct ModelVertex {
 	core::vector3df pos;//Use Irrlicht Vector here!
@@ -141,14 +149,6 @@ struct ModelViewSubmesh {
     u16 unk1, unk2, unk3, unk4;
     core::vector3df v;
     float unkf[4];
-};
-
-struct TextureDefinition {
-    u32 texType;
-    u16 unk;
-    u16 texFlags;
-    u32 texFileLen;
-    u32 texFileOfs;
 };
 
 struct TextureUnit{
