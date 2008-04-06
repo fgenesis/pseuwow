@@ -12,7 +12,9 @@
 #include "DBCFieldData.h"
 #include "Locale.h"
 #include "ProgressBar.h"
+#include "../../Client/Gui/CM2MeshFileLoader.h"
 
+int replaceSpaces (int i) { return i==(int)' ' ? (int)'_' : i; }
 
 std::map<uint32,std::string> mapNames;
 
@@ -637,47 +639,6 @@ void ExtractMapDependencies(void)
     CreateDir(pathwmo.c_str());
     uint32 wmosdone=0,texdone=0,mdone=0;
 
-    if(doTextures)
-    {
-        printf("Extracting textures...\n");
-        bar = new barGoLink(texNames.size(), true);
-        for(std::set<NameAndAlt>::iterator i = texNames.begin(); i != texNames.end(); i++)
-        {
-            bar->step();
-            mpqfn = i->name;
-            altfn = i->alt;
-            if(altfn.empty())
-                altfn = mpqfn;
-            if(!mpqtex.FileExists((char*)mpqfn.c_str()))
-                continue;
-            realfn = pathtex + "/" + _PathToFileName(altfn);
-            std::fstream fh;
-            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
-            if(fh.is_open())
-            {
-                ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
-                fh.write((const char*)bb.contents(),bb.size());
-                if(doMd5)
-                {
-                    MD5Hash h;
-                    h.Update((uint8*)bb.contents(), bb.size());
-                    h.Finalize();
-                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                    md5Tex[_PathToFileName(realfn)] = md5ptr;
-                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
-                }
-                texdone++;
-            }
-            else
-                printf("Could not write texture %s\n",realfn.c_str());
-            fh.close();
-        }
-        printf("\n");
-        if(texNames.size())
-            OutMD5((char*)pathtex.c_str(),md5Tex);
-        delete bar;
-    }
-
     if(doModels)
     {
         printf("Extracting models...\n");
@@ -712,6 +673,9 @@ void ExtractMapDependencies(void)
             {
                 ByteBuffer& bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
+                if (doTextures)
+                    FetchTexturesFromModel(bb);
+
                 if(doMd5)
                 {
                     MD5Hash h;
@@ -733,9 +697,69 @@ void ExtractMapDependencies(void)
         delete bar;
     }
 
-    if(doWmos)
+    if(doTextures)
     {
         printf("Extracting textures...\n");
+        bar = new barGoLink(texNames.size(), true);
+        for(std::set<NameAndAlt>::iterator i = texNames.begin(); i != texNames.end(); i++)
+        {
+            bar->step();
+            mpqfn = i->name;
+            altfn = i->alt;
+            if(altfn.empty())
+                altfn = mpqfn;
+            if(!mpqtex.FileExists((char*)mpqfn.c_str()))
+                continue;
+
+            // prepare lowercased and "underlined" path for file
+            std::string copy = mpqfn;
+            std::transform(copy.begin(), copy.end(), copy.begin(), ::tolower);
+            std::transform(copy.begin(), copy.end(), copy.begin(), replaceSpaces);
+            if (copy.find_first_of("/\\") != std::string::npos)
+            {
+                std::string copy2 = copy;
+                char* tok = strtok((char*)copy2.c_str(),"/\\");
+                std::string fullpath = pathtex;
+                while (tok && !strstr(tok, "."))
+                {
+                    fullpath += "/";
+                    fullpath += tok;
+                    CreateDir(fullpath.c_str());
+                    tok = strtok(NULL, "/\\");
+                }
+            }
+
+            realfn = pathtex + "/" + copy; //_PathToFileName(altfn);
+            std::fstream fh;
+            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+            if(fh.is_open())
+            {
+                ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
+                fh.write((const char*)bb.contents(),bb.size());
+                if(doMd5)
+                {
+                    MD5Hash h;
+                    h.Update((uint8*)bb.contents(), bb.size());
+                    h.Finalize();
+                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                    md5Tex[_PathToFileName(realfn)] = md5ptr;
+                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                }
+                texdone++;
+            }
+            else
+                printf("Could not write texture %s\n",realfn.c_str());
+            fh.close();
+        }
+        printf("\n");
+        if(texNames.size())
+            OutMD5((char*)pathtex.c_str(),md5Tex);
+        delete bar;
+    }
+
+    if(doWmos)
+    {
+        printf("Extracting WMOS...\n");
         bar = new barGoLink(wmoNames.size(),true);
         for(std::set<NameAndAlt>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
         {
@@ -866,4 +890,39 @@ void ADT_FillModelData(const uint8* data,std::set<NameAndAlt>& st)
     ADT_ExportStringSetByOffset(data,OFFSET_MODELS,st,"DIMM");
 }
 
+void FetchTexturesFromModel(ByteBuffer& bb)
+{
+    bb.rpos(0);
+    irr::scene::ModelHeader header;
+    bb.read((uint8*)&header, sizeof(header));
 
+    if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
+        printf("Not model file!");
+        return;
+    }
+
+    irr::core::array<irr::scene::TextureDefinition> M2MTextureDef;
+    M2MTextureDef.clear();
+    irr::scene::TextureDefinition tempM2TexDef;
+
+    bb.rpos(header.ofsTextures);
+    for(irr::u32 i=0;i<header.nTextures;i++)
+    {
+        bb.read((uint8*)&tempM2TexDef,sizeof(irr::scene::TextureDefinition));
+        M2MTextureDef.push_back(tempM2TexDef);
+    }
+
+    std::string tempTexFileName="";
+    for(irr::u32 i=0; i<M2MTextureDef.size(); i++)
+    {
+        bb.rpos(M2MTextureDef[i].texFileOfs);
+        tempTexFileName.resize(M2MTextureDef[i].texFileLen+1);
+        bb.read((uint8*)&tempTexFileName[0],M2MTextureDef[i].texFileLen);
+
+        if (tempTexFileName.empty())
+            continue;
+        // printf(tempTexFileName.c_str()); // for debug
+        texNames.insert(NameAndAlt(tempTexFileName));
+    }
+
+}

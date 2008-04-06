@@ -214,7 +214,7 @@ for(u32 i=0;i<M2MVertices.size();i++)
 
 
 	if (Mesh)
-		Mesh->drop();
+		Mesh->drop(); // crash on vc9
 
 Mesh=new SMesh();
 
