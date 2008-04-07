@@ -211,7 +211,7 @@ if(M2Vertices.size()>0)
 
 for(u32 i=0;i<M2MVertices.size();i++)
 {
-    M2Vertices.push_back(video::S3DVertex(M2MVertices[i].pos,M2MVertices[i].normal, video::SColor(255,100,100,100),M2MVertices[i].texcoords));
+    M2Vertices.push_back(video::S3DVertex(core::vector3df(M2MVertices[i].pos.X,-M2MVertices[i].pos.Y,M2MVertices[i].pos.Z),core::vector3df(M2MVertices[i].normal.X,-M2MVertices[i].normal.Y,M2MVertices[i].normal.Z), video::SColor(255,100,100,100),M2MVertices[i].texcoords));
 }
 
 
