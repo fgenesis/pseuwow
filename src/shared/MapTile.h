@@ -27,6 +27,7 @@ public:
 
 struct Doodad
 {
+    uint32 uniqueid;
     float x,y,z,ox,oy,oz,scale;
     uint16 flags;
     std::string model;

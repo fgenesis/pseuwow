@@ -1,6 +1,11 @@
 #include <iostream>
 #include "CM2MeshFileLoader.h"
 
+#ifdef _DEBUG
+#define DEBUG(code) code;
+#else
+#define DEBUG(code) ;
+#endif
 
 
 namespace irr
@@ -34,7 +39,7 @@ IAnimatedMesh* CM2MeshFileLoader::createMesh(io::IReadFile* file)
 {
 ILogger* logger =Device->getLogger();
 
-logger->log("Trying to open file",file->getFileName(),ELL_INFORMATION);
+DEBUG(logger->log("Trying to open file",file->getFileName(),ELL_INFORMATION));
 
 
 file->read(&header,sizeof(ModelHeader));
@@ -42,9 +47,12 @@ file->read(&header,sizeof(ModelHeader));
      logger->log("Something wrong!",ELL_ERROR);
      return 0;
      }
-     else logger->log(L"header okay",ELL_INFORMATION);
+     else
+     {
+         DEBUG(logger->log(L"header okay",ELL_INFORMATION));
+     }
 //Name -> not very important I think, but save it nontheless;
-std::cout << "Name offset:" << header.nameOfs << "Name length:" << header.nameLength << "\n";
+DEBUG(std::cout << "Name offset:" << header.nameOfs << "Name length:" << header.nameLength << "\n");
 //M2MeshName.clear();
 //M2MeshName.reserve(header.nameLength);
 file->seek(header.nameOfs);
@@ -65,7 +73,7 @@ for(u32 i =0;i<header.nVertices;i++)
     file->read(&tempM2MVert,sizeof(ModelVertex));
     M2MVertices.push_back(tempM2MVert);
 }
-std::cout << "Read "<<M2MVertices.size()<<"/"<<header.nVertices<<" Vertices\n";
+DEBUG(std::cout << "Read "<<M2MVertices.size()<<"/"<<header.nVertices<<" Vertices\n");
 
 //Views == Sets of vertices. Usage yet unknown. Global data
 if(M2MViews.size()>0)
@@ -79,8 +87,8 @@ for(u32 i =0;i<header.nViews;i++)
 }
 //std::cout << "Read "<<M2MViews.size()<<"/"<<header.nViews<<" Views\n";
 
-logger->log("Using View 0 for all further operations",ELL_INFORMATION);
-std::cout<<"This View has "<<M2MViews[0].nSub<<" Submeshes\n";
+DEBUG(logger->log("Using View 0 for all further operations",ELL_INFORMATION));
+DEBUG(std::cout<<"This View has "<<M2MViews[0].nSub<<" Submeshes\n");
 
 //Vertex indices of a specific view.Local to View 0
 if(M2MIndices.size()>0)
@@ -93,7 +101,7 @@ for(u32 i =0;i<M2MViews[0].nIndex;i++)
     file->read(&tempM2Index,sizeof(u16));
     M2MIndices.push_back(tempM2Index);
 }
-std::cout << "Read "<<M2MIndices.size()<<"/"<<M2MViews[0].nIndex<<" Indices\n";
+DEBUG(std::cout << "Read "<<M2MIndices.size()<<"/"<<M2MViews[0].nIndex<<" Indices\n");
 
 
 //Triangles. Data Points point to the Vertex Indices, not the vertices themself. 3 Points = 1 Triangle, Local to View 0
@@ -107,7 +115,7 @@ for(u32 i =0;i<M2MViews[0].nTris;i++)
     file->read(&tempM2Triangle,sizeof(u16));
     M2MTriangles.push_back(tempM2Triangle);
 }
-std::cout << "Read "<<M2MTriangles.size()<<"/"<<M2MViews[0].nTris<<" Triangle Indices\n";
+DEBUG(std::cout << "Read "<<M2MTriangles.size()<<"/"<<M2MViews[0].nTris<<" Triangle Indices\n");
 
 //Submeshes, Local to View 0
 if(M2MSubmeshes.size()>0)
@@ -121,7 +129,7 @@ for(u32 i =0;i<M2MViews[0].nSub;i++)
     M2MSubmeshes.push_back(tempM2Submesh);
 //    std::cout<< "Submesh " <<i<<" ID "<<tempM2Submesh.meshpartId<<" starts at V/T "<<tempM2Submesh.ofsVertex<<"/"<<tempM2Submesh.ofsTris<<" and has "<<tempM2Submesh.nVertex<<"/"<<tempM2Submesh.nTris<<" V/T\n";
 }
-std::cout << "Read "<<M2MSubmeshes.size()<<"/"<<M2MViews[0].nSub<<" Submeshes\n";
+DEBUG(std::cout << "Read "<<M2MSubmeshes.size()<<"/"<<M2MViews[0].nSub<<" Submeshes\n");
 
 //Texture units. Local to view 0
 TextureUnit tempM2TexUnit;
@@ -135,7 +143,7 @@ for(u32 i=0;i<M2MViews[0].nTex;i++)
     file->read(&tempM2TexUnit,sizeof(TextureUnit));
     M2MTextureUnit.push_back(tempM2TexUnit);
 }
-std::cout << "Read "<<M2MTextureUnit.size()<<" Texture Unit entries for View 0\n";
+DEBUG(std::cout << "Read "<<M2MTextureUnit.size()<<" Texture Unit entries for View 0\n");
 
 
 
@@ -152,7 +160,7 @@ for(u32 i=0;i<header.nTexLookup;i++)
     file->read(&tempM2TexLookup,sizeof(u16));
     M2MTextureLookup.push_back(tempM2TexLookup);
 }
-std::cout << "Read "<<M2MTextureLookup.size()<<" Texture lookup entries\n";
+DEBUG(std::cout << "Read "<<M2MTextureLookup.size()<<" Texture lookup entries\n");
 
 //Texture Definitions table. This is global data
 TextureDefinition tempM2TexDef;
@@ -166,7 +174,7 @@ for(u32 i=0;i<header.nTextures;i++)
     file->read(&tempM2TexDef,sizeof(TextureDefinition));
     M2MTextureDef.push_back(tempM2TexDef);
 }
-std::cout << "Read "<<M2MTextureDef.size()<<" Texture Definition entries\n";
+DEBUG(std::cout << "Read "<<M2MTextureDef.size()<<" Texture Definition entries\n");
 
 //Render Flags table. This is global data
 RenderFlags tempM2RF;
@@ -180,7 +188,7 @@ for(u32 i=0;i<header.nTexFlags;i++)
     file->read(&tempM2RF,sizeof(RenderFlags));
     M2MRenderFlags.push_back(tempM2RF);
 }
-std::cout << "Read "<<M2MRenderFlags.size()<<" Render Flags\n";
+DEBUG(std::cout << "Read "<<M2MRenderFlags.size()<<" Render Flags\n");
 
 
 
@@ -196,7 +204,7 @@ for(u32 i=0; i<M2MTextureDef.size(); i++)
     tempTexFileName.reserve(M2MTextureDef[i].texFileLen + 1);
     file->seek(M2MTextureDef[i].texFileOfs);
     file->read((void*)tempTexFileName.c_str(),M2MTextureDef[i].texFileLen);
-    std::cout << "texture: '" << tempTexFileName << "'\n";
+    DEBUG(std::cout << "texture: '" << tempTexFileName << "'\n");
     M2MTextureFiles.push_back(tempTexFileName.c_str());
     std::cout<<M2MTextureFiles.size()<<"-"<<M2MTextureFiles[i].c_str()<<"\n";
 }
@@ -269,7 +277,7 @@ std::transform(TexName.begin(), TexName.end(), TexName.begin(), tolower);
 IMB->getMaterial().setTexture(0,Device->getVideoDriver()->getTexture(TexName.c_str()));
 if(i<M2MRenderFlags.size())
 {
-    std::cout<<M2MRenderFlags[i].flags<<"--"<<M2MRenderFlags[i].blending<<"\n";
+    DEBUG(std::cout<<M2MRenderFlags[i].flags<<"--"<<M2MRenderFlags[i].blending<<"\n");
     IMB->getMaterial().BackfaceCulling=(M2MRenderFlags[i].flags & 0x04)?false:true;
     if(M2MRenderFlags[i].blending==1)
         IMB->getMaterial().MaterialType=video::EMT_TRANSPARENT_ALPHA_CHANNEL;

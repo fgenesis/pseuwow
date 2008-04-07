@@ -4,6 +4,12 @@
 #include "SImage.h"
 #include "CImageLoaderBLP.h"
 
+#ifdef _DEBUG
+#define DEBUG(code) code;
+#else
+#define DEBUG(code) ;
+#endif
+
 namespace irr
 {
 namespace video
@@ -24,26 +30,26 @@ bool CImageLoaderBLP::isALoadableFileFormat(io::IReadFile* file) const
  //   std::cout <<"Checking if file is a BLP file\n";
 	if (!file)
 	{
-	    std::cout<<"No such file: "<<file->getFileName()<<"\n";
+	    DEBUG(std::cout<<"No such file: "<<file->getFileName()<<"\n");
 		return false;
 	}
     std::string fileId;
 	// Read the first few bytes of the BLP file
 	if (file->read(&fileId[0], 4) != 4)
     {
-        std::cout << "Cannot read BLP file header\n";
+        DEBUG(std::cout << "Cannot read BLP file header\n");
 		return false;
     }
 
 	if(fileId[0]=='B' && fileId[1]=='L' && fileId[2]=='P' && fileId[3]=='2')
     {
-        std::cout << "Header is BLP2, file should be loadable\n";
+        DEBUG(std::cout << "Header is BLP2, file should be loadable\n");
         return true;
     }
     else
     {
-        std::cout << "Header doesn't match, this is no BLP file\n";
-        std::cout << "Expected:BLP2 Got:"<<fileId.c_str()<<"\n";
+        DEBUG(std::cout << "Header doesn't match, this is no BLP file\n");
+        DEBUG(std::cout << "Expected:BLP2 Got:"<<fileId.c_str()<<"\n");
         return false;
     }
 }

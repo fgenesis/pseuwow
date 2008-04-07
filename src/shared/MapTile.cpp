@@ -83,6 +83,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
         d.oy = mddf.b - 90.0f; // wowdev states Y=B-90, but this doesnt really look as expected...
         d.oz = -mddf.a;
         d.flags = mddf.flags;
+        d.uniqueid = mddf.uniqueid;
         d.model = std::string("./data/model/") + NormalizeFilename(_PathToFileName(adt->_models[mddf.id]));
         // this .mdx -> .m2 transformation is annoying >.< - replace "mdx" and end of string with "m2\0"
         memcpy(&d.model[0] + d.model.size() - 3, "m2\0", 3);

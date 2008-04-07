@@ -57,6 +57,12 @@ class WorldSession;
 
 class SceneWorld : public Scene
 {
+    struct SceneNodeWithGridPos
+    {
+        scene::ISceneNode *scenenode;
+        uint32 gx,gy;
+    };
+
 public:
     SceneWorld(PseuGUI *gui);
     void OnDraw(void);
@@ -65,6 +71,7 @@ public:
     void UpdateTerrain(void);
     void InitTerrain(void);
     void RelocateCamera(void);
+    void UpdateDoodads(void);
 
     WorldPosition GetWorldPosition(void);
 
@@ -82,6 +89,7 @@ private:
     MapMgr *mapmgr;
     IGUIStaticText *debugText;
     bool debugmode;
+    std::map<uint32,SceneNodeWithGridPos> _doodads;
 };
 
 
