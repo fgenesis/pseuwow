@@ -72,7 +72,7 @@ void DrawObject::_Init(void)
         //cube->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
 
         text=_smgr->addTextSceneNode(_guienv->getBuiltInFont(), L"TestText" , irr::video::SColor(255,255,255,255),cube, irr::core::vector3df(0,5,0));
-        if(_obj->IsPlayer())        
+        if(_obj->IsPlayer())
         {
             text->setTextColor(irr::video::SColor(255,255,0,0));
         }
@@ -80,7 +80,7 @@ void DrawObject::_Init(void)
         {
             text->setTextColor(irr::video::SColor(255,0,0,255));
         }
-    
+
     }
     DEBUG(logdebug("initialize DrawObject 0x%X obj: 0x%X "I64FMT,this,_obj,_obj->GetGUID()))
 
