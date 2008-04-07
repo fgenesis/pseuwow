@@ -186,20 +186,19 @@ void PseuGUI::Run(void)
         {
             _UpdateSceneState();
 
-            if(_scene && _initialized)
+            if(!_scene)
             {
-                _scene->OnUpdate(_passtimediff);
+                _device->sleep(10);
+                continue;
             }
 
-            _driver->beginScene(true, true, 0);
-
-            _smgr->drawAll();
-            _guienv->drawAll();
-
-            if(_scene)
-                _scene->OnDraw();
-
-            _driver->endScene();
+            _scene->OnUpdate(_passtimediff); // custom: process input, set camera, etc
+            _driver->beginScene(true, true, _scene->GetBackgroundColor()); // irr: call driver to start drawing
+            _scene->OnDrawBegin(); // custom: draw everything before irrlicht draws everything by itself
+            _smgr->drawAll(); // irr: draw all scene nodes
+            _guienv->drawAll(); // irr: draw gui elements
+            _scene->OnDraw(); // custom: draw everything that has to be draw late (post-processing also belongs here)
+            _driver->endScene(); // irr: drawing done
         }
         catch(...)
         {

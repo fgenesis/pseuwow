@@ -25,7 +25,9 @@ public:
     inline SceneState GetState(void) { return _scenestate; }
     virtual void OnUpdate(s32);
     virtual void OnDraw(void);
+    virtual void OnDrawBegin(void);
     virtual void OnDelete(void);    
+    virtual video::SColor GetBackgroundColor(void);
 protected:
 
     PseuGUI *gui;
@@ -66,12 +68,14 @@ class SceneWorld : public Scene
 public:
     SceneWorld(PseuGUI *gui);
     void OnDraw(void);
+    void OnDrawBegin(void);
     void OnDelete(void);
     void OnUpdate(s32);
     void UpdateTerrain(void);
     void InitTerrain(void);
     void RelocateCamera(void);
     void UpdateDoodads(void);
+    video::SColor GetBackgroundColor(void);
 
     WorldPosition GetWorldPosition(void);
 
@@ -90,6 +94,8 @@ private:
     IGUIStaticText *debugText;
     bool debugmode;
     std::map<uint32,SceneNodeWithGridPos> _doodads;
+    scene::ISceneNode *sky;
+    video::SColor envBasicColor;
 };
 
 

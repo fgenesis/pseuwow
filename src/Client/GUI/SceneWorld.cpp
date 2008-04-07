@@ -32,7 +32,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     ldata.AmbientColor = video::SColorf(0.2f,0.2f,0.2f);
     ldata.DiffuseColor = video::SColorf(1.0f,1.0f,1.0f);
     ldata.Type = video::ELT_DIRECTIONAL;
-    ldata.Position = core::vector3df(-10,5,-5);
+    ldata.Position = core::vector3df(-0.22f,-1,0);
     light->setLightData(ldata);
 
     eventrecv = new MyEventReceiver();
@@ -40,16 +40,26 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     camera = new MCameraFPS(smgr);
     camera->setNearValue(0.1f);
-    camera->setFarValue(12000); // TODO: adjust
+    camera->setFarValue(TILESIZE); // TODO: make this configurable later
 
     debugText = guienv->addStaticText(L"< debug text >",rect<s32>(0,0,driver->getScreenSize().Width,30),true,true,0,-1,true);
 
-    smgr->addSkyDomeSceneNode(driver->getTexture("data/misc/sky.jpg"),64,64,1.0f,2.0f);
+    envBasicColor = video::SColor(0,100,101,190);
 
-    driver->setFog(video::SColor(0,100,101,190), true, fogdist, fogdist + 30, 0.02f);
+    smgr->setShadowColor(); // set shadow to default color
+
+    sky = NULL;
+    //sky = smgr->addSkyDomeSceneNode(driver->getTexture("data/misc/sky.jpg"),64,64,1.0f,2.0f);
+    /* // TODO: for now let irrlicht draw the skybox
+    sky->grab(); // if the camera clip is set too short, the sky will not be rendered properly.
+    sky->remove(); // thus we grab the sky node while removing it from rendering.
+    */
+
+    f32 fogfar = camera->getFarValue() * 0.7f;
+    f32 fognear = fogfar * 0.75f;
+    driver->setFog(envBasicColor, true, fognear, fogfar, 0.02f);
 
     // setup cursor
-
     cursor->setOSCursorVisible(false);
     cursor->addMouseCursorTexture("data/misc/cursor.png", true);
     cursor->setVisible(true);
@@ -203,8 +213,11 @@ void SceneWorld::OnUpdate(s32 timediff)
         if((*it)->isVisible())
             vis++;
     str += vis;
+    str += L"\n";
     ); // END DEBUG;
 
+    str += driver->getFPS();
+    str += L" FPS";
 
     debugText->setText(str.c_str());
 
@@ -212,6 +225,21 @@ void SceneWorld::OnUpdate(s32 timediff)
 
     gui->domgr.Update(); // iterate over DrawObjects, draw them and clean up
 
+}
+
+void SceneWorld::OnDrawBegin(void)
+{
+    // TODO: this does work, but looks like the skybox is moving unsynced with the rest of the scene
+    /*
+    // this is the custom skybox/skydome render pass, done before anything else is drawn
+    f32 clip = camera->getFarValue(); // store old farclip
+    camera->setFarValue(50000); // set it so some incredible value, the sky is withoin these bounds for sure
+    camera->getNode()->render(); // set the farclip in the driver
+    //sky->OnRegisterSceneNode(); // process sky rendering
+    sky->OnAnimate(0);
+    sky->render();
+    camera->setFarValue(clip); // restore old farclip
+    */
 }
 
 void SceneWorld::OnDraw(void)
@@ -222,6 +250,7 @@ void SceneWorld::OnDraw(void)
 void SceneWorld::OnDelete(void)
 {
     DEBUG(logdebug("~SceneWorld()"));
+    //sky->drop();
 }
 
 void SceneWorld::InitTerrain(void)
@@ -235,7 +264,7 @@ void SceneWorld::InitTerrain(void)
 
     mapsize = (8 * 16 * 3) - 1; // 9-1 height floats in 16 chunks per tile per axis in 3 MapTiles
     tilesize = UNITSIZE;
-    meshsize = (s32)CHUNKSIZE*3;
+    meshsize = (s32)TILESIZE/3;
 
     //camera->setPosition(core::vector3df(mapsize*tilesize/2, 0, mapsize*tilesize/2) + terrainPos);
 
@@ -334,10 +363,16 @@ void SceneWorld::UpdateTerrain(void)
                         scene::IAnimatedMesh *mesh = smgr->getMesh(d->model.c_str());
                         if(mesh)
                         {
-                            scene::ISceneNode *doodad = smgr->addAnimatedMeshSceneNode(mesh);
+                            scene::IAnimatedMeshSceneNode *doodad = smgr->addAnimatedMeshSceneNode(mesh);
                             if(doodad)
                             {
+                                for(u32 m = 0; m < doodad->getMaterialCount(); m++)
+                                {
+                                    doodad->getMaterial(m).setFlag(EMF_FOG_ENABLE, true);
+                                }
                                 doodad->setAutomaticCulling(EAC_BOX);
+                                // this is causing the framerate to drop to ~1. better leave it disabled for now :/
+                                //doodad->addShadowVolumeSceneNode();
                                 doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
                                 doodad->setRotation(core::vector3df(-d->ox, -d->oy-90, -d->oz));
                                 SceneNodeWithGridPos gp;
@@ -430,6 +465,11 @@ WorldPosition SceneWorld::GetWorldPosition(void)
     // TODO: later do not use CAMERA, but CHARACTER position, as soon as camera is changed from 1st to 3rd person view
     // and floating around character in the middle
     return IrrToWP(camera->getPosition(), IRR_TO_O(DEG_TO_RAD(camera->getHeading())));
+}
+
+video::SColor SceneWorld::GetBackgroundColor(void)
+{
+    return envBasicColor;
 }
 
 
