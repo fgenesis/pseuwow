@@ -211,7 +211,7 @@ if(M2Vertices.size()>0)
 
 for(u32 i=0;i<M2MVertices.size();i++)
 {
-    M2Vertices.push_back(video::S3DVertex(core::vector3df(M2MVertices[i].pos.X,-M2MVertices[i].pos.Y,M2MVertices[i].pos.Z),core::vector3df(M2MVertices[i].normal.X,-M2MVertices[i].normal.Y,M2MVertices[i].normal.Z), video::SColor(255,100,100,100),M2MVertices[i].texcoords));
+    M2Vertices.push_back(video::S3DVertex(core::vector3df(M2MVertices[i].pos.X,M2MVertices[i].pos.Z,M2MVertices[i].pos.Y),core::vector3df(M2MVertices[i].normal.X,M2MVertices[i].normal.Z,M2MVertices[i].normal.Y), video::SColor(255,100,100,100),M2MVertices[i].texcoords));
 }
 
 
@@ -274,11 +274,13 @@ if(i<M2MRenderFlags.size())
     if(M2MRenderFlags[i].blending==1)
         IMB->getMaterial().MaterialType=video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 }
+IMB->recalculateBoundingBox();
     Mesh->addMeshBuffer(IMB);
 IMB->drop();
 //std::cout << "Mesh now has "<<Mesh->getMeshBufferCount()<<" Buffers\n";
 }
-
+Device->getSceneManager()->getMeshManipulator()->flipSurfaces(Mesh); //Fix inverted surfaces after the rotation
+Device->getSceneManager()->getMeshManipulator()->recalculateNormals(Mesh,true);//just to be sure
 aniMesh= new SAnimatedMesh();
 aniMesh->addMesh(Mesh);
 Mesh->drop();

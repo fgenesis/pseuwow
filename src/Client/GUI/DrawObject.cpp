@@ -55,9 +55,6 @@ void DrawObject::_Init(void)
         scene::IAnimatedMesh *mesh = _smgr->getMesh(modelfile.c_str());
         if(mesh)
         {
-            rotation.X = 270.0f; // M2 models are stored "lying on the side" - this puts them standing
-                                 // ok, this f*cks up the text scene node, but shouldnt be such a problem right now,
-                                 // until the M2-loader has been corrected so far that this line can be removed
             cube = _smgr->addAnimatedMeshSceneNode(mesh);
             //video::ITexture *tex = _device->getVideoDriver()->getTexture("data/misc/square.jpg");
             //cube->setMaterialTexture(0, tex);
