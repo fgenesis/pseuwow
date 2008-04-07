@@ -44,7 +44,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     debugText = guienv->addStaticText(L"< debug text >",rect<s32>(0,0,driver->getScreenSize().Width,30),true,true,0,-1,true);
 
-    smgr->addSkyDomeSceneNode(driver->getTexture("data/misc/sky.jpg"),64,64,1.0f,2.0f);    
+    smgr->addSkyDomeSceneNode(driver->getTexture("data/misc/sky.jpg"),64,64,1.0f,2.0f);
 
     driver->setFog(video::SColor(0,100,101,190), true, fogdist, fogdist + 30, 0.02f);
 
@@ -106,7 +106,7 @@ void SceneWorld::OnUpdate(s32 timediff)
         else
             camera->turnLeft(timediff_f * M_PI * 25);
     }
-    
+
     if(eventrecv->key.pressed_once(KEY_BACK))
     {
         debugmode = !debugmode;
@@ -140,7 +140,7 @@ void SceneWorld::OnUpdate(s32 timediff)
             scrnshot->drop();
         }
     }
-    
+
     if(camera->getPitch() < 270 && camera->getPitch() > 90)
         camera->turnUp(90);
 
@@ -164,10 +164,10 @@ void SceneWorld::OnUpdate(s32 timediff)
         //device->getCursorControl()->setPosition(device->getCursorControl()->getPosition());
         mouse_pos = device->getCursorControl()->getPosition();
     }
-    
+
     // camera height control
-    if (eventrecv->mouse.wheel < 10)
-        eventrecv->mouse.wheel = 10;
+    if (eventrecv->mouse.wheel < 2)
+        eventrecv->mouse.wheel = 2;
     camera->setHeight(  eventrecv->mouse.wheel + terrain->getHeight(camera->getPosition())  );
 
     WorldPosition wp = GetWorldPosition();
@@ -183,7 +183,7 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += " ## HEAD: ";
     str += IRR_TO_O(camera->getHeading());
     str += L"  Pos: ";
-    str = ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o; 
+    str = ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o;
     str += L"  -- Terrain: Sectors: ";
     str += (int)terrain->getSectorsRendered();
     str += L" / ";
@@ -236,7 +236,7 @@ void SceneWorld::UpdateTerrain(void)
 {
     // check if we changed the maptile
     if(map_gridX == mapmgr->GetGridX() && map_gridY == mapmgr->GetGridY())
-        return; // grid not changed, not necessary to update tile data        
+        return; // grid not changed, not necessary to update tile data
 
     // ... if changed, do necessary stuff...
     map_gridX = mapmgr->GetGridX();
@@ -303,7 +303,7 @@ void SceneWorld::UpdateTerrain(void)
                         if(doodad)
                         {
                             doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
-                            doodad->setRotation(core::vector3df(d->ox + 270.0f, d->oy, d->oz)); // +270 solves M2 models lying on the side
+                            doodad->setRotation(core::vector3df(270+d->ox, -d->oy-90, -d->oz));   // +270 solves M2 models lying on the side
                         }
                     }
                 }
@@ -355,7 +355,7 @@ void SceneWorld::UpdateTerrain(void)
         tpos.X = -(maptile->GetBaseX() + TILESIZE);
         tpos.Y = -(maptile->GetBaseY() + TILESIZE);
     }
-    logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z); 
+    logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z);
     terrain->setPosition(tpos);
 
     logdebug("SceneWorld: Smoothing terrain normals...");
