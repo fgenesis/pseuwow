@@ -199,6 +199,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\shared\ProgressBar.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\shared\ProgressBar.h"
+				>
+			</File>
+			<File
 				RelativePath=".\shared\SysDefs.h"
 				>
 			</File>

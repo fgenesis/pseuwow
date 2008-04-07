@@ -712,20 +712,18 @@ void ExtractMapDependencies(void)
                 continue;
 
             // prepare lowercased and "underlined" path for file
-            std::string copy = mpqfn;
-            std::transform(copy.begin(), copy.end(), copy.begin(), ::tolower);
-            std::transform(copy.begin(), copy.end(), copy.begin(), replaceSpaces);
-            if (copy.find_first_of("/\\") != std::string::npos)
+            std::string copy = NormalizeFilename(mpqfn);
+            if (copy.find_first_of("/") != std::string::npos)
             {
                 std::string copy2 = copy;
-                char* tok = strtok((char*)copy2.c_str(),"/\\");
+                char* tok = strtok((char*)copy2.c_str(),"/");
                 std::string fullpath = pathtex;
-                while (tok && !strstr(tok, "."))
+                while (tok && !strstr(tok, ".blp"))
                 {
                     fullpath += "/";
                     fullpath += tok;
                     CreateDir(fullpath.c_str());
-                    tok = strtok(NULL, "/\\");
+                    tok = strtok(NULL, "/");
                 }
             }
 
