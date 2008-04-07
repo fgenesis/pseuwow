@@ -29,6 +29,15 @@ void Scene::OnUpdate(s32)
 {
 }
 
+void Scene::OnDrawBegin(void)
+{
+}
+
+video::SColor Scene::GetBackgroundColor(void)
+{
+    return 0;
+}
+
 Scene::~Scene()
 {
     DEBUG(logdebug("Scene::~Scene()"));
