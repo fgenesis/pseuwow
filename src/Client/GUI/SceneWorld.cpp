@@ -170,8 +170,11 @@ void SceneWorld::OnUpdate(s32 timediff)
         eventrecv->mouse.wheel = 2;
     camera->setHeight(  eventrecv->mouse.wheel + terrain->getHeight(camera->getPosition())  );
 
+    core::stringw str = L"";
+
+    DEBUG(
     WorldPosition wp = GetWorldPosition();
-    core::stringw str = L"Camera: pitch:";
+    str += L"Camera: pitch:";
     str += camera->getPitch();
     str += L"  c pos:";
     str += camera->getPosition().X;
@@ -189,8 +192,22 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += L" / ";
     str += (int)terrain->getSectorCount();
     str += L"\n";
-    str += device->getCursorControl()->isVisible() ? L"Cursor: VISIBLE" : L"Cursor: HIDDEN";
+
+
+    const core::list<scene::ISceneNode*>& nodelist = smgr->getRootSceneNode()->getChildren();
+    str += L"Scene nodes: total: ";
+    str += nodelist.getSize();
+    str += L" visible: ";
+    u32 vis = 0;
+    for(core::list<scene::ISceneNode*>::ConstIterator it = nodelist.begin(); it != nodelist.end(); it++)
+        if((*it)->isVisible())
+            vis++;
+    str += vis;
+    ); // END DEBUG;
+
+
     debugText->setText(str.c_str());
+
 
 
     gui->domgr.Update(); // iterate over DrawObjects, draw them and clean up
@@ -260,11 +277,27 @@ void SceneWorld::UpdateTerrain(void)
         return;
     }
 
-    // something is not good here. we have terrain, but the chunks are read incorrectly.
-    // need to find out where which formula is wrong
-    // the current terrain renderer code is just a test to see if ADT files are read correctly.
-    // EDIT: it seems to display fine now, but i am still not sure if the way it is done is correct...
-    mutex.acquire(); // prevent other threads from deleting the maptile
+    UpdateDoodads(); // drop doodads on maps not loaded anymore. no maptile pointers are dereferenced here, so it can be done before acquiring the mutex
+
+    mutex.acquire(); // prevent other threads from deleting maptiles
+
+    // to set the correct position of the terrain, we have to use the top-left tile's coords as terrain base pos
+    MapTile *maptile = mapmgr->GetNearTile(-1, -1);
+    vector3df tpos(0,0,0); // height already managed when building up terrain (-> Y = always 0)
+    if(maptile)
+    {
+        tpos.X = -maptile->GetBaseX();
+        tpos.Z = -maptile->GetBaseY();
+    }
+    else if(maptile = mapmgr->GetCurrentTile()) // this is tile (0, 0) in relative coords
+    {
+        logdebug("SceneWorld: Using alternative coords due to missing MapTile");
+        tpos.X = -(maptile->GetBaseX() + TILESIZE);
+        tpos.Y = -(maptile->GetBaseY() + TILESIZE);
+    }
+    logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z);
+    terrain->setPosition(tpos);
+
     logdebug("SceneWorld: Displaying MapTiles near grids x:%u y:%u",mapmgr->GetGridX(),mapmgr->GetGridY());
     logdebug("Loaded maps: %u: %s",mapmgr->GetLoadedMapsCount(), mapmgr->GetLoadedTilesString().c_str());
     for(s32 tiley = 0; tiley < 3; tiley++)
@@ -296,14 +329,23 @@ void SceneWorld::UpdateTerrain(void)
                 for(uint32 i = 0; i < maptile->GetDoodadCount(); i++)
                 {
                     Doodad *d = maptile->GetDoodad(i);
-                    scene::IAnimatedMesh *mesh = smgr->getMesh(d->model.c_str());
-                    if(mesh)
+                    if(_doodads.find(d->uniqueid) == _doodads.end()) // only add doodads that dont exist yet
                     {
-                        scene::ISceneNode *doodad = smgr->addAnimatedMeshSceneNode(mesh);
-                        if(doodad)
+                        scene::IAnimatedMesh *mesh = smgr->getMesh(d->model.c_str());
+                        if(mesh)
                         {
-                            doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
-                            doodad->setRotation(core::vector3df(-d->ox, -d->oy-90, -d->oz));   // +270 solves M2 models lying on the side
+                            scene::ISceneNode *doodad = smgr->addAnimatedMeshSceneNode(mesh);
+                            if(doodad)
+                            {
+                                doodad->setAutomaticCulling(EAC_BOX);
+                                doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
+                                doodad->setRotation(core::vector3df(-d->ox, -d->oy-90, -d->oz));
+                                SceneNodeWithGridPos gp;
+                                gp.gx = mapmgr->GetGridX() + tilex - 1;
+                                gp.gy = mapmgr->GetGridY() + tiley - 1;
+                                gp.scenenode = doodad;
+                                _doodads[d->uniqueid] = gp;
+                            }
                         }
                     }
                 }
@@ -341,23 +383,6 @@ void SceneWorld::UpdateTerrain(void)
             terrain->setColor(i,j, video::SColor(255,r,g,b));
         }
 
-    // to set the correct position of the terrain, we have to use the top-left tile's coords as terrain base pos
-    MapTile *maptile = mapmgr->GetNearTile(-1, -1);
-    vector3df tpos(0,0,0); // height already managed when building up terrain (-> Y = always 0)
-    if(maptile)
-    {
-        tpos.X = -maptile->GetBaseX();
-        tpos.Z = -maptile->GetBaseY();
-    }
-    else if(maptile = mapmgr->GetCurrentTile()) // this is tile (0, 0) in relative coords
-    {
-        logdebug("SceneWorld: Using alternative coords due to missing MapTile");
-        tpos.X = -(maptile->GetBaseX() + TILESIZE);
-        tpos.Y = -(maptile->GetBaseY() + TILESIZE);
-    }
-    logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z);
-    terrain->setPosition(tpos);
-
     logdebug("SceneWorld: Smoothing terrain normals...");
     terrain->smoothNormals();
 
@@ -365,6 +390,24 @@ void SceneWorld::UpdateTerrain(void)
     // do NOT relocate camera if we moved around and triggered the map loading code by ourself!
     RelocateCamera();
 }
+
+// drop unneeded doodads from the map
+void SceneWorld::UpdateDoodads(void)
+{
+    uint32 s = _doodads.size();
+    std::set<uint32> tmp; // temporary storage for all doodad unique ids
+    // too bad erasing from a map causes pointer invalidation, so first store all unique ids, and then erase
+    for(std::map<uint32,SceneNodeWithGridPos>::iterator it = _doodads.begin(); it != _doodads.end(); it++ )
+        if(!mapmgr->GetTile(it->second.gx, it->second.gy))
+            tmp.insert(it->first);
+    for(std::set<uint32>::iterator it = tmp.begin(); it != tmp.end(); it++)
+    {
+        _doodads[*it].scenenode->remove();
+        _doodads.erase(*it);
+    }
+    logdebug("SceneWorld: Doodads cleaned up, before: %u, after: %u, dropped: %u", s, _doodads.size(), s - _doodads.size());
+}
+
 
 void SceneWorld::RelocateCamera(void)
 {
