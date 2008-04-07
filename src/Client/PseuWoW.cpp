@@ -190,6 +190,7 @@ bool PseuInstance::InitGUI(void)
         _gui->SetResolution(x,y,depth);
         _gui->SetVSync(vsync);
         _gui->UseShadows(shadows);
+        _gui->SetWindowed(win);
         _guithread = new ZThread::Thread(rgui);
         return true;
     }
