@@ -303,7 +303,7 @@ void SceneWorld::UpdateTerrain(void)
                         if(doodad)
                         {
                             doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
-                            doodad->setRotation(core::vector3df(270-d->ox, -d->oy-90, -d->oz));   // +270 solves M2 models lying on the side
+                            doodad->setRotation(core::vector3df(-d->ox, -d->oy-90, -d->oz));   // +270 solves M2 models lying on the side
                         }
                     }
                 }
