@@ -55,9 +55,12 @@ SceneLogin::SceneLogin(PseuGUI *gui) : Scene(gui)
 
     dimension2d<s32> scrn = driver->getScreenSize();
 
-    irrlogo = guienv->addImage(driver->getTexture("data/misc/irrlichtlogo.png"), core::position2d<s32>(5,5));
-guienv->addStaticText(L"Password:",rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)-10, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)-10), false, false, 0, 0);
-guienv->addStaticText(L"Account:", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+50, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+70), false, false, 0, 0);
+    irrlogo = guienv->addImage(driver->getTexture("data/misc/irrlichtlogo.png"), core::position2d<s32>(5,5),true,root);
+    background = guienv->addImage(driver->getTexture("data/misc/sky.jpg"), core::position2d<s32>(5,5),true,root);
+    background->setRelativePosition(rect<s32>(0,0,scrn.Width,scrn.Height));
+    irrlogo->setScaleImage(true);
+guienv->addStaticText(L"Account:",rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)-10, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+10), false, false, 0, 0);
+guienv->addStaticText(L"Password:", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+50, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+70), false, false, 0, 0);
 guienv->addEditBox(L"", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+10, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+30), true, 0, 1);
 guienv->addEditBox(L"", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+70, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+90), true, 0, 2)->setPasswordBox(true);
 guienv->addButton(rect<s32>(scrn.Width-120, scrn.Height-40, scrn.Width-10, scrn.Height-10), 0, 4, L"Quit");
