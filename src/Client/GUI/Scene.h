@@ -60,7 +60,7 @@ public:
 
 private:
     gui::IGUIElement* root;
-    IGUIImage *irrlogo, *driverlogo;
+    IGUIImage *irrlogo, *background;
     GUIEventReceiver *eventrecv;
     PseuGUI* _gui;
 };
