@@ -329,6 +329,8 @@ void PseuInstance::Update()
         {
             logdetail("Disconnected, switching GUI back to Loginscreen.");
             _gui->SetSceneState(SCENESTATE_LOGINSCREEN);
+            while(_gui->GetSceneState() != SCENESTATE_LOGINSCREEN) // .. and wait until scenestate is set
+                Sleep(1);
         }
     }
 

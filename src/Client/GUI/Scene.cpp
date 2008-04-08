@@ -8,6 +8,7 @@ Scene::Scene(PseuGUI *g)
 {
     memset(scenedata, 0, sizeof(uint32) * SCENEDATA_SIZE);
     gui = g;
+    instance = gui->GetInstance();
     device = gui->_device;
     driver = gui->_driver;
     smgr = gui->_smgr;
@@ -15,6 +16,7 @@ Scene::Scene(PseuGUI *g)
     cursor = new CCursorController(device->getCursorControl(), driver);
     cursor->setOSCursorVisible(true);
     cursor->setVisible(false);
+    cursor->render(); // apply above settings
 }
 
 void Scene::OnDraw(void)
