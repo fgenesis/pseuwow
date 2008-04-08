@@ -18,7 +18,6 @@ public:
     PseuInstance *GetInstance(void);
     void ClearSocket(void);
     void SetLogonData(void);
-    void SetLogonData(std::string, std::string);
     void SendLogonChallenge(void);
     bool MustDie(void);
     void SetMustDie(void);

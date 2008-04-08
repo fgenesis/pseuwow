@@ -95,6 +95,8 @@ public:
 
     // scenes
     void SetSceneState(SceneState);
+    bool SetSceneData(uint32, uint32);
+    inline uint32 GetSceneState(void) { return _scenestate; }
 
     // helpers
     WorldPosition GetWorldPosition(void);

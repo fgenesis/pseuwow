@@ -1016,8 +1016,11 @@ DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
 
     ZThread::FastMutex mut;
     mut.acquire();
-    // TODO: not sure if this piece of code will work as intended, needs some testing
-    if(ins->GetWSession() && ins->GetWSession()->InWorld())
+    if(!ins->GetWSession() && !ins->GetRSession())
+    {
+        ins->GetGUI()->SetSceneState(SCENESTATE_LOGINSCREEN);
+    }
+    else if(ins->GetWSession() && ins->GetWSession()->InWorld())
     {
        ins->GetGUI()->SetSceneState(SCENESTATE_WORLD);
        ins->GetWSession()->objmgr.ReNotifyGUI();

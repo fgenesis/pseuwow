@@ -14,6 +14,7 @@
 #include "GUI/PseuGUI.h"
 #include "RemoteController.h"
 #include "Cli.h"
+#include "GUI/SceneData.h"
 
 
 //###### Start of program code #######
@@ -60,6 +61,7 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _fastquit=false;
     _startrealm=true;
     _createws=false;
+    _creaters=false;
     _error=false;
     _initialized=false;
 
@@ -157,8 +159,6 @@ bool PseuInstance::Init(void)
         return false;
     }
 
-    login=false;//No GUI Login attempted yet
-
     log("Init complete.");
     _initialized=true;
     return true;
@@ -224,18 +224,11 @@ void PseuInstance::Run(void)
     }
     else
     {
-        // for now: create the realmsession only on startup.
-        // may be extended to a script command later on.
-        // then try to connect
-        _rsession = new RealmSession(this);
-        _rsession->Connect();
 
-        if(!GetConf()->enablegui||!(GetConf()->accname.empty()||GetConf()->accpass.empty()))
+        if(!GetConf()->enablegui || !(GetConf()->accname.empty() || GetConf()->accpass.empty()) )
         {
             logdebug("GUI not active or Login data pre-entered, skipping Login GUI");
-
-            _rsession->SetLogonData();
-            _rsession->SendLogonChallenge();
+            CreateRealmSession();
         }
         else
         {
@@ -307,24 +300,36 @@ void PseuInstance::Update()
         _wsession->Start();
     }
 
-    // if we have no active sessions, we may reconnect, if no GUI is active for login
-    if((!_rsession) && (!_wsession) && GetConf()->reconnect && !(login||GetConf()->enablegui))
+    if(_creaters)
     {
-        logdetail("Waiting %u ms before reconnecting.",GetConf()->reconnect);
-        for(uint32 t = 0; t < GetConf()->reconnect && !this->Stopped(); t+=100) Sleep(100);
-        this->Sleep(1000); // wait 1 sec before reconnecting
-        _rsession = new RealmSession(this);
-        _rsession->Connect();
-        _rsession->SetLogonData();
-        _rsession->SendLogonChallenge(); // and login again
+        _creaters = false;
+        if(_rsession)
+            delete _rsession;
+        ConnectToRealm();
     }
-    if((!_rsession) && (!_wsession) && GetConf()->enablegui && login)
+
+    // if we have no active sessions, we may reconnect, if no GUI is active for login
+    if((!_rsession) && (!_wsession) && GetConf()->reconnect && !_gui)
     {
-        logdetail("Disconnected, switching GUI back to Loginscreen.");
-        _rsession = new RealmSession(this);
-        _rsession->Connect();
-        _gui->SetSceneState(SCENESTATE_LOGINSCREEN);
-        login=false;
+        if(GetConf()->accname.empty() || GetConf()->accpass.empty())
+        {
+            logdev("Skipping reconnect, acc name or password not set");
+        }
+        else
+        {   // everything fine, we have all data
+            logdetail("Waiting %u ms before reconnecting.",GetConf()->reconnect);
+            for(uint32 t = 0; t < GetConf()->reconnect && !this->Stopped(); t+=100) Sleep(100);
+            this->Sleep(1000); // wait 1 sec before reconnecting
+            CreateRealmSession();
+        }
+    }
+    if((!_rsession) && (!_wsession) && _gui)
+    {
+        if(_gui->GetSceneState() != SCENESTATE_LOGINSCREEN)
+        {
+            logdetail("Disconnected, switching GUI back to Loginscreen.");
+            _gui->SetSceneState(SCENESTATE_LOGINSCREEN);
+        }
     }
 
     // update currently existing/active sessions
@@ -399,6 +404,24 @@ void PseuInstance::DeleteGUI(void)
     if(GetScripts()->ScriptExists("_onguiclose"))
         AddCliCommand("_onguiclose"); // since this func is called from another thread, use threadsafe variant via CLI
 }
+
+bool PseuInstance::ConnectToRealm(void)
+{
+    _rsession = new RealmSession(this);
+    _rsession->SetLogonData(); // get accname & accpass from PseuInstanceConfig and set it in the realm session
+    _rsession->Connect();
+    if(_rsession->MustDie()) // something failed. it will be deleted in next Update() call
+    {
+        logerror("Connecting to Realm failed!");
+        if(_gui)
+            _gui->SetSceneData(ISCENE_LOGIN_CONN_STATUS, DSCENE_LOGIN_CONN_FAILED);
+        return false;
+    }
+
+    _rsession->SendLogonChallenge();
+    return true;
+}
+
 
 PseuInstanceConf::PseuInstanceConf()
 {

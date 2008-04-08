@@ -285,6 +285,14 @@ void PseuGUI::_UpdateSceneState(void)
     }
 }
 
+bool PseuGUI::SetSceneData(uint32 index, uint32 value)
+{
+    if(!_scene)
+        return false;
+    _scene->SetData(index, value);
+    return true;
+}
+
 
 // used to get our current WorldPosition
 WorldPosition PseuGUI::GetWorldPosition(void)

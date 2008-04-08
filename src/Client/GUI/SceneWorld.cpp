@@ -49,6 +49,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     smgr->setShadowColor(); // set shadow to default color
 
     sky = NULL;
+    selectedNode = oldSelectedNode = NULL;
     //sky = smgr->addSkyDomeSceneNode(driver->getTexture("data/misc/sky.jpg"),64,64,1.0f,2.0f);
     /* // TODO: for now let irrlicht draw the skybox
     sky->grab(); // if the camera clip is set too short, the sky will not be rendered properly.
@@ -89,6 +90,15 @@ void SceneWorld::OnUpdate(s32 timediff)
     else if( !(mouse_pressed_right || mouse_pressed_left) && !cursor->isVisible())
     {
         cursor->setVisible(true);
+    }
+
+    // object focused - only check if mouse moved, saves CPU
+    // TODO: check if camera moved, also (maybe from external source)
+    if(false && mouse_pos != cursor->getMousePos())
+    {
+        focusedNode = smgr->getSceneCollisionManager()->getSceneNodeFromScreenCoordinatesBB(cursor->getMousePos());
+        if(focusedNode && mouse_pressed_left)
+            selectedNode = focusedNode;
     }
 
 
@@ -151,6 +161,7 @@ void SceneWorld::OnUpdate(s32 timediff)
         }
     }
 
+    // this fixes the camera getting screwed up by noob user; resets it back to a usable position if someone managed to flip it over
     if(camera->getPitch() < 270 && camera->getPitch() > 90)
         camera->turnUp(90);
 

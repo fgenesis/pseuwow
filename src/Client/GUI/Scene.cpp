@@ -6,6 +6,7 @@
 
 Scene::Scene(PseuGUI *g)
 {
+    memset(scenedata, 0, sizeof(uint32) * SCENEDATA_SIZE);
     gui = g;
     device = gui->_device;
     driver = gui->_driver;

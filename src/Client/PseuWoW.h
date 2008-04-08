@@ -81,6 +81,7 @@ public:
     inline PseuInstanceRunnable *GetRunnable(void) { return _runnable; }
     inline PseuGUI *GetGUI(void) { return _gui; }
     void DeleteGUI(void);
+    bool ConnectToRealm(void);
 
     inline void SetConfDir(std::string dir) { _confdir = dir; }
     inline std::string GetConfDir(void) { return _confdir; }
@@ -101,10 +102,10 @@ public:
     void Sleep(uint32 msecs);
 
     inline void CreateWorldSession(void) { _createws = true; }
+    inline void CreateRealmSession(void) { _creaters = true; }
 
     void ProcessCliQueue(void);
     void AddCliCommand(std::string);
-    bool login;//Set when GUI attempts to login
 
 private:
 
@@ -118,7 +119,7 @@ private:
     bool _stop,_fastquit;
     bool _startrealm;
     bool _error;
-    bool _createws;
+    bool _createws, _creaters; // must create world/realm session?
     BigNumber _sessionkey;
     char *_ver,*_ver_short;
     SocketHandler _sh;

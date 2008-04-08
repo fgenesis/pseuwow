@@ -2,6 +2,7 @@
 #define _SCENE_H
 
 #include "irrlicht/irrlicht.h"
+#include "SceneData.h"
 
 using namespace irr;
 using namespace core;
@@ -28,6 +29,7 @@ public:
     virtual void OnDrawBegin(void);
     virtual void OnDelete(void);
     virtual video::SColor GetBackgroundColor(void);
+    virtual void SetData(uint32 index, uint32 value) { scenedata[index] = value; }
 protected:
 
     PseuGUI *gui;
@@ -37,6 +39,7 @@ protected:
     irr::gui::IGUIEnvironment* guienv;
     CCursorController *cursor;
     SceneState _scenestate;
+    uint32 scenedata[SCENEDATA_SIZE]; // generic storage for anything the PseuInstance thread wants to tell us
 };
 
 class SceneGuiStart : public Scene
@@ -110,6 +113,7 @@ private:
     bool debugmode;
     std::map<uint32,SceneNodeWithGridPos> _doodads;
     scene::ISceneNode *sky;
+    scene::ISceneNode *selectedNode, *oldSelectedNode, *focusedNode, *oldFocusedNode;
     video::SColor envBasicColor;
 };
 
