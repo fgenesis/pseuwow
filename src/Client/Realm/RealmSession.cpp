@@ -295,6 +295,19 @@ void RealmSession::_HandleRealmList(ByteBuffer& pkt)
     GetInstance()->CreateWorldSession(); // will be done at next PseuInstance::Update()
 }
 
+void RealmSession::SetLogonData(void)
+{
+    _accname=GetInstance()->GetConf()->accname;
+    _accpass=GetInstance()->GetConf()->accpass;
+}
+
+void RealmSession::SetLogonData(std::string accname, std::string accpass)
+{
+    _accname=accname;
+    _accpass=accpass;
+    logdebug("Data Set");
+}
+
 void RealmSession::SendLogonChallenge(void)
 {
     if(!_socket)
@@ -302,14 +315,14 @@ void RealmSession::SendLogonChallenge(void)
         logerror("Can't send logon challenge, socket doesn't exist");
         return;
     }
-    if( GetInstance()->GetConf()->accname.empty() || GetInstance()->GetConf()->clientversion_string.empty()
+    if( _accname.empty() || GetInstance()->GetConf()->clientversion_string.empty()
         || GetInstance()->GetConf()->clientbuild==0 || GetInstance()->GetConf()->clientlang.empty() )
     {
         logcritical("Missing data, can't send Login challenge to Realm Server! (check your conf files)");
         GetInstance()->SetError();
         return;
     }
-    std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
+    std::string acc = stringToUpper(_accname);
     ByteBuffer packet;
     packet << (uint8)AUTH_LOGON_CHALLENGE;
     packet << (uint8)6;
@@ -327,7 +340,7 @@ void RealmSession::SendLogonChallenge(void)
     packet.append(acc.c_str(),acc.length()); // append accname, skip \0
 
     SendRealmPacket(packet);
-
+    logdebug("Packet Sent");
 }
 
 void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
@@ -346,10 +359,10 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
     switch (lc.error)
     {
     case 4:
-        logerror("Realm Server did not find account \"%s\"!",GetInstance()->GetConf()->accname.c_str());
+        logerror("Realm Server did not find account \"%s\"!",_accname.c_str());
         break;
     case 6:
-        logerror("Account \"%s\" is already logged in!",GetInstance()->GetConf()->accname.c_str());
+        logerror("Account \"%s\" is already logged in!",_accname.c_str());
         // TODO: wait a certain amount of time before reconnecting? conf option?
         break;
     case 9:
@@ -362,8 +375,8 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
 
             // now lets start calculating
             BigNumber N,A,B,a,u,x,v,S,salt,unk1,g,k(3); // init BNs, default k to 3
-            std::string user=stringToUpper( GetInstance()->GetConf()->accname );
-            std::string _authstr=stringToUpper( user +":"+GetInstance()->GetConf()->accpass );
+            std::string user=stringToUpper( _accname );
+            std::string _authstr=stringToUpper( user +":"+_accpass );
 
             B.SetBinary(lc.B,32);
             g.SetBinary(lc.g,lc.g_len);
@@ -435,7 +448,7 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
             Nhash.UpdateBigNumbers(&N,NULL);
             Nhash.Finalize();
             ghash.UpdateBigNumbers(&g,NULL);
-            ghash.Finalize();					
+            ghash.Finalize();
             for(i=0;i<20;i++)Ng_hash[i] = Nhash.GetDigest()[i]^ghash.GetDigest()[i];
             //printchex(Ng_hash,20,true);
 
@@ -467,7 +480,7 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
             logdebug("--> CRC=%s",toHexDump((uint8*)crc_hash,20,false).c_str());
 
 
-            // now lets prepare the packet 
+            // now lets prepare the packet
             ByteBuffer packet;
             packet << (uint8)AUTH_LOGON_PROOF;
             packet.append(A.AsByteArray(),A.GetNumBytes());
@@ -519,7 +532,7 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
             DieOrReconnect(true);
             return;
 
-        // cover all other cases. continue only if success. 
+        // cover all other cases. continue only if success.
         default:
             if(error != REALM_AUTH_SUCCESS)
             {
@@ -529,7 +542,7 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
                 return;
             }
     }
-    
+
 
     sAuthLogonProof_S lp;
     pkt.read((uint8*)&lp, 26); // the compiler didnt like 'sizeof(sAuthLogonProof_S)', said it was 28
@@ -592,7 +605,7 @@ void RealmSession::_HandleTransferData(ByteBuffer& pkt)
 
     _transbuf.append(pkt.contents(),pkt.size()); // append everything to the transfer buffer, which may also store incomplete bytes from the packet before
     pkt.rpos(pkt.size()); // set rpos to the end of the packet to indicate that we used all data
-    
+
     logdev("transbuf size=%u rpos=%u diff=%u",_transbuf.size(),_transbuf.rpos(),_transbuf.size() - _transbuf.rpos());
 
     while( _transbuf.size() - _transbuf.rpos() >= 3) // 3 = sizeof(uint32)+sizeof(uint8)
@@ -619,7 +632,7 @@ void RealmSession::_HandleTransferData(ByteBuffer& pkt)
             printf("\r[%.2f%% done]",pct);
             _log_resetcolor(true);
         }
-        
+
     }
 
     // finalize file

@@ -45,7 +45,7 @@ PseuGUI::PseuGUI()
     _guienv = NULL;
     _scene = NULL;
     _passtime = _lastpasstime = _passtimediff = 0;
-}
+    }
 
 PseuGUI::~PseuGUI()
 {
@@ -126,7 +126,7 @@ void PseuGUI::_Init(void)
 	_driver->addExternalImageLoader(BLPloader);
     scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device, "./data/texture");
     _smgr->addExternalMeshLoader(m2loader);
-
+    _throttle=0;
     _initialized = true;
 }
 
@@ -199,6 +199,13 @@ void PseuGUI::Run(void)
             _guienv->drawAll(); // irr: draw gui elements
             _scene->OnDraw(); // custom: draw everything that has to be draw late (post-processing also belongs here)
             _driver->endScene(); // irr: drawing done
+            if(_driver->getFPS()>100 && _throttle < 10)//Primitive FPS-Limiter - upper cap hardcoded 100 FPS.
+                _throttle++;                           //lowercap 60 (if it drops below, limiting is eased).
+            if(_driver->getFPS()<60 && _throttle>0)    //but honestly, a 10 msec delay is not worth this amount of code.
+                _throttle--;                           //If the FPS is down, it will never be because of this
+            if(_throttle>0)                            //Thus i opt for dropping the charade and using a fixed conf value of max 10.
+                _device->sleep(_throttle);             //sleeps max 10 msec (=_throttle) here.
+
         }
         catch(...)
         {
@@ -268,6 +275,7 @@ void PseuGUI::_UpdateSceneState(void)
         switch (_scenestate)
         {
             case SCENESTATE_GUISTART: _scene = new SceneGuiStart(this); break;
+            case SCENESTATE_LOGINSCREEN: _scene = new SceneLogin(this); break;
             case SCENESTATE_WORLD: _scene = new SceneWorld(this); break;
             default: _scene = new Scene(this); // will draw nothing, just yield the gui
         }
@@ -276,6 +284,7 @@ void PseuGUI::_UpdateSceneState(void)
         logdebug("PseuGUI: scene created.");
     }
 }
+
 
 // used to get our current WorldPosition
 WorldPosition PseuGUI::GetWorldPosition(void)

@@ -157,6 +157,8 @@ bool PseuInstance::Init(void)
         return false;
     }
 
+    login=false;//No GUI Login attempted yet
+
     log("Init complete.");
     _initialized=true;
     return true;
@@ -227,7 +229,18 @@ void PseuInstance::Run(void)
         // then try to connect
         _rsession = new RealmSession(this);
         _rsession->Connect();
-        _rsession->SendLogonChallenge();
+
+        if(!GetConf()->enablegui||!(GetConf()->accname.empty()||GetConf()->accpass.empty()))
+        {
+            logdebug("GUI not active or Login data pre-entered, skipping Login GUI");
+
+            _rsession->SetLogonData();
+            _rsession->SendLogonChallenge();
+        }
+        else
+        {
+            GetGUI()->SetSceneState(SCENESTATE_LOGINSCREEN);
+        }
 
         // this is the mainloop
         while(!_stop)
@@ -294,15 +307,24 @@ void PseuInstance::Update()
         _wsession->Start();
     }
 
-    // if we have no active sessions, we may reconnect
-    if((!_rsession) && (!_wsession) && GetConf()->reconnect)
+    // if we have no active sessions, we may reconnect, if no GUI is active for login
+    if((!_rsession) && (!_wsession) && GetConf()->reconnect && !(login||GetConf()->enablegui))
     {
         logdetail("Waiting %u ms before reconnecting.",GetConf()->reconnect);
         for(uint32 t = 0; t < GetConf()->reconnect && !this->Stopped(); t+=100) Sleep(100);
         this->Sleep(1000); // wait 1 sec before reconnecting
         _rsession = new RealmSession(this);
         _rsession->Connect();
+        _rsession->SetLogonData();
         _rsession->SendLogonChallenge(); // and login again
+    }
+    if((!_rsession) && (!_wsession) && GetConf()->enablegui && login)
+    {
+        logdetail("Disconnected, switching GUI back to Loginscreen.");
+        _rsession = new RealmSession(this);
+        _rsession->Connect();
+        _gui->SetSceneState(SCENESTATE_LOGINSCREEN);
+        login=false;
     }
 
     // update currently existing/active sessions

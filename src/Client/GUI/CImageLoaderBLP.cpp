@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include "common.h"
 #include "irrlicht/irrlicht.h"
 #include "SImage.h"
 #include "CImageLoaderBLP.h"
@@ -19,7 +20,7 @@ namespace video
 //! based on the file extension (e.g. ".tga")
 bool CImageLoaderBLP::isALoadableFileExtension(const c8* fileName) const
 {
-//    std::cout << "Checking for file extension\n";
+//  Checking for file extension
     return strstr(fileName, ".blp")!=0;
 }
 
@@ -27,29 +28,29 @@ bool CImageLoaderBLP::isALoadableFileExtension(const c8* fileName) const
 //! returns true if the file maybe is able to be loaded by this class
 bool CImageLoaderBLP::isALoadableFileFormat(io::IReadFile* file) const
 {
- //   std::cout <<"Checking if file is a BLP file\n";
+ //Checking if file is a BLP file
 	if (!file)
 	{
-	    DEBUG(std::cout<<"No such file: "<<file->getFileName()<<"\n");
+	    DEBUG(logdebug("No such file: %s",file->getFileName()));
 		return false;
 	}
     std::string fileId;
 	// Read the first few bytes of the BLP file
 	if (file->read(&fileId[0], 4) != 4)
     {
-        DEBUG(std::cout << "Cannot read BLP file header\n");
+        DEBUG(logdebug("Cannot read BLP file header\n"));
 		return false;
     }
 
 	if(fileId[0]=='B' && fileId[1]=='L' && fileId[2]=='P' && fileId[3]=='2')
     {
-        DEBUG(std::cout << "Header is BLP2, file should be loadable\n");
+        DEBUG(logdebug("Header is BLP2, file should be loadable"));
         return true;
     }
     else
     {
-        DEBUG(std::cout << "Header doesn't match, this is no BLP file\n");
-        DEBUG(std::cout << "Expected:BLP2 Got:"<<fileId.c_str()<<"\n");
+        DEBUG(logdebug("Header doesn't match, this is no BLP file"));
+        DEBUG(logdebug("Expected:BLP2 Got:%s",fileId.c_str()));
         return false;
     }
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "CM2MeshFileLoader.h"
+#include "common.h"
 
 #ifdef _DEBUG
 #define DEBUG(code) code;
@@ -49,10 +50,9 @@ file->read(&header,sizeof(ModelHeader));
      }
      else
      {
-         DEBUG(logger->log(L"header okay",ELL_INFORMATION));
+         DEBUG(logdebug("header okay"));
      }
 //Name -> not very important I think, but save it nontheless;
-DEBUG(std::cout << "Name offset:" << header.nameOfs << "Name length:" << header.nameLength << "\n");
 //M2MeshName.clear();
 //M2MeshName.reserve(header.nameLength);
 file->seek(header.nameOfs);
@@ -73,7 +73,7 @@ for(u32 i =0;i<header.nVertices;i++)
     file->read(&tempM2MVert,sizeof(ModelVertex));
     M2MVertices.push_back(tempM2MVert);
 }
-DEBUG(std::cout << "Read "<<M2MVertices.size()<<"/"<<header.nVertices<<" Vertices\n");
+DEBUG(logdebug("Read %u/%u Vertices",M2MVertices.size(),header.nVertices));
 
 //Views == Sets of vertices. Usage yet unknown. Global data
 if(M2MViews.size()>0)
@@ -87,8 +87,8 @@ for(u32 i =0;i<header.nViews;i++)
 }
 //std::cout << "Read "<<M2MViews.size()<<"/"<<header.nViews<<" Views\n";
 
-DEBUG(logger->log("Using View 0 for all further operations",ELL_INFORMATION));
-DEBUG(std::cout<<"This View has "<<M2MViews[0].nSub<<" Submeshes\n");
+DEBUG(logdebug("Using View 0 for all further operations"));
+DEBUG(logdebug("This View has %u Submeshes",M2MViews[0].nSub));
 
 //Vertex indices of a specific view.Local to View 0
 if(M2MIndices.size()>0)
@@ -101,7 +101,7 @@ for(u32 i =0;i<M2MViews[0].nIndex;i++)
     file->read(&tempM2Index,sizeof(u16));
     M2MIndices.push_back(tempM2Index);
 }
-DEBUG(std::cout << "Read "<<M2MIndices.size()<<"/"<<M2MViews[0].nIndex<<" Indices\n");
+DEBUG(logdebug("Read %u/%u Indices",M2MIndices.size(),M2MViews[0].nIndex));
 
 
 //Triangles. Data Points point to the Vertex Indices, not the vertices themself. 3 Points = 1 Triangle, Local to View 0
@@ -115,8 +115,7 @@ for(u32 i =0;i<M2MViews[0].nTris;i++)
     file->read(&tempM2Triangle,sizeof(u16));
     M2MTriangles.push_back(tempM2Triangle);
 }
-DEBUG(std::cout << "Read "<<M2MTriangles.size()<<"/"<<M2MViews[0].nTris<<" Triangle Indices\n");
-
+DEBUG(logdebug("Read %u/%u Triangles",M2MTriangles.size(),M2MViews[0].nTris));
 //Submeshes, Local to View 0
 if(M2MSubmeshes.size()>0)
     M2MSubmeshes.clear();
@@ -129,7 +128,7 @@ for(u32 i =0;i<M2MViews[0].nSub;i++)
     M2MSubmeshes.push_back(tempM2Submesh);
 //    std::cout<< "Submesh " <<i<<" ID "<<tempM2Submesh.meshpartId<<" starts at V/T "<<tempM2Submesh.ofsVertex<<"/"<<tempM2Submesh.ofsTris<<" and has "<<tempM2Submesh.nVertex<<"/"<<tempM2Submesh.nTris<<" V/T\n";
 }
-DEBUG(std::cout << "Read "<<M2MSubmeshes.size()<<"/"<<M2MViews[0].nSub<<" Submeshes\n");
+DEBUG(logdebug("Read %u/%u Submeshes",M2MSubmeshes.size(),M2MViews[0].nSub));
 
 //Texture units. Local to view 0
 TextureUnit tempM2TexUnit;
@@ -143,7 +142,7 @@ for(u32 i=0;i<M2MViews[0].nTex;i++)
     file->read(&tempM2TexUnit,sizeof(TextureUnit));
     M2MTextureUnit.push_back(tempM2TexUnit);
 }
-DEBUG(std::cout << "Read "<<M2MTextureUnit.size()<<" Texture Unit entries for View 0\n");
+DEBUG(logdebug("Read %u Texture Unit entries for View 0",M2MTextureUnit.size()));
 
 
 
@@ -160,7 +159,7 @@ for(u32 i=0;i<header.nTexLookup;i++)
     file->read(&tempM2TexLookup,sizeof(u16));
     M2MTextureLookup.push_back(tempM2TexLookup);
 }
-DEBUG(std::cout << "Read "<<M2MTextureLookup.size()<<" Texture lookup entries\n");
+DEBUG(logdebug("Read %u Texture lookup entries",M2MTextureLookup.size()));
 
 //Texture Definitions table. This is global data
 TextureDefinition tempM2TexDef;
@@ -174,7 +173,7 @@ for(u32 i=0;i<header.nTextures;i++)
     file->read(&tempM2TexDef,sizeof(TextureDefinition));
     M2MTextureDef.push_back(tempM2TexDef);
 }
-DEBUG(std::cout << "Read "<<M2MTextureDef.size()<<" Texture Definition entries\n");
+DEBUG(logdebug("Read %u Texture Definition entries",M2MTextureDef.size()));
 
 //Render Flags table. This is global data
 RenderFlags tempM2RF;
@@ -188,7 +187,7 @@ for(u32 i=0;i<header.nTexFlags;i++)
     file->read(&tempM2RF,sizeof(RenderFlags));
     M2MRenderFlags.push_back(tempM2RF);
 }
-DEBUG(std::cout << "Read "<<M2MRenderFlags.size()<<" Render Flags\n");
+DEBUG(logdebug("Read %u Renderflags",M2MRenderFlags.size()));
 
 
 
@@ -204,7 +203,6 @@ for(u32 i=0; i<M2MTextureDef.size(); i++)
     tempTexFileName.reserve(M2MTextureDef[i].texFileLen + 1);
     file->seek(M2MTextureDef[i].texFileOfs);
     file->read((void*)tempTexFileName.c_str(),M2MTextureDef[i].texFileLen);
-    DEBUG(std::cout << "texture: '" << tempTexFileName << "'\n");
     M2MTextureFiles.push_back(tempTexFileName.c_str());
     std::cout<<M2MTextureFiles.size()<<"-"<<M2MTextureFiles[i].c_str()<<"\n";
 }
@@ -277,7 +275,7 @@ std::transform(TexName.begin(), TexName.end(), TexName.begin(), tolower);
 IMB->getMaterial().setTexture(0,Device->getVideoDriver()->getTexture(TexName.c_str()));
 if(i<M2MRenderFlags.size())
 {
-    DEBUG(std::cout<<M2MRenderFlags[i].flags<<"--"<<M2MRenderFlags[i].blending<<"\n");
+    DEBUG(logdebug("Render Flags: %u %u",M2MRenderFlags[i].flags,M2MRenderFlags[i].blending));
     IMB->getMaterial().BackfaceCulling=(M2MRenderFlags[i].flags & 0x04)?false:true;
     if(M2MRenderFlags[i].blending==1)
         IMB->getMaterial().MaterialType=video::EMT_TRANSPARENT_ALPHA_CHANNEL;
