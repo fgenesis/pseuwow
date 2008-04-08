@@ -12,12 +12,13 @@ class Scene;
 
 enum SceneState
 {
-    SCENESTATE_NULL,
+    SCENESTATE_NULL = 0,
     SCENESTATE_GUISTART,
     SCENESTATE_LOGINSCREEN,
     SCENESTATE_CHARACTERSELECTION,
     SCENESTATE_LOADING,
-    SCENESTATE_WORLD
+    SCENESTATE_WORLD,
+    SCENESTATE_NOSCENE = 0xFFFFFFFF
 };
 
 enum DriverIDs
@@ -96,7 +97,7 @@ public:
     // scenes
     void SetSceneState(SceneState);
     bool SetSceneData(uint32, uint32);
-    inline uint32 GetSceneState(void) { return _scenestate; }
+    uint32 GetSceneState(void);
 
     // helpers
     WorldPosition GetWorldPosition(void);

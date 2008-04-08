@@ -31,7 +31,7 @@ public:
     virtual video::SColor GetBackgroundColor(void);
     virtual void SetData(uint32 index, uint32 value) { scenedata[index] = value; }
 protected:
-
+    PseuInstance *instance;
     PseuGUI *gui;
     irr::IrrlichtDevice *device;
     irr::video::IVideoDriver* driver;

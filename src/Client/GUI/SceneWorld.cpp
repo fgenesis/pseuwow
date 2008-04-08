@@ -94,12 +94,12 @@ void SceneWorld::OnUpdate(s32 timediff)
 
     // object focused - only check if mouse moved, saves CPU
     // TODO: check if camera moved, also (maybe from external source)
-    if(false && mouse_pos != cursor->getMousePos())
+    /*if(mouse_pos != cursor->getMousePos())
     {
         focusedNode = smgr->getSceneCollisionManager()->getSceneNodeFromScreenCoordinatesBB(cursor->getMousePos());
         if(focusedNode && mouse_pressed_left)
             selectedNode = focusedNode;
-    }
+    }*/ // i'll continue working on this - [FG]
 
 
     if(eventrecv->key.pressed(KEY_KEY_W) || (mouse_pressed_left && mouse_pressed_right))
