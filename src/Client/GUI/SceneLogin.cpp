@@ -59,13 +59,14 @@ SceneLogin::SceneLogin(PseuGUI *gui) : Scene(gui)
     background = guienv->addImage(driver->getTexture("data/misc/sky.jpg"), core::position2d<s32>(5,5),true,root);
     background->setRelativePosition(rect<s32>(0,0,scrn.Width,scrn.Height));
     irrlogo->setScaleImage(true);
-guienv->addStaticText(L"Account:",rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)-10, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+10), false, false, 0, 0);
-guienv->addStaticText(L"Password:", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+50, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+70), false, false, 0, 0);
-guienv->addEditBox(L"", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+10, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+30), true, 0, 1);
-guienv->addEditBox(L"", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+70, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+90), true, 0, 2)->setPasswordBox(true);
-guienv->addButton(rect<s32>(scrn.Width-120, scrn.Height-40, scrn.Width-10, scrn.Height-10), 0, 4, L"Quit");
-guienv->addButton(rect<s32>(10, scrn.Height-40, 120, scrn.Height-10), 0, 8, L"Community Site");
-guienv->addButton(rect<s32>((scrn.Width*0.5f)-60, (scrn.Height*0.3f)+100, (scrn.Width*0.5f)+60, (scrn.Height*0.3f)+130), 0, 16, L"Logon");
+
+    guienv->addStaticText(L"Account:",rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)-10, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+10), false, false, 0, 0);
+    guienv->addStaticText(L"Password:", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+50, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+70), false, false, 0, 0);
+    guienv->addEditBox(L"", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+10, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+30), true, 0, 1);
+    guienv->addEditBox(L"", rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+70, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+90), true, 0, 2)->setPasswordBox(true);
+    guienv->addButton(rect<s32>(scrn.Width-120, scrn.Height-40, scrn.Width-10, scrn.Height-10), 0, 4, L"Quit");
+    guienv->addButton(rect<s32>(10, scrn.Height-40, 120, scrn.Height-10), 0, 8, L"Community Site");
+    guienv->addButton(rect<s32>((scrn.Width*0.5f)-60, (scrn.Height*0.3f)+100, (scrn.Width*0.5f)+60, (scrn.Height*0.3f)+130), 0, 16, L"Logon");
 
 
 }
@@ -80,17 +81,26 @@ void SceneLogin::OnUpdate(s32 timepassed)
     }
     if(eventrecv->buttons & BUTTON_LOGON)
     {
+        eventrecv->buttons=0;
         logdebug("Commencing Logon");
         core::stringc tmp;
         tmp=root->getElementFromId(TEXTBOX_NAME,true)->getText();
         std::string accname =tmp.c_str();
         tmp=root->getElementFromId(TEXTBOX_PASSWORD,true)->getText();
         std::string accpass=tmp.c_str();
-        logdebug("Trying to set Logon Data %u, %u", accname.size(), accpass.size());
-        _gui->GetInstance()->GetRSession()->SetLogonData(accname,accpass);
-        _gui->GetInstance()->GetRSession()->SendLogonChallenge();
-        eventrecv->buttons=0;
-        _gui->GetInstance()->login=true;
+        if(accname.size() && accpass.size())
+        {
+            logdebug("Trying to set Logon Data %u, %u", accname.size(), accpass.size());
+            // we can safely override the conf settings
+            _gui->GetInstance()->GetConf()->accname = accname;
+            _gui->GetInstance()->GetConf()->accpass = accpass;
+            _gui->GetInstance()->CreateRealmSession();
+        }
+        else
+        {
+            guienv->addMessageBox(L"Oh noes!", L"You have to enter account name and password!");
+        }
+
     }
 }
 

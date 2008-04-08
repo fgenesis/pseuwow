@@ -133,6 +133,14 @@ void WorldSession::Update(void)
         }
     }
 
+    // process the send queue and send packets buffered by other threads
+    while(sendPktQueue.size())
+    {
+        WorldPacket *pkt = sendPktQueue.next();
+        SendWorldPacket(*pkt);
+        delete pkt;
+    }
+
     // while there are packets on the queue, handle them
     while(pktQueue.size())
     {
@@ -336,6 +344,12 @@ void WorldSession::_HandleDelayedPackets(void)
             }
         }
     }
+}
+
+// use this func to send packets from other threads
+void WorldSession::AddSendWorldPacket(WorldPacket *pkt)
+{
+    sendPktQueue.add(pkt);
 }
     
 

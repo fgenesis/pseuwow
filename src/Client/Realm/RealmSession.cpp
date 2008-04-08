@@ -301,13 +301,6 @@ void RealmSession::SetLogonData(void)
     _accpass=GetInstance()->GetConf()->accpass;
 }
 
-void RealmSession::SetLogonData(std::string accname, std::string accpass)
-{
-    _accname=accname;
-    _accpass=accpass;
-    logdebug("Data Set");
-}
-
 void RealmSession::SendLogonChallenge(void)
 {
     if(!_socket)

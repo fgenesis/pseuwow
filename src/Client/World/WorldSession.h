@@ -60,6 +60,7 @@ public:
     inline bool MustDie(void) { return _mustdie; }
     void SetMustDie(void);
     void SendWorldPacket(WorldPacket&);
+    void AddSendWorldPacket(WorldPacket *pkt);
     inline bool InWorld(void) { return _logged; }
     inline uint32 GetLagMS(void) { return _lag_ms; }
 
@@ -148,7 +149,7 @@ private:
 
     PseuInstance *_instance;
     WorldSocket *_socket;
-    ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue;
+    ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> pktQueue, sendPktQueue;
     DelayedPacketQueue delayedPktQueue;
     bool _logged,_mustdie; // world status
     SocketHandler _sh; // handles the WorldSocket

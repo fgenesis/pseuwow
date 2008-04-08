@@ -466,7 +466,13 @@
 					RelativePath=".\Client\Gui\Scene.h">
 				</File>
 				<File
+					RelativePath=".\Client\Gui\SceneData.h">
+				</File>
+				<File
 					RelativePath=".\Client\Gui\SceneGuiStart.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\SceneLogin.cpp">
 				</File>
 				<File
 					RelativePath=".\Client\Gui\SceneWorld.cpp">
