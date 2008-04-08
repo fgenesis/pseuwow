@@ -625,6 +625,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Client\GUI\SceneLogin.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Client\Gui\SceneWorld.cpp"
 					>
 				</File>
