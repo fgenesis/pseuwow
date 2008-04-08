@@ -31,7 +31,7 @@ enum DriverIDs
 };
 
 #define MOUSE_SENSIVITY 0.5f
-#define ANGLE_STEP (M_PI/180.0f) 
+#define ANGLE_STEP (M_PI/180.0f)
 #define DEG_TO_RAD(x) ((x)*ANGLE_STEP)
 #define RAD_TO_DEG(x) ((x)/ANGLE_STEP)
 #define RAD_FIX(x) ( (x)>(2*M_PI) ? ((x)-(2*M_PI)) : ( ((x)<0) ? ((x)+(2*M_PI)) : (x) ) )
@@ -64,10 +64,11 @@ private:
 
 class PseuGUI
 {
-    //  too bad friends are not inherited... 
+    //  too bad friends are not inherited...
     friend class Scene;
     friend class SceneWorld;
     friend class SceneGuiStart;
+    friend class SceneLogin;
     // ...
 
 public:
@@ -117,6 +118,7 @@ private:
     irr::ITimer *_timer;
     uint32 _passtime, _lastpasstime, _passtimediff;
     irr::core::dimension2d<irr::s32> _screendimension;
+    uint32 _throttle;//used for frameratelimiting
 
 };
 

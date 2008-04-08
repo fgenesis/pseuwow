@@ -104,6 +104,7 @@ public:
 
     void ProcessCliQueue(void);
     void AddCliCommand(std::string);
+    bool login;//Set when GUI attempts to login
 
 private:
 

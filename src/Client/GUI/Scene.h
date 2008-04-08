@@ -26,7 +26,7 @@ public:
     virtual void OnUpdate(s32);
     virtual void OnDraw(void);
     virtual void OnDrawBegin(void);
-    virtual void OnDelete(void);    
+    virtual void OnDelete(void);
     virtual video::SColor GetBackgroundColor(void);
 protected:
 
@@ -49,6 +49,21 @@ private:
 
 };
 
+class GUIEventReceiver;
+
+class SceneLogin : public Scene
+{
+public:
+    SceneLogin(PseuGUI *gui);
+    void OnUpdate(s32);
+    void OnDelete(void);
+
+private:
+    gui::IGUIElement* root;
+    IGUIImage *irrlogo, *driverlogo;
+    GUIEventReceiver *eventrecv;
+    PseuGUI* _gui;
+};
 
 class ShTlTerrainSceneNode;
 class MCameraFPS;

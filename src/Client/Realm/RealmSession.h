@@ -17,6 +17,8 @@ public:
     void Update(void);
     PseuInstance *GetInstance(void);
     void ClearSocket(void);
+    void SetLogonData(void);
+    void SetLogonData(std::string, std::string);
     void SendLogonChallenge(void);
     bool MustDie(void);
     void SetMustDie(void);
@@ -33,7 +35,7 @@ private:
     void SendRealmPacket(ByteBuffer&);
     void DumpInvalidPacket(ByteBuffer&);
     void DieOrReconnect(bool err = false);
-
+    std::string _accname,_accpass;
     SocketHandler _sh;
     PseuInstance *_instance;
     ZThread::LockedQueue<ByteBuffer*,ZThread::FastMutex> pktQueue;
