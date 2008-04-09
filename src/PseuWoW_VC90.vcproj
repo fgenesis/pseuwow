@@ -621,6 +621,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Client\GUI\SceneData.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Client\Gui\SceneGuiStart.cpp"
 					>
 				</File>

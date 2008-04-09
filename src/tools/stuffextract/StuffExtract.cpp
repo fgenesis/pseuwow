@@ -446,13 +446,35 @@ bool ConvertDBC(void)
     for(DBCFile::Iterator it = CreatureDisplayInfo.begin(); it != CreatureDisplayInfo.end(); ++it)
     {
         uint32 id = it->getUInt(CREATUREDISPLAYINFO_ID);
+        uint32 modelid = it->getUInt(CREATUREDISPLAYINFO_MODEL);
+
         for(uint32 field=CREATUREDISPLAYINFO_ID; field < CREATUREDISPLAYINFO_END; field++)
         {
             if(strlen(CreatureDisplayInfoFieldNames[field]))
             {
                 std::string value = AutoGetDataString(it,CreatureDisplayInfoFormat,field);
                 if(value.size()) // only store if not null
+                { 
+                    if(doTextures && field >= CREATUREDISPLAYINFO_NAME1 && field <= CREATUREDISPLAYINFO_NAME3)
+                    {
+                        // lookup for model path
+                        DBCFile::Iterator itm = CreatureModelData.begin();
+                        for(; itm != CreatureDisplayInfo.end() && itm->getInt(CREATUREMODELDATA_ID) != modelid;) ++itm;
+
+                        std::string str = itm->getString(CREATUREMODELDATA_FILE);
+                        uint32 pathend = str.find_last_of("/\\");
+                        if(pathend != std::string::npos) // replace model with texture name
+                            str = str.substr(0, pathend);
+                        str += "\\";
+                        str += value;
+                        str += ".blp";
+                        texNames.insert(NameAndAlt(str));
+
+                        value = NormalizeFilename(str);
+                    }
+
                     CreatureDisplayInfoStorage[id].push_back(std::string(CreatureDisplayInfoFieldNames[field]) + "=" + value);
+                }
             }
         }
     }
@@ -489,19 +511,17 @@ bool ConvertDBC(void)
                     // so we have to use good names to store all textures without overwriting each other
                     if(field >= CHARSECTIONS_TEXTURE1 && field <= CHARSECTIONS_TEXTURE3)
                     {
-                        char buf[100];
+                        /*char buf[100];
                         sprintf(buf,"charsection_%u_%u_%u_%u_%u_%u.blp",
                             it->getUInt(CHARSECTIONS_RACE_ID),
                             it->getUInt(CHARSECTIONS_GENDER),
                             it->getUInt(CHARSECTIONS_TYPE),
                             it->getUInt(CHARSECTIONS_SECTION),
                             it->getUInt(CHARSECTIONS_COLOR),
-                            field - CHARSECTIONS_TEXTURE1); // texture ID
-                        texNames.insert(NameAndAlt(value,buf));
-                        value = buf;
-
+                            field - CHARSECTIONS_TEXTURE1); // texture ID */
+                        texNames.insert(NameAndAlt(value));
                     }
-                    CharSectionStorage[id].push_back(std::string(CharSectionsFieldNames[field]) + "=" + value);
+                    CharSectionStorage[id].push_back(std::string(CharSectionsFieldNames[field]) + "=" + NormalizeFilename(value));
                 }
             }
         }
