@@ -15,7 +15,8 @@ enum SceneState
     SCENESTATE_NULL = 0,
     SCENESTATE_GUISTART,
     SCENESTATE_LOGINSCREEN,
-    SCENESTATE_CHARACTERSELECTION,
+    SCENESTATE_REALMSELECT,
+    SCENESTATE_CHARSELECT,
     SCENESTATE_LOADING,
     SCENESTATE_WORLD,
     SCENESTATE_NOSCENE = 0xFFFFFFFF
@@ -93,6 +94,7 @@ public:
     // interfaces to tell the gui what to draw
     void NotifyObjectDeletion(uint64 guid);
     void NotifyObjectCreation(Object *o);
+    void NotifyAllObjectsDeletion(void);
 
     // scenes
     void SetSceneState(SceneState);

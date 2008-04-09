@@ -246,6 +246,11 @@ void PseuGUI::NotifyObjectCreation(Object *o)
     domgr.Add(o->GetGUID(),d);
 }
 
+void PseuGUI::NotifyAllObjectsDeletion(void)
+{
+    domgr.Clear();
+}
+
 void PseuGUI::SetInstance(PseuInstance* in)
 {
     _instance = in;
@@ -264,22 +269,26 @@ void PseuGUI::_UpdateSceneState(void)
         {
             _scene->OnDelete();
             delete _scene;
+            _scene = NULL;
         }
         _smgr->clear();
         _guienv->clear();
 
-        _scenestate = _scenestate_new;
 
-        logdebug("PseuGUI: switched to SceneState %u", _scenestate);
 
-        switch (_scenestate)
+        logdebug("PseuGUI: switching to SceneState %u", _scenestate_new);
+
+        switch (_scenestate_new)
         {
             case SCENESTATE_GUISTART: _scene = new SceneGuiStart(this); break;
             case SCENESTATE_LOGINSCREEN: _scene = new SceneLogin(this); break;
             case SCENESTATE_WORLD: _scene = new SceneWorld(this); break;
             default: _scene = new Scene(this); // will draw nothing, just yield the gui
         }
-        _scene->SetState(_scenestate);
+        _scene->SetState(_scenestate_new);
+        // current scenestate can be set safely after scene is created and ready
+        _scenestate = _scenestate_new;
+
 
         logdebug("PseuGUI: scene created.");
     }
@@ -295,9 +304,11 @@ bool PseuGUI::SetSceneData(uint32 index, uint32 value)
 
 uint32 PseuGUI::GetSceneState(void)
 {
+    /* // not good, not threadsafe! (can crash)
     if(!_scene)
         return SCENESTATE_NOSCENE;
-    return _scene->GetState();
+    return _scene->GetState();*/
+    return _scenestate;
 }
 
 
