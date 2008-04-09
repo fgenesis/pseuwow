@@ -42,10 +42,9 @@ WorldSession::~WorldSession()
 {
     if(PseuGUI *gui = GetInstance()->GetGUI())
     {
-        if(gui->GetSceneState() == SCENESTATE_WORLD)
-            gui->SetSceneState(SCENESTATE_LOGINSCREEN); // kick back to login gui
+        gui->SetSceneState(SCENESTATE_LOGINSCREEN); // kick back to login gui
         logdebug("~WorldSession(): Waiting until world GUI is deleted");
-        while(gui->GetSceneState() == SCENESTATE_GUISTART) // .. and wait until the world gui is really deleted
+        while(gui->GetSceneState() != SCENESTATE_LOGINSCREEN) // .. and wait until the world gui is really deleted
             GetInstance()->Sleep(1);                       // (it can cause crash otherwise)
         logdebug("~WorldSession(): ... world GUI deleted, continuing to close session");
     }

@@ -261,6 +261,7 @@ void SceneWorld::OnDraw(void)
 void SceneWorld::OnDelete(void)
 {
     DEBUG(logdebug("~SceneWorld()"));
+    gui->domgr.Clear();
     //sky->drop();
 }
 

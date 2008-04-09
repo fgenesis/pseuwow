@@ -27,6 +27,10 @@ void DrawObjMgr::Clear(void)
     {
         delete _add.next().second;
     }
+    while(_del.size())
+    {
+        _del.next();
+    }
 }
 
 void DrawObjMgr::Add(uint64 objguid, DrawObject *o)

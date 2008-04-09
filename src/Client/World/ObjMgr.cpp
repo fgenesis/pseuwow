@@ -34,6 +34,12 @@ void ObjMgr::RemoveAll(void)
     {
         Remove(_obj.begin()->first, true);
     }
+    if(PseuGUI *gui = _instance->GetGUI())
+    {
+        // necessary that the pending-to-delete GUIDs just stored by deleting the objects above will be cleared
+        // so that newly added DrawObjects with uncleared pending-to-delete GUIDs will not get deleted again immediately.
+        gui->NotifyAllObjectsDeletion();
+    }
 }
 
 void ObjMgr::Remove(uint64 guid, bool del)
@@ -42,6 +48,8 @@ void ObjMgr::Remove(uint64 guid, bool del)
     if(o) 
     {
         o->_SetDepleted();
+        if(!del)
+            logdebug("ObjMgr: "I64FMT" '%s' -> depleted.",guid,o->GetName().c_str()); 
         PseuGUI *gui = _instance->GetGUI();
         if(gui)
             gui->NotifyObjectDeletion(guid); // we have a gui, which must delete linked DrawObject
