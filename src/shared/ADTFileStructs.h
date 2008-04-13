@@ -50,15 +50,15 @@ struct MCIN_chunk
 struct MDDF_chunk
 {
     uint32 id; // position in the MMDX list
-    uint32 uniqueid; // unique instance id (?)
+    uint32 uniqueid; // unique instance id
     float x; // position (quaternion)
     float y;
     float z;
-    float a; // rotatation
+    float a; // rotation
     float b;
     float c;
-    uint16 flags;
     uint16 scale;
+    uint16 flags;
 };
 
 struct MODF_chunk

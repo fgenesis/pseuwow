@@ -387,6 +387,7 @@ void SceneWorld::UpdateTerrain(void)
                                 //doodad->addShadowVolumeSceneNode();
                                 doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
                                 doodad->setRotation(core::vector3df(-d->ox, -d->oy-90, -d->oz));
+                                doodad->setScale(core::vector3df(d->scale, d->scale, d->scale));
                                 SceneNodeWithGridPos gp;
                                 gp.gx = mapmgr->GetGridX() + tilex - 1;
                                 gp.gy = mapmgr->GetGridY() + tiley - 1;
