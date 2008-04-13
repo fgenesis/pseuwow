@@ -103,7 +103,8 @@ IImage* CImageLoaderBLP::loadImage(io::IReadFile* file) const
         core::array<DXC3chunk> imagedata3;
         core::array<DXC1chunk> imagedata1;
 
-        for(u32 i=0;i<(header.mip_size[0]/8);i++)
+        u32 count = header.mip_size[0] / (header.alpha_bitdepth > 1 ? 16 : 8);
+        for(u32 i=0;i<count;i++)
         {
             if(header.compression==2&&header.alpha_bitdepth>1)
             {
