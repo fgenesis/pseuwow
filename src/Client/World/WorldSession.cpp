@@ -577,15 +577,30 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         }
         bool char_found=false;
 
+        SCPDatabase *zonedb = GetDBMgr().GetDB("zone"),
+                    *racedb = GetDBMgr().GetDB("race"),
+                    *mapdb = GetDBMgr().GetDB("map"),
+                    *classdb = GetDBMgr().GetDB("class");
+        char *zonename, *racename, *mapname, *classname;
+
         for(unsigned int i=0;i<num;i++)
         {
+            if(zonedb)
+                zonename = zonedb->GetString(plr[i]._zoneId, "name");
+            if(racedb)
+                racename = racedb->GetString(plr[i]._race, "name");
+            if(mapdb)
+                mapname = mapdb->GetString(plr[i]._mapId, "name");
+            if(classdb)
+                classname = classdb->GetString(plr[i]._class, "name");
+
             logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Zone: %s",
                 plr[i]._name.c_str(),
                 plr[i]._level,
-                GetDBMgr().GetRaceName(plr[i]._race).c_str(),
-                GetDBMgr().GetClassName_(plr[i]._class).c_str(),
-                GetDBMgr().GetMapName(plr[i]._mapId).c_str(),
-                GetDBMgr().GetZoneName(plr[i]._zoneId).c_str());
+                racename,
+                classname,
+                mapname,
+                zonename);
 
             logdetail("-> coords: map=%u zone=%u x=%f y=%f z=%f",
             plr[i]._mapId,plr[i]._zoneId,plr[i]._x,plr[i]._y,plr[i]._z);
@@ -683,8 +698,10 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     }
     recvPacket >> target_guid >> msglen >> msg;
 
-    std::string langname = GetDBMgr().GetLangName(lang);
-    const char* ln = langname.c_str();
+    SCPDatabase *langdb = GetDBMgr().GetDB("language");
+    const char* ln = "";
+    if(langdb)
+        langdb->GetString(lang,"name");
     std::string name;
 
     if(type == CHAT_MSG_MONSTER_SAY)
@@ -1147,9 +1164,9 @@ void WorldSession::_HandleTextEmoteOpcode(WorldPacket& recvPacket)
 
     logdebug(I64FMT " Emote: name=%s text=%u variation=%i len=%u",guid,name.c_str(),emotetext,emotev,namelen);
     SCPDatabaseMgr& dbmgr = GetInstance()->dbmgr;
-    if(dbmgr.HasDB("emote"))
+    SCPDatabase *emotedb = dbmgr.GetDB("emote");
+    if(emotedb)
     {
-        SCPDatabase& db = dbmgr.GetDB("emote");
         std::string target,target2;
         bool targeted=false; // if the emote is directed to anyone around or a specific target
         bool targeted_me=false; // if the emote was targeted to us if it was targeted
@@ -1196,13 +1213,13 @@ void WorldSession::_HandleTextEmoteOpcode(WorldPacket& recvPacket)
             target += "general";
 
         // not all emotes have a female version, so check if there is one in the database
-        if(female && db.GetField(emotetext).HasEntry(target + "female"))
+        if(female && emotedb->GetFieldId((char*)(target + "female").c_str()) != SCP_INVALID_INT)
                 target += "female";
 
         logdebug("Looking up 'emote' SCP field %u entry '%s'",emotetext,target.c_str());
 
         std::string etext;
-        etext = db.GetField(emotetext).GetString(target);
+        etext = emotedb->GetString(emotetext,(char*)target.c_str());
 
         char out[300]; // should be enough
 
@@ -1278,9 +1295,16 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
         std::string zonename;
         memset(classname,0,sizeof(classname));
         memset(racename,0,sizeof(racename));
-        zonename = db.GetZoneName(wle.zoneId);
-        strcpy(classname, db.GetClassName_(wle.classId).c_str());
-        strcpy(racename, db.GetRaceName(wle.raceId).c_str());
+
+        SCPDatabase *zonedb = db.GetDB("zone"),
+                    *racedb = db.GetDB("race"),
+                    *classdb = db.GetDB("class");
+        if(zonedb)
+            zonename = zonedb->GetString(wle.zoneId, "name");
+        if(racedb)
+            strcpy(racename,racedb->GetString(wle.raceId, "name"));
+        if(classdb)
+            strcpy(classname,classdb->GetString(wle.classId, "name"));
 
         for(uint8 i = strlen(classname); strlen(classname) < 10; i++)
             classname[i] = ' ';

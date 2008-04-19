@@ -22,6 +22,7 @@ class Scene
 public:
     Scene(PseuGUI *g);
     ~Scene();
+    core::stringw GetStringFromDB(u32 index, u32 entry);
     inline void SetState(SceneState sc) { _scenestate = sc; }
     inline SceneState GetState(void) { return _scenestate; }
     virtual void OnUpdate(s32);
@@ -40,6 +41,7 @@ protected:
     CCursorController *cursor;
     SceneState _scenestate;
     uint32 scenedata[SCENEDATA_SIZE]; // generic storage for anything the PseuInstance thread wants to tell us
+    SCPDatabase *textdb;
 };
 
 class SceneGuiStart : public Scene
@@ -66,6 +68,8 @@ private:
     IGUIImage *irrlogo, *background;
     GUIEventReceiver *eventrecv;
     PseuGUI* _gui;
+    gui::IGUIElement *msgbox;
+    uint32 msgbox_textid;
 };
 
 class ShTlTerrainSceneNode;

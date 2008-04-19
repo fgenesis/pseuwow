@@ -117,6 +117,9 @@ bool PseuInstance::Init(void)
 
     _scp->SetPath(_scpdir);
 
+    dbmgr.AddSearchPath("./cache");
+    dbmgr.AddSearchPath("./data/scp");
+
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);
     _scp->variables.Set("@inworld","false");
@@ -412,9 +415,9 @@ bool PseuInstance::ConnectToRealm(void)
     _rsession = new RealmSession(this);
     _rsession->SetLogonData(); // get accname & accpass from PseuInstanceConfig and set it in the realm session
     _rsession->Connect();
-    if(_rsession->MustDie()) // something failed. it will be deleted in next Update() call
+    if(_rsession->MustDie() || !_rsession->SocketGood()) // something failed. it will be deleted in next Update() call
     {
-        logerror("Connecting to Realm failed!");
+        logerror("PseuInstance: Connecting to Realm failed!");
         if(_gui)
             _gui->SetSceneData(ISCENE_LOGIN_CONN_STATUS, DSCENE_LOGIN_CONN_FAILED);
         return false;

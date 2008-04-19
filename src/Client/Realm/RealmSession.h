@@ -21,7 +21,7 @@ public:
     void SendLogonChallenge(void);
     bool MustDie(void);
     void SetMustDie(void);
-
+    bool SocketGood(void);
 
 
 private:

@@ -181,7 +181,7 @@ class ByteBuffer
 
         size_t rpos(size_t rpos)
         {
-            _rpos = rpos;
+            _rpos = rpos < _storage.capacity() ? rpos : _storage.capacity();
             return _rpos;
         };
 
@@ -192,7 +192,7 @@ class ByteBuffer
 
         size_t wpos(size_t wpos)
         {
-            _wpos = wpos;
+            _wpos = wpos < _storage.capacity() ? wpos : _storage.capacity();
             return _wpos;
         }
 

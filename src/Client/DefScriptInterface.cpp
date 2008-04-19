@@ -32,10 +32,6 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("castspell",&DefScriptPackage::SCcastspell);
     AddFunc("queryitem",&DefScriptPackage::SCqueryitem);
     AddFunc("target",&DefScriptPackage::SCtarget);
-    AddFunc("loadscp",&DefScriptPackage::SCloadscp);
-    AddFunc("scpexists",&DefScriptPackage::SCScpExists);
-    AddFunc("scpsectionexists",&DefScriptPackage::SCScpSectionExists);
-    AddFunc("scpentryexists",&DefScriptPackage::SCScpEntryExists);
     AddFunc("getscpvalue",&DefScriptPackage::SCGetScpValue);
     AddFunc("getplayerguid",&DefScriptPackage::SCGetPlayerGuid);
     AddFunc("getname",&DefScriptPackage::SCGetName);
@@ -61,6 +57,8 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("switchopcodehandler",&DefScriptPackage::SCSwitchOpcodeHandler);
     AddFunc("opcodedisabled",&DefScriptPackage::SCOpcodeDisabled);    
     AddFunc("spoofworldpacket",&DefScriptPackage::SCSpoofWorldPacket);
+    AddFunc("loaddb",&DefScriptPackage::SCLoadDB);
+    AddFunc("adddbpath",&DefScriptPackage::SCAddDBPath);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -81,15 +79,17 @@ DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
         DEF_RETURN_ERROR;
     }
     std::stringstream ss;
+    SCPDatabaseMgr& dbmgr = ((PseuInstance*)parentMethod)->dbmgr;
     uint32 type=atoi(Set.arg[0].c_str());
     uint32 lang=atoi(Set.arg[1].c_str());
 
     ss << lang;
     if(ss.str()!=Set.arg[1]) // given lang is NOT a number
     {
-        uint32 dblang;
-        dblang = ((PseuInstance*)parentMethod)->dbmgr.GetDB("language").GetFieldByValue("name",Set.arg[1]);
+        SCPDatabase *langdb = dbmgr.GetDB("language");
+        uint32 dblang = langdb->GetFieldByStringValue("name",(char*)Set.arg[1].c_str());
         logdev("looking up language id for lang '%s', found %i",Set.arg[1].c_str(),dblang);
+        // TODO: comment this out to enable using addon language??!
         if(dblang != -1)
             lang = dblang;
     }
@@ -135,12 +135,13 @@ DefReturnResult DefScriptPackage::SCemote(CmdSet& Set){
     // this supports calls like "emote 126" and "emote ready"
     uint32 id = uint32(-1);
     SCPDatabaseMgr& dbmgr = ((PseuInstance*)parentMethod)->dbmgr;
-    if(dbmgr.HasDB("emote"))
+    SCPDatabase *emotedb = dbmgr.GetDB("emote");
+    if(emotedb)
     {
-        SCPDatabase& db = dbmgr.GetDB("emote");
-        id = db.GetFieldByValue("name",DefScriptTools::stringToUpper(Set.defaultarg)); // emote names are always uppercased
+
+        id = emotedb->GetFieldByStringValue("name",(char*)DefScriptTools::stringToUpper(Set.defaultarg).c_str()); // emote names are always uppercased
     }
-    if(id == uint32(-1))
+    if(id == SCP_INVALID_INT)
     {
         id=atoi(Set.defaultarg.c_str());
         if(!id)
@@ -339,6 +340,7 @@ DefReturnResult DefScriptPackage::SCtarget(CmdSet& Set)
     return "";
 }
 
+/*
 DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
 {
     SCPDatabaseMgr& dbmgr = ((PseuInstance*)parentMethod)->dbmgr;
@@ -366,38 +368,9 @@ DefReturnResult DefScriptPackage::SCloadscp(CmdSet& Set)
             logerror("Failed to load SCP: \"%s\" [%s]",dbname.c_str(),Set.defaultarg.c_str());
         }
     }
-    return DefScriptTools::toString((uint64)sections);;
+    return DefScriptTools::toString((uint64)sections);
 }
-
-DefReturnResult DefScriptPackage::SCScpExists(CmdSet& Set)
-{
-    return (!Set.defaultarg.empty()) && ((PseuInstance*)parentMethod)->dbmgr.HasDB(Set.defaultarg);
-}
-
-DefReturnResult DefScriptPackage::SCScpSectionExists(CmdSet& Set)
-{
-    static std::string dbname;
-    if(!Set.arg[0].empty())
-        dbname=Set.arg[0];
-    return (!Set.defaultarg.empty()) && (!dbname.empty())
-        && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
-        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField((uint32)DefScriptTools::toUint64(Set.defaultarg));
-}
-
-DefReturnResult DefScriptPackage::SCScpEntryExists(CmdSet& Set)
-{
-    static std::string dbname;
-    static uint32 keyid;
-    if(!Set.arg[0].empty())
-        dbname=Set.arg[0];
-    if(!Set.arg[1].empty())
-        keyid=(uint32)DefScriptTools::toUint64(Set.arg[1]);
-    return (!Set.defaultarg.empty()) && (!dbname.empty())
-        && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
-        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField(keyid)
-        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).GetField(keyid).HasEntry(Set.defaultarg);
-}
-
+*/
 
 // GetScpValue,db,key entry
 // db & key will be stored, that multiple calls like GetScpValue entryxyz are possible
@@ -406,7 +379,7 @@ DefReturnResult DefScriptPackage::SCGetScpValue(CmdSet& Set)
     static std::string dbname;
     static uint32 keyid;
     std::string entry;
-    DefReturnResult r;
+    SCPDatabaseMgr& dbmgr = ((PseuInstance*)parentMethod)->dbmgr;
 
     if(!Set.arg[0].empty())
         dbname=Set.arg[0];
@@ -414,18 +387,36 @@ DefReturnResult DefScriptPackage::SCGetScpValue(CmdSet& Set)
         keyid=(uint32)DefScriptTools::toUint64(Set.arg[1]);
     if(!Set.defaultarg.empty())
         entry=Set.defaultarg;
-    if( (!entry.empty()) && (!dbname.empty())
-        && ((PseuInstance*)parentMethod)->dbmgr.HasDB(dbname)
-        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).HasField(keyid)
-        && ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).GetField(keyid).HasEntry(entry))
+    if( (!entry.empty()) && (!dbname.empty()) )
     {
-        r.ret = ((PseuInstance*)parentMethod)->dbmgr.GetDB(dbname).GetField(keyid).GetString(entry);
+        SCPDatabase *db = dbmgr.GetDB(dbname);
+        if(db)
+        {
+            uint32 ftype = db->GetFieldType((char*)entry.c_str());
+            switch(ftype)
+            {
+                case SCP_TYPE_INT:
+                {
+                    return DefScriptTools::toString(db->GetInt(keyid,(char*)entry.c_str()));
+                }
+                case SCP_TYPE_FLOAT: 
+                {
+                    return DefScriptTools::toString(db->GetFloat(keyid,(char*)entry.c_str()));
+                }
+                case SCP_TYPE_STRING:
+                {
+                    return std::string(db->GetString(keyid,(char*)entry.c_str()));
+                }
+                default: logerror("GetSCPValue: field '%s' does not exist in DB '%s'!",entry.c_str(),dbname.c_str());
+            }
+        }
+        else
+        {
+            logerror("GetSCPValue: No such DB: '%s'",dbname.c_str());
+        }
     }
-    else
-    {
-        r.ret = "";
-    }
-    return r;
+
+    return "";
 }
 
 DefReturnResult DefScriptPackage::SCGetPlayerGuid(CmdSet& Set)
@@ -825,15 +816,16 @@ DefReturnResult DefScriptPackage::SCGetFileList(CmdSet& Set)
 DefReturnResult DefScriptPackage::SCPrintScript(CmdSet &Set)
 {
     DefScript *sc = GetScript(DefScriptTools::stringToLower(Set.defaultarg));
-    if(sc)
+    if(!sc)
+        return false;
+
+    logcustom(0,GREEN,"== DefScript \"%s\", %u lines: ==",sc->GetName().c_str(),sc->GetLines());
+    for(uint32 i = 0; i < sc->GetLines(); i++)
     {
-        logcustom(0,GREEN,"== DefScript \"%s\", %u lines: ==",sc->GetName().c_str(),sc->GetLines());
-        for(uint32 i = 0; i < sc->GetLines(); i++)
-        {
-            logcustom(0,GREEN,sc->GetLine(i).c_str());
-        }
+        logcustom(0,GREEN,sc->GetLine(i).c_str());
     }
-    return "";
+
+    return true;
 }
 
 DefReturnResult DefScriptPackage::SCGetObjectValue(CmdSet &Set)
@@ -1100,7 +1092,7 @@ DefReturnResult DefScriptPackage::SCSwitchOpcodeHandler(CmdSet &Set)
     WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
     if(!ws)
     {
-        logerror("Invalid Script call: SCRemoveOpcodeHandler: WorldSession not valid");
+        logerror("Invalid Script call: SCSwitchOpcodeHandler: WorldSession not valid");
         DEF_RETURN_ERROR;
     }
     uint16 opc = (uint16)DefScriptTools::toUint64(Set.arg[0]);
@@ -1171,6 +1163,23 @@ DefReturnResult DefScriptPackage::SCSpoofWorldPacket(CmdSet &Set)
         }
     }
     return false;
+}
+
+DefReturnResult DefScriptPackage::SCLoadDB(CmdSet &Set)
+{
+    PseuInstance *ins = (PseuInstance*)parentMethod;
+    if(ins->dbmgr.GetDB(Set.defaultarg.c_str()))
+        return "exists";
+    logdetail("Loading database '%s'",Set.defaultarg.c_str());
+    uint32 result = ins->dbmgr.SearchAndLoad((char*)Set.defaultarg.c_str(), false);
+    return toString(result);
+}
+
+DefReturnResult DefScriptPackage::SCAddDBPath(CmdSet &Set)
+{
+    PseuInstance *ins = (PseuInstance*)parentMethod;
+    ins->dbmgr.AddSearchPath((char*)Set.defaultarg.c_str());
+    return true;
 }
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)

@@ -2,6 +2,7 @@
 #define PSEUGUI_H
 
 #include "irrlicht/irrlicht.h"
+#include "SceneData.h"
 #include "DrawObjMgr.h"
 #include "World.h"
 
