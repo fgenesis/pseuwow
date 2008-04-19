@@ -47,11 +47,11 @@ void DrawObject::_Init(void)
     if(!cube && _obj->IsWorldObject()) // only world objects have coords and can be drawn
     {
         uint32 displayid = _obj->IsUnit() ? _obj->GetUInt32Value(UNIT_FIELD_DISPLAYID) : 0; // TODO: in case its GO get it from proto data
-        SCPDatabase& cdi = _instance->dbmgr.GetDB("creaturedisplayinfo");
-        SCPField& crdata = cdi.GetField(displayid);
-        uint32 modelid = crdata.GetInteger("model");
-        std::string modelfile = std::string("data/model/") + _instance->dbmgr.GetDB("creaturemodeldata").GetField(modelid).GetString("file");
-        uint32 opacity = crdata.GetInteger("opacity");
+        SCPDatabase *cdi = _instance->dbmgr.GetDB("creaturedisplayinfo");
+        SCPDatabase *cmd = _instance->dbmgr.GetDB("creaturemodeldata");
+        uint32 modelid = cdi && displayid ? cdi->GetUint32(displayid,"model") : 0;
+        std::string modelfile = std::string("data/model/") + cmd->GetString(modelid,"file");
+        uint32 opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
         scene::IAnimatedMesh *mesh = _smgr->getMesh(modelfile.c_str());
         if(mesh)
         {

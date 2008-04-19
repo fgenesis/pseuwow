@@ -1,4 +1,4 @@
-// define names of genders
+#dbname=gender
 
 [0]
 name=male

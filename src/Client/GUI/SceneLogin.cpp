@@ -48,7 +48,8 @@ public:
 
 SceneLogin::SceneLogin(PseuGUI *gui) : Scene(gui)
 {
-    _gui=gui;
+    textdb = instance->dbmgr.GetDB("gui_login_text");
+    msgbox_textid = 0;
     eventrecv = new GUIEventReceiver();
     device->setEventReceiver(eventrecv);
     root = guienv->getRootGUIElement();
@@ -67,17 +68,21 @@ SceneLogin::SceneLogin(PseuGUI *gui) : Scene(gui)
     guienv->addButton(rect<s32>(scrn.Width-120, scrn.Height-40, scrn.Width-10, scrn.Height-10), 0, 4, L"Quit");
     guienv->addButton(rect<s32>(10, scrn.Height-40, 120, scrn.Height-10), 0, 8, L"Community Site");
     guienv->addButton(rect<s32>((scrn.Width*0.5f)-60, (scrn.Height*0.3f)+100, (scrn.Width*0.5f)+60, (scrn.Height*0.3f)+130), 0, 16, L"Logon");
-
+    msgbox = guienv->addStaticText(GetStringFromDB(ISCENE_LOGIN_CONN_STATUS,DSCENE_LOGIN_NOT_CONNECTED).c_str(),rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+150, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+180),true,true);
 
 }
 
 void SceneLogin::OnUpdate(s32 timepassed)
 {
+    if(msgbox_textid != scenedata[ISCENE_LOGIN_CONN_STATUS])
+    {
+        msgbox_textid = scenedata[ISCENE_LOGIN_CONN_STATUS];
+        msgbox->setText(GetStringFromDB(ISCENE_LOGIN_CONN_STATUS,msgbox_textid).c_str());
+    }
+
     if(eventrecv->buttons & BUTTON_QUIT)
     {
-        _gui->Shutdown();
-        _gui->GetInstance()->Stop();
-        eventrecv->buttons=0;
+        instance->Stop();
     }
     if(eventrecv->buttons & BUTTON_LOGON)
     {
@@ -90,18 +95,21 @@ void SceneLogin::OnUpdate(s32 timepassed)
         std::string accpass=tmp.c_str();
         if(accname.size() && accpass.size())
         {
+            SetData(ISCENE_LOGIN_CONN_STATUS,DSCENE_LOGIN_CONN_ATTEMPT);
             logdebug("Trying to set Logon Data %u, %u", accname.size(), accpass.size());
             // we can safely override the conf settings
-            _gui->GetInstance()->GetConf()->accname = accname;
-            _gui->GetInstance()->GetConf()->accpass = accpass;
-            _gui->GetInstance()->CreateRealmSession();
+            instance->GetConf()->accname = accname;
+            instance->GetConf()->accpass = accpass;
+            instance->CreateRealmSession();
         }
         else
         {
-            guienv->addMessageBox(L"Oh noes!", L"You have to enter account name and password!");
+            guienv->addMessageBox(GetStringFromDB(ISCENE_LOGIN_MSGBOX_DUMMY,0).c_str(),
+                                  GetStringFromDB(ISCENE_LOGIN_MSGBOX_DUMMY,1).c_str());
         }
 
     }
+    eventrecv->buttons = 0;
 }
 
 void SceneLogin::OnDelete(void)

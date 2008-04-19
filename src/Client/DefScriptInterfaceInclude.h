@@ -23,10 +23,6 @@ DefReturnResult SClogerror(CmdSet&);
 DefReturnResult SCcastspell(CmdSet&);
 DefReturnResult SCqueryitem(CmdSet&);
 DefReturnResult SCtarget(CmdSet&);
-DefReturnResult SCloadscp(CmdSet&);
-DefReturnResult SCScpExists(CmdSet&);
-DefReturnResult SCScpSectionExists(CmdSet&);
-DefReturnResult SCScpEntryExists(CmdSet&);
 DefReturnResult SCGetScpValue(CmdSet&);
 DefReturnResult SCGetName(CmdSet&);
 DefReturnResult SCGetPlayerGuid(CmdSet&);
@@ -52,6 +48,8 @@ DefReturnResult SCGetObjectDistance(CmdSet&);
 DefReturnResult SCSwitchOpcodeHandler(CmdSet&);
 DefReturnResult SCOpcodeDisabled(CmdSet&);
 DefReturnResult SCSpoofWorldPacket(CmdSet&);
+DefReturnResult SCLoadDB(CmdSet &Set);
+DefReturnResult SCAddDBPath(CmdSet &Set);
 
 
 void my_print(const char *fmt, ...);

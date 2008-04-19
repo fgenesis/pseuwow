@@ -41,11 +41,5 @@ ELSE
 ENDIF
 UNSET errors
 
-// Load some SCP files
-LOADALLSCP
-
-// do more stuff here in future...
-
-LOG * StartUp complete!
-
+LOG *** StartUp complete!
 

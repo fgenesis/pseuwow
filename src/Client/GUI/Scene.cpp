@@ -7,6 +7,7 @@
 Scene::Scene(PseuGUI *g)
 {
     memset(scenedata, 0, sizeof(uint32) * SCENEDATA_SIZE);
+    textdb = NULL;
     gui = g;
     instance = gui->GetInstance();
     device = gui->_device;
@@ -44,4 +45,23 @@ video::SColor Scene::GetBackgroundColor(void)
 Scene::~Scene()
 {
     DEBUG(logdebug("Scene::~Scene()"));
+}
+
+core::stringw Scene::GetStringFromDB(u32 index, u32 entry)
+{
+    core::stringw r = "";
+    if(!textdb)
+    {
+        r += L"<string ";
+        r += index;
+        r += L"/";
+        r += entry;
+        r += L" not found>";
+        return r;
+    }
+    char buf[20];
+    sprintf(buf,"%u",entry);
+    r += textdb->GetString(index, buf);
+    textdb->DumpStructureToFile("DB_textdb.txt");
+    return r;
 }

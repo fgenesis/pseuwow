@@ -1,210 +1,839 @@
 #include <fstream>
 #include "common.h"
+#include "Auth/MD5Hash.h"
 #include "SCPDatabase.h"
 
+#define HEADER_SIZE (21*sizeof(uint32))
 
-uint32 SCPDatabase::LoadFromFile(char *fn)
+inline char *gettypename(uint32 ty)
 {
-    std::fstream fh;
-    uint32 size = GetFileSize(fn);
-    if(!size)
-        return 0;
-
-    fh.open(fn,std::ios_base::in | std::ios_base::binary);
-    if( !fh.is_open() )
-        return 0;
-
-    char *buf = new char[size];
-    fh.read(buf,size);
-    fh.close();
-
-    uint32 sections = LoadFromMem(buf,size);
-    delete [] buf;
-    return sections;
+    return (ty==0 ? "INT" : (ty==1 ? "FLOAT" : "STRING"));
 }
 
-
-uint32 SCPDatabase::LoadFromMem(char *buf, uint32 size)
+// file-globally declared pointer holder. NOT multi-instance-safe for now!!
+struct memblock
 {
-    std::string line,value,entry,storage;
-    uint32 id=0,sections=0;
+    memblock() : ptr(NULL), size(0) {}
+    memblock(uint8 *p, uint32 s) : size(s), ptr(p) {}
+    ~memblock() { if(ptr) delete [] ptr; }
+    uint8 *ptr;
+    uint32 size;
+};
+TypeStorage<memblock> Pointers;
 
-    for(uint32 pos = 0; pos < size; pos++)
-    {
-        if(buf[pos] == '\n')
-        {
-            if(line.empty())
-                continue;
-            while(line[0]==' ' || line[0]=='\t')
-                line.erase(0,1);
-            if(line.empty() || (line.length() > 1 && (line[0]=='#' || (line[0]=='/' && line[1]=='/'))) )
-            {
-                line.clear();
-                continue;
-            }
-            if(line[line.size()-1] == 13 || line[line.size()-1] == 10) // this fixes the annoying newline problems on windows + binary mode
-                line[line.size()-1] = 0;
-            if(line[0]=='[')
-            {
-                id=(uint32)toInt(line.c_str()+1); // start reading after '['
-                sections++;
-            }
-            else
-            {
-                uint32 pos=line.find("=");
-                if(pos!=std::string::npos)
-                {
-                    entry=stringToLower(line.substr(0,pos));
-                    value=line.substr(pos+1,line.length()-1);
-                    _map[id].Set(entry,value);
-                }
-                // else invalid line, must have '='
-            }
-            line.clear();
-        }
-        else
-            line += buf[pos]; // fill up line until a newline is reached (see above)
-    }
-    return sections;
+SCPDatabase::~SCPDatabase()
+{
+    DEBUG(logdebug("Deleting SCPDatabase '%s'",_name.c_str()));
+    DropAll();
 }
 
-bool SCPDatabase::HasField(uint32 id)
+SCPDatabase::SCPDatabase()
 {
-    for(SCPFieldMap::iterator i = _map.begin(); i != _map.end(); i++)
-        if(i->first == id)
-            return true;
-    return false;
+    _stringbuf = NULL;
+    _intbuf = NULL;
+    _compact = false;
 }
 
-bool SCPField::HasEntry(std::string e)
+void SCPDatabase::DropAll(void)
 {
-    for(SCPEntryMap::iterator i = _map.begin(); i != _map.end(); i++)
-    {
-        std::string ch = i->first;
-        if(ch == e)
-            return true;
-    }
-    return false;
+    DropTextData();
+    if(_stringbuf)
+        delete [] _stringbuf;
+    if(_intbuf)
+        delete [] _intbuf;
+    _indexes.clear();
+    _indexes_reverse.clear();
+    _fielddefs.clear();
+    _stringbuf = NULL;
+    _intbuf = NULL;
+    _stringsize = 0;
+    _compact = false;
 }
 
-std::string SCPField::GetString(std::string entry)
+void SCPDatabase::DropTextData(void)
 {
-    //return HasEntry(entry) ? _map[entry] : "";
-    return _map[entry];
+    DEBUG(logdebug("Dropping plaintext parts of DB '%s'",_name.c_str()));
+    for(SCPSourceList::iterator it = sources.begin(); it != sources.end(); it++)
+        Pointers.Delete(*it);
+    sources.clear();
+    fields.clear();
 }
 
-// note that this can take a while depending on the size of the database!
-uint32 SCPDatabase::GetFieldByValue(std::string entry, std::string value)
+void *SCPDatabase::GetPtr(uint32 index, char *entry)
 {
-    for(SCPFieldMap::iterator fm = _map.begin(); fm != _map.end(); fm++)
-        if(fm->second.HasEntry(entry) && fm->second.GetString(entry)==value)
-            return fm->first;
-    return uint32(-1);
+    std::map<uint32,uint32>::iterator it = _indexes.find(index);
+    if(it == _indexes.end())
+        return NULL;
+    std::map<std::string,SCPFieldDef>::iterator fi = _fielddefs.find(entry);
+    if(fi == _fielddefs.end())
+        return NULL;
+
+    uint32 target_row = _indexes[index];
+    uint32 field_id = _fielddefs[entry].id;
+    return (void*)&_intbuf[(_fields_per_row * target_row) + field_id];
 }
 
-bool SCPDatabaseMgr::HasDB(std::string n)
+void *SCPDatabase::GetPtrByField(uint32 index, uint32 entry)
 {
-    for(SCPDatabaseMap::iterator i = _map.begin(); i != _map.end(); i++)
-        if(i->first == n)
-            return true;
-    return false;
+    std::map<uint32,uint32>::iterator it = _indexes.find(index);
+    if(it == _indexes.end())
+        return NULL;
+
+    uint32 target_row = _indexes[index];
+    return (void*)&_intbuf[(_fields_per_row * target_row) + entry];
 }
 
-SCPDatabase& SCPDatabaseMgr::GetDB(std::string n)
+uint32 SCPDatabase::GetFieldByUint32Value(char *entry, uint32 val)
 {
-    return _map[n];
+    std::map<std::string,SCPFieldDef>::iterator fi = _fielddefs.find(entry);
+    if(fi == _fielddefs.end())
+        return SCP_INVALID_INT;
+
+    uint32 field_id = _fielddefs[entry].id;
+    return GetFieldByUint32Value(field_id,val);
+}
+
+uint32 SCPDatabase::GetFieldByUint32Value(uint32 entry, uint32 val)
+{
+    for(uint32 row = 0; row < _rowcount; row++)
+        if(_intbuf[row * _fields_per_row + entry] == val)
+            return _indexes_reverse[row];
+    return SCP_INVALID_INT;
+}
+
+uint32 SCPDatabase::GetFieldByIntValue(char *entry, int32 val)
+{
+    std::map<std::string,SCPFieldDef>::iterator fi = _fielddefs.find(entry);
+    if(fi == _fielddefs.end())
+        return SCP_INVALID_INT;
+
+    uint32 field_id = _fielddefs[entry].id;
+    return GetFieldByIntValue(field_id,val);
+}
+
+uint32 SCPDatabase::GetFieldByIntValue(uint32 entry, int32 val)
+{
+    for(uint32 row = 0; row < _rowcount; row++)
+        if((int)_intbuf[row * _fields_per_row + entry] == val)
+            return _indexes_reverse[row];
+    return (int)SCP_INVALID_INT;
+}
+
+uint32 SCPDatabase::GetFieldByStringValue(char *entry, char *val)
+{
+    std::map<std::string,SCPFieldDef>::iterator fi = _fielddefs.find(entry);
+    if(fi == _fielddefs.end())
+        return SCP_INVALID_INT;
+    
+    uint32 field_id = _fielddefs[entry].id;
+    return GetFieldByStringValue(field_id,val);
+}
+
+uint32 SCPDatabase::GetFieldByStringValue(uint32 entry, char *val)
+{
+    for(uint32 row = 0; row < _rowcount; row++)
+        if(!stricmp(GetStringByOffset(_intbuf[row * _fields_per_row + entry]), val))
+            return row;
+    return SCP_INVALID_INT;
+}
+
+uint32 SCPDatabase::GetFieldType(char *entry)
+{
+    std::map<std::string,SCPFieldDef>::iterator it = _fielddefs.find(entry);
+    if(it != _fielddefs.end())
+        return _fielddefs[entry].type;
+    return SCP_INVALID_INT;
+}
+
+uint32 SCPDatabase::GetFieldId(char *entry)
+{
+    std::map<std::string,SCPFieldDef>::iterator it = _fielddefs.find(entry);
+    if(it != _fielddefs.end())
+        return _fielddefs[entry].id;
+    return SCP_INVALID_INT;
+}
+
+SCPDatabase *SCPDatabaseMgr::GetDB(std::string n, bool create)
+{
+    return create ? _map.Get(n) : _map.GetNoCreate(n);
 }
 
 uint32 SCPDatabaseMgr::AutoLoadFile(char *fn)
 {
-    std::fstream fh;
-    uint32 size = GetFileSize(fn);
-    if(!size)
-        return 0;
+    char *buf;
+    uint32 size;
 
-    fh.open(fn,std::ios_base::in | std::ios_base::binary);
-    if( !fh.is_open() )
-        return 0;
+    // check if file was loaded before; use memory data if this is the case
+    if(memblock *mb = Pointers.GetNoCreate(fn))
+    {
+        size = mb->size;
+        buf = (char*)mb->ptr;
+    }
+    else // and if not, read the file from disk
+    {
+        std::fstream fh;
+        size = GetFileSize(fn);
+        if(!size)
+            return 0;
 
-    char *buf = new char[size];
+        fh.open(fn,std::ios_base::in | std::ios_base::binary);
+        if( !fh.is_open() )
+            return 0;
 
-    fh.read(buf,size);
-    fh.close();
+        buf = new char[size];
 
-    std::string line,dbname;
+        fh.read(buf,size);
+        fh.close();
+
+        // store the loaded file buffer so we can reuse it later if necessary
+        Pointers.Assign(fn, new memblock((uint8*)buf,size));
+    }
+
+    std::string line,dbname,entry,value;
+    SCPDatabase *db = NULL;
+    uint32 id = 0, sections = 0;
     for(uint32 pos = 0; pos < size; pos++)
     {
-        if(buf[pos] == '\n')
+        if(buf[pos] == '\n' || buf[pos] == 10 || buf[pos] == 13)
         {
             if(line.empty())
                 continue;
-            while(line[0]==' ' || line[0]=='\t')
+            while(line.size() && (line[0]==' ' || line[0]=='\t'))
                 line.erase(0,1);
-            if(line[0] == '#')
+            uint32 eq = line.find("=");
+            if(eq != std::string::npos)
             {
-                uint32 eq = line.find("=");
-                if(eq != std::string::npos)
+                entry=stringToLower(line.substr(0,eq));
+                value=line.substr(eq+1,line.length()-1);
+
+                if(!stricmp(entry.c_str(),"#dbname") && value.size())
                 {
-                    std::string info = stringToLower(line.substr(0,pos));
-                    std::string value = stringToLower(line.substr(pos+1,line.length()-1));
-                    if(info == "#dbname")
-                    {
-                        dbname = value;
-                        break;
-                    }
+                    dbname = value;
+                    db = GetDB(dbname,true); // create db if not existing
                 }
+                else if(db)
+                        db->fields[id][entry] = value;
             }
+            else if(line[0]=='[')
+            {
+                id=(uint32)toInt(line.c_str()+1); // start reading after '['
+                sections++;
+            }
+            line.clear();
         }
         else
             line += buf[pos];
     }
-    delete [] buf;
-
-    if(dbname.empty())
-        return 0;
-
-    uint32 sections = GetDB(dbname).LoadFromMem(buf,size);
+    db->sources.insert(fn);
     return sections;
-
 }
 
-// -- helper functions -- //
+////////////////////////////////////////////////////////
+// SCP compiler
+////////////////////////////////////////////////////////
 
-std::string SCPDatabaseMgr::GetZoneName(uint32 id)
+
+// check the datatype that will be used for this string value
+uint32 SCPDatabaseMgr::GetDataTypeFromString(char *s)
 {
-    return GetDB("zone").GetField(id).GetString("name");
+    bool isint = true, first = true;
+    for(;*s;s++) // check every char until \0 is reached
+    {
+        if(!isdigit(*s) && !(first && (*s=='+' || *s=='-'))) // if not in 0-9 or first beeing "+" or "-" it cant be int...
+        {
+            isint = false;
+            if(*s != '.') // and if the char beeing not int isnt a dot (3.1415), it cant be float either
+                return SCP_TYPE_STRING;
+        }
+        first = false;
+    }
+    return isint ? SCP_TYPE_INT : SCP_TYPE_FLOAT;
 }
 
-std::string SCPDatabaseMgr::GetRaceName(uint32 id)
+bool SCPDatabaseMgr::Compact(char *dbname, char *outfile)
 {
-    std::string r = GetDB("race").GetField(id).GetString("name");
-    //if(r.empty())
-    //    r = raceName[id];
-    return r;
+    logdebug("Compacting database '%s' into file '%s'", dbname, outfile);
+    SCPDatabase *db = GetDB(dbname);
+    if(!db || db->fields.empty() || db->sources.empty())
+    {
+        logerror("Compact(\"%s\",\"%s\") failed, DB doesn't exist or is empty",dbname,outfile);
+        return false;
+    }
+    std::map<std::string, SCPFieldDef> fieldIdMap;
+    std::map<uint32,uint32> idToSectionMap;
+    ByteBuffer stringdata(5000);
+    uint32 cur_idx, pass = 0;
+    std::string line;
+    uint32 section=0;
+    uint32 *membuf = NULL; // stores ints, floats and string offsets from ByteBuffer stringdata
+    uint32 blocksize;
+    std::string entry,value;
+    uint32 field_id;
+
+    // some preparations
+    uint32 nStrings = 0, nRows = db->fields.size(), nFields; // pre-declared
+    stringdata << ""; // write an empty string so that offset 0 will always return empty string
+
+    // the whole process is divided into 2 passes:
+    // - pass 0 autodetects the datatypes stored in the dirfferent entries (SCPFieldDef)
+    // - pass 1 creates the data field holding the values and string offsets, and also stuffs string values into the ByteBuffer
+    while(pass < 2)
+    {
+        cur_idx = 1; // stores the current index of the last entry added. index 0 is always field_id!
+        section = 0; // stores how many sections are done already
+        for(SCPFieldMap::iterator fmit = db->fields.begin(); fmit != db->fields.end(); fmit++)
+        {
+            SCPEntryMap& emap = fmit->second;
+            field_id = fmit->first; // stores the field id (e.g. "[154]" in the scp file)
+            idToSectionMap[field_id] = section; // since not every field id exists, store field id and its section number
+                                                // for faster lookup, less overhead, and smaller files
+
+            // write the field id into row position 0 of the data field
+            if(pass == 1)
+            {
+                ASSERT(membuf != NULL);
+                uint32 pos = section * nFields;
+                ASSERT(pos < blocksize);
+                membuf[pos] = field_id;
+            }
+
+            for(SCPEntryMap::iterator eit = emap.begin(); eit != emap.end(); eit++)
+            {
+                // "entry=value" in the scp file
+                entry = eit->first;
+                value = eit->second;
+
+                 // pass 0 - autodetect field types
+                if(pass == 0)
+                {
+                    if(fieldIdMap.find(entry) == fieldIdMap.end())
+                    {
+                        SCPFieldDef d;
+                        d.id = cur_idx++;
+                        d.type = GetDataTypeFromString((char*)value.c_str());
+                        fieldIdMap[entry] = d;
+                        DEBUG(logdebug("Found new key: '%s' id: %u type: %s", entry.c_str(), d.id, gettypename(d.type) ));
+                    }
+                    else
+                    {
+                        SCPFieldDef& d = fieldIdMap[entry];
+                        uint32 _oldtype = d.type;
+                        // int can be changed to float or string, float only to string. changing back not allowed.
+                        if(d.type == SCP_TYPE_INT)
+                        {
+                            d.type = GetDataTypeFromString((char*)value.c_str());
+                        }
+                        else if(d.type == SCP_TYPE_FLOAT)
+                        {
+                            uint32 newtype = GetDataTypeFromString((char*)value.c_str());
+                            if(newtype == SCP_TYPE_STRING)
+                                d.type = newtype;
+                        }
+
+                        if(_oldtype != d.type)
+                        {
+                            logdebug("Key '%s' id %u changed from %s to %s (field_id: %u)", entry.c_str(), d.id, gettypename(_oldtype), gettypename(d.type),field_id);
+                        }
+                    }
+                }
+                // pass 1 - create the data field
+                else if(pass == 1)
+                {
+                    ASSERT(membuf != NULL);
+                    SCPFieldDef d = fieldIdMap[entry];
+                    uint32 pos = (section * nFields) + d.id;
+                    ASSERT(pos < blocksize);
+                    if(d.type == SCP_TYPE_STRING)
+                    {
+                        membuf[pos] = stringdata.wpos();
+                        stringdata << value;
+                        nStrings++;
+                    }
+                    else if(d.type == SCP_TYPE_INT)
+                    {
+                        membuf[pos] = atoi(value.c_str());
+                    }
+                    else if(d.type == SCP_TYPE_FLOAT)
+                    {
+                        ((float*)membuf)[pos] = atof(value.c_str());
+                    }
+                }
+            }
+            section++;
+        }
+        // if the first pass is done, allocate the data field for the second pass
+        if(!pass)
+        {
+            nFields = fieldIdMap.size() + 1; // add the one field used for the field ID
+            ASSERT(section == nRows);
+            blocksize = nRows * nFields; // +1 because we store the field id here also
+            DEBUG(logdebug("SCP: allocating %u*%u = %u integers (%u bytes)",nRows,fieldIdMap.size()+1,blocksize, blocksize*sizeof(uint32)));
+            membuf = new uint32[blocksize];
+            memset(membuf, 0, blocksize * sizeof(uint32));
+        }
+        pass++;
+    }
+
+    // used header fields, some are pre-declared above, if needed
+    uint32 offsMD5, nMD5, sizeMD5;
+    uint32 offsIndexes, nIndexes, sizeIndexes;
+    uint32 offsFields, sizeFields;
+    uint32 offsData;
+    uint32 offsStrings, sizeStrings;
+
+    // MD5 hashes of source files
+    SCPSourceList& src = db->sources;
+    ByteBuffer md5buf;
+    nMD5 = 0;
+    for(SCPSourceList::iterator it = src.begin(); it != src.end(); it++)
+    {
+        memblock *mb = Pointers.GetNoCreate(*it);
+        if(!mb)
+        {
+            // if we reach this point there was really some big f*** up
+            logerror("SCP Compact: memblock for file '%s' doesn't exist",it->c_str());
+            continue;
+        }
+
+        MD5Hash md5;
+        md5.Update(mb->ptr,mb->size);
+        md5.Finalize();
+        md5buf << *it;
+        md5buf.append(md5.GetDigest(),md5.GetLength());
+        nMD5++;
+    }
+    sizeMD5 = md5buf.size();
+
+    // field types, sorted by IDs
+    ByteBuffer fieldbuf;
+    // put the entries and their type into ByteBuffer, sorted by their position in the membuf rows
+    // note that the first field in the data row is always the field id, so the values start from 1
+    for(std::map<std::string,SCPFieldDef>::iterator itf = fieldIdMap.begin(); itf != fieldIdMap.end(); itf++)
+    {
+        fieldbuf << itf->first << itf->second.id << itf->second.type; // entry name, id, type.
+    }
+    sizeFields = fieldbuf.size();
+
+    // index -> ID lookup table, e.g. data with ID 500 will have field index 214, because some IDs in between are missing
+    // it *could* be calculated at load-time from the existing data field, but this way is faster when random-accessing the file itself
+    // (what we dont do anyway, for now)
+    ByteBuffer indexbuf;
+    for(std::map<uint32,uint32>::iterator itx = idToSectionMap.begin(); itx != idToSectionMap.end(); itx++)
+    {
+        indexbuf << itx->first << itx->second; // field id; row number
+    }
+    nIndexes = idToSectionMap.size();
+    sizeIndexes = indexbuf.size();
+
+    // string data
+    // -- most of it is handled somewhere above
+    sizeStrings = stringdata.size();
+
+    // precalc absolute offsets, header is 18 bytes large
+    offsMD5 = HEADER_SIZE;
+    offsIndexes = offsMD5 + sizeMD5;
+    offsFields = offsIndexes + sizeIndexes;
+    offsData = offsFields + sizeFields;
+    offsStrings = offsData + blocksize * sizeof(uint32);
+
+    // buffer the file header
+    ByteBuffer hbuf;
+    hbuf.append("SCPC",4); // identifier
+    hbuf << (uint32)0; // flags, not yet used
+    hbuf << (uint32)0 << (uint32)0 << (uint32)0 << (uint32)0; // padding, not yet used
+    hbuf << offsMD5 << nMD5 << sizeMD5;
+    hbuf << offsIndexes << nIndexes << sizeIndexes;
+    hbuf << offsFields << nFields << sizeFields;
+    hbuf << offsData << section << blocksize * sizeof(uint32);
+    hbuf << offsStrings << nStrings << sizeStrings;
+
+    FILE *fh = fopen(outfile,"wb");
+    if(!fh)
+        return false;
+    if(fh)
+    {
+        fwrite(hbuf.contents(),hbuf.size(),1,fh);
+        if(sizeMD5) // just in case no md5sums are stored
+            fwrite(md5buf.contents(),sizeMD5,1,fh);
+        fwrite(indexbuf.contents(),sizeIndexes,1,fh);
+        fwrite(fieldbuf.contents(),sizeFields,1,fh);
+        fwrite(membuf,sizeof(uint32),blocksize,fh);
+        fwrite(stringdata.contents(),sizeStrings,1,fh);
+    }
+    fclose(fh);
+
+    if(!db)
+        db = GetDB(dbname,true); // create if not exist
+
+    db->_compact = true;
+    db->_name = dbname;
+
+    // drop all data no longer needed if the database is compacted
+    db->DropTextData();
+
+    // we keep the membuf, since the compiled data are now usable as if loaded directly from a file
+    // associate it with the buffers used by the db accessing functions
+    db->_stringbuf = new char[sizeStrings];
+    db->_stringsize = sizeStrings;
+    memcpy(db->_stringbuf,stringdata.contents(),sizeStrings);
+    db->_intbuf = membuf; // <<-- do NOT drop the membuf, its still used and will be deleted with ~SCPDatabase()!!
+    db->_fields_per_row = nFields;
+    db->_rowcount = nRows;
+    db->_indexes = idToSectionMap;
+    db->_fielddefs = fieldIdMap;
+    for(std::map<uint32,uint32>::iterator it = idToSectionMap.begin(); it != idToSectionMap.end(); it++)
+        db->_indexes_reverse[it->second] = it->first;
+
+    return true;
 }
 
-std::string SCPDatabaseMgr::GetMapName(uint32 id)
+uint32 SCPDatabaseMgr::SearchAndLoad(char *dbname, bool no_compiled)
 {
-    return GetDB("map").GetField(id).GetString("name");
+    uint32 count = 0;
+    std::deque<std::string> goodfiles;
+
+    for(std::deque<std::string>::iterator it = _paths.begin(); it != _paths.end(); it++)
+    {
+        std::deque<std::string> files = GetFileList(*it);
+        sort(files.begin(),files.end()); // rough alphabetical sort
+        for(std::deque<std::string>::iterator itf = files.begin(); itf != files.end(); itf++)
+        {
+            std::string& fn = *itf;
+            if(fn.length() < 5)
+                continue;
+            std::string filepath = *it + fn;
+            // check for special case: <dbname>.ccp in this directory? load it and skip the rest
+            if(!no_compiled && !stricmp(std::string(dbname).append(".ccp").c_str(), fn.c_str()))
+            {
+                logdebug("Loading pre-compacted database '%s%s'", it->c_str(), fn.c_str());
+                DropDB(dbname); // if sth got loaded before, remove that
+                // load SCC database file and skip rest
+                if(LoadCompactSCP((char*)filepath.c_str(), dbname))
+                {
+                    logdebug("Loaded '%s' -> %s, skipping scp files",filepath.c_str(),dbname);
+                    return 1;
+                }
+            }
+            else if(!stricmp(fn.c_str() + fn.length() - 4, ".scp"))
+            {
+                // skip 0-byte files
+                if(GetFileSize(filepath.c_str()))
+                    goodfiles.push_back(filepath);                
+            }
+        }
+    }
+
+    logdetail("Pre-compacted SCC file for '%s' invalid, creating from SCP (%u files total)",dbname,goodfiles.size());
+
+    for(std::deque<std::string>::iterator it = goodfiles.begin(); it != goodfiles.end(); it++)
+    {
+        bool load_it = false;
+        std::fstream fh;
+        fh.open( it->c_str() , std::ios_base::in | std::ios_base::binary);
+        if( !fh.is_open() )
+            continue;
+
+        uint32 size = 1000; // search for #dbname tag in first 1000 bytes
+        char *buf = new char[size];
+        memset(buf,0,size);
+
+        fh.read(buf,size);
+        fh.close();
+
+        std::string line,dbn;
+        for(uint32 pos = 0; pos < size; pos++)
+        {
+            if(buf[pos] == '\n' || buf[pos] == 10 || buf[pos] == 13)
+            {
+                if(line.empty())
+                    continue;
+                while(line.size() && (line[0]==' ' || line[0]=='\t'))
+                    line.erase(0,1);
+                if(line[0] == '#')
+                {
+                    if(!strnicmp(line.c_str(),"#dbname=",8) && !stricmp(line.c_str()+8, dbname))
+                    {
+                        load_it = true;
+                        break;
+                    }
+                }
+                line.clear();
+            }
+            else
+                line += buf[pos];
+        }
+        delete [] buf;
+
+        if(load_it)
+        {
+            logdebug("File '%s' matching database '%s', loading", it->c_str(), dbname);
+            count++;
+            uint32 sections = AutoLoadFile((char*)it->c_str());
+        }
+    }
+
+    char fn[100];
+    sprintf(fn,"./cache/%s.ccp",dbname);
+    Compact(dbname, fn);
+
+    return count;
 }
 
-std::string SCPDatabaseMgr::GetClassName_(uint32 id)
+void SCPDatabaseMgr::AddSearchPath(char *path)
 {
-    std::string r = GetDB("class").GetField(id).GetString("name");
-    //if(r.empty())
-    //    r = className[id];
-    return r;
+    std::string p;
+
+    // normalize path, use '/' instead of '\'. needed for that check below
+    uint32 len = strlen(path);
+    for(uint32 i = 0; i < len; i++)
+    {
+        if(path[i] == '\\')
+            p += '/';
+        else
+            p += path[i];
+    }
+
+    if(p[p.size()-1] != '/')
+        p += '/';
+    for(std::deque<std::string>::iterator it = _paths.begin(); it != _paths.end(); it++)
+    {
+        // windows doesnt care about UPPER/lowercase, while *nix does;
+        // a path shouldnt be added twice or unexpected behavior is likely to occur
+#if PLATFORM == PLATFORM_WIN32
+        if(!stricmp(p.c_str(), it->c_str()))
+            return;
+#else
+        if(p == *it)
+            return;
+#endif
+    }
+        
+    _paths.push_back(p);
 }
 
-std::string SCPDatabaseMgr::GetGenderName(uint32 id)
+bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
 {
-    return GetDB("gender").GetField(id).GetString("name");
+    uint32 filesize = GetFileSize(fn);
+    if(filesize < HEADER_SIZE)
+    {
+        logerror("Database file '%s' is too small!",fn);
+        return false;
+    }
+    std::fstream fh;
+    fh.open(fn, std::ios_base::in | std::ios_base::binary);
+    if(!fh.is_open())
+    {
+        logerror("Error opening '%s'",fn);
+        return false;
+    }
+
+    ByteBuffer bb;
+    bb.resize(filesize);
+    fh.read((char*)bb.contents(), filesize);
+    fh.close();
+
+    char tag[4];
+    uint32 flags, padding[4];
+    uint32 offsMD5, nMD5, sizeMD5;
+    uint32 offsIndexes, nIndexes, sizeIndexes;
+    uint32 offsFields, nFields, sizeFields;
+    uint32 offsData, nRows, sizeData;
+    uint32 offsStrings, nStrings, sizeStrings;
+
+    bb.read((uint8*)&tag[0],4);
+    if(memcmp(tag,"SCPC",4))
+    {
+        logerror("'%s' is not a compact database file!",fn);
+        return false;
+    }
+    bb >> flags;
+    bb >> padding[0] >> padding[1] >> padding[2] >> padding[3];
+    bb >> offsMD5 >> nMD5 >> sizeMD5;
+    bb >> offsIndexes >> nIndexes >> sizeIndexes;
+    bb >> offsFields >> nFields >> sizeFields;
+    bb >> offsData >> nRows >> sizeData;
+    bb >> offsStrings >> nStrings >> sizeStrings;
+
+    SCPDatabase *db = GetDB(dbname,true);
+    db->_name = dbname;
+    db->_compact = true;
+
+    ByteBuffer md5buf(sizeMD5);
+    md5buf.resize(sizeMD5);
+    // read MD5 block
+    bb.rpos(offsMD5);
+    if(bb.rpos() == offsMD5)
+        bb.read((uint8*)md5buf.contents(),sizeMD5);
+    else
+    {
+        logerror("'%s' has wrong MD5 offset, can't load",fn);
+        return false;
+    }
+
+    for(uint32 i = 0; i < nMD5; i++)
+    {
+        // read filename and MD5 hash from compiled database
+        uint8 buf[MD5_DIGEST_LENGTH];
+        std::string refFn;
+        md5buf >> refFn;
+        md5buf.read(buf,MD5_DIGEST_LENGTH);
+
+        // load the file referred to
+        uint32 refFileSize = GetFileSize(refFn.c_str());
+        FILE *refFile = fopen(refFn.c_str(), "rb");
+        if(!refFile)
+        {
+            logdebug("Not loading '%s', file doesn't exist",fn);
+            return false;
+        }
+        uint8 *refFileBuf = new uint8[refFileSize];
+        fread(refFileBuf,sizeof(uint8),refFileSize,refFile);
+        fclose(refFile);
+        db->sources.insert(refFn);
+        Pointers.Assign(refFn, new memblock(refFileBuf,refFileSize));
+        MD5Hash md5;
+        md5.Update(refFileBuf,refFileSize);
+        md5.Finalize();
+        if(memcmp(buf, md5.GetDigest(), MD5_DIGEST_LENGTH))
+        {
+            logdebug("MD5-check: '%s' has changed!", refFn.c_str());
+            return false;
+        }
+        else
+        {
+            logdebug("MD5-check: '%s' -> OK",refFn.c_str());
+        }
+    }
+
+    // everything good so far? we reached this point? then its likely that the rest of the file is ok, alloc remaining buffers
+    ByteBuffer indexbuf(sizeIndexes);
+    ByteBuffer fieldsbuf(sizeFields);
+    indexbuf.resize(sizeIndexes);
+    fieldsbuf.resize(sizeFields);
+
+    // read indexes block
+    bb.rpos(offsIndexes);
+    if(bb.rpos() == offsIndexes)
+        bb.read((uint8*)indexbuf.contents(),sizeIndexes);
+    else
+    {
+        logerror("'%s' has wrong indexes offset, can't load",fn);
+        return false;
+    }
+
+    // read field definitions buf
+    bb.rpos(offsFields);
+    if(bb.rpos() == offsFields)
+        bb.read((uint8*)fieldsbuf.contents(),sizeFields);
+    else
+    {
+        logerror("'%s' has wrong field defs offset, can't load",fn);
+        return false;
+    }
+
+    // main data and string blocks follow below
+
+    for(uint32 i = 0; i < nIndexes; i++)
+    {
+        uint32 field_id, row;
+        indexbuf >> field_id >> row;
+        db->_indexes[field_id] = row;
+        db->_indexes_reverse[row] = field_id;
+    }
+
+    for(uint32 i = 0; i < nFields - 1; i++) // the first field (index column) is never written to the file!
+    {
+        SCPFieldDef fieldd;
+        std::string fieldn;
+        fieldsbuf >> fieldn >> fieldd.id >> fieldd.type;
+        db->_fielddefs[fieldn] = fieldd;
+    }
+
+    // read main data block
+    ASSERT(nRows * nFields == sizeData / sizeof(uint32));
+    bb.rpos(offsData);
+    if(bb.rpos() == offsData)
+    {
+        db->_intbuf = new uint32[nRows * nFields];
+        bb.read((uint8*)db->_intbuf, sizeData); // load this somewhat fast and without a for loop
+    }
+    else
+    {
+        logerror("'%s' has wrong data offset, can't load",fn);
+        return false;
+    }
+
+    // read strings
+    bb.rpos(offsStrings);
+    if(bb.rpos() == offsStrings)
+    {
+        db->_stringbuf = new char[sizeStrings];
+        bb.read((uint8*)db->_stringbuf,sizeStrings);
+    }
+    else
+    {
+        logerror("'%s' has wrong strings offset, can't load",fn);
+        return false;
+    }
+    db->_stringsize = sizeStrings;
+    db->_rowcount = nRows;
+    db->_fields_per_row = nFields;
+
+    db->DropTextData(); // delete pointers to file content created at md5 comparison
+
+    logdebug("'%s' loaded successfully",fn);
+
+    return true;
 }
 
-std::string SCPDatabaseMgr::GetLangName(uint32 id)
+// used only for debugging
+void SCPDatabase::DumpStructureToFile(char *fn)
 {
-    std::string r = GetDB("language").GetField(id).GetString("name");
-    //if(r.empty())
-    //    r = LookupName(id,langNames);
-    return r;
+    std::ofstream f;
+    f.open(fn);
+    if(!f.is_open())
+        return;
+
+    uint32 *ftype = new uint32[_fields_per_row];
+    ftype[0] = SCP_TYPE_INT;
+
+    f << "Fields: (0 is always index field)\n";
+    for(std::map<std::string,SCPFieldDef>::iterator it = _fielddefs.begin(); it != _fielddefs.end(); it++)
+    {
+        f << "-> Name: " << it->first << ", ID: " << it->second.id << ", type: " << gettypename(it->second.type) << "\n";
+        ftype[it->second.id] = it->second.type;
+    }
+    f << "\n";
+
+    for(uint32 row = 0; row < _rowcount; row++)
+    {
+        for(uint32 column = 0; column < _fields_per_row; column++)
+        {
+            if(ftype[column] == SCP_TYPE_INT)
+                f << *((int*)&_intbuf[row * _fields_per_row + column]) << "\t";
+            else if(ftype[column] == SCP_TYPE_FLOAT)
+                f << *((float*)&_intbuf[row * _fields_per_row + column]) << "\t";
+            else
+                f << "S_" << _intbuf[row * _fields_per_row + column] << "\t";
+        }
+        f << "\n";
+    }
+
+    f << "\nStrings:\n";
+    for(uint32 i = 0; i < _stringsize; i++)
+    {
+        if(!_stringbuf[i])
+        {
+            i++;
+            if(i >= _stringsize)
+                break;
+            f << "\n" << i << ": ";
+        }
+        f << _stringbuf[i];
+    }
 }
+
+
+
+
+

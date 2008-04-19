@@ -1,0 +1,25 @@
+#dbname=gui_login_text
+
+// check src/Client/GUI/SceneData.h for the fields/numbers.
+// this file covers the texts for SceneLogin.
+
+// connection info
+[1]
+0=Not connected.
+1=Connecting...
+2=Could not connect.
+3=Account does not exist!
+4=Account is already connected!
+5=Wrong game version. (Try to set a different version info in PseuWoW.conf)
+6=Logging in...
+7=Authenticating...
+8=Authentication failed! (Wrong password?)
+9=Requesting realmlist...
+10=Unknown error!
+11=Incoming file transfer.
+
+// msgbox texts. 0: header 1:body
+[2]
+0=Oh noes!
+1=You have to enter account name and password!
+

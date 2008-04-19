@@ -21,45 +21,6 @@ SET,${v} ${${v}}${@def}
 // remove the name placeholder
 UNSET v
 
-
-//--------------------------------------------------------
-#script=exloadscp
-#permission=255
-//--------------------------------------------------------
-if ?{fileexists ${@def}}
-        loadscp,{${@0}} ${@def}
-else
-        logdebug skipped loading of non-existent file '${@def}'
-endif
-
-
-//--------------------------------------------------------
-#script=loadallscp
-#permission=255
-//--------------------------------------------------------
-LOG * Loading SCP data storages...
-
-// example:
-// LOADSCP,test data/test.scp
-
-// load default databases
-LOADSCP,class data/scp/class.scp
-LOADSCP,gender data/scp/gender.scp
-LOADSCP,language data/scp/language.scp
-LOADSCP,map data/scp/map.scp
-LOADSCP,race data/scp/race.scp
-
-// load extended databases if present.
-EXLOADSCP,sound data/scp/sound.scp
-EXLOADSCP,emote data/scp/emote.scp
-EXLOADSCP,zone data/scp/zone.scp
-EXLOADSCP,creaturedisplayinfo data/scp/creaturedisplayinfo.scp
-EXLOADSCP,creaturemodeldata data/scp/creaturemodeldata.scp
-EXLOADSCP,npcsound data/scp/npcsound.scp
-
-LOG * SCP loaded.
-
-
 //-------------------------------------------------
 #script=string_is_command
 //-------------------------------------------------

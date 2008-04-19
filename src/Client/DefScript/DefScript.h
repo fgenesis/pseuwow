@@ -29,6 +29,7 @@ struct DefReturnResult
     DefReturnResult(bool b) { ok=true; mustreturn=false; ret=b?"true":"false"; }
 	DefReturnResult(std::string s) { ok=true; mustreturn=false; ret=s; }
     DefReturnResult(const char *s) { DefReturnResult(std::string(s)); }
+    DefReturnResult(char *s) { DefReturnResult(std::string(s)); }
     bool ok; // true if the execution of the current statement was successful
     bool mustreturn;
     std::string ret; // return value used by ?{..}
