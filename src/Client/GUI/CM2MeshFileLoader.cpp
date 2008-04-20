@@ -2,12 +2,6 @@
 #include "CM2MeshFileLoader.h"
 #include "common.h"
 
-#ifdef _DEBUG
-#define DEBUG(code) code;
-#else
-#define DEBUG(code) ;
-#endif
-
 
 namespace irr
 {
@@ -204,7 +198,7 @@ for(u32 i=0; i<M2MTextureDef.size(); i++)
     file->seek(M2MTextureDef[i].texFileOfs);
     file->read((void*)tempTexFileName.c_str(),M2MTextureDef[i].texFileLen);
     M2MTextureFiles.push_back(tempTexFileName.c_str());
-    std::cout<<M2MTextureFiles.size()<<"-"<<M2MTextureFiles[i].c_str()<<"\n";
+    DEBUG(logdebug("Texture: %u (%s)",M2MTextureFiles.size(),M2MTextureFiles[i].c_str()));
 }
 //    std::cout << "Read "<<M2MTextureFiles.size()<<"/"<<M2MTextureDef.size()<<" Texture file names\n";
 

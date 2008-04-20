@@ -121,6 +121,9 @@ void PseuGUI::_Init(void)
     _timer = _device->getTimer();
     //...
 
+    // disable crappy irrlicht logging
+    _device->getLogger()->setLogLevel(ELL_NONE);
+
     // register external loaders for not supported filetypes
     video::CImageLoaderBLP* BLPloader = new video::CImageLoaderBLP();
 	_driver->addExternalImageLoader(BLPloader);

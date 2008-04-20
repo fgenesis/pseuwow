@@ -60,7 +60,13 @@ class PseuInstanceConf
 
     // gui related
     bool enablegui;
-    // need more here
+    uint32 terrainsectors;
+    uint32 terrainrendersize;
+    uint32 terrainupdatestep;
+    float farclip;
+    float fogfar;
+    float fognear;
+    float fov;
 
 
 };

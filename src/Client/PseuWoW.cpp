@@ -488,6 +488,15 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
         }
     }
 
+    // GUI related
+    terrainsectors = atoi(v.Get("GUI::TERRAINSECTORS").c_str());
+    terrainrendersize = atoi(v.Get("GUI::TERRAINRENDERSIZE").c_str());
+    terrainupdatestep = atoi(v.Get("GUI::TERRAINUPDATESTEP").c_str());
+    farclip = atof(v.Get("GUI::FARCLIP").c_str());
+    fogfar = atof(v.Get("GUI::FOGFAR").c_str());
+    fognear = atof(v.Get("GUI::FOGNEAR").c_str());
+    fov = atof(v.Get("GUI::FOV").c_str());
+
     log_setloglevel(debug);
 }
 
