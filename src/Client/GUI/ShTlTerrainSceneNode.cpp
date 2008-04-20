@@ -1,10 +1,23 @@
+/*-----------------------------------------------------------------------------*
+| sourcefile ShTlTerrainSceneNode.cpp                                          |
+|                                                                              |
+| version 2.20                                                                 |
+| date: (17.04.2008)                                                           |
+|                                                                              |
+| author:  Michal Švantner                                                     |
+|                                                                              |
+| Shifting Tiled Terrain Scene Node                                            |
+|                                                                              |
+| Writen for Irrlicht engine version 1.4                                       |
+*-----------------------------------------------------------------------------*/
+
 #include "ShTlTerrainSceneNode.h"
 
 // constructor
-ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* pSceneManager,
-    s32 width, s32 height, f32 tilesize, s32 visiblesize,
+ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* smgr,
+    s32 width, s32 height, f32 tilesize, s32 visiblesize, s32 sect,
     scene::ISceneNode* parent, s32 id)
-    : scene::ISceneNode(pSceneManager->getRootSceneNode(), pSceneManager, id)
+    : scene::ISceneNode(smgr->getRootSceneNode(), smgr, id)
 {
     Size.Width = width;
     Size.Height = height;
@@ -51,12 +64,16 @@ ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* pSceneManager,
 
     // calculate number of sectors
     // terrain mesh will be split to 1 or 3 or 5 sectors on each axis depending on size
-    s32 w = 1;
-    s32 h = 1;
-    if(MeshSize.Width >= 30) w = 3;
-    if(MeshSize.Height >= 30) h = 3;
-    if(MeshSize.Width >= 50) w = 5;
-    if(MeshSize.Height >= 50) h = 5;
+    s32 w,h;
+    w = h = sect;
+    if(!(w && h))
+    {
+        w = h = 1;
+        if(MeshSize.Width >= 30) w = 3;
+        if(MeshSize.Height >= 30) h = 3;
+        if(MeshSize.Width >= 50) w = 5;
+        if(MeshSize.Height >= 50) h = 5;
+    }
 
     // create sectors
     Sector.reset(w, h);
@@ -67,16 +84,16 @@ ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* pSceneManager,
 
     for(s32 j=0; j<Sector.height(); j++)
         for(s32 i=0; i<Sector.width(); i++)
-            Sector(i,j).Size = core::dimension2d<u32>(w, h);
+            Sector(i,j).Size = core::dimension2d<s32>(w, h);
 
     // find size of center sector in tiles
     w = MeshSize.Width - Sector(0,0).Size.Width * (Sector.width()-1);
     h = MeshSize.Height - Sector(0,0).Size.Height * (Sector.height()-1);
 
-    {s32 j= Sector.height()/2;
+    {s32 j=Sector.height()/2;
         for(s32 i=0; i<Sector.width(); i++) Sector(i,j).Size.Height = h;}
 
-    {s32 i= Sector.width()/2;
+    {s32 i=Sector.width()/2;
         for(s32 j=0; j<Sector.height(); j++) Sector(i,j).Size.Width = w;}
 
     // find offset of sectors in tiles
@@ -122,13 +139,13 @@ ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* pSceneManager,
     for(s32 j=0; j<Sector.height(); j++)
         for(s32 i=0; i<Sector.width(); i++)
         {
-            u32 k = 0;
+            s32 k = 0;
 
-            for(u32 n=0; n<Sector(i,j).Size.Height; n++)
-                for(u32 m=0; m<Sector(i,j).Size.Width; m++)
+            for(s32 n=0; n<Sector(i,j).Size.Height; n++)
+                for(s32 m=0; m<Sector(i,j).Size.Width; m++)
                 {
-                    u32 x = m + Sector(i,j).Offset.X;
-                    u32 y = n + Sector(i,j).Offset.Y;
+                    s32 x = m + Sector(i,j).Offset.X;
+                    s32 y = n + Sector(i,j).Offset.Y;
 
                     Tile(x,y).Vertex[0] = &Sector(i,j).Vertex[k];
                     k++;
@@ -182,23 +199,23 @@ ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* pSceneManager,
 
     driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, mmflag);
 
-    Material[0].TextureLayer[1].Texture = CTexture;
-    Material[0].TextureLayer[1].TextureWrap = video::ETC_CLAMP_TO_EDGE;
+    Material[0].TextureLayer[0].Texture = CTexture;
+    Material[0].TextureLayer[0].TextureWrap = video::ETC_CLAMP_TO_EDGE;
 
     // setup UV coordinates of vertices on 2nd texture layer
     f32 ax = (f32)MeshSize.Width / CTexture->getSize().Width / MeshSize.Width;
     f32 ay = (f32)MeshSize.Height/ CTexture->getSize().Height / MeshSize.Height;
     f32 ry = 1.0f - (f32)MeshSize.Height/ CTexture->getSize().Height;
 
-    u32 n = MeshSize.Height-1;
+    s32 n = MeshSize.Height-1;
     for(s32 j=0; j<MeshSize.Height; j++)
     {
         for(s32 i=0; i<MeshSize.Width; i++)
         {
-            Tile(i,n).Vertex[0]->TCoords2 = core::vector2d<f32>(i*ax, ry+(j+1)*ay);
-            Tile(i,n).Vertex[1]->TCoords2 = core::vector2d<f32>(i*ax, ry+j*ay);
-            Tile(i,n).Vertex[3]->TCoords2 = core::vector2d<f32>((i+1)*ax, ry+(j+1)*ay);
-            Tile(i,n).Vertex[2]->TCoords2 = core::vector2d<f32>((i+1)*ax, ry+j*ay);
+            Tile(i,n).Vertex[0]->TCoords = core::vector2d<f32>(i*ax, ry+(j+1)*ay);
+            Tile(i,n).Vertex[1]->TCoords = core::vector2d<f32>(i*ax, ry+j*ay);
+            Tile(i,n).Vertex[3]->TCoords = core::vector2d<f32>((i+1)*ax, ry+(j+1)*ay);
+            Tile(i,n).Vertex[2]->TCoords = core::vector2d<f32>((i+1)*ax, ry+j*ay);
         }
         n--;
     }
@@ -231,7 +248,6 @@ ShTlTerrainSceneNode::ShTlTerrainSceneNode(scene::ISceneManager* pSceneManager,
     // culling will be done by terrain itself, sector by sector so that sectors
     // which are not on screen will not be renderd to save time
     setAutomaticCulling( scene::EAC_OFF );
-
 }
 
 
@@ -372,10 +388,11 @@ void ShTlTerrainSceneNode::render()
                     for (u32 n = 0; n<Sector(i,j).Vertex.size(); ++n )
                     {
                         core::vector3df h = v[n].Normal * (TileSize/2);
-				        driver->draw3DLine ( v[n].Pos, v[n].Pos + h, c );
+                        driver->draw3DLine ( v[n].Pos, v[n].Pos + h, c );
                     }
             }
 	}
+
 }
 
 
@@ -425,7 +442,7 @@ void ShTlTerrainSceneNode::recalculateBoundingBox()
 
 
 // returns amount of materials used by terrain
-u32 ShTlTerrainSceneNode::getMaterialCount()
+u32 ShTlTerrainSceneNode::getMaterialCount() const
 {
     return Material.size();
 }
@@ -451,7 +468,7 @@ s32 ShTlTerrainSceneNode::getStep()
 // set number of tiles to skip before terrain mesh gets updated
 // default is 1
 // updating slows down rendering and seting step higher will cause terrain to update less ofthen
-void ShTlTerrainSceneNode::setStep(u32 newstep)
+void ShTlTerrainSceneNode::setStep(s32 newstep)
 {
     ShStep = newstep;
 }
@@ -496,7 +513,7 @@ core::dimension2d<s32> ShTlTerrainSceneNode::getRenderedSize()
 
 
 // return number of sectors
-u32 ShTlTerrainSceneNode::getSectorCount()
+s32 ShTlTerrainSceneNode::getSectorCount()
 {
     return Sector.width() * Sector.height();
 }
@@ -504,7 +521,7 @@ u32 ShTlTerrainSceneNode::getSectorCount()
 
 
 // returns numner of sectors rendered last frame
-u32 ShTlTerrainSceneNode::getSectorsRendered()
+s32 ShTlTerrainSceneNode::getSectorsRendered()
 {
     return SectorsRendered;
 }
@@ -512,7 +529,7 @@ u32 ShTlTerrainSceneNode::getSectorsRendered()
 
 
 // return height of terrain spot at terrain coordinates
-f32 ShTlTerrainSceneNode::getHeight(u32 w, u32 h)
+f32 ShTlTerrainSceneNode::getHeight(s32 w, s32 h)
 {
     return Data(w,h).Height;
 }
@@ -565,7 +582,7 @@ f32 ShTlTerrainSceneNode::getHeight(core::vector3df pos)
 
 
 // set relative height of terrain spot at terrain coordinates
-void ShTlTerrainSceneNode::setHeight(u32 w, u32 h, f32 newheight)
+void ShTlTerrainSceneNode::setHeight(s32 w, s32 h, f32 newheight)
 {
     Data(w,h).Height = newheight;
 
@@ -593,7 +610,7 @@ void ShTlTerrainSceneNode::setHeight(u32 w, u32 h, f32 newheight)
 
 
 // return normal of terrain at terrain coordinates
-core::vector3df ShTlTerrainSceneNode::getNormal(u32 w, u32 h)
+core::vector3df ShTlTerrainSceneNode::getNormal(s32 w, s32 h)
 {
     return Data(w,h).Normal;
 }
@@ -601,7 +618,7 @@ core::vector3df ShTlTerrainSceneNode::getNormal(u32 w, u32 h)
 // set normal of terrain at terrain coordinates
 void ShTlTerrainSceneNode::setNormal(s32 w, s32 h, core::vector3df newnormal)
 {
-    Data(w,h).Normal = newnormal;
+   Data(w,h).Normal = newnormal;
 }
 
 
@@ -697,15 +714,15 @@ void ShTlTerrainSceneNode::smoothNormals()
 
 
 // get texture coordinates of tile corner
-core::vector2d<f32> ShTlTerrainSceneNode::getTileUV(u32 w, u32 h, TILE_VERTEX corner)
+core::vector2d<f32> ShTlTerrainSceneNode::getTileUV(s32 w, s32 h, TILE_VERTEX corner)
 {
-    return UVdata(w,h).Vertex[corner];
+   return UVdata(w,h).Vertex[corner];
 }
 
 
 
 // set texture coordinates of tile
-void ShTlTerrainSceneNode::setTileUV(u32 w, u32 h, core::vector2d<f32> UVlowerLeft,
+void ShTlTerrainSceneNode::setTileUV(s32 w, s32 h, core::vector2d<f32> UVlowerLeft,
     core::vector2d<f32> UVupperLeft, core::vector2d<f32> UVupperRight,
     core::vector2d<f32> UVlowerRight)
 {
@@ -723,7 +740,7 @@ void ShTlTerrainSceneNode::stretchTexture(core::vector2d<f32> scale)
     f32 ax = scale.X / Size.Width;
     f32 ay = scale.X / Size.Height;
 
-    u32 n = Size.Height-1;
+    s32 n = Size.Height-1;
     for(s32 j=0; j<Size.Height; j++)
     {
         for(s32 i=0; i<Size.Width; i++)
@@ -755,7 +772,7 @@ void ShTlTerrainSceneNode::stretchTextureOverTile(core::vector2d<f32> scale)
 
 
 // rotate texture of tile 90 degrees
-void ShTlTerrainSceneNode::rotateTileTexture90(u32 w, u32 h)
+void ShTlTerrainSceneNode::rotateTileTexture90(s32 w, s32 h)
 {
     core::vector2d<f32> tmp = UVdata(w,h).Vertex[3];
 
@@ -768,7 +785,7 @@ void ShTlTerrainSceneNode::rotateTileTexture90(u32 w, u32 h)
 
 
 // rotate texture of tile 180 degrees
-void ShTlTerrainSceneNode::rotateTileTexture180(u32 w, u32 h)
+void ShTlTerrainSceneNode::rotateTileTexture180(s32 w, s32 h)
 {
     core::vector2d<f32> tmp = UVdata(w,h).Vertex[3];
 
@@ -784,7 +801,7 @@ void ShTlTerrainSceneNode::rotateTileTexture180(u32 w, u32 h)
 
 
 // rotate texture of tile 270 degrees
-void ShTlTerrainSceneNode::rotateTileTexture270(u32 w, u32 h)
+void ShTlTerrainSceneNode::rotateTileTexture270(s32 w, s32 h)
 {
     core::vector2d<f32> tmp = UVdata(w,h).Vertex[3];
 
@@ -797,7 +814,7 @@ void ShTlTerrainSceneNode::rotateTileTexture270(u32 w, u32 h)
 
 
 // flip (mirror) texture of tile horizontaly
-void ShTlTerrainSceneNode::flipTileTextureHorizontal(u32 w, u32 h)
+void ShTlTerrainSceneNode::flipTileTextureHorizontal(s32 w, s32 h)
 {
     core::vector2d<f32> tmp = UVdata(w,h).Vertex[3];
 
@@ -813,7 +830,7 @@ void ShTlTerrainSceneNode::flipTileTextureHorizontal(u32 w, u32 h)
 
 
 // flip (mirror) texture of tile verticaly
-void ShTlTerrainSceneNode::flipTileTextureVertical(u32 w, u32 h)
+void ShTlTerrainSceneNode::flipTileTextureVertical(s32 w, s32 h)
 {
     core::vector2d<f32> tmp = UVdata(w,h).Vertex[3];
 
@@ -829,7 +846,7 @@ void ShTlTerrainSceneNode::flipTileTextureVertical(u32 w, u32 h)
 
 
 // get color of tile at terrain coordinates
-video::SColor ShTlTerrainSceneNode::getColor(u32 w, u32 h)
+video::SColor ShTlTerrainSceneNode::getColor(s32 w, s32 h)
 {
     return Data(w,h).Color;
 }
@@ -837,7 +854,7 @@ video::SColor ShTlTerrainSceneNode::getColor(u32 w, u32 h)
 
 
 // set color of tile at terrain coordinates
-void ShTlTerrainSceneNode::setColor(u32 w, u32 h, video::SColor newcolor)
+void ShTlTerrainSceneNode::setColor(s32 w, s32 h, video::SColor newcolor)
 {
     Data(w,h).Color = newcolor;
 }
@@ -1052,7 +1069,7 @@ bool ShTlTerrainSceneNode::getIntersectionWithLine( core::line3d<f32> line, core
 
 
 // load height data from texture
-void ShTlTerrainSceneNode::loadHeightMap(const c8 *filename, f32 scale, u32 w, u32 h)
+void ShTlTerrainSceneNode::loadHeightMap(const c8 *filename, f32 scale, s32 w, s32 h)
 {
     video::IVideoDriver* driver = SceneManager->getVideoDriver();
     if(!driver) return;
@@ -1095,7 +1112,7 @@ void ShTlTerrainSceneNode::loadHeightMap(const c8 *filename, f32 scale, u32 w, u
 
 
 // load color data from texture
-void ShTlTerrainSceneNode::loadColorMap(const c8 *filename, u32 w, u32 h)
+void ShTlTerrainSceneNode::loadColorMap(const c8 *filename, s32 w, s32 h)
 {
     video::IVideoDriver* driver = SceneManager->getVideoDriver();
     if(!driver) return;
@@ -1103,8 +1120,8 @@ void ShTlTerrainSceneNode::loadColorMap(const c8 *filename, u32 w, u32 h)
     video::IImage *image = driver->createImageFromFile(filename);
     if(!image) return;
 
-    s32 tw = (u32)image->getDimension().Width;
-    s32 th = (u32)image->getDimension().Height;
+    s32 tw = image->getDimension().Width;
+    s32 th = image->getDimension().Height;
 
     s32 we = w + tw;
     if(we > Size.Width+1) we = Size.Width+1;
@@ -1120,7 +1137,7 @@ void ShTlTerrainSceneNode::loadColorMap(const c8 *filename, u32 w, u32 h)
         {
             video::SColor color = image->getPixel(tw, th);
 
-            Data(i,j).Color = color;
+            setColor(i,j, color);
 
             tw++;
         }
@@ -1145,32 +1162,32 @@ bool ShTlTerrainSceneNode::isSectorOnScreen(TlTSector* sctr)
 
     // get camera frustrum planes
     const scene::SViewFrustum* frustrum = SceneManager->getActiveCamera()->getViewFrustum();
-	core::plane3d<f32> Left = frustrum->planes[scene::SViewFrustum::VF_LEFT_PLANE];
-    core::plane3d<f32> Right = frustrum->planes[scene::SViewFrustum::VF_RIGHT_PLANE];
-    core::plane3d<f32> Top = frustrum->planes[scene::SViewFrustum::VF_TOP_PLANE];
-    core::plane3d<f32> Bottom = frustrum->planes[scene::SViewFrustum::VF_BOTTOM_PLANE];
-    core::plane3d<f32> Near = frustrum->planes[scene::SViewFrustum::VF_NEAR_PLANE];
-    core::plane3d<f32> Far = frustrum->planes[scene::SViewFrustum::VF_FAR_PLANE];
+    core::plane3d<f32> left = frustrum->planes[scene::SViewFrustum::VF_LEFT_PLANE];
+    core::plane3d<f32> right = frustrum->planes[scene::SViewFrustum::VF_RIGHT_PLANE];
+    core::plane3d<f32> top = frustrum->planes[scene::SViewFrustum::VF_TOP_PLANE];
+    core::plane3d<f32> bottom = frustrum->planes[scene::SViewFrustum::VF_BOTTOM_PLANE];
+    core::plane3d<f32> near = frustrum->planes[scene::SViewFrustum::VF_NEAR_PLANE];
+    core::plane3d<f32> far = frustrum->planes[scene::SViewFrustum::VF_FAR_PLANE];
 
     // test sector bounding box against planes
     s32 leftRel, rightRel, topRel, bottomRel, nearRel, farRel;
 
-    nearRel = box.classifyPlaneRelation(Near);
+    nearRel = box.classifyPlaneRelation(near);
     if(nearRel == core::ISREL3D_FRONT) return false;
 
-    leftRel = box.classifyPlaneRelation(Left);
+    leftRel = box.classifyPlaneRelation(left);
     if(leftRel == core::ISREL3D_FRONT) return false;
 
-    rightRel = box.classifyPlaneRelation(Right);
+    rightRel = box.classifyPlaneRelation(right);
     if(rightRel == core::ISREL3D_FRONT) return false;
 
-    bottomRel = box.classifyPlaneRelation(Bottom);
+    bottomRel = box.classifyPlaneRelation(bottom);
     if(bottomRel == core::ISREL3D_FRONT) return false;
 
-    farRel = box.classifyPlaneRelation(Far);
+    farRel = box.classifyPlaneRelation(far);
     if(farRel == core::ISREL3D_FRONT) return false;
 
-    topRel = box.classifyPlaneRelation(Top);
+    topRel = box.classifyPlaneRelation(top);
     if(topRel == core::ISREL3D_FRONT) return false;
 
     return true;
@@ -1181,15 +1198,12 @@ bool ShTlTerrainSceneNode::isSectorOnScreen(TlTSector* sctr)
 // update vertices of sector
 void ShTlTerrainSceneNode::updateVertices(TlTSector &sector)
 {
-	scene::SMeshBuffer* MeshBuffer=new scene::SMeshBuffer();
-	scene::SMesh* Mesh=new scene::SMesh();
-
-    for(u32 j=sector.Offset.Y; j<sector.Offset.Y+sector.Size.Height; j++)
-        for(u32 i=sector.Offset.X; i<sector.Offset.X+sector.Size.Width; i++)
+    for(s32 j=sector.Offset.Y; j<sector.Offset.Y+sector.Size.Height; j++)
+        for(s32 i=sector.Offset.X; i<sector.Offset.X+sector.Size.Width; i++)
         {
             // positon of tile relative to terrain
-            u32 x = i + MeshPosition.X;
-            u32 y = j + MeshPosition.Y;
+            s32 x = i + MeshPosition.X;
+            s32 y = j + MeshPosition.Y;
 
             // update position
             Tile(i,j).Vertex[0]->Pos = core::vector3df(x*TileSize, Data(x,y).Height, y*TileSize);
@@ -1198,33 +1212,17 @@ void ShTlTerrainSceneNode::updateVertices(TlTSector &sector)
             Tile(i,j).Vertex[3]->Pos = core::vector3df( (x+1)*TileSize, Data(x+1,y).Height, y*TileSize);
 
             // update normals
-            Tile(i,j).Vertex[0]->Normal = Data(x,y).Normal;
-            Tile(i,j).Vertex[1]->Normal = Data(x,y+1).Normal;
-            Tile(i,j).Vertex[2]->Normal = Data(x+1,y+1).Normal;
-            Tile(i,j).Vertex[3]->Normal = Data(x+1,y).Normal;
+            Tile(i,j).Vertex[0]->Normal = getNormal(x,y);
+            Tile(i,j).Vertex[1]->Normal = getNormal(x,y+1);
+            Tile(i,j).Vertex[2]->Normal = getNormal(x+1,y+1);
+            Tile(i,j).Vertex[3]->Normal = getNormal(x+1,y);
 
             // update texture coordinates
-            Tile(i,j).Vertex[0]->TCoords = UVdata(x,y).Vertex[0];
-            Tile(i,j).Vertex[1]->TCoords = UVdata(x,y).Vertex[1];
-            Tile(i,j).Vertex[2]->TCoords = UVdata(x,y).Vertex[2];
-            Tile(i,j).Vertex[3]->TCoords = UVdata(x,y).Vertex[3];
-
-			for (int z=0;z<4;z++)
-				MeshBuffer->Vertices.push_back(video::S3DVertex(
-						Tile(i,j).Vertex[z]->Pos,
-						core::vector3df(0,0,0),	video::SColor(0,0,0,0), core::vector2df(0,0)));
+            Tile(i,j).Vertex[0]->TCoords2 = getTileUV(x,y,LOWER_LEFT);
+            Tile(i,j).Vertex[1]->TCoords2 = getTileUV(x,y,UPPER_LEFT);
+            Tile(i,j).Vertex[2]->TCoords2 = getTileUV(x,y,UPPER_RIGHT);
+            Tile(i,j).Vertex[3]->TCoords2 = getTileUV(x,y,LOWER_RIGHT);
         }
-
-	for (u32 z=0;z<sector.Index.size();z++)
-	{
-		MeshBuffer->Indices.push_back(
-					sector.Index[z]);
-	}
-
-	Mesh->addMeshBuffer(MeshBuffer);
-	MeshBuffer->drop();
-
-	Mesh->drop();
 }
 
 
@@ -1232,24 +1230,24 @@ void ShTlTerrainSceneNode::updateVertices(TlTSector &sector)
 // update 2nd texture layer
 void ShTlTerrainSceneNode::updateTexture(u32* p, TlTSector &sector)
 {
-    u32 x, y;
+    s32 x, y;
 
     // in case created texure is larger than terrain mesh, update one more pixel
     // on each axis to get rid of unused pixels at the border blended in to used ones
-    u32 w = 0;
+    s32 w = 0;
     if(MeshSize.Width < CTexture->getSize().Width) w = 1;
-    u32 h = 0;
+    s32 h = 0;
     if(MeshSize.Height < CTexture->getSize().Height) h = 1;
 
-    for(u32 j=sector.Offset.Y; j<sector.Offset.Y + sector.Size.Height + h; j++)
+    for(s32 j=sector.Offset.Y; j<sector.Offset.Y + sector.Size.Height + h; j++)
     {
-        u32 n = CTexture->getSize().Height-1 - j;
-        for(u32 i=sector.Offset.X; i<sector.Offset.X + sector.Size.Width + w; i++)
+        s32 n = CTexture->getSize().Height-1 - j;
+        for(s32 i=sector.Offset.X; i<sector.Offset.X + sector.Size.Width + w; i++)
         {
             x = i + MeshPosition.X;
             y = j + MeshPosition.Y;
 
-            p[n*CTexture->getSize().Width + i] = Data(x,y).Color.color;
+            p[n*CTexture->getSize().Width + i] = getColor(x,y).color;
         }
     }
 }

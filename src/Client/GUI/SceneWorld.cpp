@@ -24,9 +24,6 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     world = wsession->GetWorld();
     mapmgr = world->GetMapMgr();
 
-    // TODO: hardcoded for now, make this adjustable later
-    float fogdist = 150;
-
     ILightSceneNode* light = smgr->addLightSceneNode(0, core::vector3df(0,0,0), SColorf(255, 255, 255, 255), 1000.0f);
     SLight ldata = light->getLightData();
     ldata.AmbientColor = video::SColorf(0.2f,0.2f,0.2f);
@@ -40,7 +37,19 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     camera = new MCameraFPS(smgr);
     camera->setNearValue(0.1f);
-    camera->setFarValue(TILESIZE); // TODO: make this configurable later
+
+    f32 farclip = instance->GetConf()->farclip;
+    if(farclip < 50)
+        farclip = TILESIZE;
+
+    f32 fov = instance->GetConf()->fov;
+    if(!iszero(fov))
+    {
+        logdetail("Camera: Field of view (FOV) = %.3f",fov);
+        camera->setFOV(fov);
+    }
+
+    camera->setFarValue(farclip);
 
     debugText = guienv->addStaticText(L"< debug text >",rect<s32>(0,0,driver->getScreenSize().Width,30),true,true,0,-1,true);
 
@@ -56,8 +65,16 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     sky->remove(); // thus we grab the sky node while removing it from rendering.
     */
 
-    f32 fogfar = camera->getFarValue() * 0.7f;
-    f32 fognear = fogfar * 0.75f;
+    f32 fogfar = instance->GetConf()->fogfar;
+    if(fogfar < 30)
+        fogfar = farclip * 0.7f;
+
+    f32 fognear = instance->GetConf()->fognear;
+    if(fognear < 10)
+        fognear = fogfar * 0.75f;
+
+    logdetail("GUI: Using farclip=%.2f fogfar=%.2f fognear=%.2f", farclip, fogfar, fognear);
+
     driver->setFog(envBasicColor, true, fognear, fogfar, 0.02f);
 
     // setup cursor
@@ -212,6 +229,10 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += (int)terrain->getSectorsRendered();
     str += L" / ";
     str += (int)terrain->getSectorCount();
+    str += L" (";
+    str += (u32)(((f32)terrain->getSectorsRendered()/(f32)terrain->getSectorCount())*100.0f);
+    str += L"%)";
+
     str += L"\n";
 
 
@@ -273,17 +294,28 @@ void SceneWorld::InitTerrain(void)
         gui->SetSceneState(SCENESTATE_GUISTART);
         return;
     }
+    s32 mapsize = (8 * 16 * 3) - 1; // 9-1 height floats in 16 chunks per tile per axis in 3 MapTiles
 
-    mapsize = (8 * 16 * 3) - 1; // 9-1 height floats in 16 chunks per tile per axis in 3 MapTiles
-    tilesize = UNITSIZE;
-    meshsize = (s32)TILESIZE/3;
+    // terrain rendering settings
+    u32 rendersize = instance->GetConf()->terrainrendersize;
+    if(!rendersize)
+        rendersize = camera->getFarValue() / 3.0f;
 
-    //camera->setPosition(core::vector3df(mapsize*tilesize/2, 0, mapsize*tilesize/2) + terrainPos);
+    u32 sectors = instance->GetConf()->terrainsectors;
+    if(!sectors)
+        sectors = 5;
 
-    terrain = new ShTlTerrainSceneNode(smgr,mapsize,mapsize,tilesize,meshsize);
+    u32 step = instance->GetConf()->terrainupdatestep;
+    if(!step || step > 50)
+        step = 1;
+
+    logdetail("Terrain: Using %ux%u sectors, rendersize=%u, updatestep=%u",sectors,sectors,rendersize,step);
+
+    terrain = new ShTlTerrainSceneNode(smgr,mapsize,mapsize,UNITSIZE,rendersize,sectors);
     terrain->drop();
+    terrain->setStep(step);
     terrain->follow(camera->getNode());
-    terrain->getMaterial(0).setTexture(0, driver->getTexture("data/misc/dirt_test.jpg"));
+    terrain->getMaterial(0).setTexture(1,driver->getTexture("data/misc/dirt_test.jpg"));
     terrain->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
     terrain->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
 

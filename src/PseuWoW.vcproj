@@ -489,6 +489,9 @@
 				<File
 					RelativePath=".\Client\Gui\TlTMesh.h">
 				</File>
+				<File
+					RelativePath=".\Client\Gui\TlTSector.h">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

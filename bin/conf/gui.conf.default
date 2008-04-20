@@ -22,3 +22,48 @@ shadows=1
 
 // color depth; 16 or 32 bit
 depth=32
+
+
+//================================================================================================
+// Expert options: Renderer finetuning
+// Uncomment/Adjust the following settings if you really know what you do or if you need some extra performance!
+// Set a value to 0 or comment it out to use the default setting.
+//------------------------------------------------------------------------------------------------
+
+// The terrain is split into sectors, here you can specify how many will be used on every axis.
+// Each sector is seperately culled if not visible, removing GPU load, but the culling test takes up some CPU.
+// If the terrain draw size is very large, it might be better to increase the sector amount. [Default: 5]
+//TerrainSectors=5
+
+// The higher this value is, the more CPU+GPU power is needed to render the terrain.
+// Note that if you set it too low, you will get hard terrin cut-offs in some distance.
+// It looks best if this value is larger then <fogfar>. [Default: <farclip> * 0.33]
+//TerrainDrawSize=300
+
+// The terrain gets updated after walking some distance over it. Updating needs some CPU, but the more often
+// it is updated the smoother it will look like. If the fog starts early enough and covers places where there is no terrain drawn yet
+// (depends also on <TerrainDrawSize>) there will be no real visual disadvantages.  [Default: 1 (min: 1, max: 50)]
+//TerrainUpdateStep=3
+
+// The distance until the driver will stop drawing. This value has the most impact on the framerate, but setting it too low
+// will end up in a very short view distance. If your hardware is good enough, set it as high as possible, but don't forget to
+// adjust terrain drawing and fog distances if you do! [Default: 533.33]
+//farclip=533.33
+
+// The fog gets 100% thickness in the distance specified here. [Default: <farclip> * 0.7]
+//fogfar=380
+
+// The fog starts here, getting thicker until reaching <fogfar>. [Default: <fogfar> * 0.75]
+//fognear=280
+
+// Field of view. The higher the FOV is the more of the scene is visible on the screen, but the more distorted the scene will be!
+// Examples: < 0.5 is like looking through a sniper scope
+//           > 1.0 is the best setting for a "normal" field of view
+//           > 1.4 is like looking through a fish's eye
+//           > 2 offers a very high but still playable field of view, but can cause extreme headache after a while
+//             2.5 isn't a reasonable value anymore (psychotic)
+//           at around 3 it starts f***ing up the renderer
+// Note that the FOV also has a great impact on the framerate, the higher the value is, the less frames per sec.
+// [Default: 1.25]
+//FOV=1.1
+
