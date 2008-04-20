@@ -62,6 +62,5 @@ core::stringw Scene::GetStringFromDB(u32 index, u32 entry)
     char buf[20];
     sprintf(buf,"%u",entry);
     r += textdb->GetString(index, buf);
-    textdb->DumpStructureToFile("DB_textdb.txt");
     return r;
 }
