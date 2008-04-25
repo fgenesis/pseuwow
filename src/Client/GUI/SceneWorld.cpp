@@ -282,7 +282,10 @@ void SceneWorld::OnDraw(void)
 void SceneWorld::OnDelete(void)
 {
     DEBUG(logdebug("~SceneWorld()"));
+    _doodads.clear();
     gui->domgr.Clear();
+    delete camera;
+    delete eventrecv;
     //sky->drop();
 }
 

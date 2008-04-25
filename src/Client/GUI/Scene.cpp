@@ -44,6 +44,7 @@ video::SColor Scene::GetBackgroundColor(void)
 
 Scene::~Scene()
 {
+    delete cursor;
     DEBUG(logdebug("Scene::~Scene()"));
 }
 

@@ -89,7 +89,9 @@ struct sAuthLogonProof_S
     uint8   cmd;
     uint8   error;
     uint8   M2[20];
+    uint16  unk1;
     uint32  unk2;
+    uint32  unk3;
 };
 
 RealmSession::RealmSession(PseuInstance* instance)

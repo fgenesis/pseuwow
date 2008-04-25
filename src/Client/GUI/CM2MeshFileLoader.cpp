@@ -49,8 +49,8 @@ file->read(&header,sizeof(ModelHeader));
 //Name -> not very important I think, but save it nontheless;
 //M2MeshName.clear();
 //M2MeshName.reserve(header.nameLength);
-file->seek(header.nameOfs);
-//    file->read(&M2MeshName[0],header.nameLength);
+//file->seek(header.nameOfs);
+//file->read(&M2MeshName[0],header.nameLength);
 //std::cout << "Read name:"<<M2MeshName.c_str()<<"Size: "<< M2MeshName.size() <<"|"<<M2MeshName[0]<< "\n";
 //logger->log("Mesh Name",M2MeshName.c_str(),ELL_INFORMATION);
 //Now we load all kinds of data from the file
@@ -217,7 +217,7 @@ for(u32 i=0;i<M2MVertices.size();i++)
 
 
 	if (Mesh)
-		Mesh->drop(); // crash on vc9
+		Mesh->drop();
 
 Mesh=new SMesh();
 
@@ -288,6 +288,18 @@ Mesh = 0;
 
 aniMesh->recalculateBoundingBox();
 
+M2MTriangles.clear();
+M2Vertices.clear();
+M2Indices.clear();
+M2MIndices.clear();
+M2MVertices.clear();
+M2MRenderFlags.clear();
+M2MTextureUnit.clear();
+M2MTextureDef.clear();
+M2MSubmeshes.clear();
+M2MTextureFiles.clear();
+M2MTextureLookup.clear();
+M2MViews.clear();
 
 return aniMesh;
 }

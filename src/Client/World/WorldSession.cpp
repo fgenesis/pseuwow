@@ -533,6 +533,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
     uint8 charId;
     PlayerEnum plr[10]; // max characters per realm is 10
     uint8 dummy8;
+    uint32 dummy32;
 
     recvPacket >> num;
     if(num==0)
@@ -571,7 +572,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             recvPacket >> plr[i]._petFamilyId;
             for(unsigned int inv=0;inv<20;inv++)
             {
-                recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype;
+                recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype >> dummy32;
             }
             plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
         }

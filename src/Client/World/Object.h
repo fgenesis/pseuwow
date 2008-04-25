@@ -82,6 +82,10 @@ public:
     {
         _uint32values[ index ] = value;
     }
+    inline void SetUInt64Value( uint16 index, uint64 value )
+    {
+        *((uint64*)&(_uint32values[ index ])) = value;
+    }
 
     inline void SetName(std::string name) { _name = name; }
     inline std::string GetName(void) { return _name; }
@@ -160,7 +164,6 @@ inline uint8 GetTypeIdByGuid(uint64 guid)
     case HIGHGUID_PLAYER:
         return TYPEID_PLAYER;
     case HIGHGUID_CORPSE:
-    case HIGHGUID_PLAYER_CORPSE: // not sure
         return TYPEID_CORPSE;
     case HIGHGUID_ITEM: // == HIGHGUID_CONTAINER
         return TYPEID_ITEM;
