@@ -12,7 +12,7 @@
 #permission=10
 SET,lang ${@1}
 DEFAULT,lang 0
-SENDCHATMESSAGE,14,{${lang}},{${@def}},{${@0}}
+SENDCHATMESSAGE,17,{${lang}},{${@def}},{${@0}}
 UNSET lang
 
 
@@ -75,7 +75,7 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Saying '${msg}' in lang ${lang}
 
-SENDCHATMESSAGE,0,${lang},{${msg}}
+SENDCHATMESSAGE,1,${lang},{${msg}}
 UNSET lang
 UNSET msg
 
@@ -93,7 +93,7 @@ default,lang 0
 
 LOGDEBUG * Saying '${msg}' in lang ${lang} to guild
 
-SENDCHATMESSAGE,3,${lang},{${msg}}
+SENDCHATMESSAGE,4,${lang},{${msg}}
 UNSET lang
 UNSET msg
 
@@ -118,7 +118,7 @@ default,lang 0
 
 LOGDEBUG * Saying '${msg}' in lang ${lang} to party
 
-SENDCHATMESSAGE,1,${lang},{${msg}}
+SENDCHATMESSAGE,2,${lang},{${msg}}
 UNSET lang
 UNSET msg
 
@@ -168,7 +168,7 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Whisp to '{${player}}' '{${msg}}' in lang '${lang}'
 
-SENDCHATMESSAGE,6,{${lang}},{${msg}},{${player}}
+SENDCHATMESSAGE,7,{${lang}},{${msg}},{${player}}
 UNSET lang
 UNSET msg
 UNSET player
@@ -189,7 +189,7 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Yelling '${msg}' in lang ${lang}
 
-SENDCHATMESSAGE,5,${lang},{${msg}}
+SENDCHATMESSAGE,6,${lang},{${msg}}
 UNSET lang
 UNSET msg
 
@@ -223,7 +223,7 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Me ${msg} (in lang ${lang})
 
-SENDCHATMESSAGE,8,${lang},{${msg}}
+SENDCHATMESSAGE,10,${lang},{${msg}}
 UNSET lang
 UNSET msg
 

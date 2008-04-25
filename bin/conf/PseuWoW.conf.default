@@ -62,8 +62,8 @@ charname=Pseuwow
 
 
 // Client emulation configuration
-ClientVersion=2.3.3
-ClientBuild=7799
+ClientVersion=2.4.1
+ClientBuild=8125
 ClientLanguage=enUS
 // or change to enGB, deDE, ...
 

@@ -32,8 +32,7 @@ void Object::Create( uint64 guid )
     if(!_uint32values)
         _InitValues();
 
-    SetUInt32Value( OBJECT_FIELD_GUID, GUID_LOPART(guid) );
-    SetUInt32Value( OBJECT_FIELD_GUID+1, GUID_HIPART(guid) );
+    SetUInt64Value( OBJECT_FIELD_GUID, guid );
     SetUInt32Value( OBJECT_FIELD_TYPE, _type );
 }
 
