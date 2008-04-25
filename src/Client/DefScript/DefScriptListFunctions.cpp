@@ -159,8 +159,12 @@ DefReturnResult DefScriptPackage::func_ljoin(CmdSet& Set)
     std::string r;
     DefList *l = lists.GetNoCreate(_NormalizeVarName(Set.arg[0],Set.myname));
 	if(!l)
-		return "";	
-	for(unsigned int i = 0; i < l->size(); i++)
+		return "";
+    unsigned int start_from = (unsigned int)toUint64(Set.arg[1]);
+    unsigned int end_at = (unsigned int)toUint64(Set.arg[2]);
+    if(!end_at)
+        end_at = l->size();
+	for(unsigned int i = start_from; i < end_at; i++)
 	{
 		r += (*l)[i];
 		if( i+1 != l->size() )

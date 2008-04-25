@@ -1,0 +1,86 @@
+#script=help
+
+set,argstr ?{lowercase ${@def}}
+lsplit,args,{ } ${argstr}
+
+out == ${@version} :: help ==
+
+if ?{not ?{llen args}}
+	log - type "help list" to list all avalible help topics
+	out - type "help basic" for some basic usage information.
+	out   >> visit http:\//www.mangosclient.org for more information
+	out - type "help <cmd>" to see detailed information about a command
+	return
+endif
+
+if ?{equal,basic ?{lindex,args 0}}
+	out >> "say ..." to say something (might not work on servers blocking global language).
+	out >> "say,<language> ..." to say something in specified language (ID or name).
+	out >> "yell", "sayguild", "sayparty" is used in the same manner.
+	out >> there is a fun command, "sl,<language> <text>" that says text in leetspeak.
+	out >> "whisper,<playername>,<language>" to whisper to a player, language is optional, like in "say".
+	out >> "joinchannel <channelname>" joins a channel, "leavechannel <...>" leaves a channel".
+	out >> "chan,<channelname>,<language> <text>" says something in a channel. language is optional.
+	out >> "me <emote>" performs an emote. ID or emote name can be used.
+	return
+endif
+
+if ?{equal,list ?{lindex,args 0}}
+	== Help topics avalible: ?{llen reg_name}
+	set,i 0
+	loop
+		if ?{bigger_eq,${i} ?{llen reg_name}}
+			exitloop
+		endif
+		out "help ?{lindex,reg_name ${i}}"
+	endloop
+	return
+endif
+
+set,i ?{lfind,reg_name ?{lindex,args 0}}
+if ?{strlen ${i}}
+	?{lindex,reg_func ${i}} ?{ljoin,args { }} // call the function attached to the specified name, with all args passed to this func
+else
+	logerror No help exists for "${argstr}"...
+endif
+
+
+
+//--------------------------------------------------------
+#script=RegisterHelpTopic
+//--------------------------------------------------------
+// @def: topic name "help <this>"
+// @0: function name to call
+set,topic ?{lowercase ${@def}}
+set,func ?{lowercase ${@0}}
+if ?{not ?{strlen ${topic}}}
+	return
+endif
+if ?{not ?{strlen ${name}}}
+	return
+endif
+
+if ?{not ?{lcontains,#help::reg_name ${topic}}}
+	lappend,#help::reg_name ${topic}
+	lappend,#help::reg_func ${func}
+endif
+
+
+
+//======================================================================================
+//=== Help for some internal/predefined commands =======================================
+//======================================================================================
+
+#script=dummy
+#onload
+RegisterHelpTopic,help__say say
+RegisterHelpTopic,help__yell yell
+RegisterHelpTopic,help__chan chan
+RegisterHelpTopic,help__sl sl
+#/onload
+
+
+
+#script=help__say
+// to be written.....
+
