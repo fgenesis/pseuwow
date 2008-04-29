@@ -5,9 +5,11 @@
 #include <set>
 #include "Item.h"
 #include "Unit.h"
+#include "Gameobject.h"
 
 typedef std::map<uint32,ItemProto*> ItemProtoMap;
 typedef std::map<uint32,CreatureTemplate*> CreatureTemplateMap;
+typedef std::map<uint32,GameobjectTemplate*> GOTemplateMap;
 typedef std::map<uint64,Object*> ObjectMap;
 
 class PseuInstance;
@@ -40,6 +42,16 @@ public:
     void AddNonexistentCreature(uint32);
     bool CreatureNonExistent(uint32);
 
+    // Gameobject template functions
+    uint32 GetGOTemplateCount(void) { return _go_templ.size(); }
+    GameobjectTemplate *GetGOTemplate(uint32);
+    void Add(GameobjectTemplate*);
+    GOTemplateMap *GetGOTemplateStorage(void) { return &_go_templ; }
+
+    // nonexistent gameobjects handler
+    void AddNonexistentGO(uint32);
+    bool GONonExistent(uint32);
+
     // player names related
     void AddRequestedPlayerGUID(uint32);
     bool IsRequestedPlayerGUID(uint32);
@@ -58,10 +70,13 @@ public:
 private:
     ItemProtoMap _iproto;
     CreatureTemplateMap _creature_templ;
+    GOTemplateMap _go_templ;
+
     ObjectMap _obj;
     std::set<uint32> _noitem;
     std::set<uint32> _reqpnames;
     std::set<uint32> _nocreature;
+    std::set<uint32> _nogameobj;
     PseuInstance *_instance;
 
 };

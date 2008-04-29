@@ -30,6 +30,10 @@ void ObjMgr::RemoveAll(void)
     {
         delete i->second;
     }
+    for(GOTemplateMap::iterator i = _go_templ.begin(); i!=_go_templ.end(); i++)
+    {
+        delete i->second;
+    }
     while(_obj.size())
     {
         Remove(_obj.begin()->first, true);
@@ -177,6 +181,31 @@ void ObjMgr::AddNonexistentCreature(uint32 id)
 bool ObjMgr::CreatureNonExistent(uint32 id)
 {
     return _nocreature.find(id) != _nocreature.end();
+}
+
+// -- Gameobject part --
+
+void ObjMgr::Add(GameobjectTemplate *go)
+{
+    _go_templ[go->entry] = go;
+}
+
+GameobjectTemplate *ObjMgr::GetGOTemplate(uint32 entry)
+{
+    GOTemplateMap::iterator it = _go_templ.find(entry);
+    if(it != _go_templ.end())
+        return it->second;
+    return NULL;
+}
+
+void ObjMgr::AddNonexistentGO(uint32 id)
+{
+    _nogameobj.insert(id);
+}
+
+bool ObjMgr::GONonExistent(uint32 id)
+{
+    return _nogameobj.find(id) != _nogameobj.end();
 }
 
 // -- misc part --

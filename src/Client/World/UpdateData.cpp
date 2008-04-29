@@ -468,6 +468,15 @@ void WorldSession::_QueryObjectInfo(uint64 guid)
                     SendQueryCreature(obj->GetEntry(),guid);
                 break;
             }
+        case TYPEID_GAMEOBJECT:
+            {
+                GameobjectTemplate *go = objmgr.GetGOTemplate(obj->GetEntry());
+                if(go)
+                    obj->SetName(go->name);
+                else
+                    SendQueryGameobject(obj->GetEntry(),guid);
+                break;
+            }
         //case...
         }
     }

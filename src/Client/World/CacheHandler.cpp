@@ -13,6 +13,7 @@
 // increase this number whenever you change something that makes old files unusable
 uint32 ITEMPROTOTYPES_CACHE_VERSION = 3;
 uint32 CREATURETEMPLATES_CACHE_VERSION = 0;
+uint32 GOTEMPLATES_CACHE_VERSION = 0;
 
 PlayerNameCache::~PlayerNameCache()
 {
@@ -528,3 +529,113 @@ void CreatureTemplateCache_WriteDataToCache(WorldSession *session)
     fh.close();
     log("CreatureTemplateCache: Saved %u Creature Templates",counter);
 }
+
+void GOTemplateCache_InsertDataToSession(WorldSession *session)
+{
+    logdetail("GOTemplateCache: Loading...");
+    char* fn = "./cache/GOTemplates.cache";
+    std::fstream fh;
+    fh.open(fn, std::ios_base::in | std::ios_base::binary);
+    if(!fh)
+    {
+        logerror("GOTemplateCache: Could not open file '%s'!",fn);
+        return;
+    }
+
+    uint32 cacheversion, total, counter = 0;
+
+    try
+    {
+
+        fh.read((char*)&cacheversion,4);
+        if(cacheversion != GOTEMPLATES_CACHE_VERSION)
+        {
+            logerror("GOTemplateCache is outdated! Creating new cache.");
+            fh.close();
+            return;
+        }
+        fh.read((char*)&total,4);
+        logdetail("GOTemplateCache: %u gameobject templates stored",total);
+
+        uint32 datasize;
+        ByteBuffer buf;
+        for(uint32 i = 0; i < total && !fh.eof(); i++)
+        {
+            buf.clear();
+            fh.read((char*)&datasize,sizeof(uint32));
+            buf.resize(datasize);
+            fh.read((char*)buf.contents(),datasize);
+            GameobjectTemplate *go = new GameobjectTemplate();
+            buf >> go->entry;
+            buf >> go->type;
+            buf >> go->displayId;
+            buf >> go->name;
+            buf >> go->castBarCaption;
+            buf >> go->faction;
+            buf >> go->flags;
+            buf >> go->size;
+            for(uint32 i = 0; i < GAMEOBJECT_DATA_FIELDS; i++)
+                buf >> go->raw.data[i];
+
+            if(go->entry)
+            {
+                session->objmgr.Add(go);
+                counter++;
+            } else
+                delete go;
+        }
+
+    }
+    catch (ByteBufferException bbe)
+    {
+        logerror("ByteBuffer exception: attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)",
+            bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
+    }
+
+    fh.close();
+    logdetail("GOTemplateCache: Loaded %u Gameobject Templates",counter);
+}
+
+void GOTemplateCache_WriteDataToCache(WorldSession *session)
+{
+    if (!session->objmgr.GetGOTemplateCount())
+        return;
+
+    char* fn = "./cache/GOTemplates.cache";
+    std::fstream fh;
+    fh.open(fn, std::ios_base::out | std::ios_base::binary);
+    if(!fh)
+    {
+        logerror("GOTemplateCache: Could not write to file '%s'!",fn);
+        return;
+    }
+    uint32 total = session->objmgr.GetGOTemplateCount();
+    fh.write((char*)&GOTEMPLATES_CACHE_VERSION,4);
+    fh.write((char*)&total,4);
+    uint32 counter=0;
+    ByteBuffer buf;
+    for(GOTemplateMap::iterator it = session->objmgr.GetGOTemplateStorage()->begin(); it != session->objmgr.GetGOTemplateStorage()->end(); it++)
+    {
+        buf.clear();
+        GameobjectTemplate *go = new GameobjectTemplate();
+        buf << go->entry;
+        buf << go->type;
+        buf << go->displayId;
+        buf << go->name;
+        buf << go->castBarCaption;
+        buf << go->faction;
+        buf << go->flags;
+        buf << go->size;
+        for(uint32 i = 0; i < GAMEOBJECT_DATA_FIELDS; i++)
+            buf << go->raw.data[i];
+
+        uint32 size = buf.size();
+        fh.write((char*)&size,sizeof(uint32));
+        fh.write((char*)buf.contents(),buf.size());
+        counter++;
+    }
+    fh.flush();
+    fh.close();
+    log("GOTemplateCache: Saved %u Gameobject Templates",counter);
+}
+

@@ -192,5 +192,18 @@ void WorldSession::SendQueryCreature(uint32 entry, uint64 guid)
     SendWorldPacket(wp);
 }
 
+void WorldSession::SendQueryGameobject(uint32 entry, uint64 guid)
+{
+    if(objmgr.GONonExistent(entry))
+    {
+        logdebug("Skipped query of gameobject %u (was marked as nonexistent before)",entry);
+        return;
+    }
+    logdebug("Sending gameobject query, id=%u",entry);
+    WorldPacket wp(CMSG_GAMEOBJECT_QUERY,4+8);
+    wp << entry << guid;
+    SendWorldPacket(wp);
+}
+
 
 
