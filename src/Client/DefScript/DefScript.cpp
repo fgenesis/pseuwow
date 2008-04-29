@@ -259,7 +259,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
     _UpdateOrCreateScriptByName(sn);
     curScript=Script[sn];
 
-    DeleteScript(SN_ONLOAD);
+    DeleteScript(sn + SN_ONLOAD);
 
 	while(!f.eof())
     {
@@ -354,13 +354,13 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
             }
             else if(line=="onload")
             {
-                _UpdateOrCreateScriptByName(SN_ONLOAD);
-                curScript=Script[SN_ONLOAD];
+                _UpdateOrCreateScriptByName(sn + SN_ONLOAD);
+                curScript=Script[sn + SN_ONLOAD];
             }
             else if(line=="endonload" || line=="/onload")
             {
-                RunScript(SN_ONLOAD,NULL,sn);
-                DeleteScript(SN_ONLOAD);
+                RunScript(sn + SN_ONLOAD,NULL,sn);
+                DeleteScript(sn + SN_ONLOAD);
                 curScript=Script[sn];
             }
             else if(line=="cs" || line=="comments-start")
@@ -1118,7 +1118,7 @@ DefReturnResult DefScriptPackage::Interpret(CmdSet& Set)
     // if nothing has been found its maybe an external script file to run
 	result=RunScript(Set.cmd, &Set);
     if((!result.ok) /*&& Script[Set.cmd]->GetDebug()*/)
-        std::cout << "Could not execute script command '" << Set.cmd << "'\n";
+        PRINT_ERROR("Could not execute script command '%s'",Set.cmd.c_str());
     
 
     return result;

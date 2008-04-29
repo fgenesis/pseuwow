@@ -28,4 +28,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session);
 void CreatureTemplateCache_InsertDataToSession(WorldSession *session);
 void CreatureTemplateCache_WriteDataToCache(WorldSession *session);
 
+void GOTemplateCache_InsertDataToSession(WorldSession *session);
+void GOTemplateCache_WriteDataToCache(WorldSession *session);
+
 #endif

@@ -200,6 +200,11 @@ uint32 SCPDatabaseMgr::AutoLoadFile(char *fn)
                 continue;
             while(line.size() && (line[0]==' ' || line[0]=='\t'))
                 line.erase(0,1);
+            if(line.size() < 2 || (line[0] == '/' && line[1] == '/'))
+            {
+                line.clear();
+                continue;
+            }
             uint32 eq = line.find("=");
             if(eq != std::string::npos)
             {

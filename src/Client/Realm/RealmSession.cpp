@@ -516,7 +516,7 @@ void RealmSession::_HandleLogonChallenge(ByteBuffer& pkt)
 void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
 {
     PseuGUI *gui = GetInstance()->GetGUI();
-    logdebug("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]",pkt.size(),26);
+    logdebug("RealmSocket: Got AUTH_LOGON_PROOF [%u of %u bytes]",pkt.size(),sizeof(sAuthLogonProof_S));
     if(pkt.size() < 2)
     {
         logerror("AUTH_LOGON_PROOF: Recieved incorrect/unknown packet. Hexdump:");
@@ -561,7 +561,7 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
 
 
     sAuthLogonProof_S lp;
-    pkt.read((uint8*)&lp, 26); // the compiler didnt like 'sizeof(sAuthLogonProof_S)', said it was 28
+    pkt.read((uint8*)&lp, sizeof(sAuthLogonProof_S));
     //printchex((char*)&lp, sizeof(sAuthLogonProof_S),true);
     if(!memcmp(lp.M2,this->_m2,20))
     {

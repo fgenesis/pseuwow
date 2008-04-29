@@ -315,6 +315,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_NOTIFICATION, &WorldSession::_HandleNotificationOpcode},
         {SMSG_WHO, &WorldSession::_HandleWhoOpcode},
         {SMSG_CREATURE_QUERY_RESPONSE, &WorldSession::_HandleCreatureQueryResponseOpcode},
+        {SMSG_GAMEOBJECT_QUERY_RESPONSE, &WorldSession::_HandleGameobjectQueryResponseOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -700,9 +701,11 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     recvPacket >> target_guid >> msglen >> msg;
 
     SCPDatabase *langdb = GetDBMgr().GetDB("language");
-    const char* ln = "";
+    const char* ln;
+    std::string langname;
     if(langdb)
-        langdb->GetString(lang,"name");
+        langname = langdb->GetString(lang,"name");
+    ln = langname.c_str();
     std::string name;
 
     if(type == CHAT_MSG_MONSTER_SAY)
@@ -747,7 +750,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     {
         logcustom(0,WHITE,"CHAT: %s yells [%s]: %s ",name.c_str(),ln,msg.c_str());
     }
-    else if (type==CHAT_MSG_WHISPER_INFORM )
+    else if (type==CHAT_MSG_REPLY )
     {
         logcustom(0,WHITE,"TO %s [%s]: %s",name.c_str(),ln,msg.c_str());
     }
@@ -1249,6 +1252,7 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
     // update the world as soon as the server confirmed that we are where we are.
     _world->UpdatePos(x,y,m);
     _world->Update();
+    _world->CreateMoveMgr();
 
     // temp. solution to test terrain rendering
     if(PseuGUI *gui = GetInstance()->GetGUI())
@@ -1371,6 +1375,43 @@ void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
     objmgr.AssignNameToObj(entry, TYPEID_UNIT, ct->name);
 }
     
+void WorldSession::_HandleGameobjectQueryResponseOpcode(WorldPacket& recvPacket)
+{
+    uint32 entry;
+    recvPacket >> entry;
+    if(entry & 0x80000000)
+    {
+        uint32 real_entry = entry & ~0x80000000;
+        logerror("Gameobject %u does not exist!");
+        objmgr.AddNonexistentGO(real_entry);
+        return;
+    }
+
+    std::string other_names, unks;
+
+    GameobjectTemplate *go = new GameobjectTemplate();
+    go->entry = entry;
+    recvPacket >> go->type;
+    recvPacket >> go->displayId;
+    recvPacket >> go->name;
+    recvPacket >> other_names; // name1
+    recvPacket >> other_names; // name2
+    recvPacket >> other_names; // name3 (all unused)
+    recvPacket >> unks;
+    recvPacket >> go->castBarCaption;
+    recvPacket >> unks;
+    for(uint32 i = 0; i < GAMEOBJECT_DATA_FIELDS; i++)
+        recvPacket >> go->raw.data[i];
+
+    std::stringstream ss;
+    ss << "Got info for gameobject " << entry << ":" << go->name;
+    ss << " type " << go->type;
+    ss << " displayid " << go->displayId;
+    logdetail("%s",ss.str().c_str());
+
+    objmgr.Add(go);
+    objmgr.AssignNameToObj(entry, TYPEID_GAMEOBJECT, go->name);
+}
 
 
 // TODO: delete world on LogoutComplete once implemented
