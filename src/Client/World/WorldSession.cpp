@@ -1252,7 +1252,7 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
     // update the world as soon as the server confirmed that we are where we are.
     _world->UpdatePos(x,y,m);
     _world->Update();
-    _world->CreateMoveMgr();
+    //_world->CreateMoveMgr();
 
     // temp. solution to test terrain rendering
     if(PseuGUI *gui = GetInstance()->GetGUI())
