@@ -26,13 +26,14 @@ if ?{equal,basic ?{lindex,args 0}}
 endif
 
 if ?{equal,list ?{lindex,args 0}}
-	== Help topics avalible: ?{llen reg_name}
+	out == Help topics avalible: ?{llen reg_name}
 	set,i 0
 	loop
 		if ?{bigger_eq,${i} ?{llen reg_name}}
 			exitloop
 		endif
 		out "help ?{lindex,reg_name ${i}}"
+		add,i 1
 	endloop
 	return
 endif
