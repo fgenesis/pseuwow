@@ -407,6 +407,25 @@ static const char *CharSectionsFormat = {
 };
 
 
+// GameObjectDisplayInfo
+
+enum GameObjectDisplayInfoEnum
+{
+    GAMEOBJECTDISPLAYINFO_ID = 0, // <<-- this is the so-called DisplayID!!
+    GAMEOBJECTDISPLAYINFO_MODEL = 1,
+    GAMEOBJECTDISPLAYINFO_END = 18
+};
+
+static const char *GameObjectDisplayInfoFieldNames[] = {
+    "","model","","","","","","","","", // 0-9
+    "","","","","","","","" // 10-17
+};
+
+static const char *GameObjectDisplayInfoFormat = {
+    "isxxxxxxxx" // 0-9
+    "xxxxxxxx" // 10-17
+};
+
 
 
 

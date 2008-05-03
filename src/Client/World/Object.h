@@ -55,6 +55,7 @@ public:
     inline bool IsContainer(void) { return _typeid == TYPEID_CONTAINER; }     // specific
     inline bool IsCorpse(void) { return _typeid == TYPEID_CORPSE; }           // specific
     inline bool IsDynObject(void) { return _typeid == TYPEID_DYNAMICOBJECT; } // specific
+    inline bool IsGameObject(void) { return _typeid == TYPEID_GAMEOBJECT; }   // specific
     inline bool IsWorldObject(void) { return _type & (TYPE_PLAYER | TYPE_UNIT | TYPE_CORPSE | TYPE_DYNAMICOBJECT | TYPE_GAMEOBJECT); }
     inline const uint32 GetUInt32Value( uint16 index ) const
     {

@@ -1,14 +1,14 @@
 #script=register_db_loader
 if ?{not ?{IsHooked _startup}}
-	HookStart _startup
-	HookAdd db_loader_load_all
-	HookEnd
-	
-	// set up paths; ./data/scp and ./cache are set in the core already
-	// the SCP files placed in this directory are used to override some values
-	// in already present SCP files or to add custom fields or content
-	// note: it DOES matter in which order paths are added!!
-	AddDBPath ./data/scp-patches 
+        HookStart _startup
+        HookAdd db_loader_load_all
+        HookEnd
+
+        // set up paths; ./data/scp and ./cache are set in the core already
+        // the SCP files placed in this directory are used to override some values
+        // in already present SCP files or to add custom fields or content
+        // note: it DOES matter in which order paths are added!!
+        AddDBPath ./data/scp-patches
 endif
 
 //---------------------------------------------------------
@@ -26,6 +26,7 @@ LoadDB map
 LoadDB zone
 LoadDB creaturedisplayinfo
 LoadDB creaturemodeldata
+LoadDB gameobjectdisplayinfo
 // LoadDB itemdisplayinfo // not yet used
 // LoadDB charsections // not yet used
 // LoadDB sound // not yet used

@@ -617,7 +617,7 @@ void GOTemplateCache_WriteDataToCache(WorldSession *session)
     for(GOTemplateMap::iterator it = session->objmgr.GetGOTemplateStorage()->begin(); it != session->objmgr.GetGOTemplateStorage()->end(); it++)
     {
         buf.clear();
-        GameobjectTemplate *go = new GameobjectTemplate();
+        GameobjectTemplate *go = it->second;
         buf << go->entry;
         buf << go->type;
         buf << go->displayId;

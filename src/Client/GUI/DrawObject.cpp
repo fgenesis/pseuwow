@@ -4,6 +4,8 @@
 #include "PseuWoW.h"
 #include "Object.h"
 #include "Player.h"
+#include "GameObject.h"
+#include "WorldSession.h"
 
 using namespace irr;
 
@@ -46,12 +48,44 @@ void DrawObject::_Init(void)
 
     if(!cube && _obj->IsWorldObject()) // only world objects have coords and can be drawn
     {
-        uint32 displayid = _obj->IsUnit() ? _obj->GetUInt32Value(UNIT_FIELD_DISPLAYID) : 0; // TODO: in case its GO get it from proto data
-        SCPDatabase *cdi = _instance->dbmgr.GetDB("creaturedisplayinfo");
-        SCPDatabase *cmd = _instance->dbmgr.GetDB("creaturemodeldata");
-        uint32 modelid = cdi && displayid ? cdi->GetUint32(displayid,"model") : 0;
-        std::string modelfile = std::string("data/model/") + cmd->GetString(modelid,"file");
-        uint32 opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
+        std::string modelfile;
+        uint32 opacity = 255;
+        if (_obj->IsUnit())
+        {
+            uint32 displayid = _obj->GetUInt32Value(UNIT_FIELD_DISPLAYID);
+            SCPDatabase *cdi = _instance->dbmgr.GetDB("creaturedisplayinfo");
+            SCPDatabase *cmd = _instance->dbmgr.GetDB("creaturemodeldata");
+            uint32 modelid = cdi && displayid ? cdi->GetUint32(displayid,"model") : 0;
+            modelfile = std::string("data/model/") + cmd->GetString(modelid,"file");
+            opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
+        } 
+        else if (_obj->IsGameObject())
+        {
+            GameobjectTemplate* gotempl = _instance->GetWSession()->objmgr.GetGOTemplate(_obj->GetEntry());
+            while (!gotempl) 
+            {
+                ZThread::Thread::sleep(10);
+                gotempl = _instance->GetWSession()->objmgr.GetGOTemplate(_obj->GetEntry());
+            }
+            if (gotempl)
+            {
+                // GAMEOBJECT_TYPE_TRAP
+                if (gotempl->type == 6) // damage source on fires, skip for now
+                {
+                    _initialized = true;
+                    return;
+                }
+
+                uint32 displayid = gotempl->displayId;
+                SCPDatabase *gdi = _instance->dbmgr.GetDB("gameobjectdisplayinfo");
+                if (gdi && displayid)
+                    modelfile = std::string("data/model/") + gdi->GetString(displayid,"model");
+                std::string test = gdi->GetString(displayid,"model");
+                DEBUG(logdebug("GAMEOBJECT: %u - %u - %s", _obj->GetEntry(), displayid, test.c_str()));
+            } else {
+                DEBUG(logdebug("GAMEOBJECT UNKNOWN: %u", _obj->GetEntry()));
+            }
+        }
         scene::IAnimatedMesh *mesh = _smgr->getMesh(modelfile.c_str());
         if(mesh)
         {
@@ -61,7 +95,7 @@ void DrawObject::_Init(void)
         }
         else
         {
-            cube = _smgr->addCubeSceneNode(2);
+            cube = _smgr->addCubeSceneNode(1);
         }
         //cube->getMaterial(0).DiffuseColor.setAlpha(opacity);
         cube->setName("OBJECT");
