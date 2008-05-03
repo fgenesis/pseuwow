@@ -113,7 +113,9 @@ DefReturnResult DefScriptPackage::SCsavecache(CmdSet& Set){
             str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetItemProtoCount();
             str << " Item Prototypes, ";
             str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetCreatureTemplateCount();
-            str << " Creature Templates";
+            str << " Creature Templates, ";
+            str << ((PseuInstance*)parentMethod)->GetWSession()->objmgr.GetGOTemplateCount();
+            str << " GameObject Tempates";
             str << " ]";
 
             ((PseuInstance*)parentMethod)->GetWSession()->SendChatMessage(CHAT_MSG_SAY,0,str.str(),"");
@@ -489,6 +491,11 @@ DefReturnResult DefScriptPackage::SCGetName(CmdSet& Set)
     {
         CreatureTemplate *ct = ws->objmgr.GetCreatureTemplate((uint32)id);
         return ct ? ct->name : "";
+    }
+    else if(source == "gameobject")
+    {
+        GameobjectTemplate *gt = ws->objmgr.GetGOTemplate((uint32)id);
+        return gt ? gt->name : "";
     }
     // TODO: add gameobject, dynamicobject
 

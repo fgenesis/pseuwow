@@ -255,9 +255,9 @@ bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
     SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,ZoneDataStorage,ItemDisplayInfoStorage,
-        CreatureModelStorage,CreatureDisplayInfoStorage,NPCSoundStorage,CharSectionStorage; // will store the converted data from dbc files
+        CreatureModelStorage,CreatureDisplayInfoStorage,NPCSoundStorage,CharSectionStorage, GameObjectDisplayInfoStorage; // will store the converted data from dbc files
     DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo,
-        CreatureModelData,CreatureDisplayInfo,NPCSounds,CharSections;
+        CreatureModelData,CreatureDisplayInfo,NPCSounds,CharSections,GameObjectDisplayInfo;
     printf("Opening DBC archive...\n");
     MPQHelper mpq("dbc");
 
@@ -272,6 +272,7 @@ bool ConvertDBC(void)
     ItemDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\ItemDisplayInfo.dbc"));
     CreatureModelData.openmem(mpq.ExtractFile("DBFilesClient\\CreatureModelData.dbc"));
     CreatureDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\CreatureDisplayInfo.dbc"));
+    GameObjectDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\GameObjectDisplayInfo.dbc"));
     NPCSounds.openmem(mpq.ExtractFile("DBFilesClient\\NPCSounds.dbc"));
     CharSections.openmem(mpq.ExtractFile("DBFilesClient\\CharSections.dbc"));
     //...
@@ -479,6 +480,30 @@ bool ConvertDBC(void)
         }
     }
 
+    printf("gameobjectdisplayinfo..");
+    for(DBCFile::Iterator it = GameObjectDisplayInfo.begin(); it != GameObjectDisplayInfo.end(); ++it)
+    {
+        uint32 id = it->getUInt(GAMEOBJECTDISPLAYINFO_ID);
+
+        for(uint32 field=GAMEOBJECTDISPLAYINFO_ID; field < GAMEOBJECTDISPLAYINFO_END; field++)
+        {
+            if(strlen(GameObjectDisplayInfoFieldNames[field]))
+            {
+                std::string value = AutoGetDataString(it,GameObjectDisplayInfoFormat,field);
+                if(value.size()) // only store if not null
+                { 
+                    // TODO: add check for wmo model files ?
+                    if(doModels)
+                        modelNames.insert(NameAndAlt(value)); // we need to extract model later, store it
+                    std::string fn = _PathToFileName(value);
+                    if(stricmp(fn.c_str()+fn.length()-4, "mdx"))
+                        fn = fn.substr(0,fn.length()-3) + "m2";
+                    GameObjectDisplayInfoStorage[id].push_back(std::string(GameObjectDisplayInfoFieldNames[field]) + "=" + fn);
+                }
+            }
+        }
+    }
+
     printf("npcsounds..");
     for(DBCFile::Iterator it = NPCSounds.begin(); it != NPCSounds.end(); ++it)
     {
@@ -544,6 +569,7 @@ bool ConvertDBC(void)
     printf("itemdisplayinfo.."); OutSCP(SCPDIR "/itemdisplayinfo.scp",ItemDisplayInfoStorage, "itemdisplayinfo");
     printf("creaturemodeldata.."); OutSCP(SCPDIR "/creaturemodeldata.scp",CreatureModelStorage,"creaturemodeldata");
     printf("creaturedisplayinfo.."); OutSCP(SCPDIR "/creaturedisplayinfo.scp",CreatureDisplayInfoStorage,"creaturedisplayinfo");
+    printf("gameobjectdisplayinfo.."); OutSCP(SCPDIR "/gameobjectdisplayinfo.scp",GameObjectDisplayInfoStorage,"gameobjectdisplayinfo");
     printf("npcsound.."); OutSCP(SCPDIR "/npcsound.scp",NPCSoundStorage,"npcsound");
     printf("charsections.."); OutSCP(SCPDIR "/charsections.scp",CharSectionStorage,"charsections");
     //...
@@ -912,10 +938,13 @@ void FetchTexturesFromModel(ByteBuffer& bb)
 {
     bb.rpos(0);
     irr::scene::ModelHeader header;
+    if (bb.size() < sizeof(header))
+        return;
+
     bb.read((uint8*)&header, sizeof(header));
 
-    if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
-        printf("Not model file!");
+    if (header.version[0] != 4 || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
+        //printf("Not M2 model file!");
         return;
     }
 

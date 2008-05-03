@@ -109,6 +109,7 @@ void WorldSession::_LoadCache(void)
     plrNameCache.ReadFromFile(); // load names/guids of known players
     ItemProtoCache_InsertDataToSession(this);
     CreatureTemplateCache_InsertDataToSession(this);
+    GOTemplateCache_InsertDataToSession(this);
     //...
 }
 
@@ -624,7 +625,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         }
         if(!char_found)
         {
-            logerror("Character \"%s\" was not found on char list!", plr[charId]._name.c_str());
+            logerror("Character \"%s\" was not found on char list!", GetInstance()->GetConf()->charname.c_str());
             GetInstance()->SetError();
             return;
         }

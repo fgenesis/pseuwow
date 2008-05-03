@@ -392,6 +392,7 @@ void PseuInstance::SaveAllCache(void)
         GetWSession()->plrNameCache.SaveToFile();
         ItemProtoCache_WriteDataToCache(GetWSession());
         CreatureTemplateCache_WriteDataToCache(GetWSession());
+        GOTemplateCache_WriteDataToCache(GetWSession());
         //...
     }
 }
