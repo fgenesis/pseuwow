@@ -5,7 +5,7 @@
 #include <set>
 #include "Item.h"
 #include "Unit.h"
-#include "Gameobject.h"
+#include "GameObject.h"
 
 typedef std::map<uint32,ItemProto*> ItemProtoMap;
 typedef std::map<uint32,CreatureTemplate*> CreatureTemplateMap;

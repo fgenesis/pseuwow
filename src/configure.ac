@@ -1,0 +1,75 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.61)
+AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
+AM_INIT_AUTOMAKE(pseuwow, 0.1)
+#AC_CONFIG_SRCDIR([shared/ProgressBar.h])
+AM_CONFIG_HEADER([config.h])
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
+# Checks for libraries.
+AC_CHECK_LIB([Xxf86vm], [main])
+AC_CHECK_LIB([GL], [main])
+AC_CHECK_LIB([GLU], [main])
+AC_CHECK_LIB([Irrlicht], [main])
+AC_CHECK_LIB([ssl], [main])
+AC_CHECK_LIB([crypto], [main])
+AC_CHECK_LIB([ZThread], [main])
+
+# Checks for header files.
+AC_PATH_X
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h inttypes.h limits.h malloc.h memory.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/param.h sys/socket.h sys/time.h sys/timeb.h unistd.h utime.h wchar.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_HEADER_TIME
+AC_STRUCT_TM
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
+AC_C_VOLATILE
+AC_CHECK_TYPES([ptrdiff_t])
+
+# Checks for library functions.
+AC_FUNC_CHOWN
+AC_FUNC_CLOSEDIR_VOID
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_MALLOC
+AC_FUNC_MEMCMP
+AC_FUNC_SELECT_ARGTYPES
+AC_TYPE_SIGNAL
+AC_FUNC_STAT
+AC_FUNC_UTIME_NULL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([floor ftime ftruncate getcwd gethostbyaddr gethostbyname gethostname gettimeofday memmove memset mkdir pow realpath select socket sqrt strerror strrchr strstr strtol strtoul uname utime])
+
+#AC_CONFIG_FILES([dep/src/irrlicht/Makefile
+#                 dep/src/zlib/Makefile
+#                 dep/src/zthread/Makefile])
+#AC_CONFIG_SUBDIRS([dep/src/irrlicht/jpeglib
+#                   dep/src/irrlicht/libpng])
+AC_CONFIG_FILES([Makefile
+		 shared/Makefile
+		 shared/Auth/Makefile
+		 shared/Network/Makefile
+		 Client/Makefile
+		 Client/GUI/Makefile
+		 Client/Realm/Makefile
+		 Client/World/Makefile
+		 Client/DefScript/Makefile])
+AC_OUTPUT
