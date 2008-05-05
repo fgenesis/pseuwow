@@ -41,7 +41,7 @@ public:
     // access funcs
     void *GetPtr(uint32 index, char *entry);
     void *GetPtrByField(uint32 index, uint32 entry);
-    inline char *GetStringByOffset(uint32 offs) { return (offs < _stringsize ? _stringbuf + offs : ""); }
+    inline char *GetStringByOffset(uint32 offs) { return (char*)(offs < _stringsize ? _stringbuf + offs : ""); }
     inline char *GetString(uint32 index, char *entry) { return GetStringByOffset(GetUint32(index,entry)); }
     inline char *GetString(uint32 index, uint32 entry) { return GetStringByOffset(GetUint32(index,entry)); }
     inline uint32 GetUint32(uint32 index, char *entry) { uint32 *t = (uint32*)GetPtr(index,entry); return t ? *t : 0; }

@@ -7,7 +7,7 @@
 
 inline char *gettypename(uint32 ty)
 {
-    return (ty==0 ? "INT" : (ty==1 ? "FLOAT" : "STRING"));
+    return (char*)(ty==0 ? "INT" : (ty==1 ? "FLOAT" : "STRING"));
 }
 
 // file-globally declared pointer holder. NOT multi-instance-safe for now!!

@@ -1,5 +1,9 @@
 #include "common.h"
+#if PLATFORM == PLATFORM_UNIX
+#include "zlib.h"
+#else
 #include "zlib/zlib.h"
+#endif
 #include "ZCompressor.h"
 
 ZCompressor::ZCompressor()
