@@ -53,7 +53,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
         for(uint32 ly = 0; ly < adt->_chunks[ch].hdr.nLayers; ly++)
         {
             uint32 texoffs = adt->_chunks[ch].layer[ly].textureId;
-            _chunks[ch].texlayer.push_back(std::string("data/texture/") + _PathToFileName(adt->_textures[texoffs]));
+            _chunks[ch].texlayer.push_back(std::string("data/texture/") + NormalizeFilename(std::string(adt->_textures[texoffs])).c_str());
         }
         // extract alpha maps. in adt they are stored in 4-bit encoding, which makes 4096 entries in 64x32 values
         for(uint32 al = 0; al < (adt->_chunks[ch].hdr.sizeAlpha - 8) / 2048; al++) // see comment in ADTFile.cpp when loading MCAL chunk for explanation
@@ -80,8 +80,8 @@ void MapTile::ImportFromADT(ADTFile *adt)
         d.z = mddf.y;
         d.x = -(mddf.z - ZEROPOINT);
         d.ox = mddf.c;
-        d.oy = mddf.b - 90.0f; // wowdev states Y=B-90, but this doesnt really look as expected...
-        d.oz = -mddf.a;
+        d.oy = mddf.b;
+        d.oz = mddf.a;
         d.flags = mddf.flags;
         d.uniqueid = mddf.uniqueid;
         d.model = std::string("./data/model/") + NormalizeFilename(_PathToFileName(adt->_models[mddf.id]));

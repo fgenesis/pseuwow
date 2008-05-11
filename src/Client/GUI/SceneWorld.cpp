@@ -369,7 +369,7 @@ void SceneWorld::UpdateTerrain(void)
     {
         logdebug("SceneWorld: Using alternative coords due to missing MapTile");
         tpos.X = -(maptile->GetBaseX() + TILESIZE);
-        tpos.Y = -(maptile->GetBaseY() + TILESIZE);
+        tpos.Z = -(maptile->GetBaseY() + TILESIZE);
     }
     logdebug("SceneWorld: Setting position of terrain (x:%.2f y:%.2f z:%.2f)", tpos.X, tpos.Y, tpos.Z);
     terrain->setPosition(tpos);
@@ -421,8 +421,19 @@ void SceneWorld::UpdateTerrain(void)
                                 // this is causing the framerate to drop to ~1. better leave it disabled for now :/
                                 //doodad->addShadowVolumeSceneNode();
                                 doodad->setPosition(core::vector3df(-d->x, d->z, -d->y));
-                                doodad->setRotation(core::vector3df(-d->ox, -d->oy-90, -d->oz));
+
+                                // Rotation problems
+                                // MapTile.cpp - changed to
+                                // d.ox = mddf.c; d.oy = mddf.b; d.oz = mddf.a;
+                                // its nonsense to do d.oy = mddf.b-90; and rotation with -d->oy-90 = -(mddf.b-90)-90 = -mddf.b
+                                // here:
+                                // doodad->setRotation(core::vector3df(-d->ox,0,-d->oz)); // rotated axes looks good
+                                // doodad->setRotation(core::vector3df(0,-d->oy,0));      // same here
+                                doodad->setRotation(core::vector3df(-d->ox,-d->oy,-d->oz)); // very ugly with some rotations, |ang|>360? 
+                                
                                 doodad->setScale(core::vector3df(d->scale, d->scale, d->scale));
+                                
+                                // smgr->addTextSceneNode(this->device->getGUIEnvironment()->getBuiltInFont(), (irr::core::stringw(L"")+(float)d->uniqueid).c_str() , irr::video::SColor(255,255,255,255),doodad, irr::core::vector3df(0,5,0));
                                 SceneNodeWithGridPos gp;
                                 gp.gx = mapmgr->GetGridX() + tilex - 1;
                                 gp.gy = mapmgr->GetGridY() + tiley - 1;

@@ -43,6 +43,8 @@ u32 SImage::getBitsPerPixelFromFormat(ECOLOR_FORMAT format)
 }
 SImage::~SImage()
 {
+    if (Data)
+        delete Data;
 }
 
 

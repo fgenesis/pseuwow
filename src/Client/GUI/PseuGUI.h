@@ -49,7 +49,7 @@ inline irr::core::vector3df WPToIrr(WorldPosition wp)
 
 inline WorldPosition IrrToWP(irr::core::vector3df v, float o_rad)
 {
-    return WorldPosition(-v.X, v.Z, -v.Y, RAD_FIX(IRR_TO_O(o_rad))); // rotate by 90° and fix value
+    return WorldPosition(-v.X, -v.Z, v.Y, IRR_TO_O(o_rad)); // rotate by 90° and fix value
 }
 
 
