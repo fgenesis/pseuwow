@@ -56,7 +56,7 @@ void DrawObject::_Init(void)
             SCPDatabase *cdi = _instance->dbmgr.GetDB("creaturedisplayinfo");
             SCPDatabase *cmd = _instance->dbmgr.GetDB("creaturemodeldata");
             uint32 modelid = cdi && displayid ? cdi->GetUint32(displayid,"model") : 0;
-            modelfile = std::string("data/model/") + cmd->GetString(modelid,"file");
+            modelfile = std::string("data/model/") + (cmd ? cmd->GetString(modelid,"file") : "");
             opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
         } 
         else if (_obj->IsGameObject())
@@ -80,8 +80,7 @@ void DrawObject::_Init(void)
                 SCPDatabase *gdi = _instance->dbmgr.GetDB("gameobjectdisplayinfo");
                 if (gdi && displayid)
                     modelfile = std::string("data/model/") + gdi->GetString(displayid,"model");
-                std::string test = gdi->GetString(displayid,"model");
-                DEBUG(logdebug("GAMEOBJECT: %u - %u - %s", _obj->GetEntry(), displayid, test.c_str()));
+                DEBUG(logdebug("GAMEOBJECT: %u - %u", _obj->GetEntry(), displayid));
             } else {
                 DEBUG(logdebug("GAMEOBJECT UNKNOWN: %u", _obj->GetEntry()));
             }

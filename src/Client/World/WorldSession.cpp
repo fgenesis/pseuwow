@@ -585,6 +585,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
                     *mapdb = GetDBMgr().GetDB("map"),
                     *classdb = GetDBMgr().GetDB("class");
         char *zonename, *racename, *mapname, *classname;
+        zonename = racename = mapname = classname = NULL;
 
         for(unsigned int i=0;i<num;i++)
         {
