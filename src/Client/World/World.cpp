@@ -2,14 +2,19 @@
 #include "MapMgr.h"
 #include "WorldSession.h"
 #include "World.h"
+#include "MovementMgr.h"
 
 World::World(WorldSession *s)
 {
     _session = s;
     _mapId = -1;
     _mapmgr = NULL;
+    _movemgr = NULL;
     if(_session->GetInstance()->GetConf()->useMaps)
+    {
         _mapmgr = new MapMgr();
+    }
+
 }
 
 World::~World()
@@ -38,6 +43,10 @@ void World::Update(void)
     if(_mapmgr)
     {
         _mapmgr->Update(_x,_y,_mapId);
+    }
+    if(_movemgr)
+    {
+        _movemgr->Update(false);
     }
 
     // some debug code for testing...
@@ -70,4 +79,11 @@ float World::GetPosZ(float x, float y)
 
     logdebug("WORLD: GetPosZ() called, but no MapMgr exists (do you really use maps?)");
     return 0;
+}
+
+// must be called after MyCharacter is created
+void World::CreateMoveMgr(void)
+{
+    _movemgr = new MovementMgr();
+    _movemgr->SetInstance(_session->GetInstance());
 }

@@ -117,12 +117,10 @@ void MapTileStorage::_DebugDump(void)
 }
 
 // get approx Z position for world position (x,y).
-// TODO: use inner vertices also
-// TODO: interpolate values instead of choosing closest vertex
-// formula taken from BoogieBot, thx!
-/*float MapTile::GetZ(float x, float y)
+float MapTile::GetZ(float x, float y)
 {
     float bx,by;
+    float real_z;
     bx = _chunks[0].basex; // world base coords of tile
     by = _chunks[0].basey;
     uint32 chx = (uint32)fabs((bx - x) / CHUNKSIZE); // get chunk id for given coords
@@ -131,22 +129,29 @@ void MapTileStorage::_DebugDump(void)
     {
         logerror("MapTile::GetZ() wrong chunk indexes (%d, %d) for (%f, %f)",chx,chy,x,y);
         logerror(" - These coords are NOT on this tile!");
-        return 0;
+        return INVALID_HEIGHT;
     }
-    MapChunk& ch = _chunks[chy*16 + chx];
+    MapChunk& ch = _chunks[chx*16 + chy];
     uint32 vx,vy; // get vertex position (0,0) ... (8,8);
-    vx = (uint32)floor((fabs(ch.basex - x) / UNITSIZE) + 0.5f);
-    vy = (uint32)floor((fabs(ch.basey - y) / UNITSIZE) + 0.5f);
-    if(vx > 8 || vy > 8)
+    vy = (uint32)floor((fabs(ch.basey - y) / (CHUNKSIZE/16.0f)) + 0.5f);
+    if (vy % 2 == 0)
     {
-        logerror("MapTile::GetZ() wrong vertex indexes (%d, %d) for chunk (%d, %d) for (%f, %f)",vx,vy,chx,chy,x,y);
-        return 0;
+        vx = (uint32)floor((fabs(ch.basex - x) / (CHUNKSIZE/8.0f)) + 0.5f);
+        real_z = ch.hmap_rough[vx*9 + (vy/2)] + ch.baseheight;
     }
-
-    float real_z = ch.hmap_rough[vy*9 + vx] + ch.baseheight;
+    else if (vy % 2 != 0)
+    {
+        vx = (uint32)floor((fabs(ch.basex - x) / (CHUNKSIZE/7.0f)) ); //edit: removed + 0.5f
+        real_z = ch.hmap_fine[vx*8 + ((vy-1)/2)] + ch.baseheight;
+    }
+    if(vx > 8 || vy > 17)
+    {
+        logerror("MapTile::GetZ() wrong vertex indexes (%d, %d) for chunk (%d, %d) for (%f, %f) chunkpos (%f, %f) tile (%f, %f)",vx,vy,chx,chy,x,y,ch.basex,ch.basey,bx,by);
+        return INVALID_HEIGHT;
+    }
 
     return real_z;
-}*/
+}
 
 void MapTile::DebugDumpToFile(void)
 {

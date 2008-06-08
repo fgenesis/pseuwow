@@ -11,6 +11,8 @@
 #define UNITSIZE (CHUNKSIZE / 8.0f)
 #define ZEROPOINT (32.0f * (TILESIZE))
 
+#define INVALID_HEIGHT -99999.0f
+
 // individual chunks of a map
 class MapChunk
 {

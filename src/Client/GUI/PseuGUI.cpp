@@ -185,35 +185,28 @@ void PseuGUI::Run(void)
             _device->sleep(10); // save cpu & gpu power if not focused
         }
 
-        try
+        _UpdateSceneState();
+
+        if(!_scene)
         {
-            _UpdateSceneState();
-
-            if(!_scene)
-            {
-                _device->sleep(10);
-                continue;
-            }
-
-            _scene->OnUpdate(_passtimediff); // custom: process input, set camera, etc
-            _driver->beginScene(true, true, _scene->GetBackgroundColor()); // irr: call driver to start drawing
-            _scene->OnDrawBegin(); // custom: draw everything before irrlicht draws everything by itself
-            _smgr->drawAll(); // irr: draw all scene nodes
-            _guienv->drawAll(); // irr: draw gui elements
-            _scene->OnDraw(); // custom: draw everything that has to be draw late (post-processing also belongs here)
-            _driver->endScene(); // irr: drawing done
-            if(_driver->getFPS()>100 && _throttle < 10)//Primitive FPS-Limiter - upper cap hardcoded 100 FPS.
-                _throttle++;                           //lowercap 60 (if it drops below, limiting is eased).
-            if(_driver->getFPS()<60 && _throttle>0)    //but honestly, a 10 msec delay is not worth this amount of code.
-                _throttle--;                           //If the FPS is down, it will never be because of this
-            if(_throttle>0)                            //Thus i opt for dropping the charade and using a fixed conf value of max 10.
-                _device->sleep(_throttle);             //sleeps max 10 msec (=_throttle) here.
-
+            _device->sleep(10);
+            continue;
         }
-        catch(...)
-        {
-            logerror("Unhandled exception in PseuGUI::Run() device=%X smgr=%X objects:%u", _device, _smgr, domgr.StorageSize());
-        }
+
+        _scene->OnUpdate(_passtimediff); // custom: process input, set camera, etc
+        _driver->beginScene(true, true, _scene->GetBackgroundColor()); // irr: call driver to start drawing
+        _scene->OnDrawBegin(); // custom: draw everything before irrlicht draws everything by itself
+        _smgr->drawAll(); // irr: draw all scene nodes
+        _guienv->drawAll(); // irr: draw gui elements
+        _scene->OnDraw(); // custom: draw everything that has to be draw late (post-processing also belongs here)
+        _driver->endScene(); // irr: drawing done
+        if(_driver->getFPS()>100 && _throttle < 10)//Primitive FPS-Limiter - upper cap hardcoded 100 FPS.
+            _throttle++;                           //lowercap 60 (if it drops below, limiting is eased).
+        if(_driver->getFPS()<60 && _throttle>0)    //but honestly, a 10 msec delay is not worth this amount of code.
+            _throttle--;                           //If the FPS is down, it will never be because of this
+        if(_throttle>0)                            //Thus i opt for dropping the charade and using a fixed conf value of max 10.
+            _device->sleep(_throttle);             //sleeps max 10 msec (=_throttle) here.
+
 
         fps = _driver->getFPS();
 

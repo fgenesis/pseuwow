@@ -57,6 +57,7 @@ class PseuInstanceConf
     bool useMaps;
     bool skipaddonchat;
     uint8 dumpPackets;
+    bool softquit;
 
     // gui related
     bool enablegui;

@@ -16,10 +16,6 @@ QUIT
 #script=quit
 #permission=255
 //--------------------------------------------------------
-// quit PseuWoW, say goodbye when logged in
-IF ${@inworld}
-	SAY Terminating proc...
-ENDIF
 SHDN
 
 

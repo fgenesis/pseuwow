@@ -250,7 +250,8 @@ void PseuInstance::Run(void)
     }
 
     // fastquit is defined if we clicked [X] (on windows)
-    if(_fastquit)
+    // If softquit is set, do not terminate forcefully, but shut it down instead
+    if(_fastquit && !_conf->softquit)
     {
         log("Aborting Instance...");
         return;
@@ -263,6 +264,13 @@ void PseuInstance::Run(void)
     {
         SaveAllCache();
         //...
+    }
+
+    if(GetScripts()->ScriptExists("_onexit"))
+    {
+        CmdSet Set;
+        Set.arg[0] = DefScriptTools::toString(_error);
+        GetScripts()->RunScript("_onexit",&Set);
     }
 
     if(GetConf()->exitonerror == false && _error)
@@ -468,6 +476,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     useMaps=(bool)atoi(v.Get("USEMAPS").c_str());
     skipaddonchat=(bool)atoi(v.Get("SKIPADDONCHAT").c_str());
     dumpPackets=(uint8)atoi(v.Get("DUMPPACKETS").c_str());
+    softquit=(bool)atoi(v.Get("SOFTQUIT").c_str());
 
     // clientversion is a bit more complicated to add
     {

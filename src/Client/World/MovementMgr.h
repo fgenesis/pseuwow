@@ -19,8 +19,8 @@ enum MovementFlagsEx
 
 enum MoveModes
 {
-    MOVEMODE_AUTO, // CPU controlling movement, MyCharacter must be updated
-    MOVEMODE_MANUAL, // user controlling movement, MyCharacter is updated by the GUI already
+    MOVEMODE_AUTO, // CPU controlling movement, MyCharacter must be updated by MovementMgr
+    MOVEMODE_MANUAL, // user controlling movement, MyCharacter must be updated by the GUI
 };
 
 class PseuInstance;
@@ -34,17 +34,30 @@ public:
     ~MovementMgr();
     void SetInstance(PseuInstance*);
     inline void SetMoveMode(uint8 mode) { _movemode = mode; }
+    inline uint8 GetMoveMode(void) { return _movemode; }
     void Update(bool);
     void MoveStartForward(void);
     void MoveStartBackward(void);
     void MoveStop(void);
     void MoveStartStrafeLeft(void);
     void MoveStartStrafeRight(void);
+    void MoveStopStrafe(void);
     void MoveStartTurnLeft(void);
     void MoveStartTurnRight(void);
     void MoveStopTurn(void);
     void MoveFallLand(void);
-    void MoveSetFacing(float);
+    void MoveSetFacing(void);
+    void MoveJump(void);
+    //bool IsJumping(void);
+    inline bool GetMoveFlags(void) { return _moveFlags; }
+    inline bool HasMoveFlag(uint32 flag) { return _moveFlags & flag; }
+    bool IsMoved(void) { bool m = _moved; _moved = false; return m; } // true if the character moved since last call
+    bool IsMoving(void); // any move?
+    bool IsTurning(void); // spinning around?
+    bool IsWalking(void); // walking straight forward/backward?
+    bool IsStrafing(void); // strafing left/right?
+
+
 
 private:
     void _BuildPacket(uint16);
@@ -54,7 +67,10 @@ private:
     uint32 _updatetime; // timeMS of last update cycle
     uint32 _optime; // timeMS when last opcode was sent
     uint8 _movemode; // automatic or manual
+    float _movespeed; // current xy movement speed
+    float _jumptime;
     UnitMoveType _movetype; // index used for speed selection
+    bool _moved;
 
 
 };

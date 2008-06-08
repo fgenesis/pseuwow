@@ -61,6 +61,7 @@ public:
     void SetMustDie(void);
     void SendWorldPacket(WorldPacket&);
     void AddSendWorldPacket(WorldPacket *pkt);
+    void AddSendWorldPacket(WorldPacket& pkt);
     inline bool InWorld(void) { return _logged; }
     inline uint32 GetLagMS(void) { return _lag_ms; }
 
