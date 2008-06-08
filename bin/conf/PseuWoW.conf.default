@@ -16,6 +16,12 @@ debug=0
 // defines if the program should quit on error/exception or stay opened (for debugging)
 exitonerror=0
 
+// shutdown instead of terminating forcefully when user clicks the [X] (close) button.
+// If this is disabled, you have to close PseuWoW with Ctrl+C or by typing "exit" into the console to save data!
+// The problem is that windows usually gives processes 5 secs time to close after clicking [X], if they don't, they are marked as crashed.
+// Default: 1 (enabled) -- [Win32 only]
+softquit=1
+
 // reconnect on failure/disconnect
 // 0 = dont't reconnect
 // everything else: delay (in ms) until the next connection attempt.
@@ -62,8 +68,8 @@ charname=Pseuwow
 
 
 // Client emulation configuration
-ClientVersion=2.4.1
-ClientBuild=8125
+ClientVersion=2.4.2
+ClientBuild=8278
 ClientLanguage=enUS
 // or change to enGB, deDE, ...
 
@@ -127,7 +133,7 @@ SkipAddonChat=1
 // Note that packet dumps are valid for 1 session only, the counter gets reset when the WorldSession is destroyed.
 // This means they get overwritten if not saved!
 // 0 - no packet dumping
-// 1 - dump packets that caused an excpetion or object update error
+// 1 - dump packets that caused an exception or object update error
 // 2 - like [1] + all packets with opcodes not handled by the core
 //     (doesn't matter if they have scripts attached or not, they will be dumped always)
 DumpPackets=1

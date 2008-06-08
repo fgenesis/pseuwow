@@ -186,20 +186,15 @@ uint32 MapMgr::GetLoadedMapsCount(void)
 
 float MapMgr::GetZ(float x, float y)
 {
-    return -99999.0f; // for now return lowest possible number, GetZ() will be implemented correctly later
-/*    GridCoordPair gcoords = GetTransformGridCoordPair(x,y);
+    GridCoordPair gcoords = GetTransformGridCoordPair(x,y);
     MapTile *tile = _tiles->GetTile(gcoords.x,gcoords.y);
     if(tile)
     {
-#ifdef _DEBUG
-        tile->DebugDumpToFile();
-        logdebug("DEBUG: tile dumped");
-#endif
         return tile->GetZ(x,y);
     }
 
     logerror("MapMgr::GetZ() called for not loaded MapTile (%u, %u) for (%f, %f)",gcoords.x,gcoords.y,x,y);
-    return 0;*/
+    return INVALID_HEIGHT;
 }
 
 std::string MapMgr::GetLoadedTilesString(void)

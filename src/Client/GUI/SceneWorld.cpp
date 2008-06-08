@@ -12,17 +12,23 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "CCursorController.h"
+#include "MovementMgr.h"
 
 SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 {
     DEBUG(logdebug("SceneWorld: Initializing..."));
     debugmode = false;
+    _freeCameraMove = true;
 
     // store some pointers right now to prevent repeated ptr dereferencing later (speeds up code)
     gui = g;
     wsession = gui->GetInstance()->GetWSession();
     world = wsession->GetWorld();
     mapmgr = world->GetMapMgr();
+    movemgr = world->GetMoveMgr();
+    mychar = wsession->GetMyChar();
+    ASSERT(mychar);
+    _CalcXYMoveVect(mychar->GetO());
 
     ILightSceneNode* light = smgr->addLightSceneNode(0, core::vector3df(0,0,0), SColorf(255, 255, 255, 255), 1000.0f);
     SLight ldata = light->getLightData();
@@ -118,30 +124,176 @@ void SceneWorld::OnUpdate(s32 timediff)
             selectedNode = focusedNode;
     }*/ // i'll continue working on this - [FG]
 
+    if(eventrecv->key.pressed_once(KEY_KEY_L))
+        ((ICameraSceneNode*)camera->getNode())->setTarget(vector3df(0,0,0));
+
+    // maybe it is better to replace the sin() and cos() with some irr::core::matrix4 calcualtions... not sure what is more efficient
 
     if(eventrecv->key.pressed(KEY_KEY_W) || (mouse_pressed_left && mouse_pressed_right))
-        camera->moveForward(50 * timediff_f);
+    {
+        if(_freeCameraMove)
+            camera->moveForward(50 * timediff_f);
+        else
+        {
+            f32 speedfactor = timediff_f * mychar->GetSpeed(MOVE_RUN);
+            movemgr->SetMoveMode(MOVEMODE_MANUAL);
+            movemgr->MoveStartForward();
+            WorldPosition wp = mychar->GetPosition();
+            wp.x += (xyCharMovement.X * speedfactor);
+            wp.y += (xyCharMovement.Y * speedfactor);
+            wp.z = terrain->getHeight(WPToIrr(wp));
+            mychar->SetPosition(wp);
+        }
+    }
+
     if(eventrecv->key.pressed(KEY_KEY_S))
-        camera->moveBack(50 * timediff_f);
-    if(eventrecv->key.pressed(KEY_KEY_E))
-        camera->moveRight(50 * timediff_f);
-    if(eventrecv->key.pressed(KEY_KEY_Q))
-        camera->moveLeft(50 * timediff_f);
+    {
+        if(_freeCameraMove)
+            camera->moveBack(50 * timediff_f);
+        else
+        {
+            f32 speedfactor = timediff_f * mychar->GetSpeed(MOVE_WALKBACK);
+            movemgr->SetMoveMode(MOVEMODE_MANUAL);
+            movemgr->MoveStartBackward();
+            WorldPosition wp = mychar->GetPosition();
+            wp.x -= (xyCharMovement.X * speedfactor);
+            wp.y -= (xyCharMovement.Y * speedfactor);
+            wp.z = terrain->getHeight(WPToIrr(wp));
+            mychar->SetPosition(wp);
+        }
+    }
 
     // if right mouse button pressed, move in axis, if not, turn camera
     if(eventrecv->key.pressed(KEY_KEY_D))
     {
         if(mouse_pressed_right)
-            camera->moveRight(50 * timediff_f);
+        {
+            if(_freeCameraMove)
+                camera->moveRight(50 * timediff_f);
+            else
+            {
+                // TODO: strafe case
+            }
+        }
         else
-            camera->turnRight(timediff_f * M_PI * 25);
+        {
+            if(_freeCameraMove)
+                camera->turnRight(timediff_f * M_PI * 25);
+            else
+            {
+                movemgr->SetMoveMode(MOVEMODE_MANUAL);
+                movemgr->MoveStartTurnRight();
+                WorldPosition wp = mychar->GetPosition();
+                wp.z = terrain->getHeight(WPToIrr(wp));
+                wp.o -= (timediff_f * mychar->GetSpeed(MOVE_TURN));
+                wp.o = RAD_FIX(wp.o);
+                mychar->SetPosition(wp);
+                _CalcXYMoveVect(wp.o);
+            }
+        }
     }
+
     if(eventrecv->key.pressed(KEY_KEY_A))
     {
         if(mouse_pressed_right)
+        {
+            if(_freeCameraMove)
+                camera->moveLeft(50 * timediff_f);
+            else
+            {
+                // TODO: strafe case
+            }
+        }
+        else
+        {
+            if(_freeCameraMove)
+                camera->turnLeft(timediff_f * M_PI * 25);
+            else
+            {
+                movemgr->SetMoveMode(MOVEMODE_MANUAL);
+                movemgr->MoveStartTurnLeft();
+                WorldPosition wp = mychar->GetPosition();
+                wp.z = terrain->getHeight(WPToIrr(wp));
+                wp.o += (timediff_f * mychar->GetSpeed(MOVE_TURN));
+                wp.o = RAD_FIX(wp.o);
+                mychar->SetPosition(wp);
+                _CalcXYMoveVect(wp.o);
+            }
+        }
+    }
+
+    if(eventrecv->key.pressed(KEY_KEY_E))
+    {
+        if(_freeCameraMove)
+            camera->moveRight(50 * timediff_f);
+        else
+        {/*
+            f32 speedfactor = timediff_f * mychar->GetSpeed(MOVE_RUN);
+            movemgr->SetMoveMode(MOVEMODE_MANUAL);
+            movemgr->MoveStartStrafeRight();
+            WorldPosition wp = mychar->GetPosition();
+            wp.x -= (xyCharMovement.X * speedfactor);
+            wp.y -= (xyCharMovement.Y * speedfactor);
+            wp.z = terrain->getHeight(WPToIrr(wp));
+            mychar->SetPosition(wp);
+        */}
+    }
+
+    if(eventrecv->key.pressed(KEY_KEY_Q))
+    {
+        if(_freeCameraMove)
             camera->moveLeft(50 * timediff_f);
         else
-            camera->turnLeft(timediff_f * M_PI * 25);
+        {/*
+            f32 speedfactor = timediff_f * mychar->GetSpeed(MOVE_RUN);
+            movemgr->SetMoveMode(MOVEMODE_MANUAL);
+            movemgr->MoveStartStrafeLeft();
+            WorldPosition wp = mychar->GetPosition();
+            wp.x -= (xyCharMovement.X * speedfactor);
+            wp.y -= (xyCharMovement.Y * speedfactor);
+            wp.z = terrain->getHeight(WPToIrr(wp));
+            mychar->SetPosition(wp);
+        */}
+    }
+
+    /*if(eventrecv->key.pressed(KEY_SPACE))
+    {
+        movemgr->SetMoveMode(MOVEMODE_MANUAL);
+        movemgr->MoveJump();
+    }*/
+
+    // listen to *not* pressed keys only if manually moving
+    if(movemgr->GetMoveMode() == MOVEMODE_MANUAL)
+    {
+        if (!eventrecv->key.pressed(KEY_KEY_D) && !eventrecv->key.pressed(KEY_KEY_A))
+        {
+            movemgr->MoveStopTurn();
+        }
+        if (!eventrecv->key.pressed(KEY_KEY_W) && !eventrecv->key.pressed(KEY_KEY_S))
+        {
+            movemgr->MoveStop();
+        }
+        // TODO: add strafe case
+    }
+
+    // if we moved, relocate MyCharacter
+    /*if(movemgr->IsMoved())
+    {
+        MyCharacter *my = wsession->GetMyChar();
+        if(my)
+        {
+            WorldPosition newpos = GetWorldPosition();
+            my->SetPosition(newpos);
+        }
+        else
+        {
+            logerror("SceneWorld: Can't move MyCharacter, not found!");
+        }
+    }*/
+
+    if(eventrecv->key.pressed_once(KEY_HOME))
+    {
+        _freeCameraMove = !_freeCameraMove;
     }
 
     if(eventrecv->key.pressed_once(KEY_BACK))
@@ -212,7 +364,7 @@ void SceneWorld::OnUpdate(s32 timediff)
 
     DEBUG(
     WorldPosition wp = GetWorldPosition();
-    str += L"Camera: pitch:";
+    str += L" Camera: pitch:";
     str += camera->getPitch();
     str += L"  c pos:";
     str += camera->getPosition().X;
@@ -224,7 +376,7 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += " ## HEAD: ";
     str += IRR_TO_O(camera->getHeading());
     str += L"  Pos: ";
-    str = ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o;
+    str += ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o;
     str += L"  -- Terrain: Sectors: ";
     str += (int)terrain->getSectorsRendered();
     str += L" / ";
@@ -381,9 +533,12 @@ void SceneWorld::UpdateTerrain(void)
         for(s32 tilex = 0; tilex < 3; tilex++)
         {
             MapTile *maptile = mapmgr->GetNearTile(tilex - 1, tiley - 1);
+            uint32 tile_real_x =  mapmgr->GetGridX() + tilex - 1;
+            uint32 tile_real_y =  mapmgr->GetGridY() + tiley - 1;
             if(maptile)
             {
                 // apply map height data
+                logdebug("Applying height data for tile (%u, %u)", tile_real_x, tile_real_y);
                 for(uint32 chy = 0; chy < 16; chy++)
                 {
                     for(uint32 chx = 0; chx < 16; chx++)
@@ -402,6 +557,7 @@ void SceneWorld::UpdateTerrain(void)
                     }
                 }
                 // create doodads
+                logdebug("Loading %u doodads for tile (%u, %u)", maptile->GetDoodadCount(), tile_real_x, tile_real_y);
                 for(uint32 i = 0; i < maptile->GetDoodadCount(); i++)
                 {
                     Doodad *d = maptile->GetDoodad(i);
@@ -446,7 +602,7 @@ void SceneWorld::UpdateTerrain(void)
             }
             else
             {
-                logerror("SceneWorld: MapTile (%u, %u) not loaded, can't apply heightmap!", mapmgr->GetGridX()+tilex, mapmgr->GetGridY()+tiley);
+                logerror("SceneWorld: MapTile (%u, %u) not loaded!", tile_real_x, tile_real_y);
             }
         }
     }
@@ -523,7 +679,7 @@ WorldPosition SceneWorld::GetWorldPosition(void)
 {
     // TODO: later do not use CAMERA, but CHARACTER position, as soon as camera is changed from 1st to 3rd person view
     // and floating around character in the middle
-    return IrrToWP(camera->getPosition(), IRR_TO_O(DEG_TO_RAD(camera->getHeading())));
+    return IrrToWP(camera->getPosition(), DEG_TO_RAD(camera->getHeading()));
 }
 
 video::SColor SceneWorld::GetBackgroundColor(void)
@@ -531,5 +687,10 @@ video::SColor SceneWorld::GetBackgroundColor(void)
     return envBasicColor;
 }
 
+void SceneWorld::_CalcXYMoveVect(float o)
+{
+    xyCharMovement.X = cos(o);
+    xyCharMovement.Y = sin(o);
+}
 
 

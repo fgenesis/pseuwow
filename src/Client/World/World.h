@@ -3,6 +3,7 @@
 
 class WorldSession;
 class MapMgr;
+class MovementMgr;
 
 struct WorldPosition
 {
@@ -39,6 +40,8 @@ public:
     void UpdatePos(float,float);
     float GetPosZ(float x, float y);
     inline MapMgr *GetMapMgr(void) { return _mapmgr; }
+    inline MovementMgr *GetMoveMgr(void) { return _movemgr; }
+    void CreateMoveMgr(void);
 
 private:
     WorldSession *_session;
@@ -46,6 +49,8 @@ private:
     uint32 _mapId;
     float _x,_y;
     float _lastx,_lasty;
+
+    MovementMgr *_movemgr;
 
 };
 

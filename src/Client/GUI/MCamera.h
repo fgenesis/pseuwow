@@ -33,6 +33,44 @@ public:
     }
     
     ~MCameraFPS(){}
+
+    void update(void)
+    {
+        turnLeft(0);
+        turnUp(0);
+        moveForward(0);
+    }
+
+    /*
+    void setTarget(core::vector3df t)
+    {
+        direction = t - getTarget();
+        camera->setTarget(t);
+        rotationX = RADTODEG * asin(DEGTORAD * t.X);
+        rotationY = RADTODEG * (acos(DEGTORAD * t.Y) + (PI/2.0f));
+        if(rotationY>=360)rotationY-=360;
+        if(rotationY<0)rotationY+=360;
+        if(rotationX>=360)rotationX-=360;
+        if(rotationX<0)rotationX+=360;
+        direction.normalize();
+    }*/
+
+    void setRotationLeft(f32 i)
+    {
+        rotationY = i;
+        if(rotationY>=360)rotationY-=360;
+        if(rotationY<0)rotationY+=360;
+
+        direction = core::vector3df(0,0,1);
+
+        core::matrix4 matrix;
+        matrix.setRotationDegrees(core::vector3df (rotationX,rotationY,0));
+        matrix.rotateVect(direction);
+
+        camera->setTarget(camera->getPosition() + direction);
+        camera->updateAbsolutePosition();
+    }
+
     
     void turnRight(f32 i)
     {
@@ -55,13 +93,13 @@ public:
         rotationY -= i;
         if(rotationY>=360)rotationY-=360;
         if(rotationY<0)rotationY+=360;
-        
+
         direction = core::vector3df(0,0,1);
-        
+
         core::matrix4 matrix;
         matrix.setRotationDegrees(core::vector3df (rotationX,rotationY,0));
         matrix.rotateVect(direction);
-        
+
         camera->setTarget(camera->getPosition() + direction);
         camera->updateAbsolutePosition();
     }

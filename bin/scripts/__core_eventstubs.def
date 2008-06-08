@@ -111,4 +111,16 @@ EMOTE 66 // say NO!
 //- script content here
 
 
+#script=_onexit
+// called just before PseuWoW exits
+// @0: error? (0/1)
+
+if ${@inworld}
+	set,m ?{getvar #EXITMESSAGE}
+	if ?{strlen ${m}}
+		say ${m}
+	endif
+	unset m
+endif
+
 

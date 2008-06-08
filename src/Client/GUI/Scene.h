@@ -78,6 +78,8 @@ class MCameraOrbit;
 class MyEventReceiver;
 class MapMgr;
 class WorldSession;
+class MovementMgr;
+class MyCharacter;
 
 class SceneWorld : public Scene
 {
@@ -117,6 +119,11 @@ private:
     scene::ISceneNode *sky;
     scene::ISceneNode *selectedNode, *oldSelectedNode, *focusedNode, *oldFocusedNode;
     video::SColor envBasicColor;
+    MovementMgr *movemgr;
+    MyCharacter *mychar;
+    bool _freeCameraMove;
+    void _CalcXYMoveVect(float o);
+    core::vector2df xyCharMovement; // stores sin() and cos() values for current MyCharacter orientation, so that they need to be calculated only if the character turns around
 };
 
 

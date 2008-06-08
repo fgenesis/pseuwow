@@ -125,6 +125,7 @@ public:
     inline void SetPosition(WorldPosition& wp) { _wpos = wp; }
     inline void SetPosition(WorldPosition& wp, uint16 mapid) { SetPosition(wp); _m = mapid; }
     inline WorldPosition GetPosition(void) {return _wpos; }
+    inline WorldPosition *GetPositionPtr(void) {return &_wpos; }
     inline float GetX(void) { return _wpos.x; }
     inline float GetY(void) { return _wpos.y; }
     inline float GetZ(void) { return _wpos.z; }

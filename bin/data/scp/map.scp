@@ -283,6 +283,10 @@ name=Zul'Aman
 name_general=PVPLordaeron
 name=Ruins of Lordaeron
 
+[580]
+name_general=SunwellPlateau
+name=The Sunwell
+
 [582]
 name_general=Transport176244
 name=Transport: Rut'theran to Auberdine
@@ -290,6 +294,10 @@ name=Transport: Rut'theran to Auberdine
 [584]
 name_general=Transport176231
 name=Transport: Menethil to Theramore
+
+[585]
+name_general=Sunwell5ManFix
+name=Magister's Terrace
 
 [586]
 name_general=Transport181645
@@ -318,4 +326,8 @@ name=Transport: Undercity to Orgrimmar
 [593]
 name_general=Transport20808
 name=Transport: Booty Bay to Ratchet
+
+[598]
+name_general=Sunwell5Man
+name=Sunwell Fix (Unused)
 
