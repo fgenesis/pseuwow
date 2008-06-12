@@ -146,7 +146,7 @@ void MovementMgr::Update(bool sendDirect)
     }*/
 
     // if we are moving, and 500ms have passed, send an heartbeat packet. just in case 500ms have passed but the packet is sent by another function, do not send here
-    if( !sendDirect && (_moveFlags & MOVEMENTFLAG_ANY_MOVE) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
+    if( !sendDirect && (_moveFlags & MOVEMENTFLAG_ANY_MOVE_NOT_TURNING) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
     {
         _BuildPacket(MSG_MOVE_HEARTBEAT);
     }
