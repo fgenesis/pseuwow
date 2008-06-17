@@ -524,14 +524,17 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
 {
     uint8 errcode;
     recvPacket >> errcode;
-    if(errcode==0xC){
-            logdetail("World Authentication successful, preparing for char list request...");
+    if(errcode == 0xC)
+    {
+        logdetail("World Authentication successful, preparing for char list request...");
         WorldPacket pkt;
         pkt.SetOpcode(CMSG_CHAR_ENUM);
-            SendWorldPacket(pkt);
-    } else {
-            logcritical("World Authentication failed, errcode=0x%X",(unsigned char)errcode);
-        GetInstance()->SetError();
+        SendWorldPacket(pkt);
+    }
+    else
+    {
+        logerror("World Authentication failed, errcode=0x%X",(unsigned char)errcode);
+        SetMustDie();
     }
 }
 

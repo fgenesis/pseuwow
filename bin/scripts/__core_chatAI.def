@@ -53,7 +53,7 @@ if ?{equal,${@myguid} ${@2}}
 endif
 
 // filter out CHAT_MSG_WHISPER_INFORM ("whisper to ... : blah blah")
-if ?{equal,${@0} 7}
+if ?{equal,${@0} 8}
     return false
 endif
 
