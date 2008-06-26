@@ -140,6 +140,8 @@ uint64 DefScriptTools::atoi64(std::string str)
     uint64 l = 0;
     for (size_t i = 0; i < str.size(); i++)
     {
+        if(!isdigit(str[i]))
+            return l;
         l = l * 10 + str[i] - 48;
     }
     return l;
@@ -147,6 +149,6 @@ uint64 DefScriptTools::atoi64(std::string str)
 
 inline long double DefScriptTools::Round(long double z,unsigned int n)
 {
-	static long double v[] = { 1, 10, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16 };
-	return floor(z * v[n] + 0.5) / v[n];
+    static long double v[] = { 1, 10, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16 };
+    return floor(z * v[n] + 0.5) / v[n];
 }
