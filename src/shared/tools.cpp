@@ -201,6 +201,8 @@ uint32 getMSTime(void)
 
 uint32 GetFileSize(const char* sFileName)
 {
+    if(!sFileName || !*sFileName)
+        return 0;
     std::ifstream f;
     f.open(sFileName, std::ios_base::binary | std::ios_base::in);
     if (!f.good() || f.eof() || !f.is_open()) { return 0; }

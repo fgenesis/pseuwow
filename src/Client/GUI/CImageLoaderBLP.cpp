@@ -5,7 +5,7 @@
 #include "SImage.h"
 #include "CImageLoaderBLP.h"
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(DEBUG)
 #define DEBUG(code) code;
 #else
 #define DEBUG(code) ;

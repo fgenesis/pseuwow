@@ -51,8 +51,7 @@ void ZCompressor::_compress(void* dst, uint32 *dst_size, void* src, uint32 src_s
     {
         //printf("Can't compress (zlib: deflate should report Z_STREAM_END)\n");
         *dst_size = 0;
-        //return;
-        exit(1);
+        return;
     }
 
     if (Z_OK != deflateEnd(&c_stream))
@@ -86,6 +85,7 @@ void ZCompressor::Deflate(uint8 level)
     rpos(0);
     wpos(0);
     append(buf,newsize);
+    delete [] buf;
 
     _iscompressed=true;
 
@@ -105,7 +105,7 @@ void ZCompressor::Inflate(void)
     result = uncompress(target, &origsize, (uint8*)contents(), size());
     if( result!=Z_OK || origsize!=_real_size)
     {
-        //printf("ZCompressor: Inflate error! result=%d cursize=%u origsize=%u realsize=%u\n",result,size(),origsize,_real_size);
+        logerror("ZCompressor: Inflate error! result=%d cursize=%u origsize=%u realsize=%u\n",result,size(),origsize,_real_size);
         delete [] target;
         return;
     }
