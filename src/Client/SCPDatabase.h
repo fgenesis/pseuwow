@@ -2,6 +2,7 @@
 #define _SCPDATABASE_H
 
 #include "DefScript/TypeStorage.h"
+#include "ZCompressor.h"
 #include <set>
 
 enum SCPFieldTypes
@@ -9,6 +10,11 @@ enum SCPFieldTypes
     SCP_TYPE_INT = 0,
     SCP_TYPE_FLOAT = 1,
     SCP_TYPE_STRING = 2
+};
+
+enum SCPFlags
+{
+    SCP_FLAG_COMPRESSED = 1
 };
 
 struct SCPFieldDef
@@ -89,18 +95,23 @@ class SCPDatabaseMgr
 {
     friend class SCPDatabase;
 public:
+    SCPDatabaseMgr() : _compr(0) {}
     SCPDatabase *GetDB(std::string n, bool create = false);
     uint32 AutoLoadFile(char *fn);
     inline void DropDB(std::string s) { _map.Delete(stringToLower(s)); }
-    bool Compact(char *dbname, char *outfile);
+    bool Compact(char *dbname, char *outfile, uint32 compression = 0);
     static uint32 GetDataTypeFromString(char *s);
     uint32 SearchAndLoad(char*,bool);
     void AddSearchPath(char*);
-    bool LoadCompactSCP(char*, char*);
+    bool LoadCompactSCP(char*, char*, uint32);
+    void SetCompression(uint32 c) { _compr = c; } // min=0, max=9
+    uint32 GetCompression(void) { return _compr; }
 
 private:
+    void _FilterFiles(std::deque<std::string>& files, std::string dbname);
     SCPDatabaseMap _map;
     std::deque<std::string> _paths;
+    uint32 _compr; // zlib compression level
 };
 
 

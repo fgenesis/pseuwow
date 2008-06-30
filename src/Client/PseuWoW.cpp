@@ -119,6 +119,7 @@ bool PseuInstance::Init(void)
 
     dbmgr.AddSearchPath("./cache");
     dbmgr.AddSearchPath("./data/scp");
+    dbmgr.SetCompression(6);
 
     _scp->variables.Set("@version_short",_ver_short);
     _scp->variables.Set("@version",_ver);

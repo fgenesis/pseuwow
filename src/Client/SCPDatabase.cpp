@@ -19,7 +19,8 @@ struct memblock
     uint8 *ptr;
     uint32 size;
 };
-TypeStorage<memblock> Pointers;
+TypeStorage<memblock> Pointers; // stores filename -> file content
+std::map<std::string,std::string> FileRelation; // stores filename -> DB name
 
 SCPDatabase::~SCPDatabase()
 {
@@ -215,6 +216,7 @@ uint32 SCPDatabaseMgr::AutoLoadFile(char *fn)
                 {
                     dbname = value;
                     db = GetDB(dbname,true); // create db if not existing
+                    FileRelation[fn] = dbname;
                 }
                 else if(db)
                         db->fields[id][entry] = value;
@@ -255,7 +257,7 @@ uint32 SCPDatabaseMgr::GetDataTypeFromString(char *s)
     return isint ? SCP_TYPE_INT : SCP_TYPE_FLOAT;
 }
 
-bool SCPDatabaseMgr::Compact(char *dbname, char *outfile)
+bool SCPDatabaseMgr::Compact(char *dbname, char *outfile, uint32 compression)
 {
     logdebug("Compacting database '%s' into file '%s'", dbname, outfile);
     SCPDatabase *db = GetDB(dbname);
@@ -280,7 +282,7 @@ bool SCPDatabaseMgr::Compact(char *dbname, char *outfile)
     stringdata << ""; // write an empty string so that offset 0 will always return empty string
 
     // the whole process is divided into 2 passes:
-    // - pass 0 autodetects the datatypes stored in the dirfferent entries (SCPFieldDef)
+    // - pass 0 autodetects the datatypes stored in the different entries (SCPFieldDef)
     // - pass 1 creates the data field holding the values and string offsets, and also stuffs string values into the ByteBuffer
     while(pass < 2)
     {
@@ -383,7 +385,7 @@ bool SCPDatabaseMgr::Compact(char *dbname, char *outfile)
     uint32 offsMD5, nMD5, sizeMD5;
     uint32 offsIndexes, nIndexes, sizeIndexes;
     uint32 offsFields, sizeFields;
-    uint32 offsData;
+    uint32 offsData, sizeData;
     uint32 offsStrings, sizeStrings;
 
     // MD5 hashes of source files
@@ -434,37 +436,61 @@ bool SCPDatabaseMgr::Compact(char *dbname, char *outfile)
     // -- most of it is handled somewhere above
     sizeStrings = stringdata.size();
 
-    // precalc absolute offsets, header is 18 bytes large
-    offsMD5 = HEADER_SIZE;
+    // calc data field size in bytes
+    sizeData = blocksize * sizeof(uint32);
+
+    // precalc relative offsets, after header (min 21 bytes, maybe some extra bytes)
+    offsMD5 = 0; // directly after header
     offsIndexes = offsMD5 + sizeMD5;
     offsFields = offsIndexes + sizeIndexes;
     offsData = offsFields + sizeFields;
-    offsStrings = offsData + blocksize * sizeof(uint32);
+    offsStrings = offsData + sizeData;
 
     // buffer the file header
-    ByteBuffer hbuf;
+    ByteBuffer hbuf(HEADER_SIZE);
     hbuf.append("SCPC",4); // identifier
-    hbuf << (uint32)0; // flags, not yet used
+
+    uint32 flags = 0;
+
+    hbuf << flags; // flags, placeholder; real value is put below
     hbuf << (uint32)0 << (uint32)0 << (uint32)0 << (uint32)0; // padding, not yet used
     hbuf << offsMD5 << nMD5 << sizeMD5;
     hbuf << offsIndexes << nIndexes << sizeIndexes;
     hbuf << offsFields << nFields << sizeFields;
-    hbuf << offsData << section << blocksize * sizeof(uint32);
+    hbuf << offsData << section << sizeData;
     hbuf << offsStrings << nStrings << sizeStrings;
+
+    ZCompressor z;
+    z.reserve(sizeMD5 + sizeIndexes + sizeFields + sizeData + sizeStrings);
+    z.append(md5buf);
+    z.append(indexbuf);
+    z.append(fieldbuf);
+    z.append((uint8*)membuf, sizeData);
+    z.append(stringdata);
+
+    if(compression)
+    {
+        z.Deflate(compression);
+        if(z.Compressed())
+        {
+            hbuf << z.RealSize();
+            flags |= SCP_FLAG_COMPRESSED;
+        }
+        else
+        {
+            logdebug("SCP Compact: Unable to compress '%s' (too small?)",outfile);
+            return false;
+        }
+    }
+
+    hbuf.put<uint32>(4,flags); // first 4 bytes are 'SCPC', then flags...
 
     FILE *fh = fopen(outfile,"wb");
     if(!fh)
         return false;
-    if(fh)
-    {
-        fwrite(hbuf.contents(),hbuf.size(),1,fh);
-        if(sizeMD5) // just in case no md5sums are stored
-            fwrite(md5buf.contents(),sizeMD5,1,fh);
-        fwrite(indexbuf.contents(),sizeIndexes,1,fh);
-        fwrite(fieldbuf.contents(),sizeFields,1,fh);
-        fwrite(membuf,sizeof(uint32),blocksize,fh);
-        fwrite(stringdata.contents(),sizeStrings,1,fh);
-    }
+
+    fwrite(hbuf.contents(), hbuf.size(), 1, fh);
+    fwrite(z.contents(), z.size(), 1, fh);
     fclose(fh);
 
     if(!db)
@@ -492,10 +518,81 @@ bool SCPDatabaseMgr::Compact(char *dbname, char *outfile)
     return true;
 }
 
+void SCPDatabaseMgr::_FilterFiles(std::deque<std::string>& files, std::string dbname)
+{
+    for(std::deque<std::string>::iterator it = files.begin(); it != files.end(); )
+    {
+        std::map<std::string,std::string>::iterator w;
+        bool load_it = false;
+        // first check if the file was already loaded once, in this case use cached data
+        if( (w = FileRelation.find(*it)) != FileRelation.end() )
+        {
+            if(w->second == dbname)
+                load_it = true;
+        }
+        else // if not previously loaded, load now and cache
+        {
+            std::fstream fh;
+            fh.open( it->c_str() , std::ios_base::in | std::ios_base::binary);
+            if( !fh.is_open() )
+            {
+                logerror("SCP: Can't open file '%s'", it->c_str());
+                continue;
+            }
+
+            uint32 size = 1000; // search for #dbname tag in first 1000 bytes
+            char *buf = new char[size];
+            memset(buf,0,size);
+
+            fh.read(buf,size);
+            fh.close();
+
+            std::string line,dbn;
+            for(uint32 pos = 0; pos < size; pos++)
+            {
+                if(buf[pos] == '\n' || buf[pos] == 10 || buf[pos] == 13)
+                {
+                    if(line.empty())
+                        continue;
+                    while(line.size() && (line[0]==' ' || line[0]=='\t'))
+                        line.erase(0,1);
+                    if(line[0] == '#')
+                    {
+                        if(!strnicmp(line.c_str(),"#dbname=",8))
+                        {
+                            std::string t = line.c_str() + 8; // current db name
+                            FileRelation[*it] = t;
+                            if(!stricmp(t.c_str(), dbname.c_str()))
+                            {
+                                load_it = true;
+                                break;
+                            }
+                        }
+                    }
+                    line.clear();
+                }
+                else
+                    line += buf[pos];
+            }
+            delete [] buf;
+        }
+
+        if(load_it)
+            it++;
+        else
+        {
+            //DEBUG(logdebug("SCP: '%s' not used for [%s]", it->c_str(), dbname.c_str()));
+            it = files.erase(it);
+        }
+    }
+    DEBUG(logdebug("-> %u files belong to this DB",files.size()));
+}
+
 uint32 SCPDatabaseMgr::SearchAndLoad(char *dbname, bool no_compiled)
 {
     uint32 count = 0;
     std::deque<std::string> goodfiles;
+    std::string ccpFile;
 
     for(std::deque<std::string>::iterator it = _paths.begin(); it != _paths.end(); it++)
     {
@@ -507,79 +604,62 @@ uint32 SCPDatabaseMgr::SearchAndLoad(char *dbname, bool no_compiled)
             if(fn.length() < 5)
                 continue;
             std::string filepath = *it + fn;
-            // check for special case: <dbname>.ccp in this directory? load it and skip the rest
+            // check for special case: <dbname>.ccp in this directory? load it!
+            // others must be checked only for MD5-match and if new files are there not yet recorded in MD5
             if(!no_compiled && !stricmp(std::string(dbname).append(".ccp").c_str(), fn.c_str()))
             {
-                logdebug("Loading pre-compacted database '%s%s'", it->c_str(), fn.c_str());
-                DropDB(dbname); // if sth got loaded before, remove that
-                // load SCC database file and skip rest
-                if(LoadCompactSCP((char*)filepath.c_str(), dbname))
-                {
-                    logdebug("Loaded '%s' -> %s, skipping scp files",filepath.c_str(),dbname);
-                    return 1;
-                }
+                ccpFile = filepath;
             }
             else if(!stricmp(fn.c_str() + fn.length() - 4, ".scp"))
             {
                 // skip 0-byte files
                 if(GetFileSize(filepath.c_str()))
-                    goodfiles.push_back(filepath);                
+                    goodfiles.push_back(filepath);
+                else
+                    FileRelation[filepath] = ""; // empty files cant belong to a DB
             }
         }
     }
 
-    logdetail("Pre-compacted SCC file for '%s' invalid, creating from SCP (%u files total)",dbname,goodfiles.size());
+    // goodfiles stores a list of all scp files found, we need to remove those that are not required for this DB
+    _FilterFiles(goodfiles,dbname);
+
+    if(!goodfiles.size())
+    {
+        logerror("SCP: No files found that contain database [%u]", dbname);
+        return 0;
+    }
+
+    // string only exists if CCP file was found and if it should no be skipped
+    if(ccpFile.size())
+    {
+        logdebug("Loading pre-compacted database '%s'", ccpFile.c_str());
+        DropDB(dbname); // if sth got loaded before, remove that
+        // load SCC database file
+        if(LoadCompactSCP((char*)ccpFile.c_str(), dbname, goodfiles.size()))
+        {
+            logdebug("Loaded '%s' -> %s",ccpFile.c_str(),dbname);
+            return goodfiles.size();
+        }
+        else
+        {
+            logdetail("Pre-compacted SCC file for '%s' outdated, creating from SCP (%u files total)",dbname,goodfiles.size());
+        }
+    }
 
     for(std::deque<std::string>::iterator it = goodfiles.begin(); it != goodfiles.end(); it++)
     {
-        bool load_it = false;
-        std::fstream fh;
-        fh.open( it->c_str() , std::ios_base::in | std::ios_base::binary);
-        if( !fh.is_open() )
-            continue;
-
-        uint32 size = 1000; // search for #dbname tag in first 1000 bytes
-        char *buf = new char[size];
-        memset(buf,0,size);
-
-        fh.read(buf,size);
-        fh.close();
-
-        std::string line,dbn;
-        for(uint32 pos = 0; pos < size; pos++)
-        {
-            if(buf[pos] == '\n' || buf[pos] == 10 || buf[pos] == 13)
-            {
-                if(line.empty())
-                    continue;
-                while(line.size() && (line[0]==' ' || line[0]=='\t'))
-                    line.erase(0,1);
-                if(line[0] == '#')
-                {
-                    if(!strnicmp(line.c_str(),"#dbname=",8) && !stricmp(line.c_str()+8, dbname))
-                    {
-                        load_it = true;
-                        break;
-                    }
-                }
-                line.clear();
-            }
-            else
-                line += buf[pos];
-        }
-        delete [] buf;
-
-        if(load_it)
-        {
-            logdebug("File '%s' matching database '%s', loading", it->c_str(), dbname);
-            count++;
-            uint32 sections = AutoLoadFile((char*)it->c_str());
-        }
+        logdebug("File '%s' matching database '%s', loading", it->c_str(), dbname);
+        count++;
+        uint32 sections = AutoLoadFile((char*)it->c_str());
+        logdebug("%u sections loaded", sections);
     }
 
     char fn[100];
     sprintf(fn,"./cache/%s.ccp",dbname);
-    Compact(dbname, fn);
+    Compact(dbname, fn, _compr);
+
+    logdetail("Database '%s' loaded from source and compacted with compression %u", dbname, _compr);
 
     return count;
 }
@@ -616,7 +696,7 @@ void SCPDatabaseMgr::AddSearchPath(char *path)
     _paths.push_back(p);
 }
 
-bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
+bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname, uint32 nSourcefiles)
 {
     uint32 filesize = GetFileSize(fn);
     if(filesize < HEADER_SIZE)
@@ -632,10 +712,9 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
         return false;
     }
 
-    ByteBuffer bb;
-    bb.resize(filesize);
-    fh.read((char*)bb.contents(), filesize);
-    fh.close();
+    ByteBuffer hbuf;
+    hbuf.resize(HEADER_SIZE);
+    fh.read((char*)hbuf.contents(), HEADER_SIZE);
 
     char tag[4];
     uint32 flags, padding[4];
@@ -645,19 +724,44 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
     uint32 offsData, nRows, sizeData;
     uint32 offsStrings, nStrings, sizeStrings;
 
-    bb.read((uint8*)&tag[0],4);
+    uint32 realsize; // used when compressed
+
+    hbuf.read((uint8*)&tag[0],4);
     if(memcmp(tag,"SCPC",4))
     {
         logerror("'%s' is not a compact database file!",fn);
         return false;
     }
-    bb >> flags;
-    bb >> padding[0] >> padding[1] >> padding[2] >> padding[3];
-    bb >> offsMD5 >> nMD5 >> sizeMD5;
-    bb >> offsIndexes >> nIndexes >> sizeIndexes;
-    bb >> offsFields >> nFields >> sizeFields;
-    bb >> offsData >> nRows >> sizeData;
-    bb >> offsStrings >> nStrings >> sizeStrings;
+    hbuf >> flags;
+    hbuf >> padding[0] >> padding[1] >> padding[2] >> padding[3];
+    hbuf >> offsMD5 >> nMD5 >> sizeMD5;
+    hbuf >> offsIndexes >> nIndexes >> sizeIndexes;
+    hbuf >> offsFields >> nFields >> sizeFields;
+    hbuf >> offsData >> nRows >> sizeData;
+    hbuf >> offsStrings >> nStrings >> sizeStrings;
+
+    // read some extra bytes depending on flags
+    if(flags & SCP_FLAG_COMPRESSED)
+        fh.read((char*)&realsize, sizeof(uint32));
+
+    ZCompressor z;
+    uint32 remain = sizeMD5 + sizeIndexes + sizeFields + sizeData + sizeStrings;
+    z.resize(remain);
+    fh.read((char*)z.contents(), remain);
+
+    fh.close(); // All data are read from the file now, it can safely be closed
+
+    if(flags & SCP_FLAG_COMPRESSED)
+    {
+        z.Compressed(true);
+        z.RealSize(realsize);
+        z.Inflate();
+        if(z.Compressed())
+        {
+            logerror("LoadCompactSCP: Unable to uncompress '%s'",fn);
+            return false;
+        }
+    }
 
     SCPDatabase *db = GetDB(dbname,true);
     db->_name = dbname;
@@ -666,9 +770,11 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
     ByteBuffer md5buf(sizeMD5);
     md5buf.resize(sizeMD5);
     // read MD5 block
-    bb.rpos(offsMD5);
-    if(bb.rpos() == offsMD5)
-        bb.read((uint8*)md5buf.contents(),sizeMD5);
+    z.rpos(offsMD5);
+    if(z.rpos() == offsMD5)
+    {
+        z.read((uint8*)md5buf.contents(),sizeMD5);
+    }
     else
     {
         logerror("'%s' has wrong MD5 offset, can't load",fn);
@@ -710,6 +816,15 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
         }
     }
 
+    // check if there are any new files matching this database, that are not yet compacted and hashed.
+    // if the size differs now, and no changes were detected so far, there are probably new files added
+    if(nSourcefiles > nMD5)
+    {
+        logdebug("There are more source files existing then hashed in the CCP file, must recompact.");
+        return false;
+    }
+    ASSERT(nMD5 == nSourcefiles); // if we didnt return until now, something isnt good
+
     // everything good so far? we reached this point? then its likely that the rest of the file is ok, alloc remaining buffers
     ByteBuffer indexbuf(sizeIndexes);
     ByteBuffer fieldsbuf(sizeFields);
@@ -717,9 +832,9 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
     fieldsbuf.resize(sizeFields);
 
     // read indexes block
-    bb.rpos(offsIndexes);
-    if(bb.rpos() == offsIndexes)
-        bb.read((uint8*)indexbuf.contents(),sizeIndexes);
+    z.rpos(offsIndexes);
+    if(z.rpos() == offsIndexes)
+        z.read((uint8*)indexbuf.contents(),sizeIndexes);
     else
     {
         logerror("'%s' has wrong indexes offset, can't load",fn);
@@ -727,9 +842,9 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
     }
 
     // read field definitions buf
-    bb.rpos(offsFields);
-    if(bb.rpos() == offsFields)
-        bb.read((uint8*)fieldsbuf.contents(),sizeFields);
+    z.rpos(offsFields);
+    if(z.rpos() == offsFields)
+        z.read((uint8*)fieldsbuf.contents(),sizeFields);
     else
     {
         logerror("'%s' has wrong field defs offset, can't load",fn);
@@ -756,11 +871,11 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
 
     // read main data block
     ASSERT(nRows * nFields == sizeData / sizeof(uint32));
-    bb.rpos(offsData);
-    if(bb.rpos() == offsData)
+    z.rpos(offsData);
+    if(z.rpos() == offsData)
     {
         db->_intbuf = new uint32[nRows * nFields];
-        bb.read((uint8*)db->_intbuf, sizeData); // load this somewhat fast and without a for loop
+        z.read((uint8*)db->_intbuf, sizeData); // load this somewhat fast and without a for loop
     }
     else
     {
@@ -769,11 +884,11 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
     }
 
     // read strings
-    bb.rpos(offsStrings);
-    if(bb.rpos() == offsStrings)
+    z.rpos(offsStrings);
+    if(z.rpos() == offsStrings)
     {
         db->_stringbuf = new char[sizeStrings];
-        bb.read((uint8*)db->_stringbuf,sizeStrings);
+        z.read((uint8*)db->_stringbuf,sizeStrings);
     }
     else
     {
@@ -786,7 +901,7 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname)
 
     db->DropTextData(); // delete pointers to file content created at md5 comparison
 
-    logdebug("'%s' loaded successfully",fn);
+    // all fine, DB loaded
 
     return true;
 }
