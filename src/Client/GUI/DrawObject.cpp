@@ -48,7 +48,7 @@ void DrawObject::_Init(void)
 
     if(!cube && _obj->IsWorldObject()) // only world objects have coords and can be drawn
     {
-        std::string modelfile;
+        std::string modelfile, texture = "";
         uint32 opacity = 255;
         if (_obj->IsUnit())
         {
@@ -57,6 +57,8 @@ void DrawObject::_Init(void)
             SCPDatabase *cmd = _instance->dbmgr.GetDB("creaturemodeldata");
             uint32 modelid = cdi && displayid ? cdi->GetUint32(displayid,"model") : 0;
             modelfile = std::string("data/model/") + (cmd ? cmd->GetString(modelid,"file") : "");
+            if (cdi && strcmp(cdi->GetString(displayid,"name1"), "") != 0) 
+                texture = std::string("data/texture/") + cdi->GetString(displayid,"name1");
             opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
         } 
         else if (_obj->IsGameObject())
@@ -86,6 +88,8 @@ void DrawObject::_Init(void)
             }
         }
         scene::IAnimatedMesh *mesh = _smgr->getMesh(modelfile.c_str());
+
+
         if(mesh)
         {
             cube = _smgr->addAnimatedMeshSceneNode(mesh);
@@ -96,6 +100,9 @@ void DrawObject::_Init(void)
         {
             cube = _smgr->addCubeSceneNode(1);
         }
+        if (!texture.empty())
+            cube->setMaterialTexture(0, _device->getVideoDriver()->getTexture(texture.c_str()));
+
         //cube->getMaterial(0).DiffuseColor.setAlpha(opacity);
         cube->setName("OBJECT");
         //cube->getMaterial(0).setFlag(video::EMF_LIGHTING, true);

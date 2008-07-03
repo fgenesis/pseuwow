@@ -269,7 +269,7 @@ void SceneWorld::OnUpdate(s32 timediff)
         {
             movemgr->MoveStopTurn();
         }
-        if (!eventrecv->key.pressed(KEY_KEY_W) && !eventrecv->key.pressed(KEY_KEY_S))
+        if (!eventrecv->key.pressed(KEY_KEY_W) && !eventrecv->key.pressed(KEY_KEY_S) && !(mouse_pressed_left && mouse_pressed_right))
         {
             movemgr->MoveStop();
         }
