@@ -626,7 +626,7 @@ uint32 SCPDatabaseMgr::SearchAndLoad(char *dbname, bool no_compiled)
 
     if(!goodfiles.size())
     {
-        logerror("SCP: No files found that contain database [%u]", dbname);
+        logerror("SCP: No files found that contain database [%s]", dbname);
         return 0;
     }
 
@@ -657,7 +657,12 @@ uint32 SCPDatabaseMgr::SearchAndLoad(char *dbname, bool no_compiled)
 
     char fn[100];
     sprintf(fn,"./cache/%s.ccp",dbname);
-    Compact(dbname, fn, _compr);
+    if (!Compact(dbname, fn, _compr))
+    {
+        logerror("Can't compact database %s, dropping it.", dbname);
+        DropDB(dbname);
+        return 0;
+    }
 
     logdetail("Database '%s' loaded from source and compacted with compression %u", dbname, _compr);
 

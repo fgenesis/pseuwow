@@ -117,6 +117,8 @@ bool PseuInstance::Init(void)
 
     _scp->SetPath(_scpdir);
 
+    CreateDir("cache");
+
     dbmgr.AddSearchPath("./cache");
     dbmgr.AddSearchPath("./data/scp");
     dbmgr.SetCompression(6);
