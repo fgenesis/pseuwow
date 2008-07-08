@@ -479,7 +479,6 @@ bool SCPDatabaseMgr::Compact(char *dbname, char *outfile, uint32 compression)
         else
         {
             logdebug("SCP Compact: Unable to compress '%s' (too small?)",outfile);
-            return false;
         }
     }
 
