@@ -177,6 +177,13 @@ bool PseuInstance::InitGUI(void)
         logerror("GUI: Aborting init, GUI already exists!");
         return false;
     }
+
+    if (!GetConf()->enablegui)
+    {
+        logdebug("GUI: Can't start, gui disabled in config");
+        return false;
+    }
+
     uint16 x,y,depth;
     uint8 driver;
     bool shadows,vsync,win;

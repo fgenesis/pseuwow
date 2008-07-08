@@ -23,7 +23,7 @@ void ZCompressor::_compress(void* dst, uint32 *dst_size, void* src, uint32 src_s
     // default Z_BEST_SPEED (1)
     if (Z_OK != deflateInit(&c_stream, level))
     {
-        logerror("ZLIB: Can't compress (zlib: deflateInit).\n");
+        logdebug("ZLIB: Can't compress (zlib: deflateInit).\n");
         *dst_size = 0;
         return;
     }
@@ -35,28 +35,28 @@ void ZCompressor::_compress(void* dst, uint32 *dst_size, void* src, uint32 src_s
 
     if (Z_OK != deflate(&c_stream, Z_NO_FLUSH))
     {
-        logerror("ZLIB: Can't compress (zlib: deflate)\n");
+        logdebug("ZLIB: Can't compress (zlib: deflate)\n");
         *dst_size = 0;
         return;
     }
 
     if (c_stream.avail_in != 0)
     {
-        logerror("Can't compress (zlib: deflate not greedy)\n");
+        logdebug("Can't compress (zlib: deflate not greedy)\n");
         *dst_size = 0;
         return;
     }
 
     if (Z_STREAM_END != deflate(&c_stream, Z_FINISH))
     {
-        logerror("Can't compress (zlib: deflate should report Z_STREAM_END)\n");
+        logdebug("Can't compress (zlib: deflate should report Z_STREAM_END)\n");
         *dst_size = 0;
         return;
     }
 
     if (Z_OK != deflateEnd(&c_stream))
     {
-        logerror("Can't compress (zlib: deflateEnd)\n");
+        logdebug("Can't compress (zlib: deflateEnd)\n");
         *dst_size = 0;
         return;
     }

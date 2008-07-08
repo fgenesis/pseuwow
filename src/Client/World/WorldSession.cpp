@@ -946,7 +946,7 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     uint8 unk8;
     guid = recvPacket.GetPackedGuid();
     recvPacket >> flags >> unk8 >> time >> x >> y >> z >> o >> unk32;
-    DEBUG(logdebug("MOVE: "I64FMT" -> time=%u flags=%u x=%.4f y=%.4f z=%.4f o=%.4f",guid,time,flags,x,y,z,o));
+    DEBUG(logdebug("MOVE: "I64FMT" -> time=%u flags=0x%X x=%.4f y=%.4f z=%.4f o=%.4f",guid,time,flags,x,y,z,o));
     Object *obj = objmgr.GetObj(guid);
     if(obj && obj->IsWorldObject())
     {
@@ -1274,7 +1274,8 @@ void WorldSession::_HandleLoginVerifyWorldOpcode(WorldPacket& recvPacket)
 
 ByteBuffer& operator>>(ByteBuffer& bb, WhoListEntry& e)
 {
-    bb >> e.name >> e.gname >> e.level >> e.classId >> e.raceId >> e.zoneId;
+    uint8 dummy;
+    bb >> e.name >> e.gname >> e.level >> e.classId >> e.raceId >> dummy >> e.zoneId;
     return bb;
 }
 
