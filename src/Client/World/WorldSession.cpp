@@ -516,7 +516,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
 
         // note that if the sessionkey/auth is wrong or failed, the server sends the following packet UNENCRYPTED!
         // so its not 100% correct to init the crypt here, but it should do the job if authing was correct
-        _socket->InitCrypt(GetInstance()->GetSessionKey()->AsByteArray(), 40);
+        _socket->InitCrypt(GetInstance()->GetSessionKey());
 
 }
 

@@ -5,6 +5,7 @@
 #include "SysDefs.h"
 
 class WorldSession;
+class BigNumber;
 
 struct ClientPktHeader
 {
@@ -33,7 +34,7 @@ public:
     void OnException();
 
     void SendWorldPacket(WorldPacket &pkt);
-    void InitCrypt(uint8*,uint32);
+    void InitCrypt(BigNumber *);
 
 private:
     WorldSession *_session;
