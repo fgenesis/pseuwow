@@ -70,6 +70,13 @@ struct AuthHandler
     void (RealmSession::*handler)(ByteBuffer&);
 };
 
+// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some paltform
+#if defined( __GNUC__ )
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct sAuthLogonChallenge_S
 {
     uint8   cmd;
@@ -89,10 +96,17 @@ struct sAuthLogonProof_S
     uint8   cmd;
     uint8   error;
     uint8   M2[20];
-    uint16  unk1;
+    uint32  unk1;
     uint32  unk2;
-    uint32  unk3;
+    uint16  unk3;
 };
+
+// GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
+#if defined( __GNUC__ )
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 RealmSession::RealmSession(PseuInstance* instance)
 {

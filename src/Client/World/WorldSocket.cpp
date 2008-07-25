@@ -123,8 +123,8 @@ void WorldSocket::SendWorldPacket(WorldPacket &pkt)
     SendBuf((char*)final.contents(),final.size());
 }
 
-void WorldSocket::InitCrypt(uint8 *key,uint32 len)
+void WorldSocket::InitCrypt(BigNumber *k)
 {
-    _crypt.SetKey(key,len);
+    _crypt.SetKey(k);
     _crypt.Init();
 }

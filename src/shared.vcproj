@@ -308,6 +308,12 @@
 					RelativePath=".\shared\Auth\BigNumber.h">
 				</File>
 				<File
+					RelativePath=".\shared\Auth\Hmac.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\Auth\Hmac.h">
+				</File>				
+				<File
 					RelativePath=".\shared\Auth\md5.c">
 				</File>
 				<File
