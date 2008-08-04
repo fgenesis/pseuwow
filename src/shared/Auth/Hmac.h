@@ -19,9 +19,9 @@
 #ifndef _AUTH_HMAC_H
 #define _AUTH_HMAC_H
 
-#include "Common.h"
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include "common.h"
+#include "openssl/hmac.h"
+#include "openssl/sha.h"
 
 class BigNumber;
 
