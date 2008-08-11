@@ -98,7 +98,9 @@ public:
     void UpdateTerrain(void);
     void InitTerrain(void);
     void RelocateCamera(void);
+    void RelocateCameraBehindChar(void);
     void UpdateDoodads(void);
+    scene::ISceneNode *GetMyCharacterSceneNode(void);
     video::SColor GetBackgroundColor(void);
 
     WorldPosition GetWorldPosition(void);
@@ -124,6 +126,8 @@ private:
     bool _freeCameraMove;
     void _CalcXYMoveVect(float o);
     core::vector2df xyCharMovement; // stores sin() and cos() values for current MyCharacter orientation, so that they need to be calculated only if the character turns around
+    bool mouse_pressed_left;
+    bool mouse_pressed_right;
 };
 
 

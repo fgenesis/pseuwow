@@ -149,6 +149,13 @@ void MovementMgr::Update(bool sendDirect)
     if( !sendDirect && (_moveFlags & MOVEMENTFLAG_ANY_MOVE_NOT_TURNING) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
     {
         _BuildPacket(MSG_MOVE_HEARTBEAT);
+
+        // also need to tell the world map mgr that we moved; maybe maps need to be loaded
+        // the main thread will take care of really loading the maps; here we just tell our updated position
+        if(World *world = _instance->GetWSession()->GetWorld())
+        {
+            world->UpdatePos(pos.x, pos.y, world->GetMapId());
+        }
     }
     // TODO: apply gravity, handle falling, swimming, etc.
 }

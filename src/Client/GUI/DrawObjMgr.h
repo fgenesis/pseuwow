@@ -18,6 +18,7 @@ public:
     void Update(void); // Threadsafe! delete code must be called from here!
     uint32 StorageSize(void) { return _storage.size(); }
     void UnlinkAll(void);
+    DrawObject *Get(uint64);
 
 private:
     DrawObjStorage _storage;
