@@ -14,6 +14,7 @@ public:
     ~DrawObject();
     void Draw(void); // call only in threadsafe environment!! (ensure the obj ptr is still valid!)
     void Unlink(void);
+    inline irr::scene::ISceneNode *GetSceneNode(void) { return cube; }
     // additionally, we dont use a GetObject() func - that would fuck things up if the object was already deleted.
 
 private:

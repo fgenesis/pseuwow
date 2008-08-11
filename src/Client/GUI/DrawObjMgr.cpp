@@ -96,3 +96,12 @@ void DrawObjMgr::Update(void)
     //mut.release();
 
 }
+
+DrawObject *DrawObjMgr::Get(uint64 guid)
+{
+    DrawObjStorage::iterator it = _storage.find(guid);
+    if(it != _storage.end())
+        return it->second;
+    return NULL;
+}
+

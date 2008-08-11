@@ -326,6 +326,87 @@ class ByteBuffer
             printf("\n");
 
         }
+        
+        void print(void)
+        {
+            uint32 line = 1;
+            uint32 countpos = 0;
+            printf("STORAGE_SIZE: %u\n", size() );
+            printf("|------------------------------------------------|----------------|\r\n");
+            printf("|00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F |0123456789ABCDEF|\r\n");
+            printf("|------------------------------------------------|----------------|\r\n");
+            if (size() > 0)
+            {
+                printf("|");
+                for (uint32 count = 0; count < size(); count++)
+                {
+                    if (countpos == 16)
+                    {
+                        countpos = 0;
+                        printf("|");
+                        for (uint32 a = count-16; a < count; a++)
+                        {
+                            if ((read<uint8>(a) < 32) || (read<uint8>(a) > 126))
+                                printf(".");
+                            else
+                                printf("%c", read<uint8>(a));
+                        }
+                        printf("|\r\n");
+                        line++;
+                        printf("|");
+                    }
+                    printf("%02x ", read<uint8>(count));
+
+                    // Fix to parse packets with length < OR = to 16 bytes.
+                    if (count+1 == size() && size() <= 16)
+                    {
+                        for (uint32 b = countpos+1; b < 16; b++)
+                            printf("   ");
+
+                        printf("|");
+
+                        for (uint32 a = 0; a < size(); a++)
+                        {
+                            if ((read<uint8>(a) < 32) || (read<uint8>(a) > 126))
+                                printf(".");
+                            else
+                                printf("%c", read<uint8>(a));
+                        }
+
+                        for (uint32 c = count; c < 15; c++)
+                            printf(" ");
+
+                        printf("|\r\n");
+                    }
+
+                    // Fix to parse the last line of the packets when the length is > 16 and its in the last line
+                    if (count+1 == size() && size() > 16)
+                    {
+                        for (uint32 b = countpos+1; b < 16; b++)
+                            printf("   ");
+
+                        printf("|");
+                        uint16 print = 0;
+
+                        for (uint32 a = line*16 - 16; a < size(); a++)
+                        {
+                            if ((read<uint8>(a) < 32) || (read<uint8>(a) > 126))
+                                printf(".");
+                            else
+                                printf("%c", read<uint8>(a));
+                            print++;
+                        }
+
+                        for (uint32 c = print; c < 16; c++)
+                            printf(" ");
+
+                        printf("|\r\n");
+                    }
+                    countpos++;
+                }
+            }
+            printf("-------------------------------------------------------------------\r\n\r\n");
+        }
 
     protected:
 
@@ -405,4 +486,5 @@ template <typename K, typename V> ByteBuffer &operator>>(ByteBuffer &b, std::map
     }
     return b;
 }
+
 #endif

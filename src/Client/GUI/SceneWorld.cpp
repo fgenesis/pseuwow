@@ -13,6 +13,10 @@
 #include "World.h"
 #include "CCursorController.h"
 #include "MovementMgr.h"
+#include "DrawObject.h"
+
+// TODO: replace this by conf value
+#define MAX_CAM_DISTANCE 70
 
 SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 {
@@ -40,6 +44,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     eventrecv = new MyEventReceiver();
     device->setEventReceiver(eventrecv);
+    eventrecv->mouse.wheel = MAX_CAM_DISTANCE;
 
     camera = new MCameraFPS(smgr);
     camera->setNearValue(0.1f);
@@ -90,7 +95,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
 
     InitTerrain();
     UpdateTerrain();
-    RelocateCamera();
+    RelocateCameraBehindChar();
 
     DEBUG(logdebug("SceneWorld: Init done!"));
 }
@@ -101,8 +106,8 @@ void SceneWorld::OnUpdate(s32 timediff)
 
     UpdateTerrain();
 
-    bool mouse_pressed_left = eventrecv->mouse.left_pressed();
-    bool mouse_pressed_right = eventrecv->mouse.right_pressed();
+    mouse_pressed_left = eventrecv->mouse.left_pressed();
+    mouse_pressed_right = eventrecv->mouse.right_pressed();
     float timediff_f = timediff / 1000.0f;
 
     if( (mouse_pressed_right || mouse_pressed_left) && cursor->isVisible())
@@ -124,8 +129,6 @@ void SceneWorld::OnUpdate(s32 timediff)
             selectedNode = focusedNode;
     }*/ // i'll continue working on this - [FG]
 
-    if(eventrecv->key.pressed_once(KEY_KEY_L))
-        ((ICameraSceneNode*)camera->getNode())->setTarget(vector3df(0,0,0));
 
     // maybe it is better to replace the sin() and cos() with some irr::core::matrix4 calcualtions... not sure what is more efficient
 
@@ -139,6 +142,7 @@ void SceneWorld::OnUpdate(s32 timediff)
             movemgr->SetMoveMode(MOVEMODE_MANUAL);
             movemgr->MoveStartForward();
             WorldPosition wp = mychar->GetPosition();
+            _CalcXYMoveVect(wp.o);
             wp.x += (xyCharMovement.X * speedfactor);
             wp.y += (xyCharMovement.Y * speedfactor);
             wp.z = terrain->getHeight(WPToIrr(wp));
@@ -156,6 +160,7 @@ void SceneWorld::OnUpdate(s32 timediff)
             movemgr->SetMoveMode(MOVEMODE_MANUAL);
             movemgr->MoveStartBackward();
             WorldPosition wp = mychar->GetPosition();
+            _CalcXYMoveVect(wp.o);
             wp.x -= (xyCharMovement.X * speedfactor);
             wp.y -= (xyCharMovement.Y * speedfactor);
             wp.z = terrain->getHeight(WPToIrr(wp));
@@ -232,6 +237,7 @@ void SceneWorld::OnUpdate(s32 timediff)
             movemgr->SetMoveMode(MOVEMODE_MANUAL);
             movemgr->MoveStartStrafeRight();
             WorldPosition wp = mychar->GetPosition();
+            _CalcXYMoveVect(wp.o);
             wp.x -= (xyCharMovement.X * speedfactor);
             wp.y -= (xyCharMovement.Y * speedfactor);
             wp.z = terrain->getHeight(WPToIrr(wp));
@@ -249,6 +255,7 @@ void SceneWorld::OnUpdate(s32 timediff)
             movemgr->SetMoveMode(MOVEMODE_MANUAL);
             movemgr->MoveStartStrafeLeft();
             WorldPosition wp = mychar->GetPosition();
+            _CalcXYMoveVect(wp.o);
             wp.x -= (xyCharMovement.X * speedfactor);
             wp.y -= (xyCharMovement.Y * speedfactor);
             wp.z = terrain->getHeight(WPToIrr(wp));
@@ -294,19 +301,25 @@ void SceneWorld::OnUpdate(s32 timediff)
     if(eventrecv->key.pressed_once(KEY_HOME))
     {
         _freeCameraMove = !_freeCameraMove;
+        // TODO: uncomment this as soon as the camera isn't adjusted anymore every single frame
+        //if(!_freeCameraMove)
+        //    RelocateCameraBehindChar();
     }
 
     if(eventrecv->key.pressed_once(KEY_BACK))
     {
         debugmode = !debugmode;
-        if(debugmode)
+
+        // -- rendering with all debug flags uses WAY too much CPU to leave it turned on
+        E_DEBUG_SCENE_TYPE dflags = E_DEBUG_SCENE_TYPE(debugmode ? (EDS_BBOX | EDS_BBOX_BUFFERS | EDS_SKELETON) : EDS_OFF);
+
+        const core::list<scene::ISceneNode*>& nodelist = smgr->getRootSceneNode()->getChildren();
+        for(core::list<scene::ISceneNode*>::ConstIterator it = nodelist.begin(); it != nodelist.end(); it++)
         {
-            terrain->setDebugDataVisible(EDS_FULL);
+            (*it)->setDebugDataVisible(dflags);
         }
-        else
-        {
-            terrain->setDebugDataVisible(EDS_OFF);
-        }
+        // only terrain is especially useful with all debug flags enabled
+        terrain->setDebugDataVisible(debugmode ? EDS_FULL : EDS_OFF);
     }
 
     if(eventrecv->key.pressed_once(KEY_INSERT))
@@ -334,6 +347,12 @@ void SceneWorld::OnUpdate(s32 timediff)
     if(camera->getPitch() < 270 && camera->getPitch() > 90)
         camera->turnUp(90);
 
+    // camera distance control
+    if (eventrecv->mouse.wheel < 0)
+        eventrecv->mouse.wheel = 0;
+    if(eventrecv->mouse.wheel > MAX_CAM_DISTANCE)
+        eventrecv->mouse.wheel = MAX_CAM_DISTANCE;
+
     if(mouse_pressed_left || mouse_pressed_right)
     {
         if(mouse_pos != cursor->getMousePos())
@@ -347,18 +366,29 @@ void SceneWorld::OnUpdate(s32 timediff)
                 camera->turnUp(upval);
             }
             device->getCursorControl()->setPosition(mouse_pos);
+
+            // TODO: implement charater turning on right-click-mouse-move.
+            // the code below doesnt work at all actually, no idea why. seems like camera interferes with mychar pos or so..
+            if(mouse_pressed_right)
+            {
+                mychar->GetPositionPtr()->o = IRR_TO_O(DEG_TO_RAD(camera->getHeading()));
+            }
         }
     }
     else
     {
-        //device->getCursorControl()->setPosition(device->getCursorControl()->getPosition());
         mouse_pos = device->getCursorControl()->getPosition();
     }
 
-    // camera height control
-    if (eventrecv->mouse.wheel < 2)
-        eventrecv->mouse.wheel = 2;
-    camera->setHeight(  eventrecv->mouse.wheel + terrain->getHeight(camera->getPosition())  );
+    // TODO: check if the cam really has to be relocated; might save some CPU but not sure...
+    if(_freeCameraMove)
+    {
+        camera->setHeight( terrain->getHeight(camera->getPosition()) + 4 );
+    }
+    else
+    {
+        RelocateCameraBehindChar();
+    }
 
     core::stringw str = L"";
 
@@ -384,6 +414,8 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += L" (";
     str += (u32)(((f32)terrain->getSectorsRendered()/(f32)terrain->getSectorCount())*100.0f);
     str += L"%)";
+    str += L" mwheel=";
+    str += eventrecv->mouse.wheel;
 
     str += L"\n";
 
@@ -638,7 +670,7 @@ void SceneWorld::UpdateTerrain(void)
 
     // TODO: check if camera should really be relocated -> in case we got teleported
     // do NOT relocate camera if we moved around and triggered the map loading code by ourself!
-    RelocateCamera();
+    RelocateCameraBehindChar();
 }
 
 // drop unneeded doodads from the map
@@ -665,13 +697,63 @@ void SceneWorld::RelocateCamera(void)
     MyCharacter *my = wsession->GetMyChar();
     if(my)
     {
-        logdebug("SceneWorld: Relocating camera to MyCharacter");
+        //logdebug("SceneWorld: Relocating camera to MyCharacter");
         camera->setPosition(vector3df(-my->GetX(),my->GetZ(),-my->GetY()));
-        camera->turnLeft(camera->getHeading() - O_TO_IRR(my->GetO()));
+        camera->turnLeft(camera->getHeading() - RAD_TO_DEG(PI*3/2 - my->GetO()));
     }
     else
     {
         logerror("SceneWorld: Relocating camera to MyCharacter - not found!");
+    }
+}
+
+// TODO: call this func only when really needed, and not in every loop?
+void SceneWorld::RelocateCameraBehindChar(void)
+{
+    if(mychar)
+    {
+        float distance = (MAX_CAM_DISTANCE / 5.0f) - (eventrecv->mouse.wheel / 5.0f);
+        //DEBUG(logdebug("SceneWorld: Relocating camera behind MyCharacter, dist %.2f",distance));
+
+        // TODO: partial transparency for near character zoom (TEST) [fg]
+        // didnt work at all, so if somebody knows how to set a model transparent please fix this!
+        /*
+        if(distance <= 4)
+        {
+            scene::ISceneNode *charnode = GetMyCharacterSceneNode(); // NOTE: this call is absolutely not optimized!
+            if(charnode)
+            {
+                charnode->getMaterial(0).MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
+                charnode->getMaterial(0).AmbientColor.setAlpha(distance * 50);
+                charnode->getMaterial(0).DiffuseColor.setAlpha(distance * 50);
+            }
+        }
+        */
+        // WORKAROUND: if camera is too near, just make our player invisible
+        scene::ISceneNode *charnode = GetMyCharacterSceneNode(); // NOTE: this call is absolutely not optimized!
+        if(charnode)
+        {
+            if(distance <= 0.25f)
+                charnode->setVisible(false);
+            else
+                charnode->setVisible(true);
+        }
+
+        if(mouse_pressed_left)
+        {
+            camera->setPosition(vector3df(-mychar->GetX(), mychar->GetZ() + distance + 1.5f, -mychar->GetY()));
+            camera->moveBack(distance);
+        }
+        else
+        {
+            camera->setPosition(vector3df(-mychar->GetX(), mychar->GetZ() + distance + 1.5f, -mychar->GetY()));
+            camera->turnLeft(camera->getHeading() - RAD_TO_DEG(PI*3/2 - mychar->GetO()));
+            camera->moveBack(distance);
+        }
+    }
+    else
+    {
+        logerror("SceneWorld: Relocating camera behind MyCharacter - not found!");
     }
 }
 
@@ -691,6 +773,12 @@ void SceneWorld::_CalcXYMoveVect(float o)
 {
     xyCharMovement.X = cos(o);
     xyCharMovement.Y = sin(o);
+}
+
+scene::ISceneNode *SceneWorld::GetMyCharacterSceneNode(void)
+{
+    DrawObject *d = gui->domgr.Get(mychar->GetGUID());
+    return d ? d->GetSceneNode() : NULL;
 }
 
 
