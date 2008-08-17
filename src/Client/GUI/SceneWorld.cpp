@@ -33,6 +33,7 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     mychar = wsession->GetMyChar();
     ASSERT(mychar);
     _CalcXYMoveVect(mychar->GetO());
+    old_char_o = mychar->GetO();
 
     ILightSceneNode* light = smgr->addLightSceneNode(0, core::vector3df(0,0,0), SColorf(255, 255, 255, 255), 1000.0f);
     SLight ldata = light->getLightData();
@@ -367,11 +368,16 @@ void SceneWorld::OnUpdate(s32 timediff)
             }
             device->getCursorControl()->setPosition(mouse_pos);
 
-            // TODO: implement charater turning on right-click-mouse-move.
-            // the code below doesnt work at all actually, no idea why. seems like camera interferes with mychar pos or so..
+            // rotate character if right mpouse button pressed.
             if(mouse_pressed_right)
             {
-                mychar->GetPositionPtr()->o = IRR_TO_O(DEG_TO_RAD(camera->getHeading()));
+                mychar->GetPositionPtr()->o = PI*3/2 - DEG_TO_RAD(camera->getHeading());
+                // send update to server only if we turned by some amount and not always when we turn
+                if(!equals(old_char_o, mychar->GetO(), MOVE_TURN_UPDATE_DIFF))
+                {
+                    old_char_o = mychar->GetO();
+                    movemgr->MoveSetFacing();
+                }
             }
         }
     }

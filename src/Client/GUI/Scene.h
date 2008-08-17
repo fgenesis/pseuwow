@@ -128,6 +128,7 @@ private:
     core::vector2df xyCharMovement; // stores sin() and cos() values for current MyCharacter orientation, so that they need to be calculated only if the character turns around
     bool mouse_pressed_left;
     bool mouse_pressed_right;
+    float old_char_o;
 };
 
 
