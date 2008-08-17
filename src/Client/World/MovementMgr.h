@@ -5,6 +5,7 @@
 #include "UpdateData.h"
 
 #define MOVE_HEARTBEAT_DELAY 500
+#define MOVE_TURN_UPDATE_DIFF 0.15f // not sure about original/real value, but this seems good
 
 // --
 // -- MovementFlags and MovementInfo can be found in UpdateData.h
