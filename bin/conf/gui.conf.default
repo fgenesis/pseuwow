@@ -23,6 +23,11 @@ shadows=1
 // color depth; 16 or 32 bit
 depth=32
 
+// Use Sound? (experimental)
+// 1: Yes
+// 0: No (default)
+UseSound=1
+
 
 //================================================================================================
 // Expert options: Renderer finetuning

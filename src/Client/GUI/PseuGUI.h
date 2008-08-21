@@ -2,6 +2,7 @@
 #define PSEUGUI_H
 
 #include "irrlicht/irrlicht.h"
+#include "irrklang/irrKlang.h"
 #include "SceneData.h"
 #include "DrawObjMgr.h"
 #include "World.h"
@@ -89,6 +90,7 @@ public:
     void Cancel(void);
     void Shutdown(void);
     inline bool IsInitialized(void) { return _initialized && _device; }
+    inline void SetUseSound(bool b) { _usesound = b; }
 
     inline bool MustDie(void) { return _mustdie; }
 
@@ -112,11 +114,13 @@ private:
     uint16 _xres,_yres,_colordepth;
     bool _windowed,_vsync,_shadows;
     bool _initialized,_mustdie;
+    bool _usesound;
     irr::IrrlichtDevice *_device;
     irr::video::IVideoDriver* _driver;
     irr::scene::ISceneManager* _smgr;
     irr::gui::IGUIEnvironment* _guienv;
     irr::video::E_DRIVER_TYPE _driverType;
+    irrklang::ISoundEngine *_soundengine;
     DrawObjMgr domgr;
     PseuInstance *_instance;
     SceneState _scenestate, _scenestate_new;

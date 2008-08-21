@@ -186,7 +186,7 @@ bool PseuInstance::InitGUI(void)
 
     uint16 x,y,depth;
     uint8 driver;
-    bool shadows,vsync,win;
+    bool shadows,vsync,win,usesound;
 
     driver=(uint8)atoi(GetScripts()->variables.Get("GUI::DRIVER").c_str());
     vsync=(bool)atoi(GetScripts()->variables.Get("GUI::VSYNC").c_str());
@@ -195,7 +195,8 @@ bool PseuInstance::InitGUI(void)
     y=(uint16)atoi(GetScripts()->variables.Get("GUI::RESY").c_str());
     win=(bool)atoi(GetScripts()->variables.Get("GUI::WINDOWED").c_str());
     shadows=(bool)atoi(GetScripts()->variables.Get("GUI::SHADOWS").c_str());
-    log("GUI settings: driver=%u, depth=%u, res=%ux%u, windowed=%u, shadows=%u",driver,depth,x,y,win,shadows);
+    usesound=(bool)atoi(GetScripts()->variables.Get("GUI::USESOUND").c_str());
+    log("GUI settings: driver=%u, depth=%u, res=%ux%u, windowed=%u, shadows=%u sound=%u",driver,depth,x,y,win,shadows,usesound);
     if(x>0 && y>0 && (depth==16 || depth==32) && driver>0 && driver<=5)
     {
         PseuGUIRunnable *rgui = new PseuGUIRunnable();
@@ -206,6 +207,7 @@ bool PseuInstance::InitGUI(void)
         _gui->SetVSync(vsync);
         _gui->UseShadows(shadows);
         _gui->SetWindowed(win);
+        _gui->SetUseSound(usesound);
         _guithread = new ZThread::Thread(rgui);
         return true;
     }

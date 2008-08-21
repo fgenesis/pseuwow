@@ -368,7 +368,7 @@ void SceneWorld::OnUpdate(s32 timediff)
             }
             device->getCursorControl()->setPosition(mouse_pos);
 
-            // rotate character if right mpouse button pressed.
+            // rotate character if right mouse button pressed.
             if(mouse_pressed_right)
             {
                 mychar->GetPositionPtr()->o = PI*3/2 - DEG_TO_RAD(camera->getHeading());
