@@ -45,12 +45,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB irrKlang.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)/$(InputName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(SolutionDir)\src\dep\lib\static"
 				IgnoreAllDefaultLibraries="FALSE"
 				IgnoreDefaultLibraryNames="libci.lib"
 				AssemblyDebug="0"
@@ -113,11 +113,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB irrKlang.lib"
 				OutputFile="$(OutDir)/$(InputName)_debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(SolutionDir)\src\dep\lib\static"
 				IgnoreDefaultLibraryNames="libci.lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/PseuWoW.pdb"
@@ -492,6 +492,53 @@
 				<File
 					RelativePath=".\Client\Gui\TlTSector.h">
 				</File>
+				<Filter
+					Name="irrklang"
+					Filter="">
+					<File
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamLoaderMP3.cpp">
+					</File>
+					<File
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamLoaderMP3.h">
+					</File>
+					<File
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamMP3.cpp">
+					</File>
+					<File
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamMP3.h">
+					</File>
+					<File
+						RelativePath=".\Client\Gui\ikpMP3.cpp">
+					</File>
+					<File
+						RelativePath=".\Client\Gui\irrKlangSceneNode.cpp">
+					</File>
+					<File
+						RelativePath=".\Client\Gui\irrKlangSceneNode.h">
+					</File>
+					<Filter
+						Name="decoder"
+						Filter="">
+						<File
+							RelativePath=".\Client\Gui\decoder\bits.c">
+						</File>
+						<File
+							RelativePath=".\Client\Gui\decoder\internal.h">
+						</File>
+						<File
+							RelativePath=".\Client\Gui\decoder\mpaudec.c">
+						</File>
+						<File
+							RelativePath=".\Client\Gui\decoder\mpaudec.h">
+						</File>
+						<File
+							RelativePath=".\Client\Gui\decoder\mpaudectab.h">
+						</File>
+						<File
+							RelativePath=".\Client\Gui\decoder\mpegaudio.h">
+						</File>
+					</Filter>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

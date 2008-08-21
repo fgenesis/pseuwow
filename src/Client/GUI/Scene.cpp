@@ -18,6 +18,8 @@ Scene::Scene(PseuGUI *g)
     cursor->setOSCursorVisible(true);
     cursor->setVisible(false);
     cursor->render(); // apply above settings
+
+    soundengine = gui->_soundengine;
 }
 
 void Scene::OnDraw(void)

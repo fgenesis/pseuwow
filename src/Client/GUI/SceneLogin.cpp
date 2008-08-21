@@ -70,6 +70,10 @@ SceneLogin::SceneLogin(PseuGUI *gui) : Scene(gui)
     guienv->addButton(rect<s32>((scrn.Width*0.5f)-60, (scrn.Height*0.3f)+100, (scrn.Width*0.5f)+60, (scrn.Height*0.3f)+130), 0, 16, L"Logon");
     msgbox = guienv->addStaticText(GetStringFromDB(ISCENE_LOGIN_CONN_STATUS,DSCENE_LOGIN_NOT_CONNECTED).c_str(),rect<s32>((scrn.Width*0.5f)-90, (scrn.Height*0.3f)+150, (scrn.Width*0.5f)+90, (scrn.Height*0.3f)+180),true,true);
 
+    if(soundengine)
+    {
+        soundengine->play2D("data/misc/main_theme.ogg",true);
+    }
 }
 
 void SceneLogin::OnUpdate(s32 timepassed)
@@ -114,6 +118,10 @@ void SceneLogin::OnUpdate(s32 timepassed)
 
 void SceneLogin::OnDelete(void)
 {
+    if(soundengine)
+    {
+        soundengine->stopAllSounds();
+    }
     // not necessary to delete the images, because they are deleted by guienv->clear()
 }
 

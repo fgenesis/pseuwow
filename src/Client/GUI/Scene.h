@@ -10,6 +10,7 @@ using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+using namespace irrklang;
 
 
 class PseuGUI;
@@ -38,6 +39,7 @@ protected:
     irr::video::IVideoDriver* driver;
     irr::scene::ISceneManager* smgr;
     irr::gui::IGUIEnvironment* guienv;
+    irrklang::ISoundEngine *soundengine;
     CCursorController *cursor;
     SceneState _scenestate;
     uint32 scenedata[SCENEDATA_SIZE]; // generic storage for anything the PseuInstance thread wants to tell us

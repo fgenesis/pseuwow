@@ -45,7 +45,9 @@ PseuGUI::PseuGUI()
     _guienv = NULL;
     _scene = NULL;
     _passtime = _lastpasstime = _passtimediff = 0;
-    }
+    _soundengine = NULL;
+    _usesound = false;
+}
 
 PseuGUI::~PseuGUI()
 {
@@ -131,6 +133,16 @@ void PseuGUI::_Init(void)
     _smgr->addExternalMeshLoader(m2loader);
     _throttle=0;
     _initialized = true;
+
+    // initialize the sound engine
+    if(_usesound)
+    {
+        _soundengine = createIrrKlangDevice();
+        if(_soundengine)
+            logdetail("PseuGUI: Sound Driver: %s",_soundengine->getDriverName());
+        else
+            logerror("PseuGUI: Failed to initialize sound engine!");
+    }
 }
 
 void PseuGUI::Cancel(void)
@@ -147,7 +159,11 @@ void PseuGUI::Cancel(void)
     {
         _device->drop();
         _device = NULL;
-
+    }
+    if(_soundengine)
+    {
+        _soundengine->drop();
+        _soundengine = NULL;
     }
     _mustdie = true;
 }
