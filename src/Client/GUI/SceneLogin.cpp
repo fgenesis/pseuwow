@@ -120,10 +120,7 @@ void SceneLogin::OnUpdate(s32 timepassed)
 
 void SceneLogin::OnDelete(void)
 {
-    if(soundengine)
-    {
-        soundengine->stopAllSounds();
-    }
+    // sound will be stopped after char selection
     // not necessary to delete the images, because they are deleted by guienv->clear()
 }
 
