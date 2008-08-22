@@ -45,6 +45,8 @@ public:
 
 
 //TODO: Reposition elements on resize
+//the code happens only ones, We need to, in the main loop ( usually while(driver->run()) ) set the
+//positions of each gui element based on the current screensize ( gotten with driver->getScreenSize(); )
 
 SceneLogin::SceneLogin(PseuGUI *gui) : Scene(gui)
 {
