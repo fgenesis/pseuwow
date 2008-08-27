@@ -43,6 +43,23 @@ SceneCharSelection::SceneCharSelection(PseuGUI *gui) : Scene(gui)
 
 void SceneCharSelection::OnUpdate(s32 timepassed)
 {
+    // treat doubleclick on listboxes as OK button click
+    if(!eventrecv->guievent_proc)
+    {
+        eventrecv->guievent_proc = true;
+        if(eventrecv->guievent.GUIEvent.EventType == EGET_LISTBOX_SELECTED_AGAIN)
+        {
+            if(eventrecv->guievent.GUIEvent.Caller == realmlistbox)
+            {
+                eventrecv->buttons |= BUTTON_REALMWIN_OK;
+            }
+            else if(eventrecv->guievent.GUIEvent.Caller == charlistbox)
+            {
+                eventrecv->buttons |= BUTTON_ENTER_WORLD;
+            }
+        }
+    }
+
     if(eventrecv->buttons & BUTTON_ENTER_WORLD && !realmwin)
     {
         logdebug("GUI: SceneCharSelect: Entering world");
@@ -90,18 +107,7 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
         {
             guienv->addMessageBox(L"Not yet implemented!", L"This action is not yet supported.\nYou can change the realm only while still connected to the realm server.");
         }
-    }
-    // treat doubleclick on realmlist as OK button click
-    if(!eventrecv->guievent_proc)
-    {
-        eventrecv->guievent_proc = true;
-        if(eventrecv->guievent.GUIEvent.EventType == EGET_LISTBOX_SELECTED_AGAIN && eventrecv->guievent.GUIEvent.Caller == realmlistbox)
-        {
-            eventrecv->buttons |= BUTTON_REALMWIN_OK;
-        }
-        //...
-    }
-    
+    }    
     if(eventrecv->buttons & BUTTON_REALMWIN_OK)
     {
         RealmSession *rs = instance->GetRSession();
