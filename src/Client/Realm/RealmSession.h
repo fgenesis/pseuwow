@@ -4,6 +4,19 @@
 #include "common.h"
 #include "Auth/MD5Hash.h"
 
+struct SRealmInfo
+{
+    uint8	icon;			// icon near realm
+    uint8   locked;         // added in 2.0.x
+    uint8	color;			// color of record
+    std::string	name;			// Text zero terminated name of Realm
+    std::string	addr_port;		// Text zero terminated address of Realm ("ip:port")
+    float	population;		// 1.6 -> population value. lower == lower population and vice versa
+    uint8	chars_here;		// number of characters on this server
+    uint8	timezone;		// timezone
+    uint8	unknown;		//
+};
+
 struct AuthHandler;
 class RealmSocket;
 
@@ -22,6 +35,9 @@ public:
     bool MustDie(void);
     void SetMustDie(void);
     bool SocketGood(void);
+    void SetRealmAddr(std::string);
+    inline uint32 GetRealmCount(void) { return _realms.size(); }
+    inline SRealmInfo& GetRealm(uint32 i) { return _realms[i]; }
 
 
 private:
@@ -48,6 +64,7 @@ private:
     uint64 _file_done, _file_size;
     ByteBuffer _filebuf;
     ByteBuffer _transbuf; // stores parts of unfinished packets
+    std::vector<SRealmInfo> _realms;
 };
 
 

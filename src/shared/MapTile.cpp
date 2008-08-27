@@ -93,6 +93,9 @@ void MapTile::ImportFromADT(ADTFile *adt)
         _doodads.push_back(d);
     }
 
+    // copy sound emitters
+    _soundemm = adt->_soundemm;
+
     _xbase = _chunks[0].basex;
     _ybase = _chunks[0].basey;
     _hbase = _chunks[0].baseheight;

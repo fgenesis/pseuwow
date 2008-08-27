@@ -4,10 +4,10 @@ if ?{not ?{IsHooked _startup}}
         HookAdd db_loader_load_all
         HookEnd
 
-        // set up paths; ./data/scp and ./cache are set in the core already
-        // the SCP files placed in this directory are used to override some values
-        // in already present SCP files or to add custom fields or content
-        // note: it DOES matter in which order paths are added!!
+        // Set up paths; ./data/scp and ./cache are set in the core already.
+        // The SCP files placed in this directory are used to override some values
+        // in already present SCP files or to add custom fields or content.
+        // Note: it DOES matter in which order paths are added!!
         AddDBPath ./data/scp-patches
 endif
 
@@ -29,11 +29,12 @@ LoadDB creaturemodeldata
 LoadDB gameobjectdisplayinfo
 // LoadDB itemdisplayinfo // not yet used
 // LoadDB charsections // not yet used
-// LoadDB sound // not yet used
+LoadDB sound
 // LoadDB npcsound // not yet used
 
 // GUI related databases
 LoadDB gui_login_text
+LoadDB gui_charselect_text
 
 
 log ** Databases loaded.

@@ -51,6 +51,8 @@ public:
     inline float GetBaseHeight(void) { return _hbase; }
     inline uint32 GetDoodadCount(void) { return _doodads.size(); }
     inline Doodad *GetDoodad(uint32 i) { return &_doodads[i]; }
+    inline uint32 GetSoundEmitterCount(void) { return _soundemm.size(); }
+    inline MCSE_chunk *GetSoundEmitter(uint32 i) { return &_soundemm[i]; }
 
 private:
     MapChunk _chunks[256]; // 16x16
@@ -58,6 +60,7 @@ private:
     std::vector<std::string> _wmos;
     std::vector<std::string> _models;
     std::vector<Doodad> _doodads;
+    std::vector<MCSE_chunk> _soundemm;
 
     float _xbase,_ybase,_hbase;
 

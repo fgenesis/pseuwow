@@ -593,6 +593,10 @@
 					>
 				</File>
 				<File
+                    RelativePath=".\Client\Gui\GUIEventReceiver.h"
+                    >
+				</File>
+				<File
 					RelativePath=".\Client\Gui\DrawObjMgr.h"
 					>
 				</File>
@@ -615,6 +619,10 @@
 				<File
 					RelativePath=".\Client\Gui\Scene.cpp"
 					>
+				</File>
+				<File
+                    RelativePath=".\Client\Gui\SceneCharselection.cpp"
+                    >
 				</File>
 				<File
 					RelativePath=".\Client\Gui\Scene.h"

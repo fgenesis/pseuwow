@@ -14,6 +14,7 @@ Scene::Scene(PseuGUI *g)
     driver = gui->_driver;
     smgr = gui->_smgr;
     guienv = gui->_guienv;
+    rootgui = guienv->getRootGUIElement();
     cursor = new CCursorController(device->getCursorControl(), driver);
     cursor->setOSCursorVisible(true);
     cursor->setVisible(false);
@@ -32,6 +33,15 @@ void Scene::OnDelete(void)
 }
 
 void Scene::OnUpdate(s32)
+{
+}
+
+void Scene::OnManualUpdate(void)
+{
+    OnResize();
+}
+
+void Scene::OnResize(void)
 {
 }
 

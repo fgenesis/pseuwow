@@ -42,9 +42,18 @@ WorldSession::~WorldSession()
 {
     if(PseuGUI *gui = GetInstance()->GetGUI())
     {
-        gui->SetSceneState(SCENESTATE_LOGINSCREEN); // kick back to login gui
+        // if the realm session still exists, the connection to the world server was not successful
+        // and we need to show realmlist window again
+        if(_instance->GetRSession())
+        {
+            gui->SetSceneState(SCENESTATE_REALMSELECT);
+        }
+        else
+        {
+            gui->SetSceneState(SCENESTATE_LOGINSCREEN); // kick back to login gui
+        }
         logdebug("~WorldSession(): Waiting until world GUI is deleted");
-        while(gui->GetSceneState() != SCENESTATE_LOGINSCREEN) // .. and wait until the world gui is really deleted
+        while(gui->GetSceneState() == SCENESTATE_WORLD) // .. and wait until the world gui is really deleted
             GetInstance()->Sleep(1);                       // (it can cause crash otherwise)
         logdebug("~WorldSession(): ... world GUI deleted, continuing to close session");
     }
@@ -87,10 +96,6 @@ void WorldSession::Start(void)
     log("Connecting to '%s' on port %u",GetInstance()->GetConf()->worldhost.c_str(),GetInstance()->GetConf()->worldport);
     _socket=new WorldSocket(_sh,this);
     _socket->Open(GetInstance()->GetConf()->worldhost,GetInstance()->GetConf()->worldport);
-    if(GetInstance()->GetRSession())
-    {
-        GetInstance()->GetRSession()->SetMustDie(); // realm session is no longer needed
-    }
     _sh.Add(_socket);
 
     // if we cant connect, wait until the socket gives up (after 5 secs)
@@ -546,6 +551,8 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
     uint8 dummy8;
     uint32 dummy32;
 
+    _charList.clear();
+
     recvPacket >> num;
     if(num==0)
     {
@@ -556,6 +563,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
     
         logdetail("Chars in list: %u",num);
         _LoadCache(); // we are about to login, so we need cache data
+        // TODO: load cache on loadingscreen
         for(unsigned int i=0;i<num;i++)
         {
             recvPacket >> plr[i]._guid;
@@ -585,7 +593,8 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             {
                 recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype >> dummy32;
             }
-            plrNameCache.AddInfo(plr[i]._guid, plr[i]._name);
+            plrNameCache.AddInfo(plr[i]._guid, plr[i]._name); // TODO: set after loadingscreen, after loading cache
+
         }
         bool char_found=false;
 
@@ -607,6 +616,14 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             if(classdb)
                 classname = classdb->GetString(plr[i]._class, "name");
 
+            CharacterListExt cx;
+            cx.p = plr[i];
+            cx.class_ = classname;
+            cx.race = racename;
+            cx.zone = zonename;
+            cx.map_ = mapname;
+            _charList.push_back(cx);
+
             logcustom(0,LGREEN,"## %s (%u) [%s/%s] Map: %s; Zone: %s",
                 plr[i]._name.c_str(),
                 plr[i]._level,
@@ -623,41 +640,74 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
                 if(plr[i]._items[inv].displayId)
                     logdebug("-> Has Item: Model=%u InventoryType=%u",plr[i]._items[inv].displayId,plr[i]._items[inv].inventorytype);
             }
-            if(plr[i]._name==GetInstance()->GetConf()->charname)
+            if(plr[i]._name==GetInstance()->GetConf()->charname || num == 1)
             {
                 charId = i;
                 char_found=true;
-                _myGUID=plr[i]._guid;
-                GetInstance()->GetScripts()->variables.Set("@myguid",DefScriptTools::toString(plr[i]._guid));
-                GetInstance()->GetScripts()->variables.Set("@myrace",DefScriptTools::toString((uint64)plr[i]._race));
             }
 
         }
         if(!char_found)
         {
-            logerror("Character \"%s\" was not found on char list!", GetInstance()->GetConf()->charname.c_str());
-            GetInstance()->SetError();
-            return;
+            if(PseuGUI *gui = GetInstance()->GetGUI())
+            {
+                gui->SetSceneState(SCENESTATE_CHARSELECT);
+                gui->UpdateScene();
+            }
+            else
+            {
+                logerror("Character \"%s\" was not found on char list, can't connect!", GetInstance()->GetConf()->charname.c_str());
+                GetInstance()->SetError();
+                return;
+            }
         }
         else
         {
-            log("Entering World with Character \"%s\"...", plr[charId]._name.c_str());
-
-            // create the character and add it to the objmgr.
-            // note: this is the only object that has to stay in memory unless its explicitly deleted by the server!
-            // that means even if the server sends create object with that guid, do NOT recreate it!!
-            MyCharacter *my = new MyCharacter();
-            my->Create(_myGUID);
-            my->SetName(plr[charId]._name);
-            objmgr.Add(my);
-
-            // TODO: initialize the world here, and load required maps.
-            // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!
-
-            WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
-            pkt << _myGUID;
-            SendWorldPacket(pkt);
+            EnterWorldWithCharacter(plr[charId]._name.c_str());
         }
+}
+
+void WorldSession::EnterWorldWithCharacter(std::string name)
+{
+    logdebug("EnterWorldWithCharacter(%s)",name.c_str());
+    _myGUID = 0;
+    for(CharList::iterator it = _charList.begin(); it != _charList.end(); it++)
+    {
+        if(!stricmp(it->p._name.c_str(), name.c_str()))
+        {
+            _myGUID = it->p._guid;
+            GetInstance()->GetScripts()->variables.Set("@myguid",DefScriptTools::toString(_myGUID));
+            GetInstance()->GetScripts()->variables.Set("@myrace",DefScriptTools::toString(it->p._race));
+        }
+    }
+    if(!_myGUID)
+    {
+        logerror("Character '%s' does not exist on this account");
+        return;
+    }
+
+    log("Entering World with Character \"%s\"...", name.c_str());
+
+    // create the character and add it to the objmgr.
+    // note: this is the only object that has to stay in memory unless its explicitly deleted by the server!
+    // that means even if the server sends create object with that guid, do NOT recreate it!!
+    MyCharacter *my = new MyCharacter();
+    my->Create(_myGUID);
+    my->SetName(name);
+    objmgr.Add(my);
+
+    // TODO: initialize the world here, and load required maps.
+    // must remove appropriate code from _HandleLoginVerifyWorldOpcode() then!!
+
+    WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
+    pkt << _myGUID;
+    SendWorldPacket(pkt);
+
+    // close realm session when logging into world
+    if(!MustDie() && _socket->IsOk() && GetInstance()->GetRSession())
+    {
+        GetInstance()->GetRSession()->SetMustDie(); // realm session is no longer needed
+    }
 }
 
 

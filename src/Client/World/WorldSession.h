@@ -39,7 +39,19 @@ struct DelayedWorldPacket
     clock_t when;
 };
 
+// helper used for GUI
+struct CharacterListExt
+{
+    PlayerEnum p;
+    std::string zone;
+    std::string class_;
+    std::string race;
+    std::string map_;
+};
+
+
 typedef std::vector<WhoListEntry> WhoList;
+typedef std::vector<CharacterListExt> CharList;
 typedef std::deque<DelayedWorldPacket> DelayedPacketQueue;
 
 class WorldSession
@@ -74,6 +86,10 @@ public:
 
     std::string GetOrRequestPlayerName(uint64);
     std::string DumpPacket(WorldPacket& pkt, int errpos = -1, char *errstr = NULL);
+
+    inline uint32 GetCharsCount(void) { return _charList.size(); }
+    inline CharacterListExt& GetCharFromList(uint32 id) { return _charList[id]; }
+    void EnterWorldWithCharacter(std::string);
 
 
     // CMSGConstructor
@@ -160,8 +176,10 @@ private:
     uint64 _myGUID;
     World *_world;
     WhoList _whoList;
+    CharList _charList;
     uint32 _lag_ms;
     std::bitset<MAX_OPCODE_ID> _disabledOpcodes;
+
 };
 
 #endif

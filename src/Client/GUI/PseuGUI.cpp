@@ -121,6 +121,7 @@ void PseuGUI::_Init(void)
     _smgr = _device->getSceneManager();
     _guienv = _device->getGUIEnvironment();
     _timer = _device->getTimer();
+    _screendimension = _driver->getScreenSize();
     //...
 
     // disable crappy irrlicht logging
@@ -139,7 +140,14 @@ void PseuGUI::_Init(void)
     {
         _soundengine = createIrrKlangDevice();
         if(_soundengine)
+        {
             logdetail("PseuGUI: Sound Driver: %s",_soundengine->getDriverName());
+            _soundengine->setSoundVolume(GetInstance()->GetConf()->masterSoundVolume);
+            // accept only values between 0 and 1
+            if(_soundengine->getSoundVolume() < 0.0f || _soundengine->getSoundVolume() >= 1.0f)
+                _soundengine->setSoundVolume(1.0f);
+            logdetail("PseuGUI: Master Sound Volume: %.3f",_soundengine->getSoundVolume());
+        }
         else
             logerror("PseuGUI: Failed to initialize sound engine!");
     }
@@ -194,7 +202,6 @@ void PseuGUI::Run(void)
         _lastpasstime = _passtime;
         _passtime = _timer->getTime();
         _passtimediff = _passtime - _lastpasstime;
-        // _HandleWindowResize(); // not yet used; doesnt work
 
         if (!_device->isWindowActive())
         {
@@ -207,6 +214,18 @@ void PseuGUI::Run(void)
         {
             _device->sleep(10);
             continue;
+        }
+
+        if(_screendimension != _driver->getScreenSize())
+        {
+            _scene->OnResize();
+            _screendimension = _driver->getScreenSize();
+        }
+
+        if(_updateScene)
+        {
+            _updateScene = false;
+            _scene->OnManualUpdate();
         }
 
         _scene->OnUpdate(_passtimediff); // custom: process input, set camera, etc
@@ -295,6 +314,17 @@ void PseuGUI::_UpdateSceneState(void)
             case SCENESTATE_GUISTART: _scene = new SceneGuiStart(this); break;
             case SCENESTATE_LOGINSCREEN: _scene = new SceneLogin(this); break;
             case SCENESTATE_WORLD: _scene = new SceneWorld(this); break;
+            case SCENESTATE_REALMSELECT:
+                _scene = new SceneCharSelection(this);
+                _scene->SetData(ISCENE_CHARSEL_REALMFIRST, 1);
+                _scene->OnResize();
+                _scenestate_new = SCENESTATE_CHARSELECT;
+                break;
+            case SCENESTATE_CHARSELECT:
+                _scene = new SceneCharSelection(this);
+                _scene->SetData(ISCENE_CHARSEL_REALMFIRST, 0);
+                _scene->OnResize();
+                break;
             default: _scene = new Scene(this); // will draw nothing, just yield the gui
         }
         _scene->SetState(_scenestate_new);
@@ -334,25 +364,3 @@ WorldPosition PseuGUI::GetWorldPosition(void)
     return WorldPosition();
 }
 
-void PseuGUI::_HandleWindowResize(void)
-{
-    dimension2d<s32> scrn = _driver->getScreenSize();
-    if(_screendimension.Width != scrn.Width)
-    {
-        scrn.Height = s32(scrn.Width * 0.8f); // for now use aspect ratio 5:4
-        _screendimension = scrn;
-        _driver->OnResize(scrn);
-        DEBUG(logdebug("DEBUG: Width resize handled, Height adjusted"));
-
-    }
-    else if(_screendimension.Height != scrn.Height)
-    {
-        scrn.Width = s32(scrn.Height * 1.25); // 5:4 here too
-        _screendimension = scrn;
-        _driver->OnResize(scrn);
-        DEBUG(logdebug("DEBUG: Height resize handled, Width adjusted"));
-
-    }
-    // TODO: how to set irrlicht window size ?!
-
-}

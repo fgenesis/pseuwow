@@ -1019,6 +1019,18 @@ DefReturnResult DefScriptPackage::SCGui(CmdSet &Set)
     {
         ins->GetGUI()->SetSceneState(SCENESTATE_LOGINSCREEN);
     }
+    else if(ins->GetRSession() && !ins->GetWSession())
+    {
+        ins->GetGUI()->SetSceneState(SCENESTATE_REALMSELECT);
+    }
+    else if(ins->GetRSession() && ins->GetWSession())
+    {
+        ins->GetGUI()->SetSceneState(SCENESTATE_CHARSELECT);
+    }
+    /*else if(ins->GetWSession() && !ins->GetWSession()->InWorld())
+    {
+        ins->GetGUI()->SetSceneState(SCENESTATE_LOGINSCREEN);
+    }*/ // TODO: uncomment after implemented
     else if(ins->GetWSession() && ins->GetWSession()->InWorld())
     {
        ins->GetGUI()->SetSceneState(SCENESTATE_WORLD);

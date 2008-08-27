@@ -4,8 +4,8 @@
 AC_PREREQ(2.61)
 AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE(pseuwow, 0.1)
-#AC_CONFIG_SRCDIR([shared/ProgressBar.h])
-AM_CONFIG_HEADER([config.h])
+#AC_CONFIG_SRCDIR([src/shared/ProgressBar.h])
+AM_CONFIG_HEADER([src/config.h])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -58,18 +58,18 @@ AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor ftime ftruncate getcwd gethostbyaddr gethostbyname gethostname gettimeofday memmove memset mkdir pow realpath select socket sqrt strerror strrchr strstr strtol strtoul uname utime])
 
-#AC_CONFIG_FILES([dep/src/irrlicht/Makefile
-#                 dep/src/zlib/Makefile
-#                 dep/src/zthread/Makefile])
-#AC_CONFIG_SUBDIRS([dep/src/irrlicht/jpeglib
-#                   dep/src/irrlicht/libpng])
-AC_CONFIG_FILES([Makefile
-		 shared/Makefile
-		 shared/Auth/Makefile
-		 shared/Network/Makefile
-		 Client/Makefile
-		 Client/GUI/Makefile
-		 Client/Realm/Makefile
-		 Client/World/Makefile
-		 Client/DefScript/Makefile])
+#AC_CONFIG_FILES([src/dep/src/irrlicht/Makefile
+#                 src/dep/src/zlib/Makefile
+#                 src/dep/src/zthread/Makefile])
+#AC_CONFIG_SUBDIRS([src/dep/src/irrlicht/jpeglib
+#                   src/dep/src/irrlicht/libpng])
+AC_CONFIG_FILES([src/Makefile
+		 src/shared/Makefile
+		 src/shared/Auth/Makefile
+		 src/shared/Network/Makefile
+		 src/Client/Makefile
+		 src/Client/GUI/Makefile
+		 src/Client/Realm/Makefile
+		 src/Client/World/Makefile
+		 src/Client/DefScript/Makefile])
 AC_OUTPUT

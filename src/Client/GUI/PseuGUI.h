@@ -17,7 +17,7 @@ enum SceneState
     SCENESTATE_NULL = 0,
     SCENESTATE_GUISTART,
     SCENESTATE_LOGINSCREEN,
-    SCENESTATE_REALMSELECT,
+    SCENESTATE_REALMSELECT, // actually both realm and char select will call the same scene, but with slightly different data
     SCENESTATE_CHARSELECT,
     SCENESTATE_LOADING,
     SCENESTATE_WORLD,
@@ -73,6 +73,7 @@ class PseuGUI
     friend class SceneWorld;
     friend class SceneGuiStart;
     friend class SceneLogin;
+    friend class SceneCharSelection;
     // ...
 
 public:
@@ -103,6 +104,7 @@ public:
     void SetSceneState(SceneState);
     bool SetSceneData(uint32, uint32);
     uint32 GetSceneState(void);
+    inline void UpdateScene(void) { _updateScene = true; }
 
     // helpers
     WorldPosition GetWorldPosition(void);
@@ -110,7 +112,6 @@ public:
 private:
     void _Init(void);
     void _UpdateSceneState(void);
-    void _HandleWindowResize(void);
     uint16 _xres,_yres,_colordepth;
     bool _windowed,_vsync,_shadows;
     bool _initialized,_mustdie;
@@ -129,6 +130,7 @@ private:
     uint32 _passtime, _lastpasstime, _passtimediff;
     irr::core::dimension2d<irr::s32> _screendimension;
     uint32 _throttle;//used for frameratelimiting
+    bool _updateScene; // manually update scene?
 
 };
 

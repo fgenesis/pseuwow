@@ -23,3 +23,13 @@
 0=Oh noes!
 1=You have to enter account name and password!
 
+// the text box labels
+[3]
+0=Account:
+1=Password:
+
+// the buttons
+[4]
+0=Login
+1=Quit
+2=Community Site

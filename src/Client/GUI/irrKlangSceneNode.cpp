@@ -29,12 +29,17 @@ CIrrKlangSceneNode::CIrrKlangSceneNode(irrklang::ISoundEngine* soundEngine,
 
 	if (SoundEngine)
 		SoundEngine->grab();
+
+    cube = mgr->addCubeSceneNode(0.5f);
+    cube->setMaterialTexture(0,mgr->getVideoDriver()->getTexture("data/misc/square.jpg"));
+    text = mgr->addTextSceneNode(mgr->getGUIEnvironment()->getBuiltInFont(), L"", video::SColor(0xFF00AF00));
 }
 
 
 CIrrKlangSceneNode::~CIrrKlangSceneNode()
 {
 	stop();
+    cube->remove();
 
 	if (SoundEngine)
 		SoundEngine->drop();
@@ -52,6 +57,9 @@ void CIrrKlangSceneNode::OnRegisterSceneNode()
 
 void CIrrKlangSceneNode::OnAnimate(u32 timeMs)
 {
+    if(!SoundFileNames.size())
+        return;
+
 	ISceneNode::OnAnimate(timeMs);
 
 	// play the sound
@@ -84,7 +92,8 @@ void CIrrKlangSceneNode::OnAnimate(u32 timeMs)
 			else
 			if (!Sound && (!TimeMsDelayFinished || timeMs > TimeMsDelayFinished))
 			{
-				// play new sound		
+				// play new sound; select one from the possible files
+                core::stringc& SoundFileName = SoundFileNames[ rand() % SoundFileNames.size() ];
 
 				if (SoundFileName.size())
 					Sound = SoundEngine->play3D(SoundFileName.c_str(), pos, false, true, true);
@@ -105,6 +114,7 @@ void CIrrKlangSceneNode::OnAnimate(u32 timeMs)
 		{
 			if (!Sound)
 			{
+                core::stringc& SoundFileName = SoundFileNames[ rand() % SoundFileNames.size() ];
 				if (SoundFileName.size())
 					Sound = SoundEngine->play3D(SoundFileName.c_str(), pos, true, true, true);
 
@@ -142,6 +152,7 @@ void CIrrKlangSceneNode::OnAnimate(u32 timeMs)
 			else
 			{
 				// start
+                core::stringc& SoundFileName = SoundFileNames[ rand() % SoundFileNames.size() ];
 
 				if (SoundFileName.size())
 					Sound = SoundEngine->play3D(SoundFileName.c_str(), pos, false, true, true);
@@ -234,7 +245,7 @@ void CIrrKlangSceneNode::render()
 		material.Lighting = false;
 		material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 		material.MaterialTypeParam = 255;
-		material.TextureLayer[0].Texture = driver->getTexture("textures/editor_defaults/default_sound.png");
+		material.TextureLayer[0].Texture = driver->getTexture("data/misc/square.jpg");
 
 		core::matrix4 mat;
 		driver->setTransform(video::ETS_WORLD, mat);
@@ -255,122 +266,6 @@ const c8* const IrrKlangPlayModeNames[] =
 {
 	"nothing", "random", "looping",	"play_once", 0
 };
-
-
-//! Writes attributes of the scene node.
-void CIrrKlangSceneNode::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options) const
-{
-	if (!out)
-		return;
-
-	ISceneNode::serializeAttributes(out, options);
-	const char** soundNames = 0;
-
-	if ( SoundEngine && options && ( options->Flags & io::EARWF_FOR_EDITOR ) )
-	{
-		// show a list of all loaded sound files in editor
-
-		int count = SoundEngine->getSoundSourceCount();
-		soundNames = new const char*[count+3];
-
-		for (int i=0; i<count; ++i)
-			soundNames[i] = SoundEngine->getSoundSource(i)->getName();
-
-		soundNames[count] = "";
-		soundNames[count+1] = "<select>"; // editor file selector
-		soundNames[count+2] = 0;
-
-		out->addEnum("SoundFileName", SoundFileName.c_str(), soundNames);
-
-		delete [] soundNames; 
-	}
-	else
-	{
-		// only store string of sound file if not in editor 
-		out->addString("SoundFileName", SoundFileName.c_str());
-	}
-
-	// add play modes
-
-	out->addEnum("PlayMode", PlayMode, IrrKlangPlayModeNames);
-	out->addFloat("MinDistance", MinDistance);
-	out->addFloat("MaxDistance", MaxDistance);
-
-	// only save the necessary attributes
-
-	switch(PlayMode)
-	{
-	case EPM_ONCE:
-		out->addBool("DeleteWhenFinished", DeleteWhenFinished);
-		break;
-	case EPM_RANDOM:
-		out->addInt("MinTimeMsInterval", MinTimeMsInterval);
-		out->addInt("MaxTimeMsInterval", MaxTimeMsInterval);
-		break;
-	}
-}
-
-
-//! Reads attributes of the scene node.
-void CIrrKlangSceneNode::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options)
-{
-	if (!in)
-		return;
-
-	ISceneNode::deserializeAttributes(in);
-
-	core::stringc oldFileName = SoundFileName;
-	SoundFileName = in->getAttributeAsString("SoundFileName");
-	EPlayMode newMode = (EPlayMode)in->getAttributeAsEnumeration("PlayMode", IrrKlangPlayModeNames);
-	
-	f32 minDistance = in->getAttributeAsFloat("MinDistance");
-	f32 maxDistance = in->getAttributeAsFloat("MaxDistance");	
-
-	setMinMaxSoundDistance(minDistance, maxDistance);
-
-	DeleteWhenFinished = in->getAttributeAsBool("DeleteWhenFinished");
-
-	if (in->existsAttribute("MinTimeMsInterval"))
-		MinTimeMsInterval = in->getAttributeAsInt("MinTimeMsInterval");
-	if (in->existsAttribute("MaxTimeMsInterval"))
-		MaxTimeMsInterval = in->getAttributeAsInt("MaxTimeMsInterval");
-
-	if (newMode != PlayMode || oldFileName != SoundFileName)
-	{
-		stop();
-		TimeMsDelayFinished = 0;
-		PlayMode = newMode;
-	}
-}
-
-
-
-//! Creates a clone of this scene node and its children.
-ISceneNode* CIrrKlangSceneNode::clone(ISceneNode* newParent, ISceneManager* newManager)
-{
-	// this method is only implemented to let irrEdit be able to copy the
-	// scene node via CTRL+C, it's not necessary
-
-	if (!newParent) newParent = Parent;
-	if (!newManager) newManager = SceneManager;
-
-	CIrrKlangSceneNode* nb = new CIrrKlangSceneNode(SoundEngine, newParent, newManager, ID);
-
-	nb->cloneMembers(this, newManager);
-
-	nb->SoundFileName = SoundFileName;
-	nb->MinDistance = MinDistance;
-	nb->Box = Box;
-	nb->PlayMode = PlayMode;
-	nb->TimeMsDelayFinished = TimeMsDelayFinished;
-	nb->DeleteWhenFinished = DeleteWhenFinished;
-	nb->MaxTimeMsInterval = MaxTimeMsInterval;
-	nb->MinTimeMsInterval = MinTimeMsInterval;
-
-	nb->drop();
-	return nb;
-}
-
 
 //! Returns type of the scene node
 ESCENE_NODE_TYPE CIrrKlangSceneNode::getType() const
@@ -426,19 +321,17 @@ void CIrrKlangSceneNode::setRandomMode(int minTimeMs, int maxTimeMs)
 
 
 //! Sets the sound filename to play
-void CIrrKlangSceneNode::setSoundFileName(const char* soundFilename)
+void CIrrKlangSceneNode::addSoundFileName(const char* soundFilename)
 {
-	if (soundFilename)
-		SoundFileName = soundFilename;
-	else
-		SoundFileName = "";
+	if (soundFilename && strlen(soundFilename))
+        SoundFileNames.push_back(soundFilename);
 }
 
 
 //! Gets the sound filename to play
-const char* CIrrKlangSceneNode::getSoundFileName() const
+const char* CIrrKlangSceneNode::getSoundFileName(u32 id) const
 {
-	return SoundFileName.c_str();
+    return SoundFileNames.size() < id ? SoundFileNames[id].c_str() : NULL;
 }
 
 
