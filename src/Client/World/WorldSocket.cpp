@@ -127,4 +127,5 @@ void WorldSocket::InitCrypt(BigNumber *k)
 {
     _crypt.SetKey(k);
     _crypt.Init();
+    logdebug("WorldSocket: Crypt initialized");
 }

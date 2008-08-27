@@ -14,6 +14,7 @@
 #include "CCursorController.h"
 #include "MovementMgr.h"
 #include "DrawObject.h"
+#include "irrKlangSceneNode.h"
 
 // TODO: replace this by conf value
 #define MAX_CAM_DISTANCE 70
@@ -34,6 +35,11 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     ASSERT(mychar);
     _CalcXYMoveVect(mychar->GetO());
     old_char_o = mychar->GetO();
+
+    if(soundengine)
+    {
+        soundengine->stopAllSounds();
+    }
 
     ILightSceneNode* light = smgr->addLightSceneNode(0, core::vector3df(0,0,0), SColorf(255, 255, 255, 255), 1000.0f);
     SLight ldata = light->getLightData();
@@ -369,7 +375,7 @@ void SceneWorld::OnUpdate(s32 timediff)
             device->getCursorControl()->setPosition(mouse_pos);
 
             // rotate character if right mouse button pressed.
-            if(mouse_pressed_right)
+            if(mouse_pressed_right && !_freeCameraMove)
             {
                 mychar->GetPositionPtr()->o = PI*3/2 - DEG_TO_RAD(camera->getHeading());
                 // send update to server only if we turned by some amount and not always when we turn
@@ -473,6 +479,7 @@ void SceneWorld::OnDelete(void)
 {
     DEBUG(logdebug("~SceneWorld()"));
     _doodads.clear();
+    _sound_emitters.clear();
     gui->domgr.Clear();
     delete camera;
     delete eventrecv;
@@ -543,7 +550,8 @@ void SceneWorld::UpdateTerrain(void)
         return;
     }
 
-    UpdateDoodads(); // drop doodads on maps not loaded anymore. no maptile pointers are dereferenced here, so it can be done before acquiring the mutex
+    UpdateMapSceneNodes(_doodads); // drop doodads on maps not loaded anymore. no maptile pointers are dereferenced here, so it can be done before acquiring the mutex
+    UpdateMapSceneNodes(_sound_emitters); // same with sound emitters
 
     mutex.acquire(); // prevent other threads from deleting maptiles
 
@@ -637,6 +645,63 @@ void SceneWorld::UpdateTerrain(void)
                         }
                     }
                 }
+                // create sound emitters
+                logdebug("Loading %u sound emitters for tile (%u, %u)", maptile->GetSoundEmitterCount(), tile_real_x, tile_real_y);
+                uint32 fieldId[10]; // SCP: file1 - file10 (index 0 not used)
+                char fieldname_t[10];
+                SCPDatabase *sounddb = gui->GetInstance()->dbmgr.GetDB("sound");
+                if(sounddb)
+                {
+                    for(uint32 i = 0; i < 10; i++)
+                    {
+                        sprintf(fieldname_t,"file%u",i + 1); // starts with "file1"
+                        fieldId[i] = sounddb->GetFieldId(fieldname_t);
+                    }
+
+                    for(uint32 i = 0; i < maptile->GetSoundEmitterCount(); i++)
+                    {
+                        MCSE_chunk *snd = maptile->GetSoundEmitter(i);
+                        if(_sound_emitters.find(snd->soundPointID) == _sound_emitters.end())
+                        {
+                            CIrrKlangSceneNode *snode = new CIrrKlangSceneNode(soundengine, smgr->getRootSceneNode(), smgr, snd->soundPointID);
+                            snode->drop();
+                            snode->setPosition(core::vector3df(-snd->x, snd->z, -snd->y));
+                            snode->getDebugCube()->setPosition(snode->getPosition());
+                            snode->setMinMaxSoundDistance(snd->minDistance,snd->maxDistance);
+                            bool exists = sounddb->GetRowByIndex(snd->soundNameID);
+                            if(exists)
+                            {
+                                for(uint32 s = 0; s < 10; s++)
+                                {
+                                    u32 offs = sounddb->GetInt(snd->soundNameID, fieldId[s]);
+                                    if(fieldId[s] != SCP_INVALID_INT && offs && offs != SCP_INVALID_INT)
+                                    {
+                                        std::string fn = "data/sound/";
+                                        fn += sounddb->GetString(snd->soundNameID, fieldId[s]);
+                                        snode->addSoundFileName(fn.c_str());
+                                    }
+                                }
+                                snode->setLoopingStreamMode();
+                            }
+
+                            core::stringw txt;
+                            txt += (exists ? sounddb->GetString(snd->soundNameID, "name") : "[NA SoundEmitter]");
+                            txt += L" (";
+                            txt += u32(snd->soundNameID);
+                            txt += L")";
+                            snode->getDebugText()->setPosition(snode->getPosition());
+                            snode->getDebugText()->setText(txt.c_str());
+
+                            SceneNodeWithGridPos gp;
+                            gp.gx = mapmgr->GetGridX() + tilex - 1;
+                            gp.gy = mapmgr->GetGridY() + tiley - 1;
+                            gp.scenenode = snode;
+                            _sound_emitters[snd->soundPointID] = gp;
+                        }
+
+                    }
+                }
+
             }
             else
             {
@@ -679,21 +744,21 @@ void SceneWorld::UpdateTerrain(void)
     RelocateCameraBehindChar();
 }
 
-// drop unneeded doodads from the map
-void SceneWorld::UpdateDoodads(void)
+// drop unneeded map SceneNodes from the map
+void SceneWorld::UpdateMapSceneNodes(std::map<uint32,SceneNodeWithGridPos>& node_map)
 {
-    uint32 s = _doodads.size();
+    uint32 s = node_map.size();
     std::set<uint32> tmp; // temporary storage for all doodad unique ids
     // too bad erasing from a map causes pointer invalidation, so first store all unique ids, and then erase
-    for(std::map<uint32,SceneNodeWithGridPos>::iterator it = _doodads.begin(); it != _doodads.end(); it++ )
+    for(std::map<uint32,SceneNodeWithGridPos>::iterator it = node_map.begin(); it != node_map.end(); it++ )
         if(!mapmgr->GetTile(it->second.gx, it->second.gy))
             tmp.insert(it->first);
     for(std::set<uint32>::iterator it = tmp.begin(); it != tmp.end(); it++)
     {
-        _doodads[*it].scenenode->remove();
-        _doodads.erase(*it);
+        node_map[*it].scenenode->remove();
+        node_map.erase(*it);
     }
-    logdebug("SceneWorld: Doodads cleaned up, before: %u, after: %u, dropped: %u", s, _doodads.size(), s - _doodads.size());
+    logdebug("SceneWorld: MapSceneNodes cleaned up, before: %u, after: %u, dropped: %u", s, node_map.size(), s - node_map.size());
 }
 
 

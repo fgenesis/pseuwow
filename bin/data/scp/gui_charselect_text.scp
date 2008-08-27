@@ -1,0 +1,14 @@
+#dbname=gui_charselect_text
+
+[1]
+0=Enter World
+1=New Character
+2=Delete Character
+3=Change Realm
+4=Back
+5=OK
+6=Cancel
+
+[2]
+0=Realmlist
+

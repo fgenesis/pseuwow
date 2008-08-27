@@ -41,27 +41,12 @@ enum eAuthResults
     REALM_AUTH_PARENTAL_CONTROL=0x0f                        ///< Access to this account has been blocked by parental controls. Your settings may be changed in your account preferences at <site>
 };
 
-#define ChunkSize 2048
-
 struct SRealmHeader
 {
     uint8	cmd;			// OP code = CMD_REALM_LIST
     uint16	size;			// size of the rest of packet, without this part
     uint32	unknown;		// 0x00 00 00 00
     uint8	count;			// quantity of realms
-};
-
-struct SRealmInfo
-{
-    uint8	icon;			// icon near realm
-    uint8   locked;         // added in 2.0.x
-    uint8	color;			// color of record
-    std::string	name;			// Text zero terminated name of Realm
-    std::string	addr_port;		// Text zero terminated address of Realm ("ip:port")
-    float	population;		// 1.6 -> population value. lower == lower population and vice versa
-    uint8	chars_here;		// number of characters on this server
-    uint8	timezone;		// timezone
-    uint8	unknown;		//
 };
 
 struct AuthHandler
@@ -260,39 +245,47 @@ void RealmSession::_HandleRealmList(ByteBuffer& pkt)
     if(count==0)
         return;
 
-    // alloc space for as many realms as needed
-    SRealmInfo *realms=new SRealmInfo[count];
+    _realms.clear();
+    _realms.resize(count);
 
     // readout realms
     for(uint8 i=0;i<count;i++)
     {
-        pkt >> realms[i].icon;
-        pkt >> realms[i].locked;
-        pkt >> realms[i].color;
-        pkt >> realms[i].name;
-        pkt >> realms[i].addr_port;
-        pkt >> realms[i].population;
-        pkt >> realms[i].chars_here;
-        pkt >> realms[i].timezone;
-        pkt >> realms[i].unknown;
+        pkt >> _realms[i].icon;
+        pkt >> _realms[i].locked;
+        pkt >> _realms[i].color;
+        pkt >> _realms[i].name;
+        pkt >> _realms[i].addr_port;
+        pkt >> _realms[i].population;
+        pkt >> _realms[i].chars_here;
+        pkt >> _realms[i].timezone;
+        pkt >> _realms[i].unknown;
     }
 
     // the rest of the packet is not interesting
 
-    for(uint8 i=0;i<count;i++)
+    for(uint8 i = 0; i < count; i++)
     {
-        if(realms[i].name==GetInstance()->GetConf()->realmname)
+        if(!stricmp(_realms[i].name.c_str(), GetInstance()->GetConf()->realmname.c_str()))
         {
-            realmAddr=realms[i].addr_port;
+            realmAddr = _realms[i].addr_port;
         }
-        logcustom(0,LGREEN,"Realm: %s (%s)",realms[i].name.c_str(),realms[i].addr_port.c_str());
-        logdetail(" [chars:%d][population:%f][timezone:%d]",realms[i].chars_here,realms[i].population,realms[i].timezone);
+        logcustom(0,LGREEN,"Realm: %s (%s)",_realms[i].name.c_str(),_realms[i].addr_port.c_str());
+        logdetail(" [chars:%d][population:%f][timezone:%d]",_realms[i].chars_here,_realms[i].population,_realms[i].timezone);
     }
-    delete [] realms;
 
     // now setup where the worldserver is and how to login there
-    if(realmAddr.empty()){
-        log("Realm \"%s\" was not found on the realmlist!",GetInstance()->GetConf()->realmname.c_str());
+    if(realmAddr.empty())
+    {
+        if(PseuGUI *gui = GetInstance()->GetGUI())
+        {
+            logdebug("RealmSession: GUI exists, switching to realm selection screen");
+            gui->SetSceneState(SCENESTATE_REALMSELECT); // realm select is a sub-window of character selection
+        }
+        else
+        {
+            logerror("Realm \"%s\" was not found on the realmlist!",GetInstance()->GetConf()->realmname.c_str());
+        }
         return;
     }
 
@@ -300,15 +293,22 @@ void RealmSession::_HandleRealmList(ByteBuffer& pkt)
     // -> convert the worldserver port from string to int
     // -> write it into the config & set appropriate vars
 
-    uint16 colonpos=realmAddr.find(":");
-    GetInstance()->GetConf()->worldhost=realmAddr.substr(0,colonpos);
-    GetInstance()->GetConf()->worldport=atoi(realmAddr.substr(colonpos+1,realmAddr.length()-colonpos-1).c_str());
-    // set vars
-    GetInstance()->GetScripts()->variables.Set("WORLDHOST",GetInstance()->GetConf()->worldhost);
-    GetInstance()->GetScripts()->variables.Set("WORLDPORT",DefScriptTools::toString((uint64)(GetInstance()->GetConf()->worldport)));
+    SetRealmAddr(realmAddr);
 
     // now we have the correct addr/port, time to create the WorldSession
     GetInstance()->CreateWorldSession(); // will be done at next PseuInstance::Update()
+}
+
+void RealmSession::SetRealmAddr(std::string host)
+{
+    logdebug("SetRealmAddr [%s]", host.c_str());
+    uint16 colonpos=host.find(":");
+    ASSERT(colonpos != std::string::npos);
+    GetInstance()->GetConf()->worldhost=host.substr(0,colonpos);
+    GetInstance()->GetConf()->worldport=atoi(host.substr(colonpos+1,host.length()-colonpos-1).c_str());
+    // set vars
+    GetInstance()->GetScripts()->variables.Set("WORLDHOST",GetInstance()->GetConf()->worldhost);
+    GetInstance()->GetScripts()->variables.Set("WORLDPORT",DefScriptTools::toString((uint64)(GetInstance()->GetConf()->worldport)));
 }
 
 void RealmSession::SetLogonData(void)
@@ -557,7 +557,7 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
             if(gui)
                 gui->SetSceneData(ISCENE_LOGIN_CONN_STATUS, DSCENE_LOGIN_AUTH_FAILED);
             logerror("Wrong password or invalid account information or authentication error");
-            DieOrReconnect(true);
+            DieOrReconnect(false);
             return;
 
         // cover all other cases. continue only if success.

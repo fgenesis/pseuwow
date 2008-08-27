@@ -518,6 +518,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     fogfar = atof(v.Get("GUI::FOGFAR").c_str());
     fognear = atof(v.Get("GUI::FOGNEAR").c_str());
     fov = atof(v.Get("GUI::FOV").c_str());
+    masterSoundVolume = atof(v.Get("GUI::MASTERSOUNDVOLUME").c_str());
 
     log_setloglevel(debug);
 }

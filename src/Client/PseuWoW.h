@@ -69,6 +69,9 @@ class PseuInstanceConf
     float fognear;
     float fov;
 
+    // sound related
+    float masterSoundVolume;
+
 
 };
 

@@ -8,7 +8,7 @@
 // 3: OpenGL
 // 4: DirectX 8.1
 // 5: DirectX 9.0c
-driver=5
+driver=3
 
 // resolution and more
 resx=1024
@@ -27,6 +27,12 @@ depth=32
 // 1: Yes
 // 0: No (default)
 UseSound=1
+
+// Master Sound Volume. Multiplier that affects all sounds that are played
+// 1.0 - max volume
+// 0.5 - half sound volume
+// 0   - silent
+MasterSoundVolume=1.0
 
 
 //================================================================================================

@@ -142,7 +142,7 @@ uint32 SCPDatabase::GetFieldType(char *entry)
 {
     std::map<std::string,SCPFieldDef>::iterator it = _fielddefs.find(entry);
     if(it != _fielddefs.end())
-        return _fielddefs[entry].type;
+        return it->second.type;
     return SCP_INVALID_INT;
 }
 
@@ -150,7 +150,7 @@ uint32 SCPDatabase::GetFieldId(char *entry)
 {
     std::map<std::string,SCPFieldDef>::iterator it = _fielddefs.find(entry);
     if(it != _fielddefs.end())
-        return _fielddefs[entry].id;
+        return it->second.id;
     return SCP_INVALID_INT;
 }
 

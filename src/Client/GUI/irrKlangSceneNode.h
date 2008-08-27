@@ -72,11 +72,11 @@ public:
 
 	// Sound parameters
 
-	//! Sets the sound filename to play
-    void setSoundFileName(const char* soundFilename);
+	//! Adds a sound filename to play
+    void addSoundFileName(const char* soundFilename);
 
 	//! Gets the sound filename to play
-    const char* getSoundFileName() const;
+    const char* getSoundFileName(u32 id) const;
 
 	//! Sets the minimal and maximal 3D sound distances.
 	//! Set to negative values if you want to use the default values of the sound engine.
@@ -92,9 +92,9 @@ public:
 	virtual void render();
 	virtual const core::aabbox3d<f32>& getBoundingBox() const;
 	virtual ESCENE_NODE_TYPE getType() const;
-	ISceneNode* clone(ISceneNode* newParent, ISceneManager* newManager);
-	void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options) const;
-	void deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options);
+
+    scene::ISceneNode *getDebugCube(void) { return cube; }
+    scene::ITextSceneNode *getDebugText(void) { return text; }
 
 protected:
 
@@ -110,7 +110,7 @@ protected:
 	irrklang::ISoundEngine* SoundEngine;
 	irrklang::ISound* Sound;
 
-	core::stringc SoundFileName;
+    core::array<core::stringc> SoundFileNames;
 	f32 MinDistance;
 	f32 MaxDistance;
 
@@ -120,6 +120,8 @@ protected:
 	s32 MaxTimeMsInterval;
 	s32 MinTimeMsInterval;
 	s32 PlayedCount;
+    scene::ISceneNode *cube;
+    scene::ITextSceneNode *text;
 };
 
 

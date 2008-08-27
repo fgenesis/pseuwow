@@ -13,8 +13,24 @@ using namespace gui;
 using namespace irrklang;
 
 
+inline core::rect<s32> CalcRelativeScreenPos(core::dimension2d<s32> dim, f32 x, f32 y, f32 w, f32 h)
+{
+    core::rect<s32> r;
+    r.UpperLeftCorner.X = dim.Width * x;
+    r.UpperLeftCorner.Y = dim.Height* y;
+    r.LowerRightCorner.X = r.UpperLeftCorner.X + (dim.Width * w);
+    r.LowerRightCorner.Y = r.UpperLeftCorner.Y + (dim.Height * h);
+    return r;
+}
+
+inline core::rect<s32> CalcRelativeScreenPos(video::IVideoDriver* drv, f32 x, f32 y, f32 w, f32 h)
+{
+    return CalcRelativeScreenPos(drv->getScreenSize(),x,y,w,h);
+}
+
 class PseuGUI;
 class CCursorController;
+class GUIEventReceiver;
 
 // base class
 class Scene
@@ -27,11 +43,14 @@ public:
     inline void SetState(SceneState sc) { _scenestate = sc; }
     inline SceneState GetState(void) { return _scenestate; }
     virtual void OnUpdate(s32);
+    virtual void OnManualUpdate(void);
     virtual void OnDraw(void);
     virtual void OnDrawBegin(void);
     virtual void OnDelete(void);
+    virtual void OnResize(void);
     virtual video::SColor GetBackgroundColor(void);
     virtual void SetData(uint32 index, uint32 value) { scenedata[index] = value; }
+
 protected:
     PseuInstance *instance;
     PseuGUI *gui;
@@ -39,6 +58,7 @@ protected:
     irr::video::IVideoDriver* driver;
     irr::scene::ISceneManager* smgr;
     irr::gui::IGUIEnvironment* guienv;
+    irr::gui::IGUIElement* rootgui;
     irrklang::ISoundEngine *soundengine;
     CCursorController *cursor;
     SceneState _scenestate;
@@ -56,8 +76,6 @@ private:
 
 };
 
-class GUIEventReceiver;
-
 class SceneLogin : public Scene
 {
 public:
@@ -66,13 +84,32 @@ public:
     void OnDelete(void);
 
 private:
-    gui::IGUIElement* root;
     IGUIImage *irrlogo, *background;
     GUIEventReceiver *eventrecv;
-    PseuGUI* _gui;
     gui::IGUIElement *msgbox;
+    gui::IGUIWindow *popup;
     uint32 msgbox_textid;
 };
+
+class CharSelectGUIEventReceiver;
+
+class SceneCharSelection : public Scene
+{
+public:
+    SceneCharSelection(PseuGUI *gui);
+    void OnUpdate(s32);
+    void OnDelete(void);
+    void OnResize(void);
+
+private:
+    GUIEventReceiver *eventrecv;
+    IGUIWindow *realmwin;
+    IGUIListBox *realmlistbox;
+    IGUIListBox *charlistbox; // temporary until something better found
+};
+
+
+
 
 class ShTlTerrainSceneNode;
 class MCameraFPS;
@@ -101,7 +138,7 @@ public:
     void InitTerrain(void);
     void RelocateCamera(void);
     void RelocateCameraBehindChar(void);
-    void UpdateDoodads(void);
+    void UpdateMapSceneNodes(std::map<uint32,SceneNodeWithGridPos>&);
     scene::ISceneNode *GetMyCharacterSceneNode(void);
     video::SColor GetBackgroundColor(void);
 
@@ -112,7 +149,6 @@ private:
     MCameraFPS *camera;
     MyEventReceiver *eventrecv;
     ZThread::FastMutex mutex;
-    PseuGUI *gui;
     uint32 map_gridX, map_gridY;
     WorldSession *wsession;
     World *world;
@@ -120,6 +156,7 @@ private:
     IGUIStaticText *debugText;
     bool debugmode;
     std::map<uint32,SceneNodeWithGridPos> _doodads;
+    std::map<uint32,SceneNodeWithGridPos> _sound_emitters;
     scene::ISceneNode *sky;
     scene::ISceneNode *selectedNode, *oldSelectedNode, *focusedNode, *oldFocusedNode;
     video::SColor envBasicColor;

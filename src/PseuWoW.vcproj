@@ -445,6 +445,9 @@
 					RelativePath=".\Client\Gui\DrawObjMgr.h">
 				</File>
 				<File
+					RelativePath=".\Client\Gui\GUIEventReceiver.h">
+				</File>
+				<File
 					RelativePath=".\Client\Gui\MCamera.h">
 				</File>
 				<File
@@ -461,6 +464,9 @@
 				</File>
 				<File
 					RelativePath=".\Client\Gui\Scene.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\SceneCharselection.cpp">
 				</File>
 				<File
 					RelativePath=".\Client\Gui\SceneData.h">
