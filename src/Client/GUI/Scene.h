@@ -64,6 +64,7 @@ protected:
     SceneState _scenestate;
     uint32 scenedata[SCENEDATA_SIZE]; // generic storage for anything the PseuInstance thread wants to tell us
     SCPDatabase *textdb;
+    ZThread::FastMutex mutex;
 };
 
 class SceneGuiStart : public Scene
@@ -148,7 +149,6 @@ private:
     ShTlTerrainSceneNode *terrain;
     MCameraFPS *camera;
     MyEventReceiver *eventrecv;
-    ZThread::FastMutex mutex;
     uint32 map_gridX, map_gridY;
     WorldSession *wsession;
     World *world;
