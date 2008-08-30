@@ -162,6 +162,7 @@ void SceneCharSelection::OnResize(void)
         GetStringFromDB(ISCENE_CHARSEL_BUTTONS, DSCENE_CHARSEL_BUTTON_DELCHAR).c_str());
 
     realmwin = NULL;
+    mutex.acquire();
     if(scenedata[ISCENE_CHARSEL_REALMFIRST])
     {
         dimension2d<s32> dim;
@@ -260,6 +261,7 @@ void SceneCharSelection::OnResize(void)
 
         }
     }
+    mutex.release();
 
 }
 

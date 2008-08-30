@@ -127,5 +127,6 @@ void WorldSocket::InitCrypt(BigNumber *k)
 {
     _crypt.SetKey(k);
     _crypt.Init();
-    logdebug("WorldSocket: Crypt initialized");
+    std::string tmp = toHexDump(_crypt.GetKey(),_crypt.GetKeySize(), false);
+    logdebug("WorldSocket: Crypt initialized [%s]",tmp.c_str());
 }

@@ -701,7 +701,7 @@ void WorldSession::EnterWorldWithCharacter(std::string name)
 
     WorldPacket pkt(CMSG_PLAYER_LOGIN,8);
     pkt << _myGUID;
-    SendWorldPacket(pkt);
+    AddSendWorldPacket(pkt); // it can be called from gui thread also, use threadsafe version
 
     // close realm session when logging into world
     if(!MustDie() && _socket->IsOk() && GetInstance()->GetRSession())
