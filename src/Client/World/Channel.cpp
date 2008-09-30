@@ -229,16 +229,18 @@ void Channel::HandleListRequest(WorldPacket& recvPacket)
 	for(uint32 i = 0; i < size; i++)
 	{
 		recvPacket >> guid >> mode;
-        // all player names in this packet must be known before
+        // all player names in this packet must be known before we can continue
         if(_worldSession->GetOrRequestPlayerName(guid).empty())
         {
-            _worldSession->_DelayWorldPacket(recvPacket, uint32(_worldSession->GetLagMS() * 1.2f));
             must_delay = true;
         }
 		cpl[guid] = mode;
 	}
     if(must_delay)
+    {
+        _worldSession->_DelayWorldPacket(recvPacket, uint32(_worldSession->GetLagMS() * 1.2f));
         return;
+    }
 
     // store list of GUIDs in: @ChannelList - see below
     DefList *l = _worldSession->GetInstance()->GetScripts()->lists.Get("@ChannelList");
