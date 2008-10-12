@@ -1,5 +1,6 @@
 #include "irrlicht/irrlicht.h"
 #include "irrlicht/IMeshLoader.h"
+#include "SSkinnedMesh.h"
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -100,34 +101,12 @@ struct TextureDefinition {
     u32 texFileOfs;
 };
 
-class CM2MeshFileLoader : public IMeshLoader
-{
-public:
-
-	//! Constructor
-	CM2MeshFileLoader(IrrlichtDevice* device, c8* texdir);
-
-	//! destructor
-	virtual ~CM2MeshFileLoader();
-
-	//! returns true if the file maybe is able to be loaded by this class
-	//! based on the file extension (e.g. ".cob")
-	virtual bool isALoadableFileExtension(const c8* fileName)const;
-
-	//! creates/loads an animated mesh from the file.
-	//! \return Pointer to the created mesh. Returns 0 if loading failed.
-	//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
-	//! See IUnknown::drop() for more information.
-	virtual scene::IAnimatedMesh* createMesh(irr::io::IReadFile* file);
-private:
-    ModelHeader header;
-
 struct ModelVertex {
-	core::vector3df pos;//Use Irrlicht Vector here!
+	core::vector3df pos;
 	u8 weights[4];
 	u8 bones[4];
-	core::vector3df normal;//Use Irrlicht Vector here!
-	core::vector2df texcoords;//Use Irrlicht Vector here!
+	core::vector3df normal;
+	core::vector2df texcoords;
 	u32 unk1, unk2; // always 0,0 so this is probably unused
 };
 
@@ -170,15 +149,87 @@ struct RenderFlags{
     u16 blending;
 };
 
-//
-	io::IFileSystem* FileSystem;
+struct Animation{
+    u32 animationID;
+    u32 start, end;
+    float movespeed;
+    u32 loop, flags, unk1, unk2;
+    u32 playbackspeed;
+    float bbox[6];
+    float radius;
+    s16 indexSameID;
+    u16 unk3;
+};
+
+struct AnimBlockHead{
+    s16 interpolationType;
+    s16 globalSequenceID;
+    u32 nInterpolationRange;
+    u32 ofsInterpolationRange;
+    u32 nTimeStamp;
+    u32 ofsTimeStamp;
+    u32 nValues;
+    u32 ofsValues;
+};
+
+struct InterpolationRange{
+    u32 start, end;
+};
+
+struct AnimBlock{
+    AnimBlockHead header;
+    core::array<InterpolationRange> keyframes;
+    core::array<u32> timestamps;
+    core::array<float> values;
+};
+
+struct Bone{
+    s32 indexF;
+    u32 flags;
+    s16 parentBone;
+    u16 unk1;
+    u32 unk2;
+    AnimBlock translation, rotation, scaling;
+    core::vector3df PivotPoint;
+};
+
+
+class CM2MeshFileLoader : public IMeshLoader
+{
+public:
+
+	//! Constructor
+	CM2MeshFileLoader(IrrlichtDevice* device, c8* texdir);
+
+	//! destructor
+	virtual ~CM2MeshFileLoader();
+
+	//! returns true if the file maybe is able to be loaded by this class
+	//! based on the file extension (e.g. ".cob")
+	virtual bool isALoadableFileExtension(const c8* fileName)const;
+
+	//! creates/loads an animated mesh from the file.
+	//! \return Pointer to the created mesh. Returns 0 if loading failed.
+	//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
+	//! See IUnknown::drop() for more information.
+	virtual scene::IAnimatedMesh* createMesh(io::IReadFile* file);
+private:
+
+	bool load();
+
 	IrrlichtDevice* Device;
-//    scene::IMeshManipulator* Manipulator;
-    core::stringc M2MeshName;
     core::stringc Texdir;
-    SAnimatedMesh* aniMesh;
+    io::IReadFile* MeshFile;
+
+    CSkinnedMesh* AnimatedMesh;
+    scene::CSkinnedMesh::SJoint* ParentJoint;
+
+
+
+    ModelHeader header;
+    core::stringc M2MeshName;
     SMesh* Mesh;
-    SMeshBuffer* IMB;
+    //SSkinMeshBuffer* MeshBuffer;
     //Taken from the Model file, thus m2M*
     core::array<ModelVertex> M2MVertices;
     core::array<ModelView> M2MViews;
@@ -190,9 +241,13 @@ struct RenderFlags{
     core::array<std::string> M2MTextureFiles;
     core::array<TextureUnit> M2MTextureUnit;
     core::array<RenderFlags> M2MRenderFlags;
+    core::array<Animation> M2MAnimations;
+    core::array<Bone> M2MBones;
     //Used for the Mesh, thus m2_noM_*
     core::array<video::S3DVertex> M2Vertices;
     core::array<u16> M2Indices;
+    core::array<scene::ISkinnedMesh::SJoint> M2Joints;
+
 
 };
 }//namespace scene
