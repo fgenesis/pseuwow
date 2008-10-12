@@ -63,7 +63,8 @@ AC_CHECK_FUNCS([floor ftime ftruncate getcwd gethostbyaddr gethostbyname gethost
 #                 src/dep/src/zthread/Makefile])
 #AC_CONFIG_SUBDIRS([src/dep/src/irrlicht/jpeglib
 #                   src/dep/src/irrlicht/libpng])
-AC_CONFIG_FILES([src/Makefile
+AC_CONFIG_FILES([Makefile
+		 src/Makefile
 		 src/shared/Makefile
 		 src/shared/Auth/Makefile
 		 src/shared/Network/Makefile
