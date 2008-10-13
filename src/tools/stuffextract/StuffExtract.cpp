@@ -495,10 +495,19 @@ bool ConvertDBC(void)
                     // TODO: add check for wmo model files ?
                     if(doModels)
                         modelNames.insert(NameAndAlt(value)); // we need to extract model later, store it
+
                     std::string fn = _PathToFileName(value);
                     if(stricmp(fn.c_str()+fn.length()-4, "mdx"))
                         fn = fn.substr(0,fn.length()-3) + "m2";
                     GameObjectDisplayInfoStorage[id].push_back(std::string(GameObjectDisplayInfoFieldNames[field]) + "=" + fn);
+
+                    std::string texture = value.substr(0,value.length()-3) + "blp";
+                    if (mpq.FileExists((char*)texture.c_str()))
+                    {
+                        if(doTextures)
+                            texNames.insert(NameAndAlt(texture));
+                        GameObjectDisplayInfoStorage[id].push_back("texture=" + NormalizeFilename(texture));
+                    }
                 }
             }
         }
@@ -943,7 +952,7 @@ void FetchTexturesFromModel(ByteBuffer& bb)
 
     bb.read((uint8*)&header, sizeof(header));
 
-    if (header.version[0] != 4 || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
+    if ((header.version[0] < 4 || header.version[0] > 7) || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
         //printf("Not M2 model file!");
         return;
     }

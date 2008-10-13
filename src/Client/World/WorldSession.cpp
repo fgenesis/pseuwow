@@ -303,6 +303,26 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_FALL_LAND, &WorldSession::_HandleMovementOpcode},
         {MSG_MOVE_TELEPORT_ACK, &WorldSession::_HandleTelePortAckOpcode},
 
+        // set speed opcodes
+        {MSG_MOVE_SET_WALK_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_RUN_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_RUN_BACK_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_SWIM_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_SWIM_BACK_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_TURN_RATE, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_FLIGHT_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_FLIGHT_BACK_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+
+        // force set speed opcodes
+        {SMSG_FORCE_WALK_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_RUN_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_RUN_BACK_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_SWIM_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_SWIM_BACK_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_TURN_RATE_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_FLIGHT_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
         {SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
         {SMSG_CAST_FAILED, &WorldSession::_HandleCastResultOpcode},
@@ -1001,6 +1021,127 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     if(obj && obj->IsWorldObject())
     {
         ((WorldObject*)obj)->SetPosition(x,y,z,o);
+    }
+}
+
+void WorldSession::_HandleSetSpeedOpcode(WorldPacket& recvPacket)
+{
+    uint64 guid;
+    float x, y, z, o, speed;
+    uint32 unk32, movetype;
+    uint8 unk8;
+
+    switch(recvPacket.GetOpcode())
+    {
+    case MSG_MOVE_SET_WALK_SPEED:
+        movetype = MOVE_WALK;
+        break;
+
+    case MSG_MOVE_SET_RUN_SPEED:
+        movetype = MOVE_RUN;
+        break;
+
+    case MSG_MOVE_SET_RUN_BACK_SPEED:
+        movetype = MOVE_WALKBACK;
+        break;
+
+    case MSG_MOVE_SET_SWIM_SPEED:
+        movetype = MOVE_SWIM;
+        break;
+
+    case MSG_MOVE_SET_SWIM_BACK_SPEED:
+        movetype = MOVE_SWIMBACK;
+        break;
+
+    case MSG_MOVE_SET_TURN_RATE:
+        movetype = MOVE_TURN;
+        break;
+
+    case MSG_MOVE_SET_FLIGHT_SPEED:
+        movetype = MOVE_FLY;
+        break;
+
+    case MSG_MOVE_SET_FLIGHT_BACK_SPEED:
+        movetype = MOVE_FLYBACK;
+        break;
+
+    default:
+        logerror("MSG_MOVE_SET speed change unkown case error, opcode %u !", recvPacket.GetOpcode());
+        return;
+    }
+
+    guid = recvPacket.GetPackedGuid();
+    recvPacket >> unk32;
+    recvPacket >> unk8;
+    recvPacket >> unk32; /* getMSTime()*/
+    recvPacket >> x >> y >> z >> o;
+    recvPacket >> unk32;
+    recvPacket >> speed;
+
+    Object *obj = objmgr.GetObj(guid);
+    if(obj && obj->IsUnit())
+    {
+        ((Unit*)obj)->SetSpeed(movetype, speed);
+        ((Unit*)obj)->SetPosition(x, y, z, o);
+    }
+}
+
+void WorldSession::_HandleForceSetSpeedOpcode(WorldPacket& recvPacket)
+{
+    uint64 guid;
+    uint32 unk32, movetype;
+    float speed;
+    uint8 unk8;
+
+    switch(recvPacket.GetOpcode())
+    {
+    case SMSG_FORCE_WALK_SPEED_CHANGE:
+        movetype = MOVE_WALK;
+        break;
+
+    case SMSG_FORCE_RUN_SPEED_CHANGE:
+        movetype = MOVE_RUN;
+        break;
+
+    case SMSG_FORCE_RUN_BACK_SPEED_CHANGE:
+        movetype = MOVE_WALKBACK;
+        break;
+
+    case SMSG_FORCE_SWIM_SPEED_CHANGE:
+        movetype = MOVE_SWIM;
+        break;
+
+    case SMSG_FORCE_SWIM_BACK_SPEED_CHANGE:
+        movetype = MOVE_SWIMBACK;
+        break;
+
+    case SMSG_FORCE_TURN_RATE_CHANGE:
+        movetype = MOVE_TURN;
+        break;
+
+    case SMSG_FORCE_FLIGHT_SPEED_CHANGE:
+        movetype = MOVE_FLY;
+        break;
+
+    case SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE:
+        movetype = MOVE_FLYBACK;
+        break;
+
+    default:
+        logerror("MSG_FORCE_ speed change unkown case error, opcode %u !", recvPacket.GetOpcode());
+        return;
+    }
+
+    guid = recvPacket.GetPackedGuid();
+    recvPacket >> unk32;
+    if (movetype == MOVE_RUN)
+        recvPacket >> unk8;
+    recvPacket >> speed;
+
+    Object *obj = objmgr.GetObj(guid);
+    if(obj && obj->IsUnit())
+    {
+        ((Unit*)obj)->SetSpeed(movetype, speed);
     }
 }
 

@@ -54,6 +54,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("gui",&DefScriptPackage::SCGui);
     AddFunc("sendwho",&DefScriptPackage::SCSendWho);
     AddFunc("getobjectdist",&DefScriptPackage::SCGetObjectDistance);
+    AddFunc("getobjectpos",&DefScriptPackage::SCGetPos);
     AddFunc("switchopcodehandler",&DefScriptPackage::SCSwitchOpcodeHandler);
     AddFunc("opcodedisabled",&DefScriptPackage::SCOpcodeDisabled);    
     AddFunc("spoofworldpacket",&DefScriptPackage::SCSpoofWorldPacket);
@@ -1199,6 +1200,31 @@ DefReturnResult DefScriptPackage::SCAddDBPath(CmdSet &Set)
     PseuInstance *ins = (PseuInstance*)parentMethod;
     ins->dbmgr.AddSearchPath((char*)Set.defaultarg.c_str());
     return true;
+}
+
+DefReturnResult DefScriptPackage::SCGetPos(CmdSet &Set)
+{
+    WorldSession *ws = ((PseuInstance*)parentMethod)->GetWSession();
+    if(!ws)
+    {
+        logerror("Invalid Script call: SCGetPos: WorldSession not valid");
+        DEF_RETURN_ERROR;
+    }
+
+    uint64 guid = DefScriptTools::toUint64(Set.arg[0]);
+    Object* obj = ws->objmgr.GetObj(guid ? guid : ws->GetGuid());
+    if (!obj || !obj->IsWorldObject())
+        return "";
+
+    if (Set.defaultarg == "x")
+        return DefScriptTools::toString( ((WorldObject*)obj)->GetX() );
+    else if (Set.defaultarg == "y")
+        return DefScriptTools::toString( ((WorldObject*)obj)->GetY() );
+    else if (Set.defaultarg == "z")
+        return DefScriptTools::toString( ((WorldObject*)obj)->GetZ() );
+    else if (Set.defaultarg == "o")
+        return DefScriptTools::toString( ((WorldObject*)obj)->GetO() );
+    return "";
 }
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
