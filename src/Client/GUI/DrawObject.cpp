@@ -81,7 +81,13 @@ void DrawObject::_Init(void)
                 uint32 displayid = gotempl->displayId;
                 SCPDatabase *gdi = _instance->dbmgr.GetDB("gameobjectdisplayinfo");
                 if (gdi && displayid)
+                {
                     modelfile = std::string("data/model/") + gdi->GetString(displayid,"model");
+                    std::string texturef = gdi->GetString(displayid,"path");
+                    if (strcmp(gdi->GetString(displayid,"texture"), "") != 0)
+                        texture = std::string("data/texture/") + gdi->GetString(displayid,"texture");
+                }
+                
                 DEBUG(logdebug("GAMEOBJECT: %u - %u", _obj->GetEntry(), displayid));
             } else {
                 DEBUG(logdebug("GAMEOBJECT UNKNOWN: %u", _obj->GetEntry()));
@@ -105,8 +111,11 @@ void DrawObject::_Init(void)
 
         //cube->getMaterial(0).DiffuseColor.setAlpha(opacity);
         cube->setName("OBJECT");
-        cube->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
-        cube->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
+        if (cube->getMaterialCount())
+        {
+            cube->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
+            cube->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
+        }
 
         text=_smgr->addTextSceneNode(_guienv->getBuiltInFont(), L"TestText" , irr::video::SColor(255,255,255,255),cube, irr::core::vector3df(0,5,0));
         if(_obj->IsPlayer())

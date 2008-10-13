@@ -134,6 +134,8 @@ private:
     void _HandleMessageChatOpcode(WorldPacket& recvPacket);
     void _HandleNameQueryResponseOpcode(WorldPacket& recvPacket);
     void _HandleMovementOpcode(WorldPacket& recvPacket);
+    void _HandleSetSpeedOpcode(WorldPacket& recvPacket);
+    void _HandleForceSetSpeedOpcode(WorldPacket& recvPacket);
     void _HandlePongOpcode(WorldPacket& recvPacket);
     void _HandleTradeStatusOpcode(WorldPacket& recvPacket);
     void _HandleGroupInviteOpcode(WorldPacket& recvPacket);

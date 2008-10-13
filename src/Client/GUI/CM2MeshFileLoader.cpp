@@ -80,7 +80,7 @@ DEBUG(logdebug("Trying to open file %s",MeshFile->getFileName()));
 
 
 MeshFile->read(&header,sizeof(ModelHeader));
-if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
+if ((header.version[0] < 4 || header.version[0] > 7) || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
      printf("Wrong header! File version doesn't match or file is not a M2 file.");
      return 0;
      }

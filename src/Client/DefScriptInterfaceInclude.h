@@ -50,6 +50,7 @@ DefReturnResult SCOpcodeDisabled(CmdSet&);
 DefReturnResult SCSpoofWorldPacket(CmdSet&);
 DefReturnResult SCLoadDB(CmdSet &Set);
 DefReturnResult SCAddDBPath(CmdSet &Set);
+DefReturnResult SCGetPos(CmdSet &Set);
 
 
 void my_print(const char *fmt, ...);
