@@ -15,13 +15,13 @@ AC_PROG_LN_S
 AC_PROG_RANLIB
 
 # Checks for libraries.
-AC_CHECK_LIB([Xxf86vm], [main])
-AC_CHECK_LIB([GL], [main])
-AC_CHECK_LIB([GLU], [main])
-AC_CHECK_LIB([Irrlicht], [main])
-AC_CHECK_LIB([ssl], [main])
-AC_CHECK_LIB([crypto], [main])
-AC_CHECK_LIB([ZThread], [main])
+AC_CHECK_LIB([Xxf86vm], [main], [], [echo "ERROR: Xxf86vm library not found." && exit 1])
+AC_CHECK_LIB([GL], [main], [], [echo "ERROR: GL library not found." && exit 1])
+AC_CHECK_LIB([GLU], [main], [], [echo "ERROR: GLU library not found." && exit 1])
+AC_CHECK_LIB([Irrlicht], [main], [], [echo "ERROR: Irrlicht library not found." && exit 1])
+AC_CHECK_LIB([ssl], [main], [], [echo "ERROR: ssl library not found." && exit 1])
+AC_CHECK_LIB([crypto], [main], [], [echo "ERROR: ssl crypto library not found." && exit 1])
+AC_CHECK_LIB([ZThread], [main], [], [echo "ERROR: ZThread library not found." && exit 1])
 
 # Checks for header files.
 AC_PATH_X
