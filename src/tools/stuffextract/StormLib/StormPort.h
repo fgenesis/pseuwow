@@ -114,7 +114,11 @@
   typedef long           LONG_PTR;
   typedef long long      LONGLONG;
 #ifndef __OBJC__
+#ifdef __cplusplus
   #define BOOL           bool
+#else
+  #define BOOL           int
+#endif
 #endif
   typedef void         * HANDLE;
   typedef void         * LPOVERLAPPED; // Unsupported on Linux
