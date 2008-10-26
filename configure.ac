@@ -65,6 +65,9 @@ AC_CHECK_FUNCS([floor ftime ftruncate getcwd gethostbyaddr gethostbyname gethost
 #                   src/dep/src/irrlicht/libpng])
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
+		 src/tools/Makefile
+		 src/tools/stuffextract/Makefile
+		 src/tools/stuffextract/StormLib/Makefile
 		 src/shared/Makefile
 		 src/shared/Auth/Makefile
 		 src/shared/Network/Makefile

@@ -12,7 +12,7 @@
 #include "DBCFieldData.h"
 #include "Locale.h"
 #include "ProgressBar.h"
-#include "../../Client/Gui/CM2MeshFileLoader.h"
+#include "../../Client/GUI/CM2MeshFileLoader.h"
 
 int replaceSpaces (int i) { return i==(int)' ' ? (int)'_' : i; }
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	    fgets(input,sizeof(input),stdin);
 	    char loc[5];
         input[strlen(input)-1] = 0;
-	    memcpy(loc,input,4); loc[4]=0;	
+	    memcpy(loc,input,4); loc[4]=0;
 	    SetLocale(loc);
     }
 	if(GetLocale() && FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
@@ -105,7 +105,7 @@ void ProcessCmdArgs(int argc, char *argv[])
             {
                 if(!stricmp(what+7,"auto"))
                     SetLocale(NULL);
-                else 
+                else
                     SetLocale(what+7);
             }
             else if(!stricmp(what,"?") || !stricmp(what,"help"))
@@ -248,7 +248,7 @@ void OutMD5(char *path, MD5FileMap& fm)
     }
 }
 
-        
+
 
 
 bool ConvertDBC(void)
@@ -293,7 +293,7 @@ bool ConvertDBC(void)
             }
         }
     }
-    
+
     printf("emotes..");
     for(DBCFile::Iterator it = EmotesText.begin(); it != EmotesText.end(); ++it)
     {
@@ -319,7 +319,7 @@ bool ConvertDBC(void)
                                 std::string tx = (*ix).getString(stringpos);
                                 uint32 fpos=0;
                                 // the following block replaces %x$s (where x is a number) with %s
-                                do 
+                                do
                                 {
                                     if(fpos+4 < tx.length() && tx[fpos]=='%' && tx[fpos+2]=='$' && tx[fpos+3]=='s' && isdigit(tx[fpos+1]))
                                     {
@@ -455,7 +455,7 @@ bool ConvertDBC(void)
             {
                 std::string value = AutoGetDataString(it,CreatureDisplayInfoFormat,field);
                 if(value.size()) // only store if not null
-                { 
+                {
                     if(doTextures && field >= CREATUREDISPLAYINFO_NAME1 && field <= CREATUREDISPLAYINFO_NAME3)
                     {
                         // lookup for model path
@@ -491,7 +491,7 @@ bool ConvertDBC(void)
             {
                 std::string value = AutoGetDataString(it,GameObjectDisplayInfoFormat,field);
                 if(value.size()) // only store if not null
-                { 
+                {
                     // TODO: add check for wmo model files ?
                     if(doModels)
                         modelNames.insert(NameAndAlt(value)); // we need to extract model later, store it
@@ -569,7 +569,7 @@ bool ConvertDBC(void)
 
     CreateDir("stuffextract/data/scp");
 
-    printf("Writing SCP files:\n");    
+    printf("Writing SCP files:\n");
     printf("emote.."); OutSCP(SCPDIR "/emote.scp",EmoteDataStorage, "emote");
     printf("race.."); OutSCP(SCPDIR "/race.scp",RaceDataStorage, "race");
     printf("sound.."); OutSCP(SCPDIR "/sound.scp",SoundDataStorage, "sound");
@@ -605,7 +605,7 @@ void ExtractMaps(void)
         char wdt_name[300], wdt_out[300];
         sprintf(wdt_name,"World\\Maps\\%s\\%s.wdt",it->second.c_str(),it->second.c_str());
         sprintf(wdt_out,MAPSDIR"/%u.wdt",it->first);
-        ByteBuffer& wdt_bb = mpq.ExtractFile(wdt_name);
+        const ByteBuffer& wdt_bb = mpq.ExtractFile(wdt_name);
         std::fstream wdt_fh;
         wdt_fh.open(wdt_out, std::ios_base::out|std::ios_base::binary);
         if(!wdt_fh.is_open())
@@ -631,7 +631,7 @@ void ExtractMaps(void)
                 sprintf(outbuf,MAPSDIR"/%u_%u_%u.adt",it->first,x,y);
                 if(mpq.FileExists(namebuf))
                 {
-                    ByteBuffer& bb = mpq.ExtractFile(namebuf);
+                    const ByteBuffer& bb = mpq.ExtractFile(namebuf);
                     if(bb.size())
                     {
                         std::fstream fh;
@@ -648,8 +648,8 @@ void ExtractMaps(void)
                         olddeps = texNames.size() + modelNames.size() + wmoNames.size();
 
                         if(doTextures) ADT_FillTextureData(bb.contents(),texNames);
-                        if(doModels)   ADT_FillModelData(bb.contents(),modelNames); 
-                        if(doWmos)     ADT_FillWMOData(bb.contents(),wmoNames); 
+                        if(doModels)   ADT_FillModelData(bb.contents(),modelNames);
+                        if(doWmos)     ADT_FillWMOData(bb.contents(),wmoNames);
 
                         depdiff = texNames.size() + modelNames.size() + wmoNames.size() - olddeps;
                         if(doMd5)
@@ -726,7 +726,7 @@ void ExtractMapDependencies(void)
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
-                ByteBuffer& bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
+                ByteBuffer bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
                 if (doTextures)
                     FetchTexturesFromModel(bb);
@@ -770,7 +770,7 @@ void ExtractMapDependencies(void)
             std::string copy = NormalizeFilename(mpqfn);
             if (copy.find_first_of("/") != std::string::npos)
             {
-                std::string copy2 = copy;
+                std::string copy2 = copy.c_str();
                 char* tok = strtok((char*)copy2.c_str(),"/");
                 std::string fullpath = pathtex;
                 while (tok && !strstr(tok, ".blp"))
@@ -787,7 +787,7 @@ void ExtractMapDependencies(void)
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
-                ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
+                const ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
                 if(doMd5)
                 {
@@ -828,7 +828,7 @@ void ExtractMapDependencies(void)
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
-                ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
+                const ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
                 if(doMd5)
                 {
@@ -877,7 +877,7 @@ void ExtractSoundFiles(void)
         fh.open(outfn.c_str(), std::ios_base::out | std::ios_base::binary);
         if(fh.is_open())
         {
-            ByteBuffer& bb = smpq.ExtractFile((char*)i->name.c_str());
+            const ByteBuffer& bb = smpq.ExtractFile((char*)i->name.c_str());
             if(bb.size())
             {
                 fh.write((const char*)bb.contents(),bb.size());
@@ -943,7 +943,7 @@ void ADT_FillModelData(const uint8* data,std::set<NameAndAlt>& st)
     ADT_ExportStringSetByOffset(data,OFFSET_MODELS,st,"DIMM");
 }
 
-void FetchTexturesFromModel(ByteBuffer& bb)
+void FetchTexturesFromModel(ByteBuffer bb)
 {
     bb.rpos(0);
     irr::scene::ModelHeader header;
