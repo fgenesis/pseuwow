@@ -54,6 +54,7 @@ class PseuInstanceConf
     bool disablespellcheck;
     uint32 rmcontrolport;
     std::string rmcontrolhost;
+    std::string rmcontrolpass;
     bool useMaps;
     bool skipaddonchat;
     uint8 dumpPackets;

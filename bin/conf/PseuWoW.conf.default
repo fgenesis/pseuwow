@@ -117,6 +117,9 @@ enablegui=0
 rmcontrolport=8101
 // IP or hostname that is allowed to connect. leave blank to allow connections from everywhere (dangerous!)
 rmcontrolhost=localhost
+// password required to gain access. leave blank for no password.
+// to authenticate, type "pw your_pass_word" into telnet or send it somehow else if not using telnet.
+rmcontrolpass=
 
 // if you have exported and copied data from your original client,
 // set this to 1 to enable movement and everything map related.

@@ -12,8 +12,9 @@
 #permission=10
 SET,lang ${@1}
 DEFAULT,lang 0
-SENDCHATMESSAGE,17,{${lang}},{${@def}},{${@0}}
+SET,r ?{SENDCHATMESSAGE,17,{${lang}},{${@def}},{${@0}}}
 UNSET lang
+RETURN ${r}
 
 
 //-----------------------------------------------------------
@@ -24,7 +25,7 @@ UNSET lang
 // args:
 // @def: command to send
 
-SAY ${#CMDCHAR}${@def}
+RETURN ?{SAY ${#CMDCHAR}${@def}}
 
 
 //-----------------------------------------------------------
@@ -56,8 +57,7 @@ IF ?{AND,?{string_is_command ${@def}} ?{SMALLER,?{GETPLAYERPERM ${@thiscmd_name}
         RETURN false
 ELSE
         // no: say the text as usual.
-        SAY,{${@0}} ${@def}
-        RETURN true
+        RETURN ?{SAY,{${@0}} ${@def}}
 ENDIF
 
 
@@ -75,9 +75,10 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Saying '${msg}' in lang ${lang}
 
-SENDCHATMESSAGE,1,${lang},{${msg}}
+SET,r ?{SENDCHATMESSAGE,1,${lang},{${msg}}}
 UNSET lang
 UNSET msg
+RETURN ${r}
 
 
 //-----------------------------------------------------------
@@ -93,16 +94,17 @@ default,lang 0
 
 LOGDEBUG * Saying '${msg}' in lang ${lang} to guild
 
-SENDCHATMESSAGE,4,${lang},{${msg}}
+SET,r ?{SENDCHATMESSAGE,4,${lang},{${msg}}}
 UNSET lang
 UNSET msg
+RETURN ${r}
 
 //-----------------------------------------------------------
 #script=sayitem
 #permission=0
 //-----------------------------------------------------------
 // example script to "say" a clickable item
-SAY ?{getchatitem ${@def}}
+RETURN ?{SAY ?{getchatitem ${@def}}}
 
 
 //-----------------------------------------------------------
@@ -118,16 +120,17 @@ default,lang 0
 
 LOGDEBUG * Saying '${msg}' in lang ${lang} to party
 
-SENDCHATMESSAGE,2,${lang},{${msg}}
+SET,r ?{SENDCHATMESSAGE,2,${lang},{${msg}}}
 UNSET lang
 UNSET msg
+RETURN ${r}
 
 //-----------------------------------------------------------
 #script=sayred
 //-----------------------------------------------------------
 // example script how to output colored text
 #permission=0
-SAY,{${@0}} |cffFF0000${@def}
+RETURN ?{SAY,{${@0}} |cffFF0000${@def}}
 
 //-----------------------------------------------------------
 #script=sayv
@@ -140,16 +143,16 @@ SET,vl ${@0}
 DEFAULT,vl 0
 
 IF ?{NOT ?{ISSET ${vn}}}
-        SAY,{${vl}} * Var '${@def}' not defined.
+        SET,r ?{SAY,{${vl}} * Var '${@def}' not defined.}
 ELSE
         SET,vv ${${vn}}
-        SAY,{${vl}} * Var '${@def}' = '${vv}'
+        SET,r ?{SAY,{${vl}} * Var '${@def}' = '${vv}'}
 ENDIF
 
 UNSET vv
 UNSET vn
 UNSET vl
-
+RETURN ${r}
 
 //-----------------------------------------------------------
 #script=whisper
@@ -168,10 +171,11 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Whisp to '{${player}}' '{${msg}}' in lang '${lang}'
 
-SENDCHATMESSAGE,7,{${lang}},{${msg}},{${player}}
+SET,r ?{SENDCHATMESSAGE,7,{${lang}},{${msg}},{${player}}}
 UNSET lang
 UNSET msg
 UNSET player
+RETURN ${r}
 
 
 //-------------------------------------------------------------
@@ -189,9 +193,10 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Yelling '${msg}' in lang ${lang}
 
-SENDCHATMESSAGE,6,${lang},{${msg}}
+SET,r ?{SENDCHATMESSAGE,6,${lang},{${msg}}}
 UNSET lang
 UNSET msg
+RETURN ${r}
 
 
 //-----------------------------------------------------------
@@ -205,8 +210,7 @@ IF ?{AND,?{string_is_command ${@def}} ?{SMALLER,?{GETPLAYERPERM ${@thiscmd_name}
         RETURN false
 ELSE
         // no: say the text as usual.
-        YELL,{${@0}} ${@def}
-        RETURN true
+        RETURN ?{YELL,{${@0}} ${@def}}
 ENDIF
 
 
@@ -223,7 +227,8 @@ DEFAULT,lang ${#DEFAULTLANG}
 
 LOGDEBUG * Me ${msg} (in lang ${lang})
 
-SENDCHATMESSAGE,10,${lang},{${msg}}
+SET,r ?{SENDCHATMESSAGE,10,${lang},{${msg}}}
 UNSET lang
 UNSET msg
+RETURN ${r}
 
