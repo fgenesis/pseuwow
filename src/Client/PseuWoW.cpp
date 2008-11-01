@@ -352,7 +352,7 @@ void PseuInstance::Update()
         {
             logdetail("Disconnected, switching GUI back to Loginscreen.");
             _gui->SetSceneState(SCENESTATE_LOGINSCREEN);
-            while(_gui->GetSceneState() != SCENESTATE_LOGINSCREEN) // .. and wait until scenestate is set
+            while(_gui && _gui->GetSceneState() != SCENESTATE_LOGINSCREEN) // .. and wait until scenestate is set
                 Sleep(1);
         }
     }
@@ -485,6 +485,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     enablegui=(bool)atoi(v.Get("ENABLEGUI").c_str());
     rmcontrolport=atoi(v.Get("RMCONTROLPORT").c_str());
     rmcontrolhost=v.Get("RMCONTROLHOST");
+    rmcontrolpass=v.Get("RMCONTROLPASS");
     useMaps=(bool)atoi(v.Get("USEMAPS").c_str());
     skipaddonchat=(bool)atoi(v.Get("SKIPADDONCHAT").c_str());
     dumpPackets=(uint8)atoi(v.Get("DUMPPACKETS").c_str());

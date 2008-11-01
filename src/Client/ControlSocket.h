@@ -14,9 +14,15 @@ public:
     void OnAccept();
     void OnRead();
 
+    void HandleString(std::string);
+    void SendTelnetText(std::string);
+
 private:
+    void _Execute(std::string);
     PseuInstance *_instance;
     bool _ok;
+    std::string _str;
+    bool _authed;
 };
 
 

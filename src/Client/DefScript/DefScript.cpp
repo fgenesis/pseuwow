@@ -1055,24 +1055,24 @@ DefXChgResult DefScriptPackage::ReplaceVars(std::string str, CmdSet *pSet, unsig
     return xchg;
 }
 
-std::string DefScriptPackage::_NormalizeVarName(std::string vn_in, std::string sn){
-    if(vn_in.empty())
-        return vn_in;
-    std::string vn=vn_in;
+std::string DefScriptPackage::_NormalizeVarName(std::string vn, std::string sn)
+{
     bool global=false;
     if(sn.empty())
         global = true;
     while(true)
     {
-        if(vn.at(0)=='#')
+        if(vn.empty())
+            break;
+        if(vn[0]=='#')
             global = true;
-        if(vn.at(0)=='#' || vn.at(0)==':')
+        if(vn[0]=='#' || vn[0]==':')
 			vn.erase(0,1);
         else
             break;
     }
 
-    if( (!global) && (vn.at(0)!='@') )  
+    if( (!global) && (vn[0]!='@') )  
         vn=sn+"::"+vn;
 
     return vn;
