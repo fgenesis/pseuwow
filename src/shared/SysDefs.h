@@ -70,6 +70,7 @@
 #else
     #define stricmp strcasecmp
     #define strnicmp strncasecmp
+    #define memicmp memcmp
     #define I64FMT "%016llX"
     #define I64FMTD "%llu"
     #define SI64FMTD "%lld"

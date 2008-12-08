@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #ifndef _SOCKETBASE_H
 #define _SOCKETBASE_H
+#if defined( __GNUC__ ) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)>=40300
+  #include <cstring>
+#endif
 
 #include <string>
 #include <vector>

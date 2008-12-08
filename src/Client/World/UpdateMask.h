@@ -44,10 +44,12 @@ class UpdateMask
             ( (uint8 *)mUpdateMask )[ index >> 3 ] &= (0xff ^ (1 <<  ( index & 0x7 ) ) );
         }
 
-        inline bool GetBit (uint32 index)
-        {
-            return ( ( (uint8 *)mUpdateMask)[ index >> 3 ] & ( 1 << ( index & 0x7 ) )) != 0;
-        }
+	inline bool GetBit (uint32 index)
+	{
+	    if ( (index >> 3) >= mCount )
+		return false;
+	    return ( ( (uint8 *)mUpdateMask)[ index >> 3 ] & ( 1 << ( index & 0x7 ) )) != 0;
+	}
 
         inline uint32 GetBlockCount() { return mBlocks; }
         inline uint32 GetLength() { return mBlocks << 2; }

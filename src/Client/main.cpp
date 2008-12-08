@@ -1,4 +1,4 @@
-#include <new.h>
+#include <new>
 
 #include "common.h"
 #include "main.h"
@@ -80,7 +80,7 @@ void _new_handler(void)
 int main(int argc, char* argv[]) {
     try 
     {
-        set_new_handler(_new_handler);
+        std::set_new_handler(_new_handler);
         log_prepare("logfile.txt","a");
         logcustom(0,LGREEN,"+----------------------------------+");
         logcustom(0,LGREEN,"| (C) 2006-2008 Snowstorm Software |");
