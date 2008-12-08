@@ -38,11 +38,11 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 {
     uint8 utype;
     uint8 hasTransport;
-    uint32 usize, ublocks;
+    uint32 usize, ublocks, readblocks=0;
     uint64 uguid;
     recvPacket >> ublocks >> hasTransport;
-    logdev("UpdateObject: hasTransport = %u", hasTransport);
-    while(recvPacket.rpos() < recvPacket.size())
+    logdev("UpdateObject: blocks = %u, hasTransport = %u", ublocks, hasTransport);
+    while((recvPacket.rpos() < recvPacket.size())&& (readblocks < ublocks))
     {
         recvPacket >> utype;
         switch(utype)
@@ -226,6 +226,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                 return;
             }
         } // switch
+	readblocks++;
     } // while
 
 } // func

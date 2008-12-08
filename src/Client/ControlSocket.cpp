@@ -98,7 +98,7 @@ void ControlSocket::SendTelnetText(std::string s)
 
 void ControlSocket::_Execute(std::string s)
 {
-    DefReturnResult& r = _instance->GetScripts()->RunSingleLine(s);
+    DefReturnResult r = _instance->GetScripts()->RunSingleLine(s);
     if(r.ok)
     {
         std::stringstream ss;
