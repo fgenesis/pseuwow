@@ -248,4 +248,24 @@ std::string NormalizeFilename(std::string s)
     return s;
 }
 
-
+std::string FilesizeFormat(uint32 b)
+{
+    char buf[15];
+    if (b < 1024)
+    {
+        sprintf(buf,"%u B",b);
+    }
+    else if(b < 1024*1024)
+    {
+        sprintf(buf,"%.2f kB",(b / 1024.0f));
+    }
+    else if(b < 1024*1024*1024)
+    {
+        sprintf(buf,"%.2f MB",(b / double(1024*1024)));
+    }
+    else
+    {
+        sprintf(buf,"%.2f GB",(b / double(1024*1024*1024)));
+    }
+    return buf;
+}

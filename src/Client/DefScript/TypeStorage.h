@@ -99,7 +99,7 @@ template<class T> void TypeStorage<T>::Clear(bool keep)
         _storage.clear();
         return;
     }
-    for(_TypeIter it = _storage.begin(); it != _storage.end();)
+    for(_TypeIter it = _storage.begin(); it != _storage.end(); )
     {
         delete it->second;
         _storage.erase(it++);
@@ -123,7 +123,7 @@ template<class T> void TypeStorage<T>::Unlink(std::string s)
 // removes the pointer from the storage without deleting it, if name is unknown
 template<class T> void TypeStorage<T>::UnlinkByPtr(T *ptr)
 {
-    for(_TypeIter it = _storage.begin(); it != _storage.end();)
+    for(_TypeIter it = _storage.begin(); it != _storage.end(); it++)
     {
         if(it->second == ptr)
         {
@@ -135,7 +135,7 @@ template<class T> void TypeStorage<T>::UnlinkByPtr(T *ptr)
 
 template<class T> std::string TypeStorage<T>::GetNameByPtr(T *ptr)
 {
-    for(_TypeIter it = _storage.begin(); it != _storage.end();)
+    for(_TypeIter it = _storage.begin(); it != _storage.end(); it++)
     {
         if(it->second == ptr)
         {

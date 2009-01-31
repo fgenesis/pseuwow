@@ -1,0 +1,12 @@
+This directory contains packets or packet parts.
+You can change them with a hex editor or similar,
+but BE SURE YOU KNOW WHAT YOU ARE DOING!
+
+
+
+
+Information about the files:
+
+addon_info.bin - contains the addon data sent to the server in the CMSG_AUTH_SESSION
+                 packet. (Appended to the normal packet)
+
