@@ -6,6 +6,9 @@
 #include "SysDefs.h"
 #include "Unit.h"
 
+
+/*
+TODO: Update me or use UpdateFields directly
 #define PLAYER_SLOT_START            0
 
 #define EQUIPMENT_SLOT_START         0
@@ -119,6 +122,7 @@
 #define TRADE_SLOT_COUNT             7
 #define TRADE_SLOT_TRADED_COUNT      6
 #define TRADE_SLOT_NONTRADED         6
+*/
 
 struct PlayerEnumItem
 {

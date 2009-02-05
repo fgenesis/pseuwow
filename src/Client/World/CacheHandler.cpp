@@ -11,7 +11,7 @@
 #include "Item.h"
 
 // increase this number whenever you change something that makes old files unusable
-uint32 ITEMPROTOTYPES_CACHE_VERSION = 3;
+uint32 ITEMPROTOTYPES_CACHE_VERSION = 4;
 uint32 CREATURETEMPLATES_CACHE_VERSION = 0;
 uint32 GOTEMPLATES_CACHE_VERSION = 0;
 
@@ -214,11 +214,14 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->MaxCount;
         buf >> proto->Stackable;
         buf >> proto->ContainerSlots;
-        for(int i = 0; i < 10; i++)
+        buf >> proto->StatsCount;
+        for(int i = 0; i < proto->StatsCount; i++)
         {
             buf >> proto->ItemStat[i].ItemStatType;
             buf >> proto->ItemStat[i].ItemStatValue;
         }
+        buf >> proto->ScalingStatDistribution;
+        buf >> proto->ScalingStatValue;
         for(int i = 0; i < 5; i++)
         {
             buf >> proto->Damage[i].DamageMin;
@@ -274,6 +277,8 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->RequiredArenaRank;
 		buf >> proto->RequiredDisenchantSkill;
 		buf >> proto->ArmorDamageModifier;
+        buf >> proto->Duration;
+        buf >> proto->ItemLimitCategory;
 
         if(proto->Id)
         {
@@ -343,11 +348,14 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         buf << proto->MaxCount;
         buf << proto->Stackable;
         buf << proto->ContainerSlots;
-        for(int i = 0; i < 10; i++)
+        buf << proto->StatsCount;
+        for(int i = 0; i < proto->StatsCount; i++)
         {
             buf << proto->ItemStat[i].ItemStatType;
             buf << proto->ItemStat[i].ItemStatValue;
         }
+        buf << proto->ScalingStatDistribution;
+        buf << proto->ScalingStatValue;
         for(int i = 0; i < 5; i++)
         {
             buf << proto->Damage[i].DamageMin;
@@ -403,6 +411,8 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         buf << proto->RequiredArenaRank;
 		buf << proto->RequiredDisenchantSkill;
 		buf << proto->ArmorDamageModifier;
+        buf << proto->Duration;
+        buf << proto->ItemLimitCategory;
 
         //DEBUG(logdebug("ItemProtoCache: Saved %u [%s]",proto->Id, proto->Name[0].c_str()));
         uint32 size = buf.size();

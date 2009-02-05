@@ -158,6 +158,26 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 _wmosp.push_back(buf.read<MODF_chunk>());
             }
         }
+        else if(!strcmp((char*)fourcc,"MH2O"))
+        {
+            // TODO: Implement rest of this asap water levels needed for rendering/swimming!
+
+            for(uint32 i = 0; i < CHUNKS_PER_TILE; i++)
+            {
+                uint32 ofsData1, used, ofsData2;
+                buf >> ofsData1 >> used >> ofsData2;
+
+                _chunks[i].haswater = used;
+
+                if (used)
+                {
+                    // ... http://madx.dk/wowdev/wiki/index.php?title=ADT#MH2O_chunk
+                }
+            }
+
+            // remove me:
+            buf.rpos(buf.rpos()+size-(4+4+4)*CHUNKS_PER_TILE);
+        }
         else if(!strcmp((char*)fourcc,"MCNK"))
         {
             _chunks[mcnkid].hdr = buf.read<ADTMapChunkHeader>();
@@ -173,8 +193,8 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 // HACKS to make it work properly
                 if(!msize && !strcmp((char*)mfcc,"MCAL"))
                     continue;
-                if((!msize) && !strcmp((char*)mfcc,"MCLQ"))
-                    msize = _chunks[mcnkid].hdr.sizeLiquid;
+                //if((!msize) && !strcmp((char*)mfcc,"MCLQ"))
+                //    msize = _chunks[mcnkid].hdr.sizeLiquid;
 
                 //DEBUG(printf("ADT: MCNK: reading '%s' size %u\n",mfcc,msize));
 
@@ -216,7 +236,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                         buf.read((uint8*)(_chunks[mcnkid].alphamap[i]),2048);
                     }
                 }
-                else if(!strcmp((char*)mfcc,"MCLQ"))
+                /*else if(!strcmp((char*)mfcc,"MCLQ")) // MCLQ changed to MH2O chunk for whole ADT file
                 {
                     uint8 _cc3[5];
                     uint8 *fcc1 = &_cc3[0];
@@ -263,7 +283,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                         buf.rpos(buf.rpos()+diffbytes);
                         //DEBUG(printf("ADT: MCNK: MCLQ - %u junk bytes skipped\n",diffbytes));
                     }
-                }
+                }*/
                 else if(!strcmp((char*)mfcc,"MCSE"))
                 {
                     uint32 emm = _chunks[mcnkid].hdr.nSndEmitters;

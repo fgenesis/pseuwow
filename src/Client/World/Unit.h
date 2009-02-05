@@ -13,7 +13,8 @@ enum UnitMoveType
 	MOVE_TURN       = 5,
 	MOVE_FLY        = 6,
 	MOVE_FLYBACK    = 7,
-	MAX_MOVE_TYPE   = 8
+	MOVE_PITCH_RATE = 8,
+	MAX_MOVE_TYPE   = 9
 };
 
 enum UnitFlags

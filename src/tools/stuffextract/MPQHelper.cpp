@@ -18,7 +18,9 @@ MPQHelper::MPQHelper(char *archive)
     // ok maybe this is a bit too much but should work fine :)
     _patches.push_front(dir+archive+ext); //
     _patches.push_front(dir+"common"+ext);
+	_patches.push_front(dir+"common-2"+ext);
     _patches.push_front(dir+"expansion"+ext);
+	_patches.push_front(dir+"lichking"+ext);
     _patches.push_front(dir+"patch"+ext);
     for(uint32 i=1; i<=MAX_PATCH_NUMBER; i++)
     {
@@ -32,6 +34,7 @@ MPQHelper::MPQHelper(char *archive)
     _patches.push_front(ldir+"expansion-speech-"+GetLocale()+ext);
     _patches.push_front(ldir+"expansion-locale-"+GetLocale()+ext);	
     _patches.push_front(ldir+"expansion-"+archive+"-"+GetLocale()+ext);
+	_patches.push_front(ldir+"lichking-locale-"+GetLocale()+ext);	
 
     _patches.push_front(ldir+"patch"+"-"+GetLocale()+ext);
     for(uint32 i=1; i<=MAX_PATCH_NUMBER; i++)

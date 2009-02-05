@@ -118,8 +118,10 @@ void WorldSession::SendCastSpell(uint32 spellid, bool nocheck)
     WorldPacket packet;
     ByteBuffer temp;
     uint32 flags=TARGET_FLAG_SELF; // target mask. spellcast implementeation needs to be changed if TARGET_MASK_SELF is != 0
+    packet << (uint8)0; // unk
     packet << spellid;
     packet << (uint8)0; // unk
+    
     if(target && my->GetTarget() != GetGuid()) // self cast?
     {
         if(target->GetTypeId() == TYPEID_PLAYER || target->GetTypeId() == TYPEID_UNIT)

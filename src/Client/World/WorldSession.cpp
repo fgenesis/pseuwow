@@ -312,6 +312,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {MSG_MOVE_SET_TURN_RATE, &WorldSession::_HandleSetSpeedOpcode},
         {MSG_MOVE_SET_FLIGHT_SPEED, &WorldSession::_HandleSetSpeedOpcode},
         {MSG_MOVE_SET_FLIGHT_BACK_SPEED, &WorldSession::_HandleSetSpeedOpcode},
+        {MSG_MOVE_SET_PITCH_RATE, &WorldSession::_HandleSetSpeedOpcode},
 
         // force set speed opcodes
         {SMSG_FORCE_WALK_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
@@ -322,11 +323,12 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_FORCE_TURN_RATE_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
         {SMSG_FORCE_FLIGHT_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
         {SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
+        {SMSG_FORCE_PITCH_RATE_CHANGE, &WorldSession::_HandleForceSetSpeedOpcode},
 
         {SMSG_COMPRESSED_UPDATE_OBJECT, &WorldSession::_HandleCompressedUpdateObjectOpcode},
         {SMSG_UPDATE_OBJECT, &WorldSession::_HandleUpdateObjectOpcode},
         {SMSG_CAST_FAILED, &WorldSession::_HandleCastResultOpcode},
-        {SMSG_CLEAR_EXTRA_AURA_INFO, &WorldSession::_HandleCastSuccessOpcode},
+        /*{SMSG_CLEAR_EXTRA_AURA_INFO_OBSOLETE, &WorldSession::_HandleCastSuccessOpcode},  <--- RECHECK ME ! - cast success removed ?!? */
         {SMSG_ITEM_QUERY_SINGLE_RESPONSE, &WorldSession::_HandleItemQuerySingleResponseOpcode},
         {SMSG_DESTROY_OBJECT, &WorldSession::_HandleDestroyObjectOpcode},
         {SMSG_INITIAL_SPELLS, &WorldSession::_HandleInitialSpellsOpcode},
@@ -529,7 +531,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         digest.UpdateBigNumbers(GetInstance()->GetSessionKey(),NULL);
         digest.Finalize();
         WorldPacket auth;
-        auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<clientseed_uint32;
+        auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<unk<<clientseed_uint32;
         auth.append(digest.GetDigest(),20);
         // recvPacket << real_size
         // recvPacket << ziped_UI_Plugins_Info
@@ -548,7 +550,11 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
 {
     uint8 errcode;
+    uint8 dummy8, expansion; uint32 dummy32;
     recvPacket >> errcode;
+    recvPacket >> dummy32 >> dummy8 >> dummy32;
+    recvPacket >> expansion;
+
     if(errcode == 0xC)
     {
         logdetail("World Authentication successful, preparing for char list request...");
@@ -603,9 +609,9 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             recvPacket >> plr[i]._y;
             recvPacket >> plr[i]._z;
             recvPacket >> plr[i]._guildId;
-            recvPacket >> dummy8;
             recvPacket >> plr[i]._flags;
-            recvPacket >> dummy8 >> dummy8 >> dummy8;
+            recvPacket >> dummy32; // at_login_customize
+            recvPacket >> dummy8;
             recvPacket >> plr[i]._petInfoId;
             recvPacket >> plr[i]._petLevel;
             recvPacket >> plr[i]._petFamilyId;
@@ -623,7 +629,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
                     *mapdb = GetDBMgr().GetDB("map"),
                     *classdb = GetDBMgr().GetDB("class");
         char *zonename, *racename, *mapname, *classname;
-        zonename = racename = mapname = classname = NULL;
+        zonename = racename = mapname = classname = "";
 
         for(unsigned int i=0;i<num;i++)
         {
@@ -744,6 +750,12 @@ void WorldSession::_HandleSetProficiencyOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleAccountDataMD5Opcode(WorldPacket& recvPacket)
 {
+	/*
+        uint32 time;
+        uint8 dummy;
+        recvPacket >> time >> dummy;
+        ...
+	*/
     // packet structure not yet known
 }
 
@@ -1013,9 +1025,9 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     uint32 flags, time, unk32;
     float x, y, z, o;
     uint64 guid;
-    uint8 unk8;
+    uint16 unk16;
     guid = recvPacket.GetPackedGuid();
-    recvPacket >> flags >> unk8 >> time >> x >> y >> z >> o >> unk32;
+    recvPacket >> flags >> unk16 >> time >> x >> y >> z >> o >> unk32;
     DEBUG(logdebug("MOVE: "I64FMT" -> time=%u flags=0x%X x=%.4f y=%.4f z=%.4f o=%.4f",guid,time,flags,x,y,z,o));
     Object *obj = objmgr.GetObj(guid);
     if(obj && obj->IsWorldObject())
@@ -1029,7 +1041,7 @@ void WorldSession::_HandleSetSpeedOpcode(WorldPacket& recvPacket)
     uint64 guid;
     float x, y, z, o, speed;
     uint32 unk32, movetype;
-    uint8 unk8;
+    uint16 unk16;
 
     switch(recvPacket.GetOpcode())
     {
@@ -1065,6 +1077,10 @@ void WorldSession::_HandleSetSpeedOpcode(WorldPacket& recvPacket)
         movetype = MOVE_FLYBACK;
         break;
 
+    case MSG_MOVE_SET_PITCH_RATE:
+        movetype = MOVE_PITCH_RATE;
+        break;
+
     default:
         logerror("MSG_MOVE_SET speed change unkown case error, opcode %u !", recvPacket.GetOpcode());
         return;
@@ -1072,10 +1088,10 @@ void WorldSession::_HandleSetSpeedOpcode(WorldPacket& recvPacket)
 
     guid = recvPacket.GetPackedGuid();
     recvPacket >> unk32;
-    recvPacket >> unk8;
+    recvPacket >> unk16;
     recvPacket >> unk32; /* getMSTime()*/
     recvPacket >> x >> y >> z >> o;
-    recvPacket >> unk32;
+    recvPacket >> unk32; // falltime
     recvPacket >> speed;
 
     Object *obj = objmgr.GetObj(guid);
@@ -1125,6 +1141,10 @@ void WorldSession::_HandleForceSetSpeedOpcode(WorldPacket& recvPacket)
 
     case SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE:
         movetype = MOVE_FLYBACK;
+        break;
+
+    case SMSG_FORCE_PITCH_RATE_CHANGE:
+        movetype = MOVE_PITCH_RATE;
         break;
 
     default:
@@ -1253,7 +1273,7 @@ void WorldSession::_HandleCastResultOpcode(WorldPacket& recvPacket)
 {
     uint32 spellid,otherr = 0;
     uint8 result, castCount;
-    recvPacket >> spellid >> result >> castCount;
+    recvPacket >> castCount >> spellid >> result;
     if (recvPacket.rpos()+sizeof(uint32) <= recvPacket.size())
         recvPacket >> otherr;
     logdetail("Cast of spell %u failed. result=%u, cast count=%u, additional info=%u",spellid,result,castCount,otherr);
@@ -1542,7 +1562,7 @@ void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
 
     CreatureTemplate *ct = new CreatureTemplate();
     std::string s;
-    uint32 unk;
+    //uint32 unk;
     float unkf;
     ct->entry = entry;
     recvPacket >> ct->name;
@@ -1555,7 +1575,6 @@ void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
     recvPacket >> ct->type;
     recvPacket >> ct->family;
     recvPacket >> ct->rank;
-    recvPacket >> unk;
     recvPacket >> ct->SpellDataId;
     recvPacket >> ct->displayid_A;
     recvPacket >> ct->displayid_H;

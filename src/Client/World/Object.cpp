@@ -108,7 +108,9 @@ float WorldObject::GetDistanceZ(WorldObject* obj)
 void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
 {
     uint64 guid;
-    recvPacket >> guid;
+    uint8 dummy;
+
+    recvPacket >> guid >> dummy;
     logdebug("Destroy Object "I64FMT,guid);
 
     // call script just before object removal

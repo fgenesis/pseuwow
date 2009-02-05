@@ -80,7 +80,7 @@ DEBUG(logdebug("Trying to open file %s",MeshFile->getFileName()));
 
 
 MeshFile->read(&header,sizeof(ModelHeader));
-if ((header.version[0] < 4 || header.version[0] > 7) || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
+if (header.version[0] != 8 || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
      printf("Wrong header! File version doesn't match or file is not a M2 file.");
      return 0;
      }
@@ -119,33 +119,37 @@ for(u32 i =0;i<header.nVertices;i++)
 }
 DEBUG(logdebug("Read %u/%u Vertices",M2MVertices.size(),header.nVertices));
 
-//Views == Sets of vertices. Usage yet unknown. Global data
-if(M2MViews.size()>0)
-    M2MViews.clear();
-ModelView tempM2MView;
-MeshFile->seek(header.ofsViews);
-for(u32 i =0;i<header.nViews;i++)
+//Views (skins) == Sets of vertices. Usage yet unknown. Global data
+
+std::string SkinName = MeshFile->getFileName();
+SkinName = SkinName.substr(0, SkinName.length()-3) + "00.skin"; // FIX ME (and stuffextract) ! as we need more skins
+io::IReadFile* SkinFile = io::createReadFile(SkinName.c_str());
+if (!SkinFile)
 {
-    MeshFile->read(&tempM2MView,sizeof(ModelView));
-    M2MViews.push_back(tempM2MView);
+    printf("Error! Skin file not found: %s", SkinName.c_str());
+    return 0;
 }
-//std::cout << "Read "<<M2MViews.size()<<"/"<<header.nViews<<" Views\n";
+
+ModelView currentView;
+SkinFile->read(&currentView, sizeof(ModelView));
+
+//std::cout << "Skins "<<header.nViews<<" (views)\n";
 
 DEBUG(logdebug("Using View 0 for all further operations"));
-DEBUG(logdebug("This View has %u Submeshes",M2MViews[0].nSub));
+DEBUG(logdebug("This View has %u Submeshes",currentView.nSub));
 
 //Vertex indices of a specific view.Local to View 0
 if(M2MIndices.size()>0)
     M2MIndices.clear();
 
 u16 tempM2Index;
-MeshFile->seek(M2MViews[0].ofsIndex);
-for(u32 i =0;i<M2MViews[0].nIndex;i++)
+SkinFile->seek(currentView.ofsIndex);
+for(u32 i =0;i<currentView.nIndex;i++)
 {
-    MeshFile->read(&tempM2Index,sizeof(u16));
+    SkinFile->read(&tempM2Index,sizeof(u16));
     M2MIndices.push_back(tempM2Index);
 }
-DEBUG(logdebug("Read %u/%u Indices",M2MIndices.size(),M2MViews[0].nIndex));
+DEBUG(logdebug("Read %u/%u Indices",M2MIndices.size(),currentView.nIndex));
 
 
 //Triangles. Data Points point to the Vertex Indices, not the vertices themself. 3 Points = 1 Triangle, Local to View 0
@@ -153,26 +157,26 @@ if(M2MTriangles.size()>0)
     M2MTriangles.clear();
 
 u16 tempM2Triangle;
-MeshFile->seek(M2MViews[0].ofsTris);
-for(u32 i =0;i<M2MViews[0].nTris;i++)
+SkinFile->seek(currentView.ofsTris);
+for(u32 i =0;i<currentView.nTris;i++)
 {
-    MeshFile->read(&tempM2Triangle,sizeof(u16));
+    SkinFile->read(&tempM2Triangle,sizeof(u16));
     M2MTriangles.push_back(tempM2Triangle);
 }
-DEBUG(logdebug("Read %u/%u Triangles",M2MTriangles.size(),M2MViews[0].nTris));
+DEBUG(logdebug("Read %u/%u Triangles",M2MTriangles.size(),currentView.nTris));
 //Submeshes, Local to View 0
 if(M2MSubmeshes.size()>0)
     M2MSubmeshes.clear();
 
 ModelViewSubmesh tempM2Submesh;
-MeshFile->seek(M2MViews[0].ofsSub);
-for(u32 i =0;i<M2MViews[0].nSub;i++)
+SkinFile->seek(currentView.ofsSub);
+for(u32 i =0;i<currentView.nSub;i++)
 {
-    MeshFile->read(&tempM2Submesh,sizeof(ModelViewSubmesh));
+    SkinFile->read(&tempM2Submesh,sizeof(ModelViewSubmesh));
     M2MSubmeshes.push_back(tempM2Submesh);
 //    std::cout<< "Submesh " <<i<<" ID "<<tempM2Submesh.meshpartId<<" starts at V/T "<<tempM2Submesh.ofsVertex<<"/"<<tempM2Submesh.ofsTris<<" and has "<<tempM2Submesh.nVertex<<"/"<<tempM2Submesh.nTris<<" V/T\n";
 }
-DEBUG(logdebug("Read %u/%u Submeshes",M2MSubmeshes.size(),M2MViews[0].nSub));
+DEBUG(logdebug("Read %u/%u Submeshes",M2MSubmeshes.size(),currentView.nSub));
 
 //Texture units. Local to view 0
 TextureUnit tempM2TexUnit;
@@ -180,10 +184,10 @@ if(!M2MTextureUnit.empty())
 {
     M2MTextureUnit.clear();
 }
-MeshFile->seek(M2MViews[0].ofsTex);
-for(u32 i=0;i<M2MViews[0].nTex;i++)
+SkinFile->seek(currentView.ofsTex);
+for(u32 i=0;i<currentView.nTex;i++)
 {
-    MeshFile->read(&tempM2TexUnit,sizeof(TextureUnit));
+    SkinFile->read(&tempM2TexUnit,sizeof(TextureUnit));
     M2MTextureUnit.push_back(tempM2TexUnit);
 DEBUG(logdebug(" TexUnit %u: Submesh: %u %u Render Flag: %u TextureUnitNumber: %u %u TTU: %u",i,tempM2TexUnit.submeshIndex1,tempM2TexUnit.submeshIndex2, tempM2TexUnit.renderFlagsIndex, tempM2TexUnit.TextureUnitNumber, tempM2TexUnit.TextureUnitNumber2 ,tempM2TexUnit.textureIndex));
 }
@@ -259,6 +263,8 @@ for(u32 i=0; i<M2MTextureDef.size(); i++)
 ///////////////////////////////////////
 //      Animation related stuff      //
 ///////////////////////////////////////
+
+/* ANIMATION NEED FIX !!! - search this text to find all code blocks for animations
 
 printf("Global Sequences: %u\n",header.nGlobalSequences);
 //Ignored at the moment, as wolf.m2 has none
@@ -442,7 +448,7 @@ if(M2MBones[i].scaling.header.nValues>0){
 
 //    Joint->Animatedscale=core::vector3df(1.0f,1.0f,1.0f);
     //Joint->Animatedrotation=core::quaternion(0.0f,0.0f,0.0f,0.0f);
-    core::matrix4 positionMatrix;
+/*    core::matrix4 positionMatrix; ANIMATION NEED FIX !!!
 //	positionMatrix.setTranslation( Joint->Animatedposition );
 	core::matrix4 scaleMatrix;
 	//scaleMatrix.setScale( Joint->Animatedscale );
@@ -459,7 +465,7 @@ if(M2MBones[i].scaling.header.nValues>0){
 	else
 		Joint->LocalMatrix = Joint->GlobalMatrix;
 }
-
+*/
 //std::cout<<AnimatedMesh->getAllJoints()[1]->Children.size()<<" Children\n";
 //And M2MVertices are not usable like this. Thus we transform
 
@@ -473,7 +479,7 @@ for(u32 i=0;i<M2MVertices.size();i++)
     M2Vertices.push_back(video::S3DVertex(core::vector3df(M2MVertices[i].pos.X,M2MVertices[i].pos.Y,M2MVertices[i].pos.Z),core::vector3df(M2MVertices[i].normal.X,M2MVertices[i].normal.Y,M2MVertices[i].normal.Z), video::SColor(255,100,100,100),M2MVertices[i].texcoords));
 }
 //Loop through the submeshes
-for(u32 i=0; i < M2MViews[0].nSub;i++)//
+for(u32 i=0; i < currentView.nSub;i++)//
 {
     //Now, M2MTriangles refers to M2MIndices and not to M2MVertices.
     scene::SSkinMeshBuffer *MeshBuffer = AnimatedMesh->createBuffer();
@@ -492,6 +498,7 @@ for(u32 i=0; i < M2MViews[0].nSub;i++)//
         for(u32 k=0; k<4; k++)
         {
             //std::cout << (u32)M2MVertices[j].bones[k] << " ";
+            /* ANIMATION NEED FIX !!!
             if((M2MVertices[j].weights[k]/255.0f)>0.0f)
             {
             scene::CSkinnedMesh::SWeight* weight = AnimatedMesh->createWeight(AnimatedMesh->getAllJoints()[(u32)M2MVertices[j].bones[k]]);
@@ -499,6 +506,7 @@ for(u32 i=0; i < M2MViews[0].nSub;i++)//
             weight->vertex_id=j-M2MSubmeshes[i].ofsVertex;
             weight->buffer_id=i;
             }
+            */
             //std::cout<<weight->buffer_id << " " << weight->vertex_id << " " << weight->strength <<"|";
         }
     //    std::cout<<'\n';
@@ -563,7 +571,6 @@ M2MTextureDef.clear();
 M2MSubmeshes.clear();
 M2MTextureFiles.clear();
 M2MTextureLookup.clear();
-M2MViews.clear();
 return true;
 }
 

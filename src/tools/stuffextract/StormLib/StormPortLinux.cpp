@@ -77,9 +77,9 @@ HANDLE CreateFile(const char *sFileName, DWORD ulMode, DWORD ulSharing, void *pS
     case OPEN_EXISTING:
         return (HANDLE)open(sFileName, O_RDONLY | O_LARGEFILE);
     case OPEN_ALWAYS:
-        return (HANDLE)open(sFileName, O_RDWR | O_CREAT);
+        return (HANDLE)open(sFileName, O_RDWR | O_CREAT, 0666);
     case CREATE_NEW:
-        return (HANDLE)open(sFileName, O_RDWR | O_CREAT | O_TRUNC);
+        return (HANDLE)open(sFileName, O_RDWR | O_CREAT | O_TRUNC, 0666);
     default:
         return INVALID_HANDLE_VALUE;
     }

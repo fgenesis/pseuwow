@@ -55,7 +55,7 @@ enum Classes
     CLASS_HUNTER    = 3,
     CLASS_ROGUE     = 4,
     CLASS_PRIEST    = 5,
-    // CLASS_UNK1   = 6, unused
+    CLASS_DEATH_KNIGHT = 6,
     CLASS_SHAMAN    = 7,
     CLASS_MAGE      = 8,
     CLASS_WARLOCK   = 9,
@@ -140,7 +140,8 @@ enum ItemQualities
     ITEM_QUALITY_RARE                  = 3,                 //BLUE
     ITEM_QUALITY_EPIC                  = 4,                 //PURPLE
     ITEM_QUALITY_LEGENDARY             = 5,                 //ORANGE
-    ITEM_QUALITY_ARTIFACT              = 6                  //LIGHT YELLOW
+    ITEM_QUALITY_ARTIFACT              = 6,                  //LIGHT YELLOW
+    ITEM_QUALITY_HEIRLOOM              = 7
 };
 
 enum sheathTypes
@@ -209,7 +210,7 @@ enum SpellEffects
     SPELL_EFFECT_TELEPORT_UNITS            = 5,
     SPELL_EFFECT_APPLY_AURA                = 6,
     SPELL_EFFECT_ENVIRONMENTAL_DAMAGE      = 7,
-    SPELL_EFFECT_MANA_DRAIN                = 8,
+    SPELL_EFFECT_POWER_DRAIN               = 8,
     SPELL_EFFECT_HEALTH_LEECH              = 9,
     SPELL_EFFECT_HEAL                      = 10,
     SPELL_EFFECT_BIND                      = 11,
@@ -236,7 +237,7 @@ enum SpellEffects
     SPELL_EFFECT_TRIGGER_MISSILE           = 32,
     SPELL_EFFECT_OPEN_LOCK                 = 33,
     SPELL_EFFECT_SUMMON_CHANGE_ITEM        = 34,
-    SPELL_EFFECT_APPLY_AREA_AURA           = 35,
+    SPELL_EFFECT_APPLY_AREA_AURA_PARTY     = 35,
     SPELL_EFFECT_LEARN_SPELL               = 36,
     SPELL_EFFECT_SPELL_DEFENSE             = 37,
     SPELL_EFFECT_DISPEL                    = 38,
@@ -246,12 +247,11 @@ enum SpellEffects
     SPELL_EFFECT_SUMMON_GUARDIAN           = 42,
     SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER= 43,
     SPELL_EFFECT_SKILL_STEP                = 44,
-    SPELL_EFFECT_UNDEFINED_45              = 45,
+    SPELL_EFFECT_ADD_HONOR                 = 45,
     SPELL_EFFECT_SPAWN                     = 46,
     SPELL_EFFECT_TRADE_SKILL               = 47,
     SPELL_EFFECT_STEALTH                   = 48,
     SPELL_EFFECT_DETECT                    = 49,
-    //    SPELL_EFFECT_SUMMON_OBJECT             = 50,
     SPELL_EFFECT_TRANS_DOOR                = 50,
     SPELL_EFFECT_FORCE_CRITICAL_HIT        = 51,
     SPELL_EFFECT_GUARANTEE_HIT             = 52,
@@ -267,16 +267,16 @@ enum SpellEffects
     SPELL_EFFECT_POWER_BURN                = 62,
     SPELL_EFFECT_THREAT                    = 63,
     SPELL_EFFECT_TRIGGER_SPELL             = 64,
-    SPELL_EFFECT_HEALTH_FUNNEL             = 65,
-    SPELL_EFFECT_POWER_FUNNEL              = 66,
+    SPELL_EFFECT_APPLY_AREA_AURA_RAID      = 65,
+    SPELL_EFFECT_CREATE_MANA_GEM           = 66,
     SPELL_EFFECT_HEAL_MAX_HEALTH           = 67,
     SPELL_EFFECT_INTERRUPT_CAST            = 68,
     SPELL_EFFECT_DISTRACT                  = 69,
     SPELL_EFFECT_PULL                      = 70,
     SPELL_EFFECT_PICKPOCKET                = 71,
     SPELL_EFFECT_ADD_FARSIGHT              = 72,
-    SPELL_EFFECT_SUMMON_POSSESSED          = 73,
-    SPELL_EFFECT_SUMMON_TOTEM              = 74,
+    SPELL_EFFECT_UNTRAIN_TALENTS           = 73,
+    SPELL_EFFECT_APPLY_GLYPH               = 74,
     SPELL_EFFECT_HEAL_MECHANICAL           = 75,
     SPELL_EFFECT_SUMMON_OBJECT_WILD        = 76,
     SPELL_EFFECT_SCRIPT_EFFECT             = 77,
@@ -289,10 +289,10 @@ enum SpellEffects
     SPELL_EFFECT_STUCK                     = 84,
     SPELL_EFFECT_SUMMON_PLAYER             = 85,
     SPELL_EFFECT_ACTIVATE_OBJECT           = 86,
-    SPELL_EFFECT_SUMMON_TOTEM_SLOT1        = 87,
-    SPELL_EFFECT_SUMMON_TOTEM_SLOT2        = 88,
-    SPELL_EFFECT_SUMMON_TOTEM_SLOT3        = 89,
-    SPELL_EFFECT_SUMMON_TOTEM_SLOT4        = 90,
+    SPELL_EFFECT_WMO_DAMAGE                = 87,
+    SPELL_EFFECT_WMO_REPAIR                = 88,
+    SPELL_EFFECT_WMO_CHANGE                = 89,
+    SPELL_EFFECT_KILL_CREDIT               = 90,
     SPELL_EFFECT_THREAT_ALL                = 91,
     SPELL_EFFECT_ENCHANT_HELD_ITEM         = 92,
     SPELL_EFFECT_SUMMON_PHANTASM           = 93,
@@ -321,38 +321,48 @@ enum SpellEffects
     SPELL_EFFECT_SKIN_PLAYER_CORPSE        = 116,
     SPELL_EFFECT_SPIRIT_HEAL               = 117,
     SPELL_EFFECT_SKILL                     = 118,
-    SPELL_EFFECT_APPLY_AURA_NEW            = 119,
+    SPELL_EFFECT_APPLY_AREA_AURA_PET       = 119,
     SPELL_EFFECT_TELEPORT_GRAVEYARD        = 120,
     SPELL_EFFECT_NORMALIZED_WEAPON_DMG     = 121,
     SPELL_EFFECT_122                       = 122,
-    SPELL_EFFECT_123                       = 123,
-    SPELL_EFFECT_124                       = 124,
-    SPELL_EFFECT_REDUCE_THREAT_PERCENT     = 125,
-    SPELL_EFFECT_126                       = 126,
+    SPELL_EFFECT_SEND_TAXI                 = 123,
+    SPELL_EFFECT_PLAYER_PULL               = 124,
+    SPELL_EFFECT_MODIFY_THREAT_PERCENT     = 125,
+    SPELL_EFFECT_STEAL_BENEFICIAL_BUFF     = 126,
     SPELL_EFFECT_PROSPECTING               = 127,
-    SPELL_EFFECT_128                       = 128,
-    SPELL_EFFECT_129                       = 129,
-    SPELL_EFFECT_130                       = 130,
+    SPELL_EFFECT_APPLY_AREA_AURA_FRIEND    = 128,
+    SPELL_EFFECT_APPLY_AREA_AURA_ENEMY     = 129,
+    SPELL_EFFECT_REDIRECT_THREAT           = 130,
     SPELL_EFFECT_131                       = 131,
     SPELL_EFFECT_132                       = 132,
-    SPELL_EFFECT_133                       = 133,
-    SPELL_EFFECT_134                       = 134,
+    SPELL_EFFECT_UNLEARN_SPECIALIZATION    = 133,
+    SPELL_EFFECT_KILL_CREDIT2              = 134,
     SPELL_EFFECT_135                       = 135,
-    SPELL_EFFECT_136                       = 136,
-    SPELL_EFFECT_137                       = 137,
+    SPELL_EFFECT_HEAL_PCT                  = 136,
+    SPELL_EFFECT_ENERGIZE_PCT              = 137,
     SPELL_EFFECT_138                       = 138,
-    SPELL_EFFECT_139                       = 139,
-    SPELL_EFFECT_140                       = 140,
+    SPELL_EFFECT_CLEAR_QUEST               = 139,
+    SPELL_EFFECT_FORCE_CAST                = 140,
     SPELL_EFFECT_141                       = 141,
-    SPELL_EFFECT_142                       = 142,
-    SPELL_EFFECT_143                       = 143,
+    SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
+    SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
     SPELL_EFFECT_144                       = 144,
     SPELL_EFFECT_145                       = 145,
-    SPELL_EFFECT_146                       = 146,
-    SPELL_EFFECT_147                       = 147,
+    SPELL_EFFECT_ACTIVATE_RUNE             = 146,
+    SPELL_EFFECT_QUEST_FAIL                = 147,
     SPELL_EFFECT_148                       = 148,
     SPELL_EFFECT_149                       = 149,
-    TOTAL_SPELL_EFFECTS                    = 150
+    SPELL_EFFECT_150                       = 150,
+    SPELL_EFFECT_TRIGGER_SPELL_2           = 151,
+    SPELL_EFFECT_152                       = 152,
+    SPELL_EFFECT_153                       = 153,
+    SPELL_EFFECT_154                       = 154,
+    SPELL_EFFECT_TITAN_GRIP                = 155,
+    SPELL_EFFECT_ADD_SOCKET                = 156,
+    SPELL_EFFECT_157                       = 157,
+    SPELL_EFFECT_MILLING                   = 158,
+    SPELL_EFFECT_ALLOW_RENAME_PET          = 159,
+    TOTAL_SPELL_EFFECTS                    = 160
 };
 
 enum CharacterStates
@@ -404,7 +414,8 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_DO_NOT_USE_YET         = 32,
     GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING  = 33,
     GAMEOBJECT_TYPE_GUILD_BANK             = 34,
-    MAX_GAMEOBJECT_TYPE                    = 35             // sending to client this or greater value can crash client.
+    GAMEOBJECT_TYPE_TRAPDOOR               = 35,
+    MAX_GAMEOBJECT_TYPE                    = 36             // sending to client this or greater value can crash client.
 };
 
 enum TextEmote
@@ -924,7 +935,9 @@ enum LockType
     LOCKTYPE_BLASTING              = 16,
     LOCKTYPE_SLOW_OPEN             = 17,
     LOCKTYPE_SLOW_CLOSE            = 18,
-    LOCKTYPE_FISHING               = 19
+    LOCKTYPE_FISHING               = 19,
+    LOCKTYPE_INSCRIPTION           = 20,
+    LOCKTYPE_OPEN_FROM_VEHICLE     = 21
 };
 
 enum TrainerType
@@ -974,7 +987,7 @@ enum CreatureFamily
     CREATURE_FAMILY_IMP            = 23,
     CREATURE_FAMILY_BAT            = 24,
     CREATURE_FAMILY_HYENA          = 25,
-    CREATURE_FAMILY_OWL            = 26,
+    CREATURE_FAMILY_BIRD_OF_PREY   = 26,
     CREATURE_FAMILY_WIND_SERPENT   = 27,
     CREATURE_FAMILY_REMOTE_CONTROL = 28,
     CREATURE_FAMILY_FELGUARD       = 29,
@@ -984,7 +997,17 @@ enum CreatureFamily
     CREATURE_FAMILY_SPOREBAT       = 33,
     CREATURE_FAMILY_NETHER_RAY     = 34,
     CREATURE_FAMILY_SERPENT        = 35,
-    CREATURE_FAMILY_SEA_LION       = 36 
+    CREATURE_FAMILY_SEA_LION       = 36,
+    CREATURE_FAMILY_MOTH           = 37,
+    CREATURE_FAMILY_CHIMAERA       = 38,
+    CREATURE_FAMILY_DEVILSAUR      = 39,
+    CREATURE_FAMILY_GHOUL          = 40,
+    CREATURE_FAMILY_SILITHID       = 41,
+    CREATURE_FAMILY_WORM           = 42,
+    CREATURE_FAMILY_RHINO          = 43,
+    CREATURE_FAMILY_WASP           = 44,
+    CREATURE_FAMILY_CORE_HOUND     = 45,
+    CREATURE_FAMILY_SPIRIT_BEAST   = 46
 };
 
 enum CreatureEliteType
@@ -1007,7 +1030,9 @@ enum QuestTypes
     QUEST_TYPE_LEGENDARY           = 83,
     QUEST_TYPE_ESCORT              = 84,
     QUEST_TYPE_HEROIC              = 85,
-    QUEST_TYPE_DAILY               = 87
+    QUEST_TYPE_DAILY               = 87,
+    QUEST_TYPE_RAID_10             = 88,
+    QUEST_TYPE_RAID_25             = 89
 };
 
 enum CreatureType
@@ -1032,7 +1057,7 @@ enum QuestSort
     QUEST_SORT_SEASONAL            = 22,
     QUEST_SORT_UNDERCITY_OLD       = 23,
     QUEST_SORT_HERBALISM           = 24,
-    QUEST_SORT_SCARLET_MONASTERY_OLD= 25,
+    QUEST_SORT_BATTLEGROUNDS       = 25,
     QUEST_SORT_ULDAMN_OLD          = 41,
     QUEST_SORT_WARLOCK             = 61,
     QUEST_SORT_WARRIOR             = 81,
@@ -1060,7 +1085,11 @@ enum QuestSort
     QUEST_SORT_LUNAR_FESTIVAL      = 366,
     QUEST_SORT_REPUTATION          = 367,
     QUEST_SORT_INVASION            = 368,
-    QUEST_SORT_MIDSUMMER           = 369
+    QUEST_SORT_MIDSUMMER           = 369,
+    QUEST_SORT_BREWFEST            = 370,
+    QUEST_SORT_INSCRIPTION         = 371,
+    QUEST_SORT_DEATH_KNIGHT        = 372,
+    QUEST_SORT_JEWELCRAFTING       = 373
 };
 
 enum SkillType
@@ -1070,7 +1099,6 @@ enum SkillType
     SKILL_ARMS                     = 26,
     SKILL_COMBAT                   = 38,
     SKILL_SUBTLETY                 = 39,
-    SKILL_POISONS                  = 40,
     SKILL_SWORDS                   = 43,
     SKILL_AXES                     = 44,
     SKILL_BOWS                     = 45,
@@ -1078,8 +1106,8 @@ enum SkillType
     SKILL_BEAST_MASTERY            = 50,
     SKILL_SURVIVAL                 = 51,
     SKILL_MACES                    = 54,
-    SKILL_HOLY                     = 56,
     SKILL_2H_SWORDS                = 55,
+    SKILL_HOLY                     = 56,
     SKILL_SHADOW                   = 78,
     SKILL_DEFENSE                  = 95,
     SKILL_LANG_COMMON              = 98,
@@ -1135,24 +1163,20 @@ enum SkillType
     SKILL_PET_BOAR                 = 211,
     SKILL_PET_CROCILISK            = 212,
     SKILL_PET_CARRION_BIRD         = 213,
-    SKILL_PET_GORILLA              = 215,
     SKILL_PET_CRAB                 = 214,
+    SKILL_PET_GORILLA              = 215,
     SKILL_PET_RAPTOR               = 217,
     SKILL_PET_TALLSTRIDER          = 218,
     SKILL_RACIAL_UNDED             = 220,
-    SKILL_WEAPON_TALENTS           = 222,
     SKILL_CROSSBOWS                = 226,
-    SKILL_SPEARS                   = 227,
     SKILL_WANDS                    = 228,
     SKILL_POLEARMS                 = 229,
     SKILL_PET_SCORPID              = 236,
     SKILL_ARCANE                   = 237,
-    SKILL_OPEN_LOCK                = 242,
     SKILL_PET_TURTLE               = 251,
     SKILL_ASSASSINATION            = 253,
     SKILL_FURY                     = 256,
     SKILL_PROTECTION               = 257,
-    SKILL_BEAST_TRAINING           = 261,
     SKILL_PROTECTION2              = 267,
     SKILL_PET_TALENTS              = 270,
     SKILL_PLATE_MAIL               = 293,
@@ -1182,7 +1206,7 @@ enum SkillType
     SKILL_LOCKPICKING              = 633,
     SKILL_PET_BAT                  = 653,
     SKILL_PET_HYENA                = 654,
-    SKILL_PET_OWL                  = 655,
+    SKILL_PET_BIRD_OF_PREY         = 655,
     SKILL_PET_WIND_SERPENT         = 656,
     SKILL_LANG_GUTTERSPEAK         = 673,
     SKILL_RIDING_KODO              = 713,
@@ -1201,7 +1225,25 @@ enum SkillType
     SKILL_PET_SPOREBAT             = 765,
     SKILL_PET_WARP_STALKER         = 766,
     SKILL_PET_RAVAGER              = 767,
-    SKILL_PET_SERPENT              = 768
+    SKILL_PET_SERPENT              = 768,
+    SKILL_INTERNAL                 = 769,
+    SKILL_DK_BLOOD                 = 770,
+    SKILL_DK_FROST                 = 771,
+    SKILL_DK_UNHOLY                = 772,
+    SKILL_INSCRIPTION              = 773,
+    SKILL_PET_MOTH                 = 775,
+    SKILL_RUNEFORGING              = 776,
+    SKILL_MOUNTS                   = 777,
+    SKILL_COMPANIONS               = 778,
+    SKILL_PET_EXOTIC_CHIMAERA      = 780,
+    SKILL_PET_EXOTIC_DEVILSAUR     = 781,
+    SKILL_PET_GHOUL                = 782,
+    SKILL_PET_EXOTIC_SILITHID      = 783,
+    SKILL_PET_EXOTIC_WORM          = 784,
+    SKILL_PET_WASP                 = 785,
+    SKILL_PET_EXOTIC_RHINO         = 786,
+    SKILL_PET_EXOTIC_CORE_HOUND    = 787,
+    SKILL_PET_EXOTIC_SPIRIT_BEAST  = 788
 };
 
 
@@ -1219,7 +1261,7 @@ enum SkillCategory
 
 enum TotemCategory
 {
-    TC_SKINNING_SKIFE              = 1,
+    TC_SKINNING_SKIFE_OLD          = 1,
     TC_EARTH_TOTEM                 = 2,
     TC_AIR_TOTEM                   = 3,
     TC_FIRE_TOTEM                  = 4,
@@ -1229,15 +1271,28 @@ enum TotemCategory
     TC_GOLDEN_ROD                  = 8,
     TC_TRUESILVER_ROD              = 9,
     TC_ARCANITE_ROD                = 10,
-    TC_MINING_PICK                 = 11,
+    TC_MINING_PICK_OLD             = 11,
     TC_PHILOSOPHERS_STONE          = 12,
-    TC_BLACKSMITH_HAMMER           = 13,
+    TC_BLACKSMITH_HAMMER_OLD       = 13,
     TC_ARCLIGHT_SPANNER            = 14,
     TC_GYROMATIC_MA                = 15,
     TC_MASTER_TOTEM                = 21,
     TC_FEL_IRON_ROD                = 41,
     TC_ADAMANTITE_ROD              = 62,
-    TC_ETERNIUM_ROD                = 63
+    TC_ETERNIUM_ROD                = 63,
+    TC_HOLLOW_QUILL                = 81,
+    TC_RUNED_AZURITE_ROD           = 101,
+    TC_VIRTUOSO_INKING_SET         = 121,
+    TC_DRUMS                       = 141,
+    TC_GNOMISH_ARMY_KNIFE          = 161,
+    TC_BLACKSMITH_HAMMER           = 162,
+    TC_MINING_PICK                 = 165,
+    TC_SKINNING_KNIFE              = 166,
+    TC_HAMMER_PICK                 = 167,
+    TC_BLADED_PICKAXE              = 168,
+    TC_FLINT_AND_TINDER            = 169,
+    TC_RUNED_COBALT_ROD            = 189,
+    TC_RUNED_TITANIUM_ROD          = 190
 };
 
 enum UnitDynFlags
@@ -1247,7 +1302,8 @@ enum UnitDynFlags
     UNIT_DYNFLAG_OTHER_TAGGER      = 0x0004,
     UNIT_DYNFLAG_ROOTED            = 0x0008,
     UNIT_DYNFLAG_SPECIALINFO       = 0x0010,
-    UNIT_DYNFLAG_DEAD              = 0x0020
+    UNIT_DYNFLAG_DEAD              = 0x0020,
+    UNIT_DYNFLAG_REFER_A_FRIEND    = 0x0040
 };
 
 enum UnitFlags1
@@ -1310,6 +1366,9 @@ enum ChatMsg
     CHAT_MSG_BATTLEGROUND           = 0x2C,
     CHAT_MSG_BATTLEGROUND_LEADER    = 0x2D,
     CHAT_MSG_RESTRICTED             = 0x2E,
+    CHAT_MSG_BN                     = 0x2F,
+    CHAT_MSG_ACHIEVEMENT            = 0x30,
+    CHAT_MSG_GUILD_ACHIEVEMENT      = 0x31
 };
 
 enum SpellCastTargetFlags
