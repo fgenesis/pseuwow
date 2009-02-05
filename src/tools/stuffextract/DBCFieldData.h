@@ -345,13 +345,13 @@ static const char *CreatureDisplayInfoFieldNames[] = {
     "","model","unk","extra","scale","opacity","name1","name2","name3","", // 0-9
     "","sound","","","","","","","","", // 10-19
     "",
-    ""
+    "", "", ""
 };
 
 static const char *CreatureDisplayInfoFormat = {
     "iiiifisssx" // 0-9
     "xixxxxxxxx" // 10-19
-    "x"
+    "xxx"
 };
 
 enum NPCSoundsEnum

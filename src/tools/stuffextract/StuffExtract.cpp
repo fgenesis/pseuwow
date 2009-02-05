@@ -728,8 +728,6 @@ void ExtractMapDependencies(void)
             {
                 ByteBuffer bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
-                if (doTextures)
-                    FetchTexturesFromModel(bb);
 
                 if(doMd5)
                 {
@@ -741,6 +739,35 @@ void ExtractMapDependencies(void)
                     memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
                 }
                 mdone++;
+
+                // model ok, now extract skins
+                // for now first skin is all what we need
+                std::string copy = mpqfn;
+                std::transform(copy.begin(), copy.end(), copy.begin(), tolower);
+                if (copy.find(".wmo") == std::string::npos)
+                {
+                    if (doTextures)
+                        FetchTexturesFromModel(bb);
+
+                    std::string skin = mpqfn.substr(0,mpqfn.length()-3) + "00.skin";
+                    std::string skinrealfn = pathmodel + "/" + _PathToFileName(skin);
+                    if (mpqmodel.FileExists((char*)skin.c_str()))
+                    {
+                        std::fstream fhs;
+                        fhs.open(skinrealfn.c_str(),std::ios_base::out | std::ios_base::binary);
+                        if(fhs.is_open())
+                        {
+                            ByteBuffer bbs = mpqmodel.ExtractFile((char*)skin.c_str());
+                            fhs.write((const char*)bbs.contents(),bbs.size());
+                        }
+                        else
+                            printf("Could not write skin %s\n",skinrealfn.c_str());
+
+                        fhs.close();
+                    }
+                    else
+                        printf("Could not open skin %s\n",skin.c_str());
+                }
             }
             else
                 printf("Could not write model %s\n",realfn.c_str());
@@ -952,8 +979,8 @@ void FetchTexturesFromModel(ByteBuffer bb)
 
     bb.read((uint8*)&header, sizeof(header));
 
-    if ((header.version[0] < 4 || header.version[0] > 7) || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
-        //printf("Not M2 model file!");
+    if (header.version[0] != 8 || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
+        printf("Not M2 model file!");
         return;
     }
 

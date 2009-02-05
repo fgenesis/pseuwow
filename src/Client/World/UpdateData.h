@@ -16,11 +16,12 @@ enum OBJECT_UPDATE_FLAGS
     UPDATEFLAG_NONE         = 0x00,
     UPDATEFLAG_SELF         = 0x01,
     UPDATEFLAG_TRANSPORT    = 0x02,
-    UPDATEFLAG_FULLGUID     = 0x04,
+    UPDATEFLAG_HAS_TARGET   = 0x04,
     UPDATEFLAG_LOWGUID      = 0x08,
     UPDATEFLAG_HIGHGUID     = 0x10,
     UPDATEFLAG_LIVING       = 0x20,
-    UPDATEFLAG_HASPOSITION  = 0x40
+    UPDATEFLAG_HAS_POSITION = 0x40,
+    UPDATEFLAG_VEHICLE      = 0x80
 };
 
 enum MovementFlags
@@ -58,13 +59,14 @@ struct MovementInfo
 {
     // common
     uint32  flags;
-    uint8   unk1;
+    uint16  unkFlags;
     uint32  time;
     float   x, y, z, o;
     // transport
     uint64  t_guid;
     float   t_x, t_y, t_z, t_o;
     uint32  t_time;
+    uint8    t_seat;
     // swimming and unk
     float   s_angle;
     // last fall time
@@ -76,8 +78,8 @@ struct MovementInfo
 
     MovementInfo()
     {
-        flags = time = t_time = fallTime = 0;
-        unk1 = 0;
+        flags = time = t_time = fallTime = unkFlags = 0;
+        t_seat = 0;
         x = y = z = o = t_x = t_y = t_z = t_o = s_angle = j_unk = j_sinAngle = j_cosAngle = j_xyspeed = u_unk1 = 0.0f;
         t_guid = 0;
     }

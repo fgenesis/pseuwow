@@ -23,8 +23,6 @@ struct ModelHeader {
 	u32 ofsAnimations;
 	u32 nC;
 	u32 ofsC;
-	u32 nD;
-	u32 ofsD;
 	u32 nBones;
 	u32 ofsBones;
 	u32 nF;
@@ -32,8 +30,7 @@ struct ModelHeader {
 
 	u32 nVertices;
 	u32 ofsVertices;
-	u32 nViews;
-	u32 ofsViews;
+	u32 nViews; // number of skins ?
 
 	u32 nColors;
 	u32 ofsColors;
@@ -43,8 +40,6 @@ struct ModelHeader {
 
 	u32 nTransparency; // H
 	u32 ofsTransparency;
-	u32 nI;   // always unused ?
-	u32 ofsI;
 	u32 nTexAnims;	// J
 	u32 ofsTexAnims;
 	u32 nTexReplace;
@@ -111,6 +106,7 @@ struct ModelVertex {
 };
 
 struct ModelView {
+    c8 id[4]; // always "SKIN"
     u32 nIndex, ofsIndex; // Vertices in this model (index into vertices[])
     u32 nTris, ofsTris;	 // indices
     u32 nProps, ofsProps; // additional vtx properties
@@ -232,7 +228,6 @@ private:
     //SSkinMeshBuffer* MeshBuffer;
     //Taken from the Model file, thus m2M*
     core::array<ModelVertex> M2MVertices;
-    core::array<ModelView> M2MViews;
     core::array<u16> M2MIndices;
     core::array<u16> M2MTriangles;
     core::array<ModelViewSubmesh> M2MSubmeshes;

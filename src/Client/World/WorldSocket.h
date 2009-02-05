@@ -7,6 +7,12 @@
 class WorldSession;
 class BigNumber;
 
+#if defined( __GNUC__ )
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct ClientPktHeader
 {
     uint16 size;
@@ -19,6 +25,19 @@ struct ServerPktHeader
     uint16 size;
     uint16 cmd;
 };
+
+struct ServerPktHeaderBig
+{
+    uint8 size[3];
+    uint16 cmd;
+};
+
+#if defined( __GNUC__ )
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
+
 
 class WorldSocket : public TcpSocket
 {
@@ -41,7 +60,7 @@ private:
     AuthCrypt _crypt;
     bool _gothdr; // true if only the header was recieved yet
     uint16 _opcode; // stores the last recieved opcode
-    uint16 _remaining; // bytes amount of the next data packet
+    uint32 _remaining; // bytes amount of the next data packet
     bool _ok;
 
 };

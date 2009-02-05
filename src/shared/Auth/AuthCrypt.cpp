@@ -30,20 +30,30 @@ void AuthCrypt::Init()
     _initialized = true;
 }
 
-void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
+void AuthCrypt::DecryptRecv(uint8 *data, size_t len, bool temp)
 {
     if (!_initialized) return;
-    if (len < CRYPTED_RECV_LEN) return;
+    //if (len < CRYPTED_RECV_LEN) return;
+    uint8 ti, tj;
+    if (temp)
+    {
+        ti = _recv_i;
+        tj = _recv_j;
+    }
 
-    for (size_t t = 0; t < CRYPTED_RECV_LEN; t++)
+    for (size_t t = 0; t < len; t++)
     {
         _recv_i %= _key.size();
         uint8 x = (data[t] - _recv_j) ^ _key[_recv_i];
         ++_recv_i;
         _recv_j = data[t];
         data[t] = x;
+    }
 
-        
+    if (temp)
+    {
+        _recv_i = ti;
+        _recv_j = tj;
     }
 }
 

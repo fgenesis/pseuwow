@@ -211,7 +211,9 @@ enum INVENTORY_CLASS
     ITEM_CLASS_QUEST         = 12,
     ITEM_CLASS_KEY           = 13,
     ITEM_CLASS_PERMANENT     = 14,
-    ITEM_CLASS_JUNK          = 15
+    ITEM_CLASS_JUNK          = 15,
+    ITEM_CLASS_MISC          = 15,
+    ITEM_CLASS_GLYPH         = 16
 };
 
 // Client understand only 0 subclass for ITEM_CLASS_CONSUMABLE
@@ -236,7 +238,8 @@ enum ITEM_SUBCLASS_CONTAINER
     ITEM_SUBCLASS_ENGINEERING_CONTAINER    = 4,
     ITEM_SUBCLASS_GEM_CONTAINER            = 5,
     ITEM_SUBCLASS_MINING_CONTAINER         = 6,
-    ITEM_SUBCLASS_LEATHERWORKING_CONTAINER = 7
+    ITEM_SUBCLASS_LEATHERWORKING_CONTAINER = 7,
+    ITEM_SUBCLASS_INSCRIPTION_CONTAINER    = 8
 };
 
 enum INVENTORY_SUBCLASS_WEAPON
@@ -272,7 +275,11 @@ enum ITEM_SUBCLASS_ARMOR
     ITEM_SUBCLASS_ARMOR_MAIL        = 3,
     ITEM_SUBCLASS_ARMOR_PLATE       = 4,
     ITEM_SUBCLASS_ARMOR_BUCKLER     = 5,
-    ITEM_SUBCLASS_ARMOR_SHIELD      = 6
+    ITEM_SUBCLASS_ARMOR_SHIELD      = 6,
+    ITEM_SUBCLASS_ARMOR_LIBRAM      = 7,
+    ITEM_SUBCLASS_ARMOR_IDOL        = 8,
+    ITEM_SUBCLASS_ARMOR_TOTEM       = 9,
+    ITEM_SUBCLASS_ARMOR_SIGIL       = 10
 };
 
 enum ITEM_SUBCLASS_PROJECTILE
@@ -295,7 +302,10 @@ enum ITEM_SUBCLASS_TRADE_GOODS
     ITEM_SUBCLASS_HERB              = 9, 
     ITEM_SUBCLASS_ELEMENTAZL        = 10, 
     ITEM_SUBCLASS_TRADE_GOODS_OTHER = 11, 
-    ITEM_SUBCLASS_ENCHANTING        = 12 
+    ITEM_SUBCLASS_ENCHANTING        = 12,
+    ITEM_SUBCLASS_MATERIAL          = 13,
+    ITEM_SUBCLASS_ARMOR_ENCHANTMENT = 14,
+    ITEM_SUBCLASS_WEAPON_ENCHANTMENT= 15
 };
 
 enum ITEM_SUBCLASS_BOOK
@@ -376,7 +386,10 @@ struct ItemProto
     uint32 MaxCount;
     uint32 Stackable;
     uint32 ContainerSlots;
+    uint32 StatsCount;
     _ItemStat ItemStat[10];
+    uint32 ScalingStatDistribution;                         // id from ScalingStatDistribution.dbc
+    uint32 ScalingStatValue;                                // mask for selecting column in ScalingStatValues.dbc
     _ItemDamage Damage[5];
     uint32 Armor;
     uint32 HolyRes;
@@ -414,6 +427,8 @@ struct ItemProto
     uint32 RequiredArenaRank;
 	uint32 RequiredDisenchantSkill;
 	float  ArmorDamageModifier;
+    int32  Duration;                                        // negative = realtime, positive = ingame time
+    uint32 ItemLimitCategory;                               // id from ItemLimitCategory.dbc
 };
 
 class Item : public Object

@@ -39,11 +39,14 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->MaxCount;
         recvPacket >> proto->Stackable;
         recvPacket >> proto->ContainerSlots;
-        for(int i = 0; i < 10; i++)
+        recvPacket >> proto->StatsCount;
+        for(int i = 0; i < proto->StatsCount; i++)
         {
             recvPacket >> proto->ItemStat[i].ItemStatType;
             recvPacket >> proto->ItemStat[i].ItemStatValue;
         }
+        recvPacket >> proto->ScalingStatDistribution;
+        recvPacket >> proto->ScalingStatValue;
         for(int i = 0; i < 5; i++)
         {
             recvPacket >> proto->Damage[i].DamageMin;
@@ -97,6 +100,8 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 		recvPacket >> proto->ExtendedCost;
 		recvPacket >> proto->RequiredDisenchantSkill;
 		recvPacket >> proto->ArmorDamageModifier; 
+        recvPacket >> proto->Duration;
+        recvPacket >> proto->ItemLimitCategory;
 
         logdetail("Got Item Info: Id=%u Name='%s' ReqLevel=%u Armor=%u Desc='%s'",
             proto->Id, proto->Name.c_str(), proto->RequiredLevel, proto->Armor, proto->Description.c_str());

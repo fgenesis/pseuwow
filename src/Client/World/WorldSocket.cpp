@@ -77,11 +77,32 @@ void WorldSocket::OnRead()
                 DEBUG(logdebug("Delaying header reading, bufsize is %u but should be >= %u",ibuf.GetLength(),sizeof(ServerPktHeader)));
                 break;
             }
-            ServerPktHeader hdr;
-            ibuf.Read((char*)&hdr,sizeof(ServerPktHeader));
-            _crypt.DecryptRecv((uint8*)&hdr,sizeof(ServerPktHeader));
-            _remaining = ntohs(hdr.size)-2;
-            _opcode = hdr.cmd;
+
+            // read first byte and check if size is 3 or 2 bytes
+            uint8 firstSizeByte;
+            ibuf.SoftRead((char*)&firstSizeByte, 1);
+            _crypt.DecryptRecv(&firstSizeByte, 1, true);
+
+            if (firstSizeByte & 0x80) // got large packet
+            {
+                ServerPktHeaderBig hdr;
+                ibuf.Read((char*)&hdr, 3+2);
+                _crypt.DecryptRecv((uint8*)&hdr, 3+2, false);
+
+                uint32 realsize = ((hdr.size[0]&0x7F)<<16) | (hdr.size[1]<<8) | hdr.size[2];
+                _remaining = realsize - 2;
+                _opcode = hdr.cmd;
+            }
+            else // "normal" packet
+            {
+                ServerPktHeader hdr;
+                ibuf.Read((char*)&hdr, sizeof(ServerPktHeader));
+                _crypt.DecryptRecv((uint8*)&hdr, sizeof(ServerPktHeader), false);
+
+                _remaining = ntohs(hdr.size)-2;
+                _opcode = hdr.cmd;
+            }
+            
             if(_opcode > MAX_OPCODE_ID)
             {
                 logcritical("CRYPT ERROR: opcode=%u, remain=%u",_opcode,_remaining); // this should never be the case!

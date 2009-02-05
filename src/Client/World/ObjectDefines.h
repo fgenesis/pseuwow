@@ -28,6 +28,7 @@ enum HighGuid
  	HIGHGUID_TRANSPORT      = 0xF120,                       // blizz F120 (for GAMEOBJECT_TYPE_TRANSPORT) 
  	HIGHGUID_UNIT           = 0xF130,                       // blizz F130 
  	HIGHGUID_PET            = 0xF140,                       // blizz F140 
+ 	HIGHGUID_VEHICLE        = 0xF150,
  	HIGHGUID_DYNAMICOBJECT  = 0xF100,                       // blizz F100 
  	HIGHGUID_CORPSE         = 0xF101,                       // blizz F100 
  	HIGHGUID_MO_TRANSPORT   = 0x1FC0,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT) 
@@ -41,4 +42,5 @@ enum HighGuid
 #define IS_CORPSE_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_CORPSE )
 #define IS_PLAYER_CORPSE_GUID(Guid)  ( GUID_HIPART(Guid) == HIGHGUID_PLAYER_CORPSE )
 #define IS_TRANSPORT(Guid)           ( GUID_HIPART(Guid) == HIGHGUID_TRANSPORT )
+#define IS_VEHICLE_GUID(Guid)        ( GUID_HIPART(Guid) == HIGHGUID_VEHICLE )
 #endif

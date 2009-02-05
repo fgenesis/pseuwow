@@ -37,11 +37,12 @@ void WorldSession::_HandleCompressedUpdateObjectOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 {
     uint8 utype;
-    uint8 hasTransport;
+    //uint8 hasTransport;
     uint32 usize, ublocks, readblocks=0;
     uint64 uguid;
-    recvPacket >> ublocks >> hasTransport;
-    logdev("UpdateObject: blocks = %u, hasTransport = %u", ublocks, hasTransport);
+    recvPacket >> ublocks; // >> hasTransport;
+    //logdev("UpdateObject: blocks = %u, hasTransport = %u", ublocks, hasTransport);
+    logdev("UpdateObject: blocks = %u", ublocks);
     while((recvPacket.rpos() < recvPacket.size())&& (readblocks < ublocks))
     {
         recvPacket >> utype;
@@ -237,7 +238,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
     uint8 flags;
     float unkfx,unkfy,unkfz;
     // uint64 fullguid; // see below
-    float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack;
+    float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack, speedPitchRate;
     uint32 unk32;
 
     Object *obj = (Object*)objmgr.GetObj(uguid, true); // also depleted objects
@@ -259,7 +260,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
     mi.flags = 0; // not sure if its correct to set it to 0 (needs some starting flag?)
     if(flags & UPDATEFLAG_LIVING)
     {
-        recvPacket >> mi.flags >> mi.unk1 >> mi.time;
+        recvPacket >> mi.flags >> mi.unkFlags >> mi.time;
     }
     else
     {
@@ -268,7 +269,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 
     logdev("MovementUpdate: TypeID=%u GUID="I64FMT" pObj=%X flags=%u mi.flags=%u",objtypeid,uguid,obj,flags,mi.flags);
 
-    if(flags & UPDATEFLAG_HASPOSITION)
+    if(flags & UPDATEFLAG_HAS_POSITION)
     {
         if(flags & UPDATEFLAG_TRANSPORT)
         {
@@ -290,10 +291,11 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         {
             recvPacket >> mi.t_guid >> mi.t_x >> mi.t_y >> mi.t_z >> mi.t_o;
             recvPacket >> mi.t_time; // added in 2.0.3
+            recvPacket >> mi.t_seat;
             logdev("TRANSPORT @ mi.flags: guid="I64FMT" x=%f y=%f z=%f o=%f", mi.t_guid, mi.t_x, mi.t_y, mi.t_z, mi.t_o);
         }
 
-        if(mi.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
+        if((mi.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5)) || (mi.unkFlags & 0x20))
         {
             recvPacket >>  mi.s_angle;
             logdev("MovementUpdate: MOVEMENTFLAG_SWIMMING is set, angle = %f!", mi.s_angle);
@@ -317,18 +319,20 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 
         recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim; // speedRun can also be mounted speed if player is mounted
         recvPacket >> speedWalkBack >> speedFly >> speedFlyBack >> speedTurn; // fly added in 2.0.x
+        recvPacket >> speedPitchRate;
         logdev("MovementUpdate: Got speeds, walk=%f run=%f turn=%f", speedWalk, speedRun, speedTurn);
         if(u)
         {
                 u->SetPosition(mi.x, mi.y, mi.z, mi.o);
-                u->SetSpeed(MOVE_WALK,speedWalk);
-                u->SetSpeed(MOVE_RUN,speedRun);
-                u->SetSpeed(MOVE_SWIMBACK,speedSwimBack);
-                u->SetSpeed(MOVE_SWIM,speedSwim);
-                u->SetSpeed(MOVE_WALKBACK,speedWalkBack);
-                u->SetSpeed(MOVE_TURN,speedTurn);
-                u->SetSpeed(MOVE_FLY,speedFly);
-                u->SetSpeed(MOVE_FLYBACK,speedFlyBack);
+                u->SetSpeed(MOVE_WALK, speedWalk);
+                u->SetSpeed(MOVE_RUN, speedRun);
+                u->SetSpeed(MOVE_SWIMBACK, speedSwimBack);
+                u->SetSpeed(MOVE_SWIM, speedSwim);
+                u->SetSpeed(MOVE_WALKBACK, speedWalkBack);
+                u->SetSpeed(MOVE_TURN, speedTurn);
+                u->SetSpeed(MOVE_FLY, speedFly);
+                u->SetSpeed(MOVE_FLYBACK, speedFlyBack);
+                u->SetSpeed(MOVE_PITCH_RATE, speedPitchRate);
         }
 
         // TODO: correct this one as soon as its meaning is known OR if it appears often and needs to be fixed
@@ -353,7 +357,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         logdev("MovementUpdate: UPDATEFLAG_HIGHGUID is set, got %X", unk32);
     }
 
-    if(flags & UPDATEFLAG_FULLGUID)
+    if(flags & UPDATEFLAG_HAS_TARGET)
     {
         uint64 unkguid = recvPacket.GetPackedGuid(); // MaNGOS sends uint8(0) always, but its probably be a packed guid
         logdev("MovementUpdate: UPDATEFLAG_FULLGUID is set, got "I64FMT, unkguid);
@@ -365,6 +369,13 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         logdev("MovementUpdate: UPDATEFLAG_TRANSPORT is set, got %u", unk32);
     }
 
+    if(flags & UPDATEFLAG_VEHICLE)                          // unused for now
+    {
+        uint32 vehicleId; 
+        float facingAdj;
+
+        recvPacket >> vehicleId >> facingAdj;
+    }
 }
 
 void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
@@ -531,8 +542,8 @@ bool IsFloatField(uint8 ty, uint32 f)
         (uint32)PLAYER_FROST_SPELL_CRIT_PERCENTAGE,
         (uint32)PLAYER_SHADOW_SPELL_CRIT_PERCENTAGE,
         (uint32)PLAYER_ARCANE_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_FIELD_MOD_MANA_REGEN,
-        (uint32)PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,
+        /*(uint32)PLAYER_FIELD_MOD_MANA_REGEN,
+        (uint32)PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,*/
         (uint32)-1
     };
     static uint32 floats_gameobject[] =
