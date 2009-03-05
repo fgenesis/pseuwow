@@ -34,7 +34,7 @@ void MovementMgr::_BuildPacket(uint16 opcode)
 {
     WorldPacket *wp = new WorldPacket(opcode,4+1+4+12); // it can be larger, if we are jumping, on transport or swimming
     *wp << _moveFlags;
-    *wp << (uint8)0; // unk
+    *wp << (uint16)0; // unk
     *wp << getMSTime();
     *wp << _mychar->GetPosition();
     // TODO: transport not yet handled/done

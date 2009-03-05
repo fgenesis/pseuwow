@@ -279,9 +279,33 @@ name=Eye of the Storm
 name_general=ZulAman
 name=Zul'Aman
 
+[571]
+name_general=Northrend
+name=Northrend
+
 [572]
 name_general=PVPLordaeron
 name=Ruins of Lordaeron
+
+[573]
+name_general=ExteriorTest
+name=ExteriorTest
+
+[574]
+name_general=Valgarde70
+name=Utgarde Keep
+
+[575]
+name_general=UtgardePinnacle
+name=Utgarde Pinnacle
+
+[576]
+name_general=Nexus70
+name=The Nexus
+
+[578]
+name_general=Nexus80
+name=The Oculus
 
 [580]
 name_general=SunwellPlateau
@@ -323,11 +347,131 @@ name=Transport: Grom'Gol to Undercity
 name_general=Transport164871
 name=Transport: Undercity to Orgrimmar
 
+[592]
+name_general=Transport186238
+name=Transport: Borean Tundra Test
+
 [593]
 name_general=Transport20808
 name=Transport: Booty Bay to Ratchet
 
+[594]
+name_general=Transport187038
+name=Transport: Howling Fjord Sister Mercy (Quest)
+
+[595]
+name_general=StratholmeCOT
+name=The Culling of Stratholme
+
+[596]
+name_general=Transport187263
+name=Transport: Naglfar
+
+[597]
+name_general=CraigTest
+name=Craig Test
+
 [598]
 name_general=Sunwell5Man
 name=Sunwell Fix (Unused)
+
+[599]
+name_general=Ulduar70
+name=Halls of Stone
+
+[600]
+name_general=DrakTheronKeep
+name=Drak'Tharon Keep
+
+[601]
+name_general=Azjol_Uppercity
+name=Azjol-Nerub
+
+[602]
+name_general=Ulduar80
+name=Halls of Lightning
+
+[603]
+name_general=UlduarRaid
+name=Ulduar
+
+[604]
+name_general=GunDrak
+name=Gundrak
+
+[605]
+name_general=development_nonweighted
+name=Development Land (non-weighted textures)
+
+[606]
+name_general=QA_DVD
+name=QA and DVD
+
+[607]
+name_general=NorthrendBG
+name=Strand of the Ancients
+
+[608]
+name_general=DalaranPrison
+name=Violet Hold
+
+[609]
+name_general=DeathKnightStart
+name=Ebon Hold
+
+[610]
+name_general=Transport_Tirisfal _Vengeance_Landing
+name=Transport: Tirisfal to Vengeance Landing
+
+[612]
+name_general=Transport_Menethil_Valgarde
+name=Transport: Menethil to Valgarde
+
+[613]
+name_general=Transport_Orgrimmar_Warsong_Hold
+name=Transport: Orgrimmar to Warsong Hold
+
+[614]
+name_general=Transport_Stormwind_Valiance_Keep
+name=Transport: Stormwind to Valiance Keep
+
+[615]
+name_general=ChamberOfAspectsBlack
+name=The Obsidian Sanctum
+
+[616]
+name_general=NexusRaid
+name=The Eye of Eternity
+
+[617]
+name_general=DalaranArena
+name=Dalaran Sewers
+
+[618]
+name_general=OrgrimmarArena
+name=The Ring of Valor
+
+[619]
+name_general=Azjol_LowerCity
+name=Ahn'kahet: The Old Kingdom
+
+[620]
+name_general=Transport_Moa'ki_Unu'pe
+name=Transport: Moa'ki to Unu'pe
+
+[621]
+name_general=Transport_Moa'ki_Kamagua
+name=Transport: Moa'ki to Kamagua
+
+[622]
+name_general=Transport192241
+name=Transport: Orgrim's Hammer
+
+[623]
+name_general=Transport192242
+name=Transport: The Skybreaker
+
+[624]
+name_general=WintergraspRaid
+name=Vault of Archavon
 

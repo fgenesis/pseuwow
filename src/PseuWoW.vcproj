@@ -185,6 +185,18 @@
 			</File>
 			<File
 				RelativePath=".\Client\MemoryDataHolder.cpp">
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Client\MemoryDataHolder.h">
