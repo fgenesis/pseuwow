@@ -55,6 +55,10 @@ void MapTile::ImportFromADT(ADTFile *adt)
             uint32 texoffs = adt->_chunks[ch].layer[ly].textureId;
             _chunks[ch].texlayer.push_back(std::string("data/texture/") + NormalizeFilename(std::string(adt->_textures[texoffs])).c_str());
         }
+
+        memcpy(_chunks[ch].alphamap, adt->_chunks[ch].alphamap, adt->_chunks[ch].hdr.sizeAlpha - 8);
+
+        /*
         // extract alpha maps. in adt they are stored in 4-bit encoding, which makes 4096 entries in 64x32 values
         for(uint32 al = 0; al < (adt->_chunks[ch].hdr.sizeAlpha - 8) / 2048; al++) // see comment in ADTFile.cpp when loading MCAL chunk for explanation
         {
@@ -67,6 +71,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
                 }
             }
         }
+        */
     }
 
     // copy over doodads and do some transformations

@@ -149,7 +149,7 @@ public:
 	float _y;
 	float _z;
 	uint32 _guildId;
-	uint8 _flags;
+	uint32 _flags;
 	uint32 _petInfoId;
 	uint32 _petLevel;
 	uint32 _petFamilyId;

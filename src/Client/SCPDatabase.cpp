@@ -134,7 +134,7 @@ uint32 SCPDatabase::GetFieldByStringValue(uint32 entry, char *val)
 {
     for(uint32 row = 0; row < _rowcount; row++)
         if(!stricmp(GetStringByOffset(_intbuf[row * _fields_per_row + entry]), val))
-            return row;
+            return _indexes_reverse[row];
     return SCP_INVALID_INT;
 }
 

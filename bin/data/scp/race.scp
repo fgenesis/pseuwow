@@ -119,6 +119,22 @@ faction=7
 name_general=Skeleton
 name=Skeleton
 
+[16]
+model_m=21685
+model_f=21686
+name_short=Vr
+faction=7
+name_general=Vrykul
+name=Vrykul
+
+[17]
+model_m=21780
+model_f=21781
+name_short=Tu
+faction=7
+name_general=Tuskarr
+name=Tuskarr
+
 [18]
 model_m=21963
 model_f=21964
@@ -126,4 +142,28 @@ name_short=Ft
 faction=7
 name_general=ForestTroll
 name=Forest Troll
+
+[19]
+model_m=26316
+model_f=26317
+name_short=Wt
+faction=7
+name_general=Taunka
+name=Taunka
+
+[20]
+model_m=26871
+model_f=26872
+name_short=NS
+faction=7
+name_general=NorthrendSkeleton
+name=Northrend Skeleton
+
+[21]
+model_m=26873
+model_f=26874
+name_short=It
+faction=7
+name_general=IceTroll
+name=Ice Troll
 

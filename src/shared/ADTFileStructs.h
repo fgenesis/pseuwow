@@ -200,7 +200,7 @@ struct ADTMapChunk
     MCLY_chunk layer[ADT_MAXLAYERS]; // can be less
     uint32 nTextures;
     uint8 shadowmap[512]; // 1 bit 64x64
-    uint8 alphamap[ADT_MAXLAYERS][2048]; // 4 bits, 64x64. max 4, 1 per layer
+    uint8 alphamap[ADT_MAXLAYERS][4096]; // 8 bits, 64x64. max 4, 1 per layer
     bool haswater;
     float waterlevel;
     LiquidVertex lqvertex[81];

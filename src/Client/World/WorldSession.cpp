@@ -11,6 +11,7 @@
 #include "World.h"
 #include "RealmSession.h"
 #include "WorldSession.h"
+#include "MemoryDataHolder.h"
 
 struct OpcodeHandler
 {
@@ -533,10 +534,13 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         WorldPacket auth;
         auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<unk<<clientseed_uint32;
         auth.append(digest.GetDigest(),20);
-        // recvPacket << real_size
-        // recvPacket << ziped_UI_Plugins_Info
-        // TODO: add addon data, simulate no addons.
-        auth<<(uint32)0; // no addons? no idea, but seems to work. MaNGOS doesnt accept without this.
+        auth << (uint32)0;
+        //uint8 *addon_info = MemoryDataHolder::GetFileBasic("data/packet/addon_info.bin");
+        //if(addon_info)
+        //{
+        //    logdebug("Auth: Using custom addon info, %s", FilesizeFormat(
+        //    auth.append(addon_info, 160);
+
         auth.SetOpcode(CMSG_AUTH_SESSION);
 
         SendWorldPacket(auth);
@@ -1178,9 +1182,8 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
     // TODO: put this into a capsule class later, that autodetects movement flags etc.
-    WorldPacket response(MSG_MOVE_FALL_LAND,4+1+4+4+4+4+4+4);
-    response << uint32(0) << (uint8)0; // no flags; unk
-    response <<(uint32)getMSTime(); // time correct?
+    WorldPacket response(MSG_MOVE_FALL_LAND,4+2+4+4+4+4+4+4);
+    response << uint32(0) << (uint16)0; // no flags; unk
     response << x << y << z << o << uint32(100); // simulate 100 msec fall time
     SendWorldPacket(response);
 
@@ -1228,8 +1231,8 @@ void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
     SendWorldPacket(wp);
 
     // TODO: put this into a capsule class later, that autodetects movement flags etc.
-    WorldPacket response(MSG_MOVE_FALL_LAND,4+1+4+4+4+4+4+4);
-    response << uint32(0) << (uint8)0; // no flags; unk
+    WorldPacket response(MSG_MOVE_FALL_LAND,4+2+4+4+4+4+4+4);
+    response << uint32(0) << (uint16)0; // no flags; unk
     response <<(uint32)getMSTime(); // time correct?
     response << x << y << z << o << uint32(100); // simulate 100 msec fall time
     SendWorldPacket(response);

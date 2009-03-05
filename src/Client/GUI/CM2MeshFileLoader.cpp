@@ -556,7 +556,10 @@ for(u32 i=0; i < currentView.nSub;i++)//
 
 
 Device->getSceneManager()->getMeshManipulator()->flipSurfaces(AnimatedMesh); //Fix inverted surfaces after the rotation
-Device->getSceneManager()->getMeshManipulator()->recalculateNormals(AnimatedMesh,true);//just to be sure
+
+// False.Genesis: commented out this problematic line.. was causing crashes for me, since 3.x client models
+// SEEMS TO CRASH ONLY IN OPENGL-MODE ?! -- investigate!
+//Device->getSceneManager()->getMeshManipulator()->recalculateNormals(AnimatedMesh,true);//just to be sure
 
 AnimatedMesh->setInterpolationMode(scene::EIM_LINEAR);
 

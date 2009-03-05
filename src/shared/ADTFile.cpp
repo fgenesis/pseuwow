@@ -14,6 +14,41 @@ inline void flipcc(uint8 *fcc)
     fcc[2]=t;
 }
 
+void MCAL_decompress(uint8 *inbuf, uint8 *outbuf)
+{
+    /*
+    How the decompression works
+
+        * read a byte
+        * check for sign bit
+        * if set we are in fill mode else we are in copy mode
+        * take the 7 lesser bits of the first byte as a count indicator
+        o fill mode: read the next byte an fill it by count in resulting alpha map
+        o copy mode: read the next count bytes and copy them in the resulting alpha map 
+        * if the alpha map is complete we are done otherwise start at 1. again 
+    */
+    // 21-10-2008 by Flow
+    uint32 offI = 0; //offset IN buffer
+    uint32 offO = 0; //offset OUT buffer
+
+    while( offO < 4096 )
+    {
+        // fill or copy mode
+        bool fill = inbuf[offI] & 0x80;
+        unsigned n = inbuf[offI] & 0x7F;
+        offI++;
+        for( unsigned k = 0; k < n; k++ )
+        {
+            outbuf[offO] = inbuf[offI];
+            offO++;
+            if( !fill )
+                offI++;
+        }
+        if( fill ) offI++;
+    }
+}
+
+
 bool ADTFile::Load(std::string fn)
 {
     try
@@ -185,6 +220,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
             uint8 *mfcc = &_cc2[0];
             mfcc[4]=0;
             uint32 msize;
+            bool mcal_compressed = false;
             while(buf.rpos()<buf.size())
             {
                 buf.read(mfcc,4); flipcc(mfcc); 
@@ -223,6 +259,8 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                     {
                         _chunks[mcnkid].layer[i] = buf.read<MCLY_chunk>();
                     }
+                    if(_chunks[mcnkid].layer[i].flags & 0x200)
+                        mcal_compressed = true;
                 }
                 else if(!strcmp((char*)mfcc,"MCSH"))
                 {
@@ -233,7 +271,23 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                     // we can NOT use _chunks[mcnkid].hdr.nLayers here... so we use: (full block size - header size) / single block size
                     for(uint32 i = 0; i < (_chunks[mcnkid].hdr.sizeAlpha - 8) / 2048; i++)
                     {
-                        buf.read((uint8*)(_chunks[mcnkid].alphamap[i]),2048);
+                        uint8 alphamap[2048];
+                        buf.read((uint8*)alphamap,2048);
+                        if(mcal_compressed)
+                        {
+                            MCAL_decompress(alphamap,_chunks[mcnkid].alphamap[i]);
+                        }
+                        else
+                        {
+                            for(uint32 aly = 0; aly < 64; aly++)
+                            {
+                                for(uint32 alx = 0; alx < 32; alx++)
+                                {
+                                    _chunks[mcnkid].alphamap[i][aly*64 + (alx*2)]   = alphamap[aly*64 + alx] & 0xF0; // first 4 bits
+                                    _chunks[mcnkid].alphamap[i][aly*64 + (alx*2)+1] = alphamap[aly*64 + alx] & 0x0F; // second
+                                }
+                            }
+                        }
                     }
                 }
                 /*else if(!strcmp((char*)mfcc,"MCLQ")) // MCLQ changed to MH2O chunk for whole ADT file
