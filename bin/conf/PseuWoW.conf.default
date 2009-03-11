@@ -141,4 +141,13 @@ SkipAddonChat=1
 //     (doesn't matter if they have scripts attached or not, they will be dumped always)
 DumpPackets=1
 
+// Specify how many threads should be used for loading data files
+// 0 - Do not use any multithreading to load files (will pause execution everytime a file is loaded).
+       Use this setting if there are threading problems or similar.
+// 1 - Allows to load files in background, but serial, one after another
+// 2 or more - Optimize for multicore processors; parallel file loading.
+// Note: Using too many threads may result in overall slower loading times due to harddisk seek overhead.
+// Default: 2
+DataLoaderThreads=2
+
 

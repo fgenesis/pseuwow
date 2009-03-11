@@ -18,6 +18,18 @@ class PseuInstanceRunnable;
 class CliRunnable;
 class RemoteController;
 
+// possible conditions threads can wait for. used for thread synchronisation. extend if needed.
+enum InstanceConditions
+{
+    COND_GUI_INITIALIZED,
+    COND_GUI_SCENE_CHANGED,
+    COND_GUI_CLOSED,
+    COND_MAP_LOADED,
+
+    COND_MAX
+};
+
+
 class PseuInstanceConf
 {
     public:
@@ -59,6 +71,7 @@ class PseuInstanceConf
     bool skipaddonchat;
     uint8 dumpPackets;
     bool softquit;
+    uint8 dataLoaderThreads;
 
     // gui related
     bool enablegui;

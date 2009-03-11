@@ -48,9 +48,10 @@ DefReturnResult SCGetObjectDistance(CmdSet&);
 DefReturnResult SCSwitchOpcodeHandler(CmdSet&);
 DefReturnResult SCOpcodeDisabled(CmdSet&);
 DefReturnResult SCSpoofWorldPacket(CmdSet&);
-DefReturnResult SCLoadDB(CmdSet &Set);
-DefReturnResult SCAddDBPath(CmdSet &Set);
-DefReturnResult SCGetPos(CmdSet &Set);
+DefReturnResult SCLoadDB(CmdSet&);
+DefReturnResult SCAddDBPath(CmdSet&);
+DefReturnResult SCGetPos(CmdSet&);
+DefReturnResult SCPreloadFile(CmdSet&);
 
 
 void my_print(const char *fmt, ...);

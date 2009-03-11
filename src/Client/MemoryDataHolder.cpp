@@ -1,78 +1,108 @@
 #include <fstream>
 #include "MemoryDataHolder.h"
 #include "DefScript/TypeStorage.h"
+#include "zthread/Condition.h"
+#include "zthread/Task.h"
+#include "zthread/PoolExecutor.h"
 
 namespace MemoryDataHolder
 {
     class DataLoaderRunnable;
+    ZThread::PoolExecutor *executor = NULL;
 
     ZThread::FastMutex mutex;
-    TypeStorage<uint8*> storage;
+    TypeStorage<memblock> storage;
     TypeStorage<DataLoaderRunnable> loaders;
+    TypeStorage<uint32> refs;
+    bool alwaysSingleThreaded = false;
+
+    void Init(void)
+    {
+        if(!executor)
+            executor = new ZThread::PoolExecutor(1); // TODO: fix memleak on shutdown?
+    }
     
-    // instances of this class MUST be created with new-operator, or Destroy() will cause a crash!
+    void SetThreadCount(uint32 t)
+    {
+        // 0 threads used means we use no threading at all
+        if(!t)
+        {
+            logdetail("MemoryDataHolder: Single-threaded mode.");
+            alwaysSingleThreaded = true;
+            executor->size(1);
+        }
+        else
+        {
+            logdetail("MemoryDataHolder: Using %u threads.", t);
+            alwaysSingleThreaded = false;
+            executor->size(t);
+        }
+    }
+    
     class DataLoaderRunnable : public ZThread::Runnable
     {
     public:
         DataLoaderRunnable()
         {
-            _buf = NULL;
             _threaded = false;
+        }
+        ~DataLoaderRunnable()
+        {
+            logdev("~DataLoaderRunnable(%s)", _name.c_str());
         }
         // the threaded part
         void run()
         {
-            uint32 size = GetFileSize(_name.c_str());
+            const char *name = _name.c_str();
+            memblock *mb = new memblock();
+
+            mb->size = GetFileSize(name);
             // couldnt open file if size is 0
-            if(!size)
+            if(!mb->size)
             {
-                logerror("DataLoaderRunnable: Error opening file: '%s'",_name.c_str());
-                DoCallbacks(false); // call callback func, 'false' to indicate file coulsnt be loaded
-                Destroy();
+                logerror("DataLoaderRunnable: Error opening file: '%s'", name);
+                loaders.Unlink(name);
+                DoCallbacks(name, MDH_FILE_ERROR); // call callback func, 'false' to indicate file couldnt be loaded
+                delete mb;
                 return;
             }
-            _buf = new uint8[size];
+            mb->alloc(mb->size);
             std::ifstream fh;
-            fh.open(_name.c_str(), std::ios_base::in | std::ios_base::binary);
+            fh.open(name, std::ios_base::in | std::ios_base::binary);
             if(!fh.is_open())
             {
-                logerror("DataLoaderRunnable: Error opening file: '%s'",_name.c_str());
-                delete _buf;
-                _buf = NULL;
-                DoCallbacks(false);
-                Destroy();
+                logerror("DataLoaderRunnable: Error opening file: '%s'", name);
+                loaders.Unlink(name);
+                mb->free();
+                delete mb;
+                DoCallbacks(name, MDH_FILE_ERROR);
                 return;
             }
-            fh.read((char*)_buf,size);
+            logdev("DataLoaderRunnable: Reading '%s'... (%s)", name, FilesizeFormat(mb->size).c_str());
+            fh.read((char*)mb->ptr, mb->size);
             fh.close();
-            storage.Assign(_name,&_buf);
-            loaders.UnlinkByPtr(this); // must be unlinked after the file is fully loaded, but before the callbacks are processed!
-            DoCallbacks(true);
-            Destroy();
+            storage.Assign(name, mb);
+            loaders.Unlink(name); // must be unlinked after the file is fully loaded, but before the callbacks are processed!
+            logdev("DataLoaderRunnable: Done with '%s' (%s)", name, FilesizeFormat(mb->size).c_str());
+            DoCallbacks(name, MDH_FILE_OK | MDH_FILE_JUST_LOADED);
         }
 
-        inline void AddCallback(callback_func func, void *ptr = NULL)
+        inline void AddCallback(callback_func func, void *ptr = NULL, ZThread::Condition *cond = NULL)
         {
-            _callbacks[func] = ptr;
+            callback_struct cbs;
+            cbs.func = func;
+            cbs.ptr = ptr;
+            cbs.cond = cond;
+            _callbacks.push_back(cbs);
         }
-        inline void SetName(std::string name)
+        inline void DoCallbacks(std::string fn, uint32 flags)
         {
-            _name = name;
-        }
-        // if this class has done its work, delete self
-        inline void Destroy(void)
-        {
-            delete this;
-        }
-        inline uint8 *GetBuf(void)
-        {
-            return _buf;
-        }
-        inline void DoCallbacks(bool success = true)
-        {
-            for(std::map<callback_func,void*>::iterator it = _callbacks.begin(); it != _callbacks.end(); it++)
+            for(CallbackStore::iterator it = _callbacks.begin(); it != _callbacks.end(); it++)
             {
-                (*(it->first))(it->second,success);
+                if(it->cond)
+                    it->cond->broadcast();
+                if(it->func)
+                    (*(it->func))(it->ptr, fn, flags);
             }
         }
         inline void SetThreaded(bool t)
@@ -83,28 +113,51 @@ namespace MemoryDataHolder
         {
             return _threaded;
         }
-        inline bool HasCallbackFunc(callback_func f)
+        inline void SetName(std::string n)
         {
-            return _callbacks.find(f) != _callbacks.end();
+            _name = n;
         }
 
-
-   private:
-       std::string _name;
-       std::map<callback_func, void*> _callbacks;
-       uint8 *_buf;
+       CallbackStore _callbacks;
        bool _threaded;
+       std::string _name;
     };
 
 
-    uint8 *GetFile(std::string s, bool threaded = false, callback_func func = NULL,void *ptr = NULL)
+    memblock GetFile(std::string s, bool threaded, callback_func func, void *ptr, ZThread::Condition *cond, bool ref_counted)
     {
-        mutex.acquire(); // we need excusive access, other threads might unload the requested file during checking
-        if(uint8 **buf = storage.GetNoCreate(s))
+        mutex.acquire(); // we need exclusive access, other threads might unload the requested file during checking
+
+        if(alwaysSingleThreaded)
+            threaded = false;
+
+        // manage reference counter
+        uint32 *refcount = refs.GetNoCreate(s);
+        if(!refcount || !*refcount)
         {
-            // the file was requested some other time, is still present in memory and the pointer can simply be returned
-            mutex.release(); // everything ok, mutex can be unloaded safely before returning
-            return *buf;
+            refcount = new uint32;
+            *refcount = ref_counted ? 1 : 0;
+            refs.Assign(s,refcount);
+        }
+        else
+        {
+            if(ref_counted)
+            {
+                (*refcount)++;
+            }
+        }
+
+        if(memblock *mb = storage.GetNoCreate(s))
+        {
+            // the file was requested some other time, is still present in memory and the pointer can simply be returned...
+            mutex.release(); // everything ok, mutex can be unloaded safely
+            // execute callback and broadcast condition (must check for MDH_FILE_ALREADY_EXIST in callback func)
+            if(func)
+                (*func)(ptr, s, MDH_FILE_OK | MDH_FILE_ALREADY_EXIST);
+            if(cond)
+                cond->broadcast();
+
+            return *mb;
         }
         else
         {
@@ -114,29 +167,81 @@ namespace MemoryDataHolder
                 // no loader thread is working on that file...
                 r = new DataLoaderRunnable();
                 loaders.Assign(s,r);
-                r->AddCallback(func,ptr); // not threadsafe!
-                // after assigning/registering a new loader to the file, the mutex can be released safely
-                mutex.release();
-                r->SetName(s);
+                r->AddCallback(func,ptr,cond); // not threadsafe!
                 r->SetThreaded(threaded);
+                r->SetName(s); // here we set the filename the thread should load
+                // the mutex can be released safely now
+                mutex.release();
                 if(threaded)
                 {
-                    ZThread::Thread t(r); // start thread
+                    ZThread::Task task(r);
+                    executor->execute(task);
                 }
                 else
                 {
-                    r->run(); // will exit after the whole file is loaded and the (one) callback is run
-                    return r->GetBuf();
+                    r->run(); // will exit after the whole file is loaded and the callbacks were run
+                    memblock *mb = storage.GetNoCreate(s);
+                    delete r;
+                    return *mb;
                 }
             }
             else // if a loader is already existing, add callbacks to that loader.
             {  
-                r->AddCallback(func,ptr);
+                r->AddCallback(func,ptr,cond);
                 mutex.release();
             }
         }
-        return NULL;
+        return memblock();
     }
+
+    bool IsLoaded(std::string s)
+    {
+        ZThread::Guard<ZThread::FastMutex> g(mutex);
+        return storage.Exists(s);
+    }
+
+    // ensure the file is present in memory, but do not touch the reference counter
+    void BackgroundLoadFile(std::string s)
+    {
+        GetFile(s, true, NULL, NULL, NULL, false);
+    }
+
+
+    bool Delete(std::string s)
+    {
+        ZThread::Guard<ZThread::FastMutex> g(mutex);
+        uint32 *refcount = refs.GetNoCreate(s);
+        if(!refcount)
+        {
+            logerror("MemoryDataHolder:Delete(\"%s\"): no refcount", s.c_str());
+            return false;
+        }
+        else
+        {
+            if(*refcount)
+                (*refcount)--;
+            logdev("MemoryDataHolder::Delete(\"%s\"): refcount dropped to %u", s.c_str(), *refcount);
+        }
+        if(!*refcount)
+        {
+            refs.Delete(s);
+            if(memblock *mb = storage.GetNoCreate(s))
+            {
+                logdev("MemoryDataHolder:: deleting 0x%X (size %u)", mb->ptr, mb->size);
+                mb->free();
+                storage.Delete(s);
+                return true;
+            }
+            else
+            {
+                logerror("MemoryDataHolder::Delete(\"%s\"): no buf existing",s.c_str());
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 
 
 

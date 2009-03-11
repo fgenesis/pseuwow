@@ -41,7 +41,7 @@ public:
         {
             s32 id = event.GUIEvent.Caller->getID();
 
-            printf("event type %u ID %u\n",event.GUIEvent.EventType,id);
+            DEBUG(logdev("GUIEventReceiver: event type %u ID %u",event.GUIEvent.EventType,id));
 
             switch(event.GUIEvent.EventType)
             {
