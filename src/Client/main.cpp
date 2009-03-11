@@ -3,6 +3,7 @@
 #include "common.h"
 #include "main.h"
 #include "PseuWoW.h"
+#include "MemoryDataHolder.h"
 
 
 std::list<PseuInstanceRunnable*> instanceList; // TODO: move this to a "Master" class later
@@ -77,8 +78,9 @@ void _new_handler(void)
     throw;
 }
 
-int main(int argc, char* argv[]) {
-    try 
+int main(int argc, char* argv[])
+{
+    try
     {
         std::set_new_handler(_new_handler);
         log_prepare("logfile.txt","a");
@@ -91,6 +93,7 @@ int main(int argc, char* argv[]) {
         logcustom(0,GREEN,"Compiled: %s  %s",__DATE__,__TIME__);
         
         _HookSignals();
+        MemoryDataHolder::Init();
 
         // 1 instance is enough for now
         PseuInstanceRunnable *r=new PseuInstanceRunnable();

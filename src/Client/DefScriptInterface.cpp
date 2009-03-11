@@ -10,6 +10,7 @@
 #include "Channel.h"
 #include "CacheHandler.h"
 #include "SCPDatabase.h"
+#include "MemoryDataHolder.h"
 
 
 void DefScriptPackage::_InitDefScriptInterface(void)
@@ -60,6 +61,7 @@ void DefScriptPackage::_InitDefScriptInterface(void)
     AddFunc("spoofworldpacket",&DefScriptPackage::SCSpoofWorldPacket);
     AddFunc("loaddb",&DefScriptPackage::SCLoadDB);
     AddFunc("adddbpath",&DefScriptPackage::SCAddDBPath);
+    AddFunc("preloadfile",&DefScriptPackage::SCPreloadFile);
 }
 
 DefReturnResult DefScriptPackage::SCshdn(CmdSet& Set)
@@ -1225,6 +1227,12 @@ DefReturnResult DefScriptPackage::SCGetPos(CmdSet &Set)
     else if (Set.defaultarg == "o")
         return DefScriptTools::toString( ((WorldObject*)obj)->GetO() );
     return "";
+}
+
+DefReturnResult DefScriptPackage::SCPreloadFile(CmdSet& Set)
+{
+    MemoryDataHolder::BackgroundLoadFile(Set.defaultarg);
+    return true;
 }
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)

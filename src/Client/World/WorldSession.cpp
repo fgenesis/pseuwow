@@ -534,12 +534,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         WorldPacket auth;
         auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<unk<<clientseed_uint32;
         auth.append(digest.GetDigest(),20);
-        auth << (uint32)0;
-        //uint8 *addon_info = MemoryDataHolder::GetFileBasic("data/packet/addon_info.bin");
-        //if(addon_info)
-        //{
-        //    logdebug("Auth: Using custom addon info, %s", FilesizeFormat(
-        //    auth.append(addon_info, 160);
+        auth << (uint32)0; // TODO: this is not correct value, expected: 160 bytes of addon_data
 
         auth.SetOpcode(CMSG_AUTH_SESSION);
 

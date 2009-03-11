@@ -15,6 +15,7 @@
 #include "RemoteController.h"
 #include "Cli.h"
 #include "GUI/SceneData.h"
+#include "MemoryDataHolder.h"
 
 
 //###### Start of program code #######
@@ -490,6 +491,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     skipaddonchat=(bool)atoi(v.Get("SKIPADDONCHAT").c_str());
     dumpPackets=(uint8)atoi(v.Get("DUMPPACKETS").c_str());
     softquit=(bool)atoi(v.Get("SOFTQUIT").c_str());
+    dataLoaderThreads=atoi(v.Get("DATALOADERTHREADS").c_str());
 
     // clientversion is a bit more complicated to add
     {
@@ -521,7 +523,9 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     fov = atof(v.Get("GUI::FOV").c_str());
     masterSoundVolume = atof(v.Get("GUI::MASTERSOUNDVOLUME").c_str());
 
+    // cleanups, internal settings, etc.
     log_setloglevel(debug);
+    MemoryDataHolder::SetThreadCount(dataLoaderThreads);
 }
 
 
