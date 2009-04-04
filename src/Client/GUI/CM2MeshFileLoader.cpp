@@ -126,7 +126,7 @@ SkinName = SkinName.substr(0, SkinName.length()-3) + "00.skin"; // FIX ME (and s
 io::IReadFile* SkinFile = io::createReadFile(SkinName.c_str());
 if (!SkinFile)
 {
-    printf("Error! Skin file not found: %s", SkinName.c_str());
+    logerror("Error! Skin file not found: %s", SkinName.c_str());
     return 0;
 }
 
@@ -563,6 +563,7 @@ Device->getSceneManager()->getMeshManipulator()->flipSurfaces(AnimatedMesh); //F
 
 AnimatedMesh->setInterpolationMode(scene::EIM_LINEAR);
 
+SkinFile->drop();
 M2MTriangles.clear();
 M2Vertices.clear();
 M2Indices.clear();
