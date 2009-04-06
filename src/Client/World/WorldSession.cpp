@@ -1166,13 +1166,13 @@ void WorldSession::_HandleForceSetSpeedOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 {
-    uint32 unk32,time;
+    uint32 unk32,time, flags; // movement flags
     uint64 guid;
-    uint8 unk8;
+    uint16 unk16;
     float x, y, z, o;
 
     guid = recvPacket.GetPackedGuid();
-    recvPacket >> unk32 >> unk32 >> unk8 >> time >> x >> y >> z >> o >> unk32;
+    recvPacket >> unk32 >> flags >> unk16 >> time >> x >> y >> z >> o >> unk32;
 
     logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
@@ -1199,6 +1199,7 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
         Set.arg[2] = DefScriptTools::toString(y);
         Set.arg[3] = DefScriptTools::toString(z);
         Set.arg[4] = DefScriptTools::toString(o);
+        Set.arg[5] = DefScriptTools::toString(flags);
         GetInstance()->GetScripts()->RunScriptIfExists("_onteleport");
     }
 }

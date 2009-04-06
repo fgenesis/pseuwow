@@ -149,6 +149,78 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="Release noconsole|Win32"
+			OutputDirectory="$(SolutionDir)/bin"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2"
+			WholeProgramOptimization="TRUE">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				ImproveFloatingPointConsistency="FALSE"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="shared;Client;Client/World;Client/Realm;dep/include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_IRR_STATIC_LIB_"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
+				EnableFunctionLevelLinking="FALSE"
+				EnableEnhancedInstructionSet="0"
+				PrecompiledHeaderFile=".\Release/PseuWoW.pch"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB irrKlang.lib"
+				ShowProgress="0"
+				OutputFile="$(OutDir)/$(InputName)_noconsole.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(SolutionDir)\src\dep\lib\static"
+				IgnoreAllDefaultLibraries="FALSE"
+				IgnoreDefaultLibraryNames="libci.lib"
+				AssemblyDebug="0"
+				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/Release/PseuWoW.pdb"
+				SubSystem="2"
+				OptimizeReferences="2"
+				SetChecksum="TRUE"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release/PseuWoW.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="0"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -185,16 +257,6 @@
 			</File>
 			<File
 				RelativePath=".\Client\MemoryDataHolder.cpp">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Client\MemoryDataHolder.h">
@@ -459,6 +521,12 @@
 				</File>
 				<File
 					RelativePath=".\Client\Gui\MCamera.h">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\MemoryInterface.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\MemoryInterface.h">
 				</File>
 				<File
 					RelativePath=".\Client\Gui\MInput.h">
