@@ -430,6 +430,11 @@ void PseuInstance::DeleteGUI(void)
     _guithread = NULL;
     if(GetScripts()->ScriptExists("_onguiclose"))
         AddCliCommand("_onguiclose"); // since this func is called from another thread, use threadsafe variant via CLI
+
+    // if console mode is disabled in windows, closing the gui needs to close the app
+#if PLATFORM == PLATFORM_WIN32 && !defined(_CONSOLE)
+    this->Stop();
+#endif
 }
 
 bool PseuInstance::ConnectToRealm(void)

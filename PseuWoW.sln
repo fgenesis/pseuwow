@@ -38,6 +38,7 @@ Global
 		Release = Release
 		Release - Fast FPU = Release - Fast FPU
 		Release - Fast FPU DebugInfo = Release - Fast FPU DebugInfo
+		Release - No console = Release - No console
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Debug.ActiveCfg = Debug|Win32
@@ -50,6 +51,8 @@ Global
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU.Build.0 = Release|Win32
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU DebugInfo.ActiveCfg = Release|Win32
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU DebugInfo.Build.0 = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - No console.ActiveCfg = Release noconsole|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - No console.Build.0 = Release noconsole|Win32
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Debug.ActiveCfg = Debug|Win32
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Debug.Build.0 = Debug|Win32
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Relase - Fast FPU.ActiveCfg = Release|Win32
@@ -60,6 +63,8 @@ Global
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release - Fast FPU.Build.0 = Release|Win32
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release - Fast FPU DebugInfo.ActiveCfg = Release|Win32
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release - Fast FPU DebugInfo.Build.0 = Release|Win32
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release - No console.ActiveCfg = Release|Win32
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release - No console.Build.0 = Release|Win32
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Debug.ActiveCfg = Debug|Win32
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Debug.Build.0 = Debug|Win32
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Relase - Fast FPU.ActiveCfg = Release|Win32
@@ -70,6 +75,8 @@ Global
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Release - Fast FPU.Build.0 = Release|Win32
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Release - Fast FPU DebugInfo.ActiveCfg = Release|Win32
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Release - Fast FPU DebugInfo.Build.0 = Release|Win32
+		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Release - No console.ActiveCfg = Release|Win32
+		{262199E8-EEDF-4700-A1D1-E9CC901CF480}.Release - No console.Build.0 = Release|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Debug.ActiveCfg = Debug|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Debug.Build.0 = Debug|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Relase - Fast FPU.ActiveCfg = Release|Win32
@@ -80,6 +87,8 @@ Global
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Release - Fast FPU.Build.0 = Release|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Release - Fast FPU DebugInfo.ActiveCfg = Release|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Release - Fast FPU DebugInfo.Build.0 = Release|Win32
+		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Release - No console.ActiveCfg = Release|Win32
+		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Release - No console.Build.0 = Release|Win32
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Debug.ActiveCfg = Debug|Win32
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Debug.Build.0 = Debug|Win32
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Relase - Fast FPU.ActiveCfg = Release|Win32
@@ -90,6 +99,8 @@ Global
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU.Build.0 = Release|Win32
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU DebugInfo.ActiveCfg = Release|Win32
 		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - Fast FPU DebugInfo.Build.0 = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - No console.ActiveCfg = Release|Win32
+		{EFFE60F4-DA39-41E8-9E53-E462000A2D91}.Release - No console.Build.0 = Release|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Debug.ActiveCfg = Debug|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Debug.Build.0 = Debug|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Relase - Fast FPU.ActiveCfg = Release - Fast FPU|Win32
@@ -100,6 +111,8 @@ Global
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - Fast FPU.Build.0 = Release - Fast FPU|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - Fast FPU DebugInfo.ActiveCfg = Release - Fast FPU|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - Fast FPU DebugInfo.Build.0 = Release - Fast FPU|Win32
+		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - No console.ActiveCfg = Release|Win32
+		{E08E042A-6C45-411B-92BE-3CC31331019F}.Release - No console.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

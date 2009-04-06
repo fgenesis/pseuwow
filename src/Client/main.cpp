@@ -78,6 +78,13 @@ void _new_handler(void)
     throw;
 }
 
+#if PLATFORM == PLATFORM_WIN32 && !defined(_CONSOLE)
+int CALLBACK WinMain( IN HINSTANCE hInstance, IN HINSTANCE hPrevInstance, IN LPSTR lpCmdLine, IN int nShowCmd)
+{
+    main(0, NULL);
+}
+#endif
+
 int main(int argc, char* argv[])
 {
     try
