@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt / Thomas Alten
+// Copyright (C) 2006-2009 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -31,8 +31,8 @@ namespace quake3
 
 	// we are not using gamma, so quake3 is very dark.
 	// define the standard multiplication for lightmaps and vertex colors
-	const video::E_MATERIAL_TYPE defaultLightMap = video::EMT_LIGHTMAP_M2;
-	const video::E_MODULATE_FUNC defaultModulate = video::EMFN_MODULATE_2X;
+	const video::E_MATERIAL_TYPE defaultMaterialType = video::EMT_LIGHTMAP_M4;
+	const video::E_MODULATE_FUNC defaultModulate = video::EMFN_MODULATE_4X;
 
 	// some useful typedefs
 	typedef core::array< core::stringc > tStringList;
@@ -132,16 +132,22 @@ namespace quake3
 
 	}
 
+	//! A blend function for a q3 shader.
 	struct SBlendFunc
 	{
-		SBlendFunc () : type ( video::EMT_SOLID ), param ( 0.f ) {}
+		SBlendFunc ()
+			: type ( video::EMT_SOLID ), modulate ( defaultModulate ), param ( 0.f ),
+			isTransparent ( false ) {}
 
 		video::E_MATERIAL_TYPE type;
+		video::E_MODULATE_FUNC modulate;
+
 		f32 param;
+		bool isTransparent;
 	};
 
 	// parses the content of Variable cull
-	inline bool getBackfaceCulling ( const core::stringc &string )
+	inline bool isDisabled ( const core::stringc &string )
 	{
 		if ( string.size() == 0 )
 			return true;
@@ -168,7 +174,7 @@ namespace quake3
 			return 1;
 
 		u32 ret = 1;
-		static const c8 * funclist[] = { "lequal","equal"  };
+		static const c8 * funclist[] = { "lequal","equal" };
 
 		u32 pos = 0;
 		switch ( isEqual ( string, pos, funclist, 2 ) )
@@ -181,7 +187,6 @@ namespace quake3
 		}
 		return ret;
 	}
-
 
 
 	// parses the content of Variable blendfunc,alphafunc
@@ -231,12 +236,14 @@ namespace quake3
 					// gl_one gl_zero
 					case video::EBF_ZERO:
 						blendfunc.type = video::EMT_SOLID;
+						blendfunc.isTransparent = false;
 						resolved = 1;
 						break;
 
 					// gl_one gl_one
 					case video::EBF_ONE:
 						blendfunc.type = video::EMT_TRANSPARENT_ADD_COLOR;
+						blendfunc.isTransparent = true;
 						resolved = 1;
 						break;
 				} break;
@@ -248,6 +255,7 @@ namespace quake3
 					case video::EBF_ONE_MINUS_SRC_ALPHA:
 						blendfunc.type = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 						blendfunc.param = 1.f / 255.f;
+						blendfunc.isTransparent = true;
 						resolved = 1;
 						break;
 				} break;
@@ -255,30 +263,35 @@ namespace quake3
 			case 11:
 				// add
 				blendfunc.type = video::EMT_TRANSPARENT_ADD_COLOR;
+				blendfunc.isTransparent = true;
 				resolved = 1;
 				break;
 			case 12:
 				// filter = gl_dst_color gl_zero
 				blendfunc.type = video::EMT_ONETEXTURE_BLEND;
 				blendfunc.param = video::pack_texureBlendFunc ( video::EBF_DST_COLOR, video::EBF_ZERO, defaultModulate );
+				blendfunc.isTransparent = false;
 				resolved = 1;
 				break;
 			case 13:
 				// blend
 				blendfunc.type = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 				blendfunc.param = 1.f / 255.f;
+				blendfunc.isTransparent = true;
 				resolved = 1;
 				break;
 			case 14:
 				// alphafunc ge128
 				blendfunc.type = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
 				blendfunc.param = 0.5f;
+				blendfunc.isTransparent = true;
 				resolved = 1;
 				break;
 			case 15:
 				// alphafunc gt0
 				blendfunc.type = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
 				blendfunc.param = 1.f / 255.f;
+				blendfunc.isTransparent = true;
 				resolved = 1;
 				break;
 		}
@@ -290,14 +303,24 @@ namespace quake3
 			blendfunc.param = video::pack_texureBlendFunc (
 					(video::E_BLEND_FACTOR) srcFact,
 					(video::E_BLEND_FACTOR) dstFact,
-					defaultModulate);
+					blendfunc.modulate);
+
+			if (srcFact == video::EBF_SRC_COLOR && dstFact == video::EBF_ZERO) 
+			{
+				blendfunc.isTransparent = 0;
+			}
+			else
+			{
+				blendfunc.isTransparent = true;
+			}
+
 		}
 	}
 
 	struct SModifierFunction
 	{
 		SModifierFunction ()
-			: masterfunc0 ( 0 ), masterfunc1(0), func ( 0 ),
+			: masterfunc0 ( -2 ), masterfunc1(0), func ( 0 ),
 			tcgen( 8 ), base ( 0 ), amp ( 1 ), phase ( 0 ), freq ( 1 ), wave(1) {}
 
 		// "tcmod","deformvertexes","rgbgen", "tcgen"
@@ -442,6 +465,7 @@ namespace quake3
 		core::array < SVarGroup > VariableGroup;
 	};
 
+
 	//! A Parsed Shader Holding Variables ordered in Groups
 	class SShader
 	{
@@ -470,7 +494,7 @@ namespace quake3
 			// Shader: shader name ( also first variable in first Vargroup )
 			// Entity: classname ( variable in Group(1) )
 			core::stringc name;
-			SVarGroupList *VarGroup;	// reference
+			SVarGroupList *VarGroup; // reference
 	};
 
 	typedef SShader SEntity;
@@ -535,7 +559,7 @@ namespace quake3
 		for ( u32 i = 0; i != size; ++i )
 		{
 			group = &shader->VarGroup->VariableGroup[ i ];
-			dumpVarGroup ( dest, group, core::clamp ( (s32) i, 0, 2 ) );
+			dumpVarGroup ( dest, group, core::clamp( (int)i, 0, 2 ) );
 		}
 
 		if ( size <= 1 )
@@ -554,13 +578,12 @@ namespace quake3
 		load one or multiple files stored in name started at startPos to the texture array textures
 		if texture is not loaded 0 will be added ( to find missing textures easier)
 	*/
-	inline void getTextures (	tTexArray &textures ,
-						const core::stringc &name, u32 &startPos,
-						io::IFileSystem *fileSystem,
-						video::IVideoDriver* driver
-					)
+	inline void getTextures(tTexArray &textures,
+				const core::stringc &name, u32 &startPos,
+				io::IFileSystem *fileSystem,
+				video::IVideoDriver* driver)
 	{
-		static const char * extension[2] = 
+		static const char * extension[2] =
 		{
 			".jpg",
 			".tga"
@@ -594,9 +617,7 @@ namespace quake3
 	}
 
 
-	/*!
-		Manages various Quake3 Shader Styles
-	*/
+	//! Manages various Quake3 Shader Styles
 	class IShaderManager : public IReferenceCounted
 	{
 	};

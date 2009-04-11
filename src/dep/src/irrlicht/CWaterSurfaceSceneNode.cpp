@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -76,52 +76,10 @@ void CWaterSurfaceSceneNode::animateWaterSurface()
 	{
 		const u32 vtxCnt = Mesh->getMeshBuffer(b)->getVertexCount();
 
-		switch(Mesh->getMeshBuffer(b)->getVertexType())
-		{
-		case video::EVT_STANDARD:
-			{
-				video::S3DVertex* v =
-					(video::S3DVertex*)Mesh->getMeshBuffer(b)->getVertices();
-
-				video::S3DVertex* v2 =
-					(video::S3DVertex*)OriginalMesh->getMeshBuffer(b)->getVertices();
-
-				for (u32 i=0; i<vtxCnt; ++i)
-				{
-					addWave(v[i].Pos, v2[i].Pos, time);
-				}
-
-			}
-			break;
-		case video::EVT_2TCOORDS:
-			{
-				video::S3DVertex2TCoords* v =
-					(video::S3DVertex2TCoords*)Mesh->getMeshBuffer(b)->getVertices();
-
-				video::S3DVertex2TCoords* v2 =
-					(video::S3DVertex2TCoords*)OriginalMesh->getMeshBuffer(b)->getVertices();
-
-				for (u32 i=0; i<vtxCnt; ++i)
-				{
-					addWave(v[i].Pos, v2[i].Pos, time);
-				}
-			}
-			break;
-		case video::EVT_TANGENTS:
-			{
-				video::S3DVertexTangents* v =
-					(video::S3DVertexTangents*)Mesh->getMeshBuffer(b)->getVertices();
-
-				video::S3DVertexTangents* v2 =
-					(video::S3DVertexTangents*)OriginalMesh->getMeshBuffer(b)->getVertices();
-
-				for (u32 i=0; i<vtxCnt; ++i)
-				{
-					addWave(v[i].Pos, v2[i].Pos, time);
-				}
-			}
-			break;
-		} // end switch
+		for (u32 i=0; i<vtxCnt; ++i)
+			addWave(Mesh->getMeshBuffer(b)->getPosition(i),
+				OriginalMesh->getMeshBuffer(b)->getPosition(i),
+				time);
 	}// end for all mesh buffers
 
 	SceneManager->getMeshManipulator()->recalculateNormals(Mesh);

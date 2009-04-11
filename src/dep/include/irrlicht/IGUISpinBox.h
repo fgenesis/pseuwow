@@ -1,5 +1,6 @@
-// Copyright (C) 2006 Michael Zeilfelder
-// This file uses the licence of the Irrlicht Engine.
+// Copyright (C) 2006-2009 Michael Zeilfelder
+// This file is part of the "Irrlicht Engine".
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_GUI_SPIN_BOX_H_INCLUDED__
 #define __I_GUI_SPIN_BOX_H_INCLUDED__
@@ -22,13 +23,7 @@ namespace gui
 					s32 id, core::rect<s32> rectangle)
 			: IGUIElement(EGUIET_SPIN_BOX, environment, parent, id, rectangle) {}
 
-		//! destructor
-		virtual ~IGUISpinBox() {}
-
 		//! Access the edit box used in the spin control
-		/** \param enable: If set to true, the override color, which can be set
-		 with IGUIEditBox::setOverrideColor is used, otherwise the
-		 EGDC_BUTTON_TEXT color of the skin. */
 		virtual IGUIEditBox* getEditBox() const = 0;
 
 		//! set the current value of the spinbox

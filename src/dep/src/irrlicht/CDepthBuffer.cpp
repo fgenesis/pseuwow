@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt / Thomas Alten
+// Copyright (C) 2002-2009 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -65,7 +65,8 @@ void CDepthBuffer::setSize(const core::dimension2d<s32>& size)
 	if (Buffer)
 		delete [] Buffer;
 
-	TotalSize = size.Width * size.Height * sizeof ( fp24 );
+	Pitch = size.Width * sizeof ( fp24 );
+	TotalSize = Pitch * size.Height;
 	Buffer = new u8[TotalSize];
 }
 
@@ -78,19 +79,6 @@ const core::dimension2d<s32>& CDepthBuffer::getSize() const
 }
 
 
-
-//! locks the zbuffer
-fp24* CDepthBuffer::lock()
-{
-	return (fp24*) Buffer;
-}
-
-
-
-//! unlocks the zbuffer
-void CDepthBuffer::unlock()
-{
-}
 
 } // end namespace video
 } // end namespace irr

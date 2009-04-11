@@ -259,7 +259,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                     {
                         _chunks[mcnkid].layer[i] = buf.read<MCLY_chunk>();
                     }
-                    if(_chunks[mcnkid].layer[i].flags & 0x200)
+                    if(_chunks[mcnkid].layer[_chunks[mcnkid].nTextures].flags & 0x200)
                         mcal_compressed = true;
                 }
                 else if(!strcmp((char*)mfcc,"MCSH"))

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -22,8 +22,13 @@ namespace scene
 		IShadowVolumeSceneNode(ISceneNode* parent, ISceneManager* mgr, s32 id)
 			: ISceneNode(parent, mgr, id) {}
 
-		//! sets the mesh from which the shadow volume should be generated.
-		virtual void setMeshToRenderFrom(const IMesh* mesh) = 0;
+		//! Sets the mesh from which the shadow volume should be generated.
+		/** To optimize shadow rendering, use a simpler mesh for shadows.
+		*/
+		virtual void setShadowMesh(const IMesh* mesh) = 0;
+
+		//! Updates the shadow volumes for current light positions.
+		virtual void updateShadowVolumes() = 0;
 	};
 
 } // end namespace scene

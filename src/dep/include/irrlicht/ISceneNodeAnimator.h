@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -9,6 +9,7 @@
 #include "vector3d.h"
 #include "ESceneNodeAnimatorTypes.h"
 #include "IAttributeExchangingObject.h"
+#include "IEventReceiver.h"
 
 namespace irr
 {
@@ -26,24 +27,36 @@ namespace scene
 	change its position, rotation, scale and/or material. There are lots of animators
 	to choose from. You can create scene node animators with the ISceneManager interface.
 	*/
-	class ISceneNodeAnimator : public io::IAttributeExchangingObject
+	class ISceneNodeAnimator : public io::IAttributeExchangingObject, public IEventReceiver
 	{
 	public:
 
-		//! destructor
+		//! Destructor
 		virtual ~ISceneNodeAnimator() {}
 
 		//! Animates a scene node.
-		//! \param node: Node to animate.
-		//! \param timeMs: Current time in milli seconds.
+		/** \param node Node to animate.
+		\param timeMs Current time in milli seconds. */
 		virtual void animateNode(ISceneNode* node, u32 timeMs) = 0;
 
-		//! Creates a clone of this animator. 
-		/** Please note that you will have to drop (IReferenceCounted::drop()) 
-		the returned pointer after calling this. */
-		virtual ISceneNodeAnimator* createClone(ISceneNode* node, ISceneManager* newManager=0) 
+		//! Creates a clone of this animator.
+		/** Please note that you will have to drop
+		(IReferenceCounted::drop()) the returned pointer after calling
+		this. */
+		virtual ISceneNodeAnimator* createClone(ISceneNode* node, ISceneManager* newManager=0) = 0;
+
+		//! Returns true if this animator receives events.
+		/** When attached to an active camera, this animator will be
+		able to respond to events such as mouse and keyboard events. */
+		virtual bool isEventReceiverEnabled() const
 		{
-			return 0; // to be implemented by derived classes.
+			return false;
+		}
+
+		//! Event receiver, override this function for camera controlling animators
+		virtual bool OnEvent(const SEvent& event)
+		{
+			return false;
 		}
 
 		//! Returns type of the scene node animator
@@ -52,6 +65,8 @@ namespace scene
 			return ESNAT_UNKNOWN;
 		}
 	};
+
+
 } // end namespace scene
 } // end namespace irr
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -9,7 +9,7 @@
 #ifdef _IRR_WINDOWS_
 
 #ifdef _IRR_COMPILE_WITH_DIRECT3D_9_
-#include "d3d9.h"
+#include <d3d9.h>
 
 #include "IMaterialRenderer.h"
 
@@ -101,8 +101,10 @@ public:
 			E_MODULATE_FUNC modulate;
 			unpack_texureBlendFunc ( srcFact, dstFact, modulate, material.MaterialTypeParam );
 
-			if (srcFact == EBF_SRC_COLOR && dstFact == EBF_ZERO) 
+			if (srcFact == EBF_SRC_COLOR && dstFact == EBF_ZERO)
+			{
 				pID3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+			}
 			else
 			{
 				pID3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -132,12 +134,22 @@ public:
 
 	}
 
+	//! Returns if the material is transparent.
+	/** The scene management needs to know this for being able to sort the
+	materials by opaque and transparent.
+	The return value could be optimized, but we'd need to know the
+	MaterialTypeParam for it. */
+	virtual bool isTransparent() const
+	{
+		return true;
+	}
+
 	private:
 
 		u32 getD3DBlend ( E_BLEND_FACTOR factor ) const
 		{
 			u32 r = 0;
-		switch ( factor )
+			switch ( factor )
 			{
 				case EBF_ZERO:					r = D3DBLEND_ZERO; break;
 				case EBF_ONE:					r = D3DBLEND_ONE; break;
@@ -157,7 +169,7 @@ public:
 		u32 getTexelAlpha ( E_BLEND_FACTOR factor ) const
 		{
 			u32 r = 0;
-		switch ( factor )
+			switch ( factor )
 			{
 				case EBF_SRC_ALPHA:				r = 1; break;
 				case EBF_ONE_MINUS_SRC_ALPHA:	r = 1; break;
@@ -179,6 +191,8 @@ public:
 			}
 			return r;
 		}
+
+		bool transparent;
 
 };
 
@@ -236,8 +250,6 @@ public:
 			pID3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
 		}
 
-		((SMaterial&)material).ZWriteEnable = false;
-
 		services->setBasicRenderStates(material, lastMaterial, resetAllRenderstates);
 	}
 
@@ -276,8 +288,6 @@ public:
 			pID3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 			pID3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 		}
-
-		((SMaterial&)material).ZWriteEnable = false;
 
 		services->setBasicRenderStates(material, lastMaterial, resetAllRenderstates);
 	}
@@ -318,17 +328,10 @@ public:
 			pID3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 			pID3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 
-			s32 refValue = core::floor32(material.MaterialTypeParam * 255.f);
-			if ( !refValue )
-				refValue = 127; // default value
-
-			pID3DDevice->SetRenderState(D3DRS_ALPHAREF, refValue);
+			pID3DDevice->SetRenderState(D3DRS_ALPHAREF, core::floor32(material.MaterialTypeParam * 255.f));
 			pID3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 			pID3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-
 		}
-
-		((SMaterial&)material).ZWriteEnable = false;
 
 		services->setBasicRenderStates(material, lastMaterial, resetAllRenderstates);
 	}
@@ -372,16 +375,11 @@ public:
 
 			pID3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 
-			s32 refValue = core::floor32(material.MaterialTypeParam * 255);
-			if ( !refValue )
-				refValue = 127; // default value
-
-			pID3DDevice->SetRenderState(D3DRS_ALPHAREF,refValue);
+			// 127 is required by EMT_TRANSPARENT_ALPHA_CHANNEL_REF
+			pID3DDevice->SetRenderState(D3DRS_ALPHAREF, 127); 
 			pID3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 			pID3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 		}
-
-		((SMaterial&)material).ZWriteEnable = false;
 
 		services->setBasicRenderStates(material, lastMaterial, resetAllRenderstates);
 	}

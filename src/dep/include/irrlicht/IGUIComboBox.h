@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -11,6 +11,7 @@ namespace irr
 {
 namespace gui
 {
+
 	//! Combobox widget
 	class IGUIComboBox : public IGUIElement
 	{
@@ -19,9 +20,6 @@ namespace gui
 		//! constructor
 		IGUIComboBox(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(EGUIET_COMBO_BOX, environment, parent, id, rectangle) {}
-
-		//! destructor
-		virtual ~IGUIComboBox() {}
 
 		//! Returns amount of items in box
 		virtual u32 getItemCount() const = 0;
@@ -33,8 +31,8 @@ namespace gui
 		virtual u32 addItem(const wchar_t* text) = 0;
 
 		//! Removes an item from the combo box.
-		/** Warning. This will change the IDs of all following items */
-		virtual void removeItem(u32 id) = 0;
+		/** Warning. This will change the index of all following items */
+		virtual void removeItem(u32 idx) = 0;
 
 		//! Deletes all items in the combo box
 		virtual void clear() = 0;
@@ -43,7 +41,14 @@ namespace gui
 		virtual s32 getSelected() const = 0;
 
 		//! Sets the selected item. Set this to -1 if no item should be selected
-		virtual void setSelected(s32 id) = 0;
+		virtual void setSelected(s32 idx) = 0;
+
+		//! Sets text justification of the text area
+		/** \param horizontal: EGUIA_UPPERLEFT for left justified (default),
+		EGUIA_LOWEERRIGHT for right justified, or EGUIA_CENTER for centered text.
+		\param vertical: EGUIA_UPPERLEFT to align with top edge,
+		EGUIA_LOWEERRIGHT for bottom edge, or EGUIA_CENTER for centered text (default). */
+		virtual void setTextAlignment(EGUI_ALIGNMENT horizontal, EGUI_ALIGNMENT vertical) = 0;
 	};
 
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -33,6 +33,8 @@ CGUIFont::CGUIFont(IGUIEnvironment *env, const c8* filename)
 		Driver = Environment->getVideoDriver();
 
 		SpriteBank = Environment->addEmptySpriteBank(filename);
+		if (SpriteBank)
+			SpriteBank->grab();
 	}
 
 	if (Driver)
@@ -48,7 +50,6 @@ CGUIFont::~CGUIFont()
 
 	if (SpriteBank)
 		SpriteBank->drop();
-
 }
 
 
@@ -95,7 +96,7 @@ bool CGUIFont::load(io::IXMLReader* xml)
 					if (alpha == core::stringw("false"))
 						Driver->makeColorKeyTexture(SpriteBank->getTexture(i), core::position2di(0,0));
 				}
-			} 
+			}
 			else if (core::stringw(L"c") == xml->getNodeName())
 			{
 				// adding a character to this font
@@ -111,45 +112,45 @@ bool CGUIFont::load(io::IXMLReader* xml)
 
 				// parse rectangle
 				core::stringc rectstr	= xml->getAttributeValue(L"r");
-				wchar_t ch				= xml->getAttributeValue(L"c")[0];
+				wchar_t ch		= xml->getAttributeValue(L"c")[0];
 
 				const c8 *c = rectstr.c_str();
 				s32 val;
 				val = 0;
-				while (*c >= '0' && *c <= '9') 
-				{ 
-					val *= 10; 
-					val += *c - '0'; 
+				while (*c >= '0' && *c <= '9')
+				{
+					val *= 10;
+					val += *c - '0';
 					c++;
 				}
 				rectangle.UpperLeftCorner.X = val;
 				while (*c == L' ' || *c == L',') c++;
 
 				val = 0;
-				while (*c >= '0' && *c <= '9') 
-				{ 
-					val *= 10; 
-					val += *c - '0'; 
+				while (*c >= '0' && *c <= '9')
+				{
+					val *= 10;
+					val += *c - '0';
 					c++;
 				}
 				rectangle.UpperLeftCorner.Y = val;
 				while (*c == L' ' || *c == L',') c++;
 
 				val = 0;
-				while (*c >= '0' && *c <= '9') 
-				{ 
-					val *= 10; 
-					val += *c - '0'; 
+				while (*c >= '0' && *c <= '9')
+				{
+					val *= 10;
+					val += *c - '0';
 					c++;
 				}
 				rectangle.LowerRightCorner.X = val;
 				while (*c == L' ' || *c == L',') c++;
 
 				val = 0;
-				while (*c >= '0' && *c <= '9') 
-				{ 
-					val *= 10; 
-					val += *c - '0'; 
+				while (*c >= '0' && *c <= '9')
+				{
+					val *= 10;
+					val += *c - '0';
 					c++;
 				}
 				rectangle.LowerRightCorner.Y = val;
@@ -157,7 +158,7 @@ bool CGUIFont::load(io::IXMLReader* xml)
 				CharacterMap.insert(ch,Areas.size());
 
 				// make frame
-				f.rectNumber = 	SpriteBank->getPositions().size();
+				f.rectNumber = SpriteBank->getPositions().size();
 				f.textureNumber = texno;
 
 				// add frame to sprite
@@ -254,7 +255,7 @@ bool CGUIFont::loadTexture(video::IImage* image, const c8* name)
 
 	// output warnings
 	if (!lowerRightPositions || !SpriteBank->getSprites().size())
-		os::Printer::log("The amount of upper corner pixels or lower corner pixels is == 0, font file may be corrupted.", ELL_ERROR);
+		os::Printer::log("Either no upper or lower corner pixels in the font file. If this font was made using the new font tool, please load the XML file instead. If not, the font may be corrupted.", ELL_ERROR);
 	else
 	if (lowerRightPositions != (s32)SpriteBank->getPositions().size())
 		os::Printer::log("The amount of upper corner pixels and the lower corner pixels is not equal, font file may be corrupted.", ELL_ERROR);
@@ -480,7 +481,7 @@ core::dimension2d<s32> CGUIFont::getDimension(const wchar_t* text) const
 
 
 //! set an Pixel Offset on Drawing ( scale position on width )
-void CGUIFont::setKerningWidth ( s32 kerning )
+void CGUIFont::setKerningWidth(s32 kerning)
 {
 	GlobalKerningWidth = kerning;
 }
@@ -506,7 +507,7 @@ s32 CGUIFont::getKerningWidth(const wchar_t* thisLetter, const wchar_t* previous
 
 
 //! set an Pixel Offset on Drawing ( scale position on height )
-void CGUIFont::setKerningHeight ( s32 kerning )
+void CGUIFont::setKerningHeight(s32 kerning)
 {
 	GlobalKerningHeight = kerning;
 }
@@ -581,7 +582,6 @@ void CGUIFont::draw(const wchar_t* text, const core::rect<s32>& position, video:
 
 	core::dimension2d<s32> textDimension;
 	core::position2d<s32> offset = position.UpperLeftCorner;
-	core::rect<s32> pos;
 
 	if (hcenter || vcenter || clip)
 		textDimension = getDimension(text);
@@ -646,3 +646,4 @@ IGUISpriteBank* CGUIFont::getSpriteBank() const
 } // end namespace irr
 
 #endif // _IRR_COMPILE_WITH_GUI_
+

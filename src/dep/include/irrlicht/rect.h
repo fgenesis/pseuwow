@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -16,32 +16,41 @@ namespace core
 
 	//! Rectangle template.
 	/** Mostly used by 2D GUI elements and for 2D drawing methods.
-	    It has 2 positions instead of position and dimension and a fast
-	    method for collision detection with other rectangles and points.
+	It has 2 positions instead of position and dimension and a fast
+	method for collision detection with other rectangles and points.
+
+	Coordinates are (0,0) for top-left corner, and increasing to the right
+	and to the bottom.
 	*/
 	template <class T>
 	class rect
 	{
 	public:
 
+		//! Default constructor creating empty rectangle at (0,0)
 		rect() : UpperLeftCorner(0,0), LowerRightCorner(0,0) {}
 
+		//! Constructor with two corners
 		rect(T x, T y, T x2, T y2)
 			: UpperLeftCorner(x,y), LowerRightCorner(x2,y2) {}
 
+		//! Constructor with two corners
 		rect(const position2d<T>& upperLeft, const position2d<T>& lowerRight)
 			: UpperLeftCorner(upperLeft), LowerRightCorner(lowerRight) {}
 
+		//! Constructor with upper left corner and dimension
 		rect(const position2d<T>& pos, const dimension2d<T>& size)
 			: UpperLeftCorner(pos), LowerRightCorner(pos.X + size.Width, pos.Y + size.Height) {}
 
 
+		//! move right by given numbers
 		rect<T> operator+(const position2d<T>& pos) const
 		{
 			rect<T> ret(*this);
 			return ret+=pos;
 		}
 
+		//! move right by given numbers
 		rect<T>& operator+=(const position2d<T>& pos)
 		{
 			UpperLeftCorner += pos;
@@ -49,12 +58,14 @@ namespace core
 			return *this;
 		}
 
+		//! move left by given numbers
 		rect<T> operator-(const position2d<T>& pos) const
 		{
 			rect<T> ret(*this);
 			return ret-=pos;
 		}
 
+		//! move left by given numbers
 		rect<T>& operator-=(const position2d<T>& pos)
 		{
 			UpperLeftCorner -= pos;
@@ -62,20 +73,21 @@ namespace core
 			return *this;
 		}
 
+		//! equality operator
 		bool operator==(const rect<T>& other) const
 		{
 			return (UpperLeftCorner == other.UpperLeftCorner &&
 				LowerRightCorner == other.LowerRightCorner);
 		}
 
-
+		//! inequality operator
 		bool operator!=(const rect<T>& other) const
 		{
 			return (UpperLeftCorner != other.UpperLeftCorner ||
 				LowerRightCorner != other.LowerRightCorner);
 		}
 
-		// compares size of rectangles
+		//! compares size of rectangles
 		bool operator<(const rect<T>& other) const
 		{
 			return getArea() < other.getArea();
@@ -88,8 +100,8 @@ namespace core
 		}
 
 		//! Returns if a 2d point is within this rectangle.
-		//! \param pos: Position to test if it lies within this rectangle.
-		//! \return Returns true if the position is within the rectangle, false if not.
+		/** \param pos Position to test if it lies within this rectangle.
+		\return True if the position is within the rectangle, false if not. */
 		bool isPointInside(const position2d<T>& pos) const
 		{
 			return (UpperLeftCorner.X <= pos.X &&
@@ -98,7 +110,9 @@ namespace core
 				LowerRightCorner.Y >= pos.Y);
 		}
 
-		//! Returns if the rectangle collides with another rectangle.
+		//! Check if the rectangle collides with another rectangle.
+		/** \param other Rectangle to test collision with
+		\return True if the rectangles collide. */
 		bool isRectCollided(const rect<T>& other) const
 		{
 			return (LowerRightCorner.Y > other.UpperLeftCorner.Y &&
@@ -108,7 +122,8 @@ namespace core
 		}
 
 		//! Clips this rectangle with another one.
-		void clipAgainst(const rect<T>& other) 
+		/** \param other Rectangle to clip with */
+		void clipAgainst(const rect<T>& other)
 		{
 			if (other.LowerRightCorner.X < LowerRightCorner.X)
 				LowerRightCorner.X = other.LowerRightCorner.X;
@@ -128,8 +143,8 @@ namespace core
 		}
 
 		//! Moves this rectangle to fit inside another one.
-		//! \return: returns true on success, false if not possible
-		bool constrainTo(const rect<T>& other) 
+		/** \return True on success, false if not possible */
+		bool constrainTo(const rect<T>& other)
 		{
 			if (other.getWidth() < getWidth() || other.getHeight() < getHeight())
 				return false;
@@ -165,20 +180,19 @@ namespace core
 			return true;
 		}
 
-		//! Returns width of rectangle.
+		//! Get width of rectangle.
 		T getWidth() const
 		{
 			return LowerRightCorner.X - UpperLeftCorner.X;
 		}
 
-		//! Returns height of rectangle.
+		//! Get height of rectangle.
 		T getHeight() const
 		{
 			return LowerRightCorner.Y - UpperLeftCorner.Y;
 		}
 
-		//! If the lower right corner of the rect is smaller then the
-		//! upper left, the points are swapped.
+		//! If the lower right corner of the rect is smaller then the upper left, the points are swapped.
 		void repair()
 		{
 			if (LowerRightCorner.X < UpperLeftCorner.X)
@@ -196,41 +210,44 @@ namespace core
 			}
 		}
 
-		//! Returns if the rect is valid to draw. It could be invalid
-		//! if the UpperLeftCorner is lower or more right than the
-		//! LowerRightCorner, or if any dimension is 0.
+		//! Returns if the rect is valid to draw.
+		/** It would be invalid if the UpperLeftCorner is lower or more
+		right than the LowerRightCorner. */
 		bool isValid() const
 		{
 			return ((LowerRightCorner.X >= UpperLeftCorner.X) &&
 				(LowerRightCorner.Y >= UpperLeftCorner.Y));
 		}
 
-		//! Returns the center of the rectangle
+		//! Get the center of the rectangle
 		position2d<T> getCenter() const
 		{
-			return position2d<T>((UpperLeftCorner.X + LowerRightCorner.X) / 2,
-				(UpperLeftCorner.Y + LowerRightCorner.Y) / 2);
+			return position2d<T>(
+					(UpperLeftCorner.X + LowerRightCorner.X) / 2,
+					(UpperLeftCorner.Y + LowerRightCorner.Y) / 2);
 		}
 
-		//! Returns the dimensions of the rectangle
+		//! Get the dimensions of the rectangle
 		dimension2d<T> getSize() const
 		{
 			return dimension2d<T>(getWidth(), getHeight());
 		}
 
 
-		//! Adds a point to the rectangle, causing it to grow bigger, 
-		//! if point is outside of the box
-		//! \param p: Point to add into the box.
+		//! Adds a point to the rectangle
+		/** Causes the rectangle to grow bigger if point is outside of
+		the box
+		\param p Point to add to the box. */
 		void addInternalPoint(const position2d<T>& p)
 		{
 			addInternalPoint(p.X, p.Y);
 		}
 
-		//! Adds a point to the bounding rectangle, causing it to grow bigger, 
-		//! if point is outside of the box.
-		//! \param x: X Coordinate of the point to add to this box.
-		//! \param y: Y Coordinate of the point to add to this box.
+		//! Adds a point to the bounding rectangle
+		/** Causes the rectangle to grow bigger if point is outside of
+		the box
+		\param x X-Coordinate of the point to add to this box.
+		\param y Y-Coordinate of the point to add to this box. */
 		void addInternalPoint(T x, T y)
 		{
 			if (x>LowerRightCorner.X)
@@ -244,11 +261,16 @@ namespace core
 				UpperLeftCorner.Y = y;
 		}
 
-
+		//! Upper left corner
 		position2d<T> UpperLeftCorner;
+		//! Lower right corner
 		position2d<T> LowerRightCorner;
 	};
 
+	//! Rectangle with float values
+	typedef rect<f32> rectf;
+	//! Rectangle with int values
+	typedef rect<s32> recti;
 
 } // end namespace core
 } // end namespace irr

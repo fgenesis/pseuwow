@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -21,9 +21,6 @@ namespace gui
 		IGUIScrollBar(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(EGUIET_SCROLL_BAR, environment, parent, id, rectangle) {}
 
-		//! destructor
-		~IGUIScrollBar() {};
-
 		//! gets the maximum value of the scrollbar.
 		virtual s32 getMax() const = 0;
 
@@ -33,15 +30,17 @@ namespace gui
 		//! gets the small step value
 		virtual s32 getSmallStep() const = 0;
 
-		//! Sets the small step, the amount that the value changes by when clicking
-		//! on the buttons or using the cursor keys.
+		//! Sets the small step
+		/** That is the amount that the value changes by when clicking
+		on the buttons or using the cursor keys. */
 		virtual void setSmallStep(s32 step) = 0;
 
 		//! gets the large step value
 		virtual s32 getLargeStep() const = 0;
 
-		//! Sets the large step, the amount that the value changes by when clicking
-		//! in the tray, or using the page up and page down keys.
+		//! Sets the large step
+		/** That is the amount that the value changes by when clicking
+		in the tray, or using the page up and page down keys. */
 		virtual void setLargeStep(s32 step) = 0;
 
 		//! gets the current position of the scrollbar

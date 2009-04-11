@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -104,8 +104,7 @@ public:
 			if (!TriangleRect.isRectCollided(ViewPortRect))
 				continue;
 
-
-			// höhe des dreiecks berechnen
+			// calculate height of triangle
 			height = v3->Pos.Y - v1->Pos.Y;
 			if (!height)
 				continue;
@@ -136,18 +135,18 @@ public:
 				tmpDiv = 1.0f / (f32)(v2->Pos.Y - v1->Pos.Y);
 				rightdeltaxf = (v2->Pos.X - v1->Pos.X) * tmpDiv;
 				rightZStep = (s32)((v2->ZValue - v1->ZValue) * tmpDiv);
-				rightStepR = (s32)(((video::getRed(v2->Color)<<8) - rightR) * tmpDiv);
-				rightStepG = (s32)(((video::getGreen(v2->Color)<<8) - rightG) * tmpDiv);
-				rightStepB = (s32)(((video::getBlue(v2->Color)<<8) - rightB) * tmpDiv);
+				rightStepR = (s32)(((s32)(video::getRed(v2->Color)<<8) - rightR) * tmpDiv);
+				rightStepG = (s32)(((s32)(video::getGreen(v2->Color)<<8) - rightG) * tmpDiv);
+				rightStepB = (s32)(((s32)(video::getBlue(v2->Color)<<8) - rightB) * tmpDiv);
 				rightTxStep = (s32)((v2->TCoords.X - rightTx) * tmpDiv);
 				rightTyStep = (s32)((v2->TCoords.Y - rightTy) * tmpDiv);
 
 				tmpDiv = 1.0f / (f32)height;
 				leftdeltaxf = (v3->Pos.X - v1->Pos.X) * tmpDiv;
 				leftZStep = (s32)((v3->ZValue - v1->ZValue) * tmpDiv);
-				leftStepR = (s32)(((video::getRed(v3->Color)<<8) - leftR) * tmpDiv);
-				leftStepG = (s32)(((video::getGreen(v3->Color)<<8) - leftG) * tmpDiv);
-				leftStepB = (s32)(((video::getBlue(v3->Color)<<8) - leftB) * tmpDiv);
+				leftStepR = (s32)(((s32)(video::getRed(v3->Color)<<8) - leftR) * tmpDiv);
+				leftStepG = (s32)(((s32)(video::getGreen(v3->Color)<<8) - leftG) * tmpDiv);
+				leftStepB = (s32)(((s32)(video::getBlue(v3->Color)<<8) - leftB) * tmpDiv);
 				leftTxStep = (s32)((v3->TCoords.X - leftTx) * tmpDiv);
 				leftTyStep = (s32)((v3->TCoords.Y - leftTy) * tmpDiv);
 			}
@@ -156,18 +155,18 @@ public:
 				tmpDiv = 1.0f / (f32)height;
 				rightdeltaxf = (v3->Pos.X - v1->Pos.X) * tmpDiv;
 				rightZStep = (s32)((v3->ZValue - v1->ZValue) * tmpDiv);
-				rightStepR = (s32)(((video::getRed(v3->Color)<<8) - rightR) * tmpDiv);
-				rightStepG = (s32)(((video::getGreen(v3->Color)<<8) - rightG) * tmpDiv);
-				rightStepB = (s32)(((video::getBlue(v3->Color)<<8) - rightB) * tmpDiv);
+				rightStepR = (s32)(((s32)(video::getRed(v3->Color)<<8) - rightR) * tmpDiv);
+				rightStepG = (s32)(((s32)(video::getGreen(v3->Color)<<8) - rightG) * tmpDiv);
+				rightStepB = (s32)(((s32)(video::getBlue(v3->Color)<<8) - rightB) * tmpDiv);
 				rightTxStep = (s32)((v3->TCoords.X - rightTx) * tmpDiv);
 				rightTyStep = (s32)((v3->TCoords.Y - rightTy) * tmpDiv);
 
 				tmpDiv = 1.0f / (f32)(v2->Pos.Y - v1->Pos.Y);
 				leftdeltaxf = (v2->Pos.X - v1->Pos.X) * tmpDiv;
 				leftZStep = (s32)((v2->ZValue - v1->ZValue) * tmpDiv);
-				leftStepR = (s32)(((video::getRed(v2->Color)<<8) - leftR) * tmpDiv);
-				leftStepG = (s32)(((video::getGreen(v2->Color)<<8) - leftG) * tmpDiv);
-				leftStepB = (s32)(((video::getBlue(v2->Color)<<8) - leftB) * tmpDiv);
+				leftStepR = (s32)(((s32)(video::getRed(v2->Color)<<8) - leftR) * tmpDiv);
+				leftStepG = (s32)(((s32)(video::getGreen(v2->Color)<<8) - leftG) * tmpDiv);
+				leftStepB = (s32)(((s32)(video::getBlue(v2->Color)<<8) - leftB) * tmpDiv);
 				leftTxStep = (s32)((v2->TCoords.X - leftTx) * tmpDiv);
 				leftTyStep = (s32)((v2->TCoords.Y - leftTy) * tmpDiv);
 			}
@@ -234,7 +233,9 @@ public:
 						{
 							*(zTarget + leftx) = leftZValue;
 							color = lockedTexture[((leftTy>>8)&textureYMask) * lockedTextureWidth + ((leftTx>>8)&textureXMask)];
-							*(targetSurface + leftx) = video::RGB16(video::getRed(color) * (leftR>>8) >>2, video::getGreen(color) * (leftG>>8) >>2, video::getBlue(color) * (leftR>>8) >>2);
+							*(targetSurface + leftx) = video::RGB16(video::getRed(color) * (leftR>>8) >>2,
+									video::getGreen(color) * (leftG>>8) >>2,
+									video::getBlue(color) * (leftR>>8) >>2);
 						}
 					}
 
@@ -246,7 +247,9 @@ public:
 						{
 							*(zTarget + rightx) = rightZValue;
 							color = lockedTexture[((rightTy>>8)&textureYMask) * lockedTextureWidth + ((rightTx>>8)&textureXMask)];
-							*(targetSurface + rightx) = video::RGB16(video::getRed(color) * (rightR>>8) >>2, video::getGreen(color) * (rightG>>8) >>2, video::getBlue(color) * (rightR>>8) >>2);
+							*(targetSurface + rightx) = video::RGB16(video::getRed(color) * (rightR>>8) >>2,
+									video::getGreen(color) * (rightG>>8) >>2,
+									video::getBlue(color) * (rightR>>8) >>2);
 						}
 
 					}
@@ -291,9 +294,9 @@ public:
 					rightR = video::getRed(v2->Color)<<8;
 					rightG = video::getGreen(v2->Color)<<8;
 					rightB = video::getBlue(v2->Color)<<8;
-					rightStepR = (s32)(((video::getRed(v3->Color)<<8) - rightR) * tmpDiv);
-					rightStepG = (s32)(((video::getGreen(v3->Color)<<8) - rightG) * tmpDiv);
-					rightStepB = (s32)(((video::getBlue(v3->Color)<<8) - rightB) * tmpDiv);
+					rightStepR = (s32)(((s32)(video::getRed(v3->Color)<<8) - rightR) * tmpDiv);
+					rightStepG = (s32)(((s32)(video::getGreen(v3->Color)<<8) - rightG) * tmpDiv);
+					rightStepB = (s32)(((s32)(video::getBlue(v3->Color)<<8) - rightB) * tmpDiv);
 
 					rightTx = v2->TCoords.X;
 					rightTy = v2->TCoords.Y;
@@ -313,9 +316,9 @@ public:
 					leftR = video::getRed(v2->Color)<<8;
 					leftG = video::getGreen(v2->Color)<<8;
 					leftB = video::getBlue(v2->Color)<<8;
-					leftStepR = (s32)(((video::getRed(v3->Color)<<8) - leftR) * tmpDiv);
-					leftStepG = (s32)(((video::getGreen(v3->Color)<<8) - leftG) * tmpDiv);
-					leftStepB = (s32)(((video::getBlue(v3->Color)<<8) - leftB) * tmpDiv);
+					leftStepR = (s32)(((s32)(video::getRed(v3->Color)<<8) - leftR) * tmpDiv);
+					leftStepG = (s32)(((s32)(video::getGreen(v3->Color)<<8) - leftG) * tmpDiv);
+					leftStepB = (s32)(((s32)(video::getBlue(v3->Color)<<8) - leftB) * tmpDiv);
 
 					leftTx = v2->TCoords.X;
 					leftTy = v2->TCoords.Y;
@@ -332,10 +335,9 @@ public:
 		RenderTarget->unlock();
 		ZBuffer->unlock();
 		Texture->unlock();
-
 	}
-
 };
+
 
 } // end namespace video
 } // end namespace irr
@@ -359,3 +361,4 @@ ITriangleRenderer* createTriangleRendererTextureGouraudWire(IZBuffer* zbuffer)
 
 } // end namespace video
 } // end namespace irr
+

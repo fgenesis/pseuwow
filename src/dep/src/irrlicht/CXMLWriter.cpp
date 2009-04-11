@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -17,6 +17,10 @@ namespace io
 CXMLWriter::CXMLWriter(IWriteFile* file)
 : File(file), Tabs(0), TextWrittenLast(false)
 {
+	#ifdef _DEBUG
+	setDebugName("CXMLWriter");
+	#endif
+	
 	if (File)
 		File->grab();
 }
@@ -233,7 +237,7 @@ void CXMLWriter::writeLineBreak()
 	if (!File)
 		return;
 
-#if defined(MACOSX)
+#if defined(_IRR_OSX_PLATFORM_)
 	File->write(L"\r", sizeof(wchar_t));
 #elif defined(_IRR_WINDOWS_API_)
 	File->write(L"\r\n", 2*sizeof(wchar_t));

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -25,11 +25,7 @@ class CIrrMeshFileLoader : public IMeshLoader
 public:
 
 	//! Constructor
-	CIrrMeshFileLoader(video::IVideoDriver* driver,
-		scene::ISceneManager* smgr, io::IFileSystem* fs);
-
-	//! destructor
-	virtual ~CIrrMeshFileLoader();
+	CIrrMeshFileLoader(scene::ISceneManager* smgr, io::IFileSystem* fs);
 
 	//! returns true if the file maybe is able to be loaded by this class
 	//! based on the file extension (e.g. ".cob")
@@ -83,7 +79,6 @@ private:
 
 	// member variables
 
-	video::IVideoDriver* Driver;
 	scene::ISceneManager* SceneManager;
 	io::IFileSystem* FileSystem;
 };

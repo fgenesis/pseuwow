@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // 
@@ -46,7 +46,7 @@ public:
 	
 private:
 	void constructMesh(SMesh* mesh);
-	void loadTextures(SMesh* mesh, u32 numTextures, u32 numLightMaps, const core::array<u32>& textureIDs);
+	void loadTextures(SMesh* mesh);
 	void cleanup();
 
 // byte-align structures
@@ -59,10 +59,6 @@ private:
 #else
 #	error compiler not supported
 #endif
-
-	struct SLMTSMagigID {
-		u32 ID;
-	} PACK_STRUCT;
 
 	struct SLMTSHeader
 	{
@@ -116,10 +112,10 @@ private:
 	io::IAttributes* Parameters;
 	video::IVideoDriver* Driver;
 	io::IFileSystem* FileSystem;
+	bool FlipEndianess;
 };
 
 } // end namespace scene
 } // end namespace irr
 
 #endif // !defined(__C_LMTS_MESH_FILE_LOADER_H_INCLUDED__)
-

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -133,6 +133,9 @@ const c8* CMeshCache::getMeshFilename(u32 number) const
 //! Returns the filename of a loaded mesh, if there is any. Returns 0 if there is none.
 const c8* CMeshCache::getMeshFilename(const IAnimatedMesh* const mesh) const
 {
+	if(!mesh)
+		return 0;
+
 	for (u32 i=0; i<Meshes.size(); ++i)
 	{
 		if (Meshes[i].Mesh == mesh)
@@ -146,10 +149,15 @@ const c8* CMeshCache::getMeshFilename(const IAnimatedMesh* const mesh) const
 //! Returns the filename of a loaded mesh, if there is any. Returns 0 if there is none.
 const c8* CMeshCache::getMeshFilename(const IMesh* const mesh) const
 {
+	if(!mesh)
+		return 0;
+
 	for (u32 i=0; i<Meshes.size(); ++i)
 	{
-		if (Meshes[i].Mesh && Meshes[i].Mesh->getMesh(0) == mesh)
-			return Meshes[i].Name.c_str();
+		// IMesh may actually be an IAnimatedMesh, so do a direct comparison
+		// as well as getting an IMesh from our stored IAnimatedMeshes
+		if (Meshes[i].Mesh && (Meshes[i].Mesh == mesh || Meshes[i].Mesh->getMesh(0) == mesh))
+			return Meshes[i].Name.c_str(); 
 	}
 
 	return 0;

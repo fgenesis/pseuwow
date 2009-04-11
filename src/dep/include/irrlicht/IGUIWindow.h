@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -22,9 +22,6 @@ namespace gui
 		//! constructor
 		IGUIWindow(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(EGUIET_WINDOW, environment, parent, id, rectangle) {}
-
-		//! destructor
-		virtual ~IGUIWindow() {}
 
 		//! Returns pointer to the close button
 		virtual IGUIButton* getCloseButton() const = 0;

@@ -1,3 +1,4 @@
+/* pnggvrd.c was removed from libpng-1.2.20. */
 
 /* pngvcrd.c - mixed C/assembler version of utilities to read a PNG file
  *

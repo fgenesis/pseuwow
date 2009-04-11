@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -17,9 +17,6 @@ namespace gui
 class IGUIFontBitmap : public IGUIFont
 {
 public:
-
-	//! Destructor
-	virtual ~IGUIFontBitmap() {}
 
 	//! Returns the type of this font
 	virtual EGUI_FONT_TYPE getType() const { return EGFT_BITMAP; }

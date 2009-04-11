@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -16,7 +16,7 @@ namespace irr
 {
 namespace gui
 {
-
+#ifdef _IRR_COMPILE_WITH_BMP_LOADER_
 u8 BuiltInFontData[] =
 {
 	0x42, 0x4d, 0x4a, 0x20, 0x00, 0x00, 0x00, 0x00, 
@@ -1056,6 +1056,16 @@ u8 BuiltInFontData[] =
 };
 
 	u32 BuiltInFontDataSize = sizeof(BuiltInFontData);
+
+#else // !defined(_IRR_COMPILE_WITH_BMP_LOADER_)
+
+	// built-in font cannot be loaded if there is no BMP loader
+
+	u8* BuiltInFontData=0;
+
+	u32 BuiltInFontDataSize = 0;
+
+#endif
 } // end namespace gui
 } // end namespace irr
 

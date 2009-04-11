@@ -418,7 +418,14 @@ void SceneWorld::OnUpdate(s32 timediff)
     str += " ## HEAD: ";
     str += IRR_TO_O(camera->getHeading());
     str += L"  Pos: ";
-    str += ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o;
+    str += wp.x;
+    str += L" | ";
+    str += wp.y;
+    str += L" | ";
+    str += wp.z;
+    str += L" | OR:";
+    str += wp.o;
+//    str += ((((((str + wp.x) + L" | ") + wp.y) + L" | ") + wp.z) + L" | OR:") + wp.o;// WTF?
     str += L"  -- Terrain: Sectors: ";
     str += (int)terrain->getSectorsRendered();
     str += L" / ";

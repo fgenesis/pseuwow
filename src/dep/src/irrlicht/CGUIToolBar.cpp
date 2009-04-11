@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -67,14 +67,17 @@ CGUIToolBar::CGUIToolBar(IGUIEnvironment* environment, IGUIElement* parent, s32 
 //! called if an event happened.
 bool CGUIToolBar::OnEvent(const SEvent& event)
 {
-	if (event.EventType == EET_MOUSE_INPUT_EVENT && 
-		event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+	if (IsEnabled)
 	{
-		if (AbsoluteClippingRect.isPointInside(core::position2di(event.MouseInput.X, event.MouseInput.Y)))
-			return true;
+		if (event.EventType == EET_MOUSE_INPUT_EVENT &&
+			event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+		{
+			if (AbsoluteClippingRect.isPointInside(core::position2di(event.MouseInput.X, event.MouseInput.Y)))
+				return true;
+		}
 	}
 
-	return Parent ? Parent->OnEvent(event) : false;
+	return IGUIElement::OnEvent(event);
 }
 
 
@@ -89,7 +92,7 @@ void CGUIToolBar::draw()
 		return;
 
 	core::rect<s32> rect = AbsoluteRect;
-	core::rect<s32>* clip = 0;
+	core::rect<s32>* clip = &AbsoluteClippingRect;
 
 	// draw frame
 	skin->draw3DToolBar(this, rect, clip);
@@ -113,7 +116,7 @@ void CGUIToolBar::updateAbsolutePosition()
 
 //! Adds a button to the tool bar
 IGUIButton* CGUIToolBar::addButton(s32 id, const wchar_t* text,const wchar_t* tooltiptext,
-	video::ITexture* img, video::ITexture* pressed, bool isPushButton, 
+	video::ITexture* img, video::ITexture* pressed, bool isPushButton,
 	bool useAlphaChannel)
 {
 	ButtonX += 3;
@@ -148,10 +151,10 @@ IGUIButton* CGUIToolBar::addButton(s32 id, const wchar_t* text,const wchar_t* to
 
 	if (useAlphaChannel)
 		button->setUseAlphaChannel(useAlphaChannel);
-	
+
 	return button;
 }
-	
+
 } // end namespace gui
 } // end namespace irr
 

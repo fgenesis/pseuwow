@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -175,7 +175,7 @@ bool CImageLoaderPSD::readRawImageData(io::IReadFile* file, const PsdHeader& hea
 			break;
 		}
 
-		s16 shift = getShiftFromChannel(channel, header);
+		s16 shift = getShiftFromChannel((c8)channel, header);
 		if (shift != -1)
 		{
 			u32 mask = 0xff << shift;
@@ -316,7 +316,7 @@ bool CImageLoaderPSD::readRLEImageData(io::IReadFile* file, const PsdHeader& hea
 			}
 		}
 
-		s16 shift = getShiftFromChannel(channel, header);
+		s16 shift = getShiftFromChannel((c8)channel, header);
 
 		if (shift != -1)
 		{

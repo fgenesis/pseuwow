@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -40,6 +40,13 @@ void CSceneNodeAnimatorDelete::animateNode(ISceneNode* node, u32 timeMs)
 	}
 }
 
+ISceneNodeAnimator* CSceneNodeAnimatorDelete::createClone(ISceneNode* node, ISceneManager* newManager)
+{
+	CSceneNodeAnimatorDelete * newAnimator = 
+		new CSceneNodeAnimatorDelete(SceneManager, DeleteTime);
+
+	return newAnimator;
+}
 
 } // end namespace scene
 } // end namespace irr

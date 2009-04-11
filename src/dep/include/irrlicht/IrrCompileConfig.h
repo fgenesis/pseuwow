@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -6,7 +6,9 @@
 #define __IRR_COMPILE_CONFIG_H_INCLUDED__
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION "1.4"
+#define IRRLICHT_SDK_VERSION "1.5"
+
+#include <stdio.h> // TODO: Although included elsewhere this is required at least for mingw
 
 //! The defines for different operating system are:
 //! _IRR_XBOX_PLATFORM_ for XBox
@@ -14,17 +16,23 @@
 //! _IRR_WINDOWS_API_ for Windows or XBox
 //! _IRR_LINUX_PLATFORM_ for Linux (it is defined here if no other os is defined)
 //! _IRR_SOLARIS_PLATFORM_ for Solaris
+//! _IRR_OSX_PLATFORM_ for Apple systems running OSX
 //! _IRR_POSIX_API_ for Posix compatible systems
 //! _IRR_USE_SDL_DEVICE_ for platform independent SDL framework
 //! _IRR_USE_WINDOWS_DEVICE_ for Windows API based device
+//! _IRR_USE_WINDOWS_CE_DEVICE_ for Windows CE API based device
 //! _IRR_USE_LINUX_DEVICE_ for X11 based device
-//! MACOSX for Mac OS X
+//! _IRR_USE_OSX_DEVICE_ for Cocoa native windowing on OSX
+//! Note: PLATFORM defines the OS specific layer, API can groups several platforms
+//! DEVICE is the windowing system used, several PLATFORMs support more than one DEVICE
+//! Moreover, the DEVICE defined here is not directly related to the Irrlicht devices created in the app (but may depend on each other).
 
 //#define _IRR_USE_SDL_DEVICE_ 1
 
 //! WIN32 for Windows32
 //! WIN64 for Windows64
-#if defined(WIN32) || defined(WIN64)
+// The windows platform and API support SDL and WINDOW device
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(_WIN32_WCE)
 #define _IRR_WINDOWS_
 #define _IRR_WINDOWS_API_
 #ifndef _IRR_USE_SDL_DEVICE_
@@ -32,12 +40,24 @@
 #endif
 #endif
 
+// XBox only suppots the native Window stuff
 #if defined(_XBOX)
 #define _IRR_XBOX_PLATFORM_
 #define _IRR_WINDOWS_API_
+#define _IRR_USE_WINDOWS_DEVICE_
 #endif
 
-#if !defined(_IRR_WINDOWS_API_) && !defined(MACOSX)
+#if defined(__APPLE__) || defined(MACOSX)
+#if !defined(MACOSX)
+#define MACOSX // legacy support
+#endif
+#define _IRR_OSX_PLATFORM_
+#if !defined(_IRR_USE_LINUX_DEVICE_) // for X11 windowing declare this
+#define _IRR_USE_OSX_DEVICE_
+#endif
+#endif
+
+#if !defined(_IRR_WINDOWS_API_) && !defined(_IRR_OSX_PLATFORM_)
 #if defined(__sparc__) || defined(__sun__)
 #define __BIG_ENDIAN__
 #define _IRR_SOLARIS_PLATFORM_
@@ -51,7 +71,8 @@
 #endif
 #endif
 
-#include <stdio.h> // TODO: Although included elsewhere this is required at least for mingw
+//! Define _IRR_COMPILE_WITH_JOYSTICK_SUPPORT_ if you want joystick events.
+#define _IRR_COMPILE_WITH_JOYSTICK_EVENTS_
 
 //! Define _IRR_COMPILE_WITH_DIRECT3D_8_ and _IRR_COMPILE_WITH_DIRECT3D_9_ to
 //! compile the Irrlicht engine with Direct3D8 and/or DIRECT3D9.
@@ -61,9 +82,16 @@ directX header files, and directX is only available on windows platforms. If you
 are using Dev-Cpp, and want to compile this using a DX dev pack, you can define
 _IRR_COMPILE_WITH_DX9_DEV_PACK_. So you simply need to add something like this
 to the compiler settings: -DIRR_COMPILE_WITH_DX9_DEV_PACK
-and this to the linker settings: -ld3dx9 -ld3dx8 **/
+and this to the linker settings: -ld3dx9 -ld3dx8
+
+Microsoft have chosen to remove D3D8 headers from their recent DXSDKs, and 
+so D3D8 support is now disabled by default.  If you really want to build 
+with D3D8 support, then you will have to source a DXSDK with the appropriate 
+headers, e.g. Summer 2004.  This is a Microsoft issue, not an Irrlicht one.
+*/
 #if defined(_IRR_WINDOWS_API_) && (!defined(__GNUC__) || defined(IRR_COMPILE_WITH_DX9_DEV_PACK))
 
+//! Only define _IRR_COMPILE_WITH_DIRECT3D_8_ if you have an appropriate DXSDK, e.g. Summer 2004 
 //#define _IRR_COMPILE_WITH_DIRECT3D_8_
 #define _IRR_COMPILE_WITH_DIRECT3D_9_
 
@@ -92,13 +120,13 @@ define out. */
 //! Define _IRR_OPENGL_USE_EXTPOINTER_ if the OpenGL renderer should use OpenGL extensions via function pointers.
 /** On some systems there is no support for the dynamic extension of OpenGL
 	via function pointers such that this has to be undef'ed. */
-#if !defined(MACOSX) && !defined(_IRR_SOLARIS_PLATFORM_)
+#if !defined(_IRR_OSX_PLATFORM_) && !defined(_IRR_SOLARIS_PLATFORM_)
 #define _IRR_OPENGL_USE_EXTPOINTER_
 #endif
 
 //! On some Linux systems the XF86 vidmode extension or X11 RandR are missing. Use these flags
 //! to remove the dependencies such that Irrlicht will compile on those systems, too.
-#if defined(_IRR_LINUX_PLATFORM_)
+#if defined(_IRR_LINUX_PLATFORM_) && defined(_IRR_COMPILE_WITH_X11_)
 #define _IRR_LINUX_X11_VIDMODE_
 //#define _IRR_LINUX_X11_RANDR_
 #endif
@@ -154,44 +182,13 @@ watch registers, variables etc. This works with ASM, HLSL, and both with pixel a
 Note that the engine will run in D3D REF for this, which is a lot slower than HAL. */
 #define _IRR_D3D_NO_SHADER_DEBUGGING
 
-
-#ifdef _IRR_WINDOWS_API_
-
-#ifndef _IRR_STATIC_LIB_
-#ifdef IRRLICHT_EXPORTS
-#define IRRLICHT_API __declspec(dllexport)
-#else
-#define IRRLICHT_API __declspec(dllimport)
-#endif // IRRLICHT_EXPORT
-#else
-#define IRRLICHT_API
-#endif // _IRR_STATIC_LIB_
-
-// Declare the calling convention.
-#if defined(_STDCALL_SUPPORTED)
-#define IRRCALLCONV __stdcall
-#else
-#define IRRCALLCONV __cdecl
-#endif // STDCALL_SUPPORTED
-
-#else
-#define IRRLICHT_API
-#define IRRCALLCONV
-#endif // _IRR_WINDOWS_API_
-
-// We need to disable DIRECT3D9 support for Visual Studio 6.0 because
-// those $%&$!! disabled support for it since Dec. 2004 and users are complaining
-// about linker errors. Comment this out only if you are knowing what you are
-// doing. (Which means you have an old DX9 SDK and VisualStudio6).
-#ifdef _MSC_VER
-#if (_MSC_VER < 1300 && !defined(__GNUC__))
-#undef _IRR_COMPILE_WITH_DIRECT3D_9_
-#pragma message("Compiling Irrlicht with Visual Studio 6.0, support for DX9 is disabled.")
-#endif
-#endif
+//! Define _IRR_USE_NVIDIA_PERFHUD_ to opt-in to using the nVidia PerHUD tool
+/** Enable, by opting-in, to use the nVidia PerfHUD performance analysis driver
+tool <http://developer.nvidia.com/object/nvperfhud_home.html>. */
+#undef _IRR_USE_NVIDIA_PERFHUD_
 
 //! Define one of the three setting for Burning's Video Software Rasterizer
-/** So if we were marketing guys we could says Irrlicht has 4 Software-Rasterizers.
+/** So if we were marketing guys we could say Irrlicht has 4 Software-Rasterizers.
 	In a Nutshell:
 		All Burnings Rasterizers use 32 Bit Backbuffer, 32Bit Texture & 32 Bit Z or WBuffer,
 		16 Bit/32 Bit can be adjusted on a global flag.
@@ -255,6 +252,8 @@ B3D, MS3D or X meshes */
 #define _IRR_COMPILE_WITH_OCT_LOADER_
 //! Define _IRR_COMPILE_WITH_OGRE_LOADER_ if you want to load Ogre 3D files
 #define _IRR_COMPILE_WITH_OGRE_LOADER_
+//! Define _IRR_COMPILE_WITH_LWO_LOADER_ if you want to load Lightwave3D files
+#define _IRR_COMPILE_WITH_LWO_LOADER_
 //! Define _IRR_COMPILE_WITH_STL_LOADER_ if you want to load .stl files
 #define _IRR_COMPILE_WITH_STL_LOADER_
 
@@ -264,8 +263,11 @@ B3D, MS3D or X meshes */
 #define _IRR_COMPILE_WITH_COLLADA_WRITER_
 //! Define _IRR_COMPILE_WITH_STL_WRITER_ if you want to write .stl files
 #define _IRR_COMPILE_WITH_STL_WRITER_
+//! Define _IRR_COMPILE_WITH_OBJ_WRITER_ if you want to write .obj files
+#define _IRR_COMPILE_WITH_OBJ_WRITER_
 
 //! Define _IRR_COMPILE_WITH_BMP_LOADER_ if you want to load .bmp files
+//! Disabling this loader will also disable the built-in font
 #define _IRR_COMPILE_WITH_BMP_LOADER_
 //! Define _IRR_COMPILE_WITH_JPG_LOADER_ if you want to load .jpg files
 #define _IRR_COMPILE_WITH_JPG_LOADER_
@@ -279,6 +281,8 @@ B3D, MS3D or X meshes */
 #define _IRR_COMPILE_WITH_PSD_LOADER_
 //! Define _IRR_COMPILE_WITH_TGA_LOADER_ if you want to load .tga files
 #define _IRR_COMPILE_WITH_TGA_LOADER_
+//! Define _IRR_COMPILE_WITH_WAL_LOADER_ if you want to load .wal files
+#define _IRR_COMPILE_WITH_WAL_LOADER_
 
 //! Define _IRR_COMPILE_WITH_BMP_WRITER_ if you want to write .bmp files
 #define _IRR_COMPILE_WITH_BMP_WRITER_
@@ -299,15 +303,69 @@ B3D, MS3D or X meshes */
 /** Irrlicht should use approximate float and integer fpu techniques
 precision will be lower but speed higher. currently X86 only
 */
-#if !defined(MACOSX) && !defined(_IRR_SOLARIS_PLATFORM_)
+#if !defined(_IRR_OSX_PLATFORM_) && !defined(_IRR_SOLARIS_PLATFORM_)
 	//#define IRRLICHT_FAST_MATH
 #endif
 
-// Some cleanup
+// Some cleanup and standard stuff
+
+#ifdef _IRR_WINDOWS_API_
+
+// To build Irrlicht as a static library, you must define _IRR_STATIC_LIB_ in both the
+// Irrlicht build, *and* in the user application, before #including <irrlicht.h>
+#ifndef _IRR_STATIC_LIB_
+#ifdef IRRLICHT_EXPORTS
+#define IRRLICHT_API __declspec(dllexport)
+#else
+#define IRRLICHT_API __declspec(dllimport)
+#endif // IRRLICHT_EXPORT
+#else
+#define IRRLICHT_API
+#endif // _IRR_STATIC_LIB_
+
+// Declare the calling convention.
+#if defined(_STDCALL_SUPPORTED)
+#define IRRCALLCONV __stdcall
+#else
+#define IRRCALLCONV __cdecl
+#endif // STDCALL_SUPPORTED
+
+#else
+#define IRRLICHT_API
+#define IRRCALLCONV
+#endif // _IRR_WINDOWS_API_
+
+// We need to disable DIRECT3D9 support for Visual Studio 6.0 because
+// those $%&$!! disabled support for it since Dec. 2004 and users are complaining
+// about linker errors. Comment this out only if you are knowing what you are
+// doing. (Which means you have an old DX9 SDK and VisualStudio6).
+#ifdef _MSC_VER
+#if (_MSC_VER < 1300 && !defined(__GNUC__))
+#undef _IRR_COMPILE_WITH_DIRECT3D_9_
+#pragma message("Compiling Irrlicht with Visual Studio 6.0, support for DX9 is disabled.")
+#endif
+#endif
+
 // XBox does not have OpenGL or DirectX9
 #if defined(_IRR_XBOX_PLATFORM_)
 #undef _IRR_COMPILE_WITH_OPENGL_
 #undef _IRR_COMPILE_WITH_DIRECT3D_9_
+#endif
+
+// WinCE does not have OpenGL or DirectX9
+#if defined(_WIN32_WCE)
+	#undef _IRR_COMPILE_WITH_OPENGL_
+	#undef _IRR_COMPILE_WITH_DIRECT3D_8_
+	#undef _IRR_COMPILE_WITH_DIRECT3D_9_
+	#undef _IRR_COMPILE_WITH_SOFTWARE_
+	#undef BURNINGVIDEO_RENDERER_BEAUTIFUL
+	#undef _IRR_USE_WINDOWS_DEVICE_
+	#define _IRR_USE_WINDOWS_CE_DEVICE_
+	#define BURNINGVIDEO_RENDERER_CE
+#endif
+
+#if defined(_IRR_SOLARIS_PLATFORM_)
+#undef _IRR_COMPILE_WITH_JOYSTICK_EVENTS_
 #endif
 
 #endif // __IRR_COMPILE_CONFIG_H_INCLUDED__

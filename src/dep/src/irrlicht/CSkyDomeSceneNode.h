@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // Code for this scene node has been contributed by Anders la Cour-Harbo (alc)
@@ -18,8 +18,8 @@ class CSkyDomeSceneNode : public ISceneNode
 {
 	public:
 		CSkyDomeSceneNode(video::ITexture* texture, u32 horiRes, u32 vertRes,
-		f64 texturePercentage, f64 spherePercentage, ISceneNode* root,
-		ISceneManager* smgr, s32 id);
+			f64 texturePercentage, f64 spherePercentage,
+			ISceneNode* root, ISceneManager* smgr, s32 id);
 		virtual ~CSkyDomeSceneNode();
 		virtual void OnRegisterSceneNode();
 		virtual void render();
@@ -29,7 +29,7 @@ class CSkyDomeSceneNode : public ISceneNode
 		virtual ESCENE_NODE_TYPE getType() const { return ESNT_SKY_BOX; }
 
 	private:
-		SMeshBuffer Buffer;
+		SMeshBuffer* Buffer;
 };
 
 

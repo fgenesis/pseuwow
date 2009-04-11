@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -24,7 +24,7 @@ CGUIModalScreen::CGUIModalScreen(IGUIEnvironment* environment, IGUIElement* pare
 	setDebugName("CGUIModalScreen");
 	#endif
 	setAlignment(EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT);
-	
+
 	// this element is a tab group
 	setTabGroup(true);
 }
@@ -69,7 +69,7 @@ bool CGUIModalScreen::OnEvent(const SEvent& event)
 	default:
 		break;
 	}
-	
+
 	IGUIElement::OnEvent(event);
 
 	return true; // absorb everything else
@@ -93,19 +93,21 @@ void CGUIModalScreen::draw()
 
 		for (; it != Children.end(); ++it)
 		{
-			r = (*it)->getAbsolutePosition();
-			r.LowerRightCorner.X += 1;
-			r.LowerRightCorner.Y += 1;
-			r.UpperLeftCorner.X -= 1;
-			r.UpperLeftCorner.Y -= 1;
+			if ((*it)->isVisible())
+			{
+				r = (*it)->getAbsolutePosition();
+				r.LowerRightCorner.X += 1;
+				r.LowerRightCorner.Y += 1;
+				r.UpperLeftCorner.X -= 1;
+				r.UpperLeftCorner.Y -= 1;
 
-			skin->draw2DRectangle(this, c, r, &AbsoluteClippingRect);
+				skin->draw2DRectangle(this, c, r, &AbsoluteClippingRect);
+			}
 		}
 	}
 
 	IGUIElement::draw();
 }
-
 
 
 //! Removes a child.
@@ -116,6 +118,7 @@ void CGUIModalScreen::removeChild(IGUIElement* child)
 	if (Children.empty())
 		remove();
 }
+
 
 //! adds a child
 void CGUIModalScreen::addChild(IGUIElement* child)
@@ -141,6 +144,7 @@ void CGUIModalScreen::updateAbsolutePosition()
 	IGUIElement::updateAbsolutePosition();
 }
 
+
 //! Writes attributes of the element.
 void CGUIModalScreen::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0) const
 {
@@ -158,3 +162,4 @@ void CGUIModalScreen::deserializeAttributes(io::IAttributes* in, io::SAttributeR
 } // end namespace irr
 
 #endif // _IRR_COMPILE_WITH_GUI_
+

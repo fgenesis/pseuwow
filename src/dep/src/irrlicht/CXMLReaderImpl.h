@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine" and the "irrXML" project.
 // For conditions of distribution and use, see copyright notice in irrlicht.h and/or irrXML.h
 
@@ -71,8 +71,7 @@ public:
 		// if not end reached, parse the node
 		if (P && (unsigned int)(P - TextBegin) < TextSize - 1 && *P != 0)
 		{
-			parseCurrentNode();
-			return true;
+			return parseCurrentNode();
 		}
 
 		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
@@ -210,7 +209,8 @@ public:
 private:
 
 	// Reads the current xml node
-	void parseCurrentNode()
+	// return false if no further node is found
+	bool parseCurrentNode()
 	{
 		char_type* start = P;
 
@@ -218,14 +218,15 @@ private:
 		while(*P != L'<' && *P)
 			++P;
 
+		// not a node, so return false
 		if (!*P)
-			return;
+			return false;
 
 		if (P - start > 0)
 		{
 			// we found some text, store it
 			if (setText(start, P))
-				return;
+				return true;
 		}
 
 		++P;
@@ -247,6 +248,7 @@ private:
 			parseOpeningXMLElement();
 			break;
 		}
+		return true;
 	}
 
 
@@ -550,8 +552,10 @@ private:
 	//! reads the xml file and converts it into the wanted character format.
 	bool readFile(IFileReadCallBack* callback)
 	{
-		int size = callback->getSize();		
-		size += 4; // We need two terminating 0's at the end.
+		long size = callback->getSize();		
+		if (size<0)
+			return false;
+		size += 4; // We need four terminating 0's at the end.
 		           // For ASCII we need 1 0's, for UTF-16 2, for UTF-32 4.
 
 		char* data8 = new char[size];
@@ -564,10 +568,7 @@ private:
 
 		// add zeros at end
 
-		data8[size-1] = 0;
-		data8[size-2] = 0;
-		data8[size-3] = 0;
-		data8[size-4] = 0;
+		memset(data8+size-4, 0, 4);
 
 		char16* data16 = reinterpret_cast<char16*>(data8);
 		char32* data32 = reinterpret_cast<char32*>(data8);	
@@ -587,35 +588,35 @@ private:
 		{
 			// UTF-32, big endian
 			SourceFormat = ETF_UTF32_BE;
-			convertTextData(data32+1, data8, (size/4)); // data32+1 because we need to skip the header
+			convertTextData(data32+1, data8, (size/4)-1); // data32+1 because we need to skip the header
 		}
 		else
 		if (size >= 4 && data32[0] == (char32)UTF32_LE)
 		{
 			// UTF-32, little endian
 			SourceFormat = ETF_UTF32_LE;
-			convertTextData(data32+1, data8, (size/4)); // data32+1 because we need to skip the header
+			convertTextData(data32+1, data8, (size/4)-1); // data32+1 because we need to skip the header
 		}
 		else
 		if (size >= 2 && data16[0] == UTF16_BE)
 		{
 			// UTF-16, big endian
 			SourceFormat = ETF_UTF16_BE;
-			convertTextData(data16+1, data8, (size/2)); // data16+1 because we need to skip the header
+			convertTextData(data16+1, data8, (size/2)-1); // data16+1 because we need to skip the header
 		}
 		else
 		if (size >= 2 && data16[0] == UTF16_LE)
 		{
 			// UTF-16, little endian
 			SourceFormat = ETF_UTF16_LE;
-			convertTextData(data16+1, data8, (size/2)); // data16+1 because we need to skip the header
+			convertTextData(data16+1, data8, (size/2)-1); // data16+1 because we need to skip the header
 		}
 		else
-		if (size >= 3 && data8[0] == UTF8[0] && data8[1] == UTF8[1] && data8[2] == UTF8[2])
+		if (size >= 3 && memcmp(data8,UTF8,3)==0)
 		{
 			// UTF-8
 			SourceFormat = ETF_UTF8;
-			convertTextData(data8+3, data8, size); // data8+3 because we need to skip the header
+			convertTextData(data8+3, data8, size-3); // data8+3 because we need to skip the header
 		}
 		else
 		{

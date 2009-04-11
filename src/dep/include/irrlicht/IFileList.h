@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -16,37 +16,27 @@ namespace io
 class IFileList : public virtual IReferenceCounted
 {
 public:
-
-	//! destructor
-	virtual ~IFileList() {}
-
-	//! Returns the amount of files in the filelist.
-	//! \return
-	//! Returns the amount of files and directories in the file list.
+	//! Get the number of files in the filelist.
+	/** \return Amount of files and directories in the file list. */
 	virtual u32 getFileCount() const = 0;
 
 	//! Gets the name of a file in the list, based on an index.
-	//! The path is not included in this name. Use getFullFileName for this.
-	//! \param index is the zero based index of the file which name should
-	//!   be returned. The index has to be smaller than the amount getFileCount() returns.
-	//! \return
-	//! Returns the file name of the file. Returns 0, if an error occured.
+	/** The path is not included in this name. Use getFullFileName for this.
+	\param index is the zero based index of the file which name should
+	be returned. The index has to be smaller than the amount getFileCount() returns.
+	\return File name of the file. Returns 0, if an error occured. */
 	virtual const c8* getFileName(u32 index) const = 0;
 
 	//! Gets the full name of a file in the list, path included, based on an index.
-	//! \param index is the zero based index of the file which name should
-	//!   be returned. The index has to be smaller than the amount getFileCount() returns.
-	//! \return
-	//! Returns the file name of the file. Returns 0, if an error occured.
+	/** \param index is the zero based index of the file which name should
+	be returned. The index has to be smaller than the amount getFileCount() returns.
+	\return File name of the file. Returns 0, if an error occured. */
 	virtual const c8* getFullFileName(u32 index) = 0;
 
-	//! Returns of the file is a directory
-	//! \param
-	//! index is the zero based index of the file which name should
-	//!   be returned. The index has to be smaller than the amount getFileCount() returns.
-	//! \return
-	//! Returns true, if the file is a directory, and false, if it is not.
-	//!  If an error occurs, the result is undefined.
+	//! Check if the file is a directory
+	/** \param index The zero based index of the file whose name shall
+	be returned. The index has to be smaller than the amount getFileCount() returns.
+	\return True if the file is a directory, else false. */
 	virtual bool isDirectory(u32 index) const = 0;
 };
 

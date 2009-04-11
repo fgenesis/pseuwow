@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -18,7 +18,7 @@ class CTriangleBBSelector : public CTriangleSelector
 public:
 
 	//! Constructs a selector based on a mesh
-	CTriangleBBSelector(ISceneNode* node);
+	CTriangleBBSelector(const ISceneNode* node);
 
 	//! Gets all triangles.
 	virtual void getTriangles(core::triangle3df* triangles, s32 arraySize, s32& outTriangleCount, 

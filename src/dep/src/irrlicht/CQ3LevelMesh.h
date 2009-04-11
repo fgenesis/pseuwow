@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -24,21 +24,26 @@ namespace scene
 	public:
 
 		//! constructor
-		CQ3LevelMesh(io::IFileSystem* fs, video::IVideoDriver* driver,  scene::ISceneManager* smgr);
+		CQ3LevelMesh(io::IFileSystem* fs, scene::ISceneManager* smgr);
 
 		//! destructor
 		virtual ~CQ3LevelMesh();
 
-		//! loads a level from a .bsp-File. Also tries to load all needed textures. Returns true if successful.
+		//! loads a level from a .bsp-File. Also tries to load all
+		//! needed textures. Returns true if successful.
 		bool loadFile(io::IReadFile* file);
 
-		//! returns the amount of frames in milliseconds. If the amount is 1, it is a static (=non animated) mesh.
+		//! returns the amount of frames in milliseconds. If the amount
+		//! is 1, it is a static (=non animated) mesh.
 		virtual u32 getFrameCount() const;
 
-		//! returns the animated mesh based on a detail level. 0 is the lowest, 255 the highest detail. Note, that some Meshes will ignore the detail level.
-		virtual IMesh* getMesh(s32 frameInMs, s32 detailLevel=255, s32 startFrameLoop=-1, s32 endFrameLoop=-1);
+		//! returns the animated mesh based on a detail level. 0 is the
+		//! lowest, 255 the highest detail. Note, that some Meshes will
+		//! ignore the detail level.
+		virtual IMesh* getMesh(s32 frameInMs, s32 detailLevel=255,
+				s32 startFrameLoop=-1, s32 endFrameLoop=-1);
 
-		virtual void releaseMesh ( s32 index );
+		virtual void releaseMesh( s32 index );
 
 		//! Returns an axis aligned bounding box of the mesh.
 		//! \return A bounding box of this mesh is returned.
@@ -51,14 +56,14 @@ namespace scene
 		virtual E_ANIMATED_MESH_TYPE getMeshType() const;
 
 		//! loads the shader definition
-		virtual const quake3::SShader * getShader ( const c8 * filename, s32 fileNameIsValid );
+		virtual const quake3::SShader * getShader( const c8 * filename, bool fileNameIsValid=true );
 
 		//! returns a already loaded Shader
-		virtual const quake3::SShader * getShader ( u32 index  ) const;
+		virtual const quake3::SShader * getShader( u32 index  ) const;
 
 
 		//! get's an interface to the entities
-		virtual const quake3::tQ3EntityList & getEntityList ();
+		virtual const quake3::tQ3EntityList & getEntityList();
 
 
 
@@ -79,8 +84,7 @@ namespace scene
 
 		//! Returns pointer to a mesh buffer which fits a material
  		/** \param material: material to search for
-		\return Returns the pointer to the mesh buffer or
-		NULL if there is no such mesh buffer. */
+		\return Pointer to the mesh buffer or 0 if there is no such mesh buffer. */
 		virtual IMeshBuffer* getMeshBuffer( const video::SMaterial &material) const
 		{
 			return 0;
@@ -91,8 +95,17 @@ namespace scene
 			return;
 		}
 
+		//! set the hardware mapping hint, for driver
+		virtual void setHardwareMappingHint(E_HARDWARE_MAPPING newMappingHint, E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX)
+		{
+			return;
+		}
 
-
+		//! flags the meshbuffer as changed, reloads hardware buffers
+		virtual void setDirty(E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX)
+		{
+			return;
+		}
 
 	private:
 
@@ -259,38 +272,32 @@ namespace scene
 			u8 direction[2];   // The direction of the light: [phi,theta]
 		};
 
-		void loadTextures	(tBSPLump* l, io::IReadFile* file);		// Load the textures
-		void loadLightmaps  (tBSPLump* l, io::IReadFile* file);      // Load the lightmaps
-		void loadVerts      (tBSPLump* l, io::IReadFile* file);		// Load the vertices
-		void loadFaces      (tBSPLump* l, io::IReadFile* file);		// Load the faces
-		void loadPlanes     (tBSPLump* l, io::IReadFile* file);		// Load the Planes of the BSP
-		void loadNodes      (tBSPLump* l, io::IReadFile* file);		// load the Nodes of the BSP
-		void loadLeafs      (tBSPLump* l, io::IReadFile* file);		// load the Leafs of the BSP
-		void loadLeafFaces  (tBSPLump* l, io::IReadFile* file);		// load the Faces of the Leafs of the BSP
-		void loadVisData    (tBSPLump* l, io::IReadFile* file);		// load the visibility data of the clusters
-		void loadEntities   (tBSPLump* l, io::IReadFile* file);		// load the entities
-		void loadModels     (tBSPLump* l, io::IReadFile* file);		// load the models
-		void loadMeshVerts  (tBSPLump* l, io::IReadFile* file);		// load the mesh vertices
-		void loadBrushes    (tBSPLump* l, io::IReadFile* file);		// load the brushes of the BSP
-		void loadBrushSides (tBSPLump* l, io::IReadFile* file);		// load the brushsides of the BSP
-		void loadLeafBrushes(tBSPLump* l, io::IReadFile* file);		// load the brushes of the leaf
-		void loadShaders	(tBSPLump* l, io::IReadFile* file);		// load the shaders
+		void loadTextures   (tBSPLump* l, io::IReadFile* file); // Load the textures
+		void loadLightmaps  (tBSPLump* l, io::IReadFile* file); // Load the lightmaps
+		void loadVerts      (tBSPLump* l, io::IReadFile* file); // Load the vertices
+		void loadFaces      (tBSPLump* l, io::IReadFile* file); // Load the faces
+		void loadPlanes     (tBSPLump* l, io::IReadFile* file); // Load the Planes of the BSP
+		void loadNodes      (tBSPLump* l, io::IReadFile* file); // load the Nodes of the BSP
+		void loadLeafs      (tBSPLump* l, io::IReadFile* file); // load the Leafs of the BSP
+		void loadLeafFaces  (tBSPLump* l, io::IReadFile* file); // load the Faces of the Leafs of the BSP
+		void loadVisData    (tBSPLump* l, io::IReadFile* file); // load the visibility data of the clusters
+		void loadEntities   (tBSPLump* l, io::IReadFile* file); // load the entities
+		void loadModels     (tBSPLump* l, io::IReadFile* file); // load the models
+		void loadMeshVerts  (tBSPLump* l, io::IReadFile* file); // load the mesh vertices
+		void loadBrushes    (tBSPLump* l, io::IReadFile* file); // load the brushes of the BSP
+		void loadBrushSides (tBSPLump* l, io::IReadFile* file); // load the brushsides of the BSP
+		void loadLeafBrushes(tBSPLump* l, io::IReadFile* file); // load the brushes of the leaf
+		void loadShaders    (tBSPLump* l, io::IReadFile* file); // load the shaders
 
 		// second parameter i is the zero based index of the current face.
 		void createCurvedSurface(SMeshBufferLightMap* meshBuffer, s32 i);
 
 		//bi-quadratic bezier patches
-		void createCurvedSurface2 (	SMeshBufferLightMap* meshBuffer,
-									s32 faceIndex,
-									s32 patchTesselation,
-									s32 storevertexcolor
-								);
+		void createCurvedSurface2(SMeshBufferLightMap* meshBuffer,
+				s32 faceIndex, s32 patchTesselation, s32 storevertexcolor);
 
-		void createCurvedSurface3 (	SMeshBufferLightMap* meshBuffer,
-									s32 faceIndex,
-									s32 patchTesselation,
-									s32 storevertexcolor
-								);
+		void createCurvedSurface3(SMeshBufferLightMap* meshBuffer,
+				s32 faceIndex, s32 patchTesselation, s32 storevertexcolor);
 
 		f32 Blend( const f64 s[3], const f64 t[3], const tBSPVertex *v[9], int offset);
 
@@ -302,27 +309,28 @@ namespace scene
 			core::vector2d<f64> TCoords;
 			core::vector2d<f64> TCoords2;
 
-			void copyto ( video::S3DVertex2TCoords &dest ) const;
+			void copyto( video::S3DVertex2TCoords &dest ) const;
 
 			S3DVertex2TCoords_64() {}
 			S3DVertex2TCoords_64(const core::vector3d<f64>& pos, const core::vector3d<f64>& normal, const video::SColorf& color,
 				const core::vector2d<f64>& tcoords, const core::vector2d<f64>& tcoords2)
 				: Pos(pos), Normal(normal), Color(color), TCoords(tcoords), TCoords2(tcoords2) {}
 
-			S3DVertex2TCoords_64 getInterpolated_quadratic(const S3DVertex2TCoords_64& v2, const S3DVertex2TCoords_64& v3, const f64 d) const
+			S3DVertex2TCoords_64 getInterpolated_quadratic(const S3DVertex2TCoords_64& v2,
+					const S3DVertex2TCoords_64& v3, const f64 d) const
 			{
 				return S3DVertex2TCoords_64 (
 						Pos.getInterpolated_quadratic ( v2.Pos, v3.Pos, d  ),
 						Normal.getInterpolated_quadratic ( v2.Normal, v3.Normal, d ),
 						Color.getInterpolated_quadratic ( v2.Color, v3.Color, (f32) d ),
 						TCoords.getInterpolated_quadratic ( v2.TCoords, v3.TCoords, d ),
-						TCoords2.getInterpolated_quadratic ( v2.TCoords2, v3.TCoords2, d )
-					);
+						TCoords2.getInterpolated_quadratic ( v2.TCoords2, v3.TCoords2, d ));
 			}
 		};
 
-		inline void copy ( video::S3DVertex2TCoords * dest, const tBSPVertex * source, s32 vertexcolor ) const;
-		void copy ( S3DVertex2TCoords_64 * dest, const tBSPVertex * source, s32 vertexcolor ) const;
+		inline void copy( video::S3DVertex2TCoords * dest, const tBSPVertex * source,
+				s32 vertexcolor ) const;
+		void copy( S3DVertex2TCoords_64 * dest, const tBSPVertex * source, s32 vertexcolor ) const;
 
 
 		struct SBezier
@@ -406,24 +414,24 @@ namespace scene
 		SQ3Parser Parser;
 
 
-		typedef void ( CQ3LevelMesh::*tParserCallback ) ( quake3::SVarGroupList *& groupList );
-		void parser_parse ( const void * data, u32 size, tParserCallback callback );
-		void parser_nextToken ();
+		typedef void( CQ3LevelMesh::*tParserCallback ) ( quake3::SVarGroupList *& groupList );
+		void parser_parse( const void * data, u32 size, tParserCallback callback );
+		void parser_nextToken();
 
-		void dumpVarGroup ( const quake3::SVarGroup * group, s32 stack ) const;
+		void dumpVarGroup( const quake3::SVarGroup * group, s32 stack ) const;
 
-		void scriptcallback_entity ( quake3::SVarGroupList *& grouplist );
+		void scriptcallback_entity( quake3::SVarGroupList *& grouplist );
 		quake3::tQ3EntityList Entity;
 
-		void scriptcallback_shader ( quake3::SVarGroupList *& grouplist );
+		void scriptcallback_shader( quake3::SVarGroupList *& grouplist );
 		core::array < quake3::SShader > Shader;
 		quake3::tStringList ShaderFile;
-		void InitShader ();
-		void ReleaseShader ();
-		void ReleaseEntity ();
+		void InitShader();
+		void ReleaseShader();
+		void ReleaseEntity();
 
 
-		s32 setShaderMaterial ( video::SMaterial & material, const tBSPFace * face ) const;
+		s32 setShaderMaterial( video::SMaterial & material, const tBSPFace * face ) const;
 
 		struct SToBuffer
 		{
@@ -431,8 +439,8 @@ namespace scene
 			u32 index;
 		};
 
-		void cleanMeshes ();
-		void calcBoundingBoxes ();
+		void cleanMeshes();
+		void calcBoundingBoxes();
 
 	};
 

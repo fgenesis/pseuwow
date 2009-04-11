@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -20,7 +20,7 @@ namespace scene
 
 		//! constructor
 		COctTreeSceneNode(ISceneNode* parent, ISceneManager* mgr, s32 id, 
-			s32 minimalPolysPerNode=128);
+			s32 minimalPolysPerNode=512);
 
 		//! destructor
 		virtual ~COctTreeSceneNode();
@@ -67,10 +67,12 @@ namespace scene
 		OctTree<video::S3DVertex2TCoords>* LightMapOctTree;
 		core::array< OctTree<video::S3DVertex2TCoords>::SMeshChunk > LightMapMeshes;
 
+		OctTree<video::S3DVertexTangents>* TangentsOctTree;
+		core::array< OctTree<video::S3DVertexTangents>::SMeshChunk > TangentsMeshes;
+
 		video::E_VERTEX_TYPE vertexType;
 		core::array< video::SMaterial > Materials;
 
-		//IMesh* Mesh;
 		core::stringc MeshName;
 		s32 MinimalPolysPerNode;
 		s32 PassCount;

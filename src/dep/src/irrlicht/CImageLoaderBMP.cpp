@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -100,7 +100,7 @@ void CImageLoaderBMP::decompress8BitRLE(u8*& bmpData, s32 size, s32 width, s32 h
 		else
 		{
 			s32 count = (u8)*p; ++p;
-			s32 color = (u8)*p; ++p;
+			u8 color = *p; ++p;
 			for (s32 i=0; i<count; ++i)
 			{
 				*d = color;

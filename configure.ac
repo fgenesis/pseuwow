@@ -13,15 +13,16 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_RANLIB
+# AC_PROG_LIBTOOL
 
 # Checks for libraries.
 AC_CHECK_LIB([Xxf86vm], [main], [], [echo "ERROR: Xxf86vm library not found." && exit 1])
 AC_CHECK_LIB([GL], [main], [], [echo "ERROR: GL library not found." && exit 1])
 AC_CHECK_LIB([GLU], [main], [], [echo "ERROR: GLU library not found." && exit 1])
-AC_CHECK_LIB([Irrlicht], [main], [], [echo "ERROR: Irrlicht library not found." && exit 1])
+# AC_CHECK_LIB([Irrlicht], [main], [], [echo "ERROR: Irrlicht library not found." && exit 1])
 AC_CHECK_LIB([ssl], [main], [], [echo "ERROR: ssl library not found." && exit 1])
 AC_CHECK_LIB([crypto], [main], [], [echo "ERROR: ssl crypto library not found." && exit 1])
-AC_CHECK_LIB([ZThread], [main], [], [echo "ERROR: ZThread library not found." && exit 1])
+# AC_CHECK_LIB([ZThread], [main], [], [echo "ERROR: ZThread library not found." && exit 1])
 
 # Checks for header files.
 AC_PATH_X
@@ -65,6 +66,10 @@ AC_CHECK_FUNCS([floor ftime ftruncate getcwd gethostbyaddr gethostbyname gethost
 #                   src/dep/src/irrlicht/libpng])
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
+		 src/dep/Makefile
+		 src/dep/src/Makefile
+		 src/dep/src/zlib/Makefile
+		 src/dep/src/zthread/Makefile
 		 src/tools/Makefile
 		 src/tools/stuffextract/Makefile
 		 src/tools/stuffextract/StormLib/Makefile

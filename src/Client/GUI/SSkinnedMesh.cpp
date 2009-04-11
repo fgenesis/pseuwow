@@ -596,6 +596,22 @@ void CSkinnedMesh::setMaterialFlag(video::E_MATERIAL_FLAG flag, bool newvalue)
 		LocalBuffers[i]->Material.setFlag(flag,newvalue);
 }
 
+//! set the hardware mapping hint, for driver
+void CSkinnedMesh::setHardwareMappingHint(E_HARDWARE_MAPPING newMappingHint,
+                E_BUFFER_TYPE buffer)
+{
+        for (u32 i=0; i<LocalBuffers.size(); ++i)
+                LocalBuffers[i]->setHardwareMappingHint(newMappingHint, buffer);
+}
+ 
+ 
+//! flags the meshbuffer as changed, reloads hardware buffers
+void CSkinnedMesh::setDirty(E_BUFFER_TYPE buffer)
+{
+        for (u32 i=0; i<LocalBuffers.size(); ++i)
+                LocalBuffers[i]->setDirty(buffer);
+}
+
 
 //! uses animation from another mesh
 bool CSkinnedMesh::useAnimationFrom(const ISkinnedMesh *mesh)
@@ -837,7 +853,6 @@ void CSkinnedMesh::checkForAnimation()
 //! called by loader after populating with mesh and bone data
 void CSkinnedMesh::finalize()
 {
-	std::cout<<"Finalize has been called\n";
 	u32 i;
 
 	LastAnimatedFrame=-1;
@@ -913,8 +928,8 @@ void CSkinnedMesh::finalize()
 	//Todo: optimise keys here...
 
 	checkForAnimation();
-    printf("Has Animation %u\n",HasAnimation);
-	if (HasAnimation)
+
+if (HasAnimation)
 	{
 		//--- optimize and check keyframes ---
 		for(i=0;i<AllJoints.size();++i)
