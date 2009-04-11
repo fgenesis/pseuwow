@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -460,8 +460,7 @@ namespace gui
 		implementations to find out how to draw the part exactly.
 		\param active: Specifies if the tab is currently active.
 		\param rect: Defining area where to draw.
-		\param clip: Clip area.
-		\param alignment Alignment of GUI element. */
+		\param clip: Clip area. */
 		virtual void draw3DTabButton(IGUIElement* element, bool active,
 			const core::rect<s32>& rect, const core::rect<s32>* clip=0, gui::EGUI_ALIGNMENT alignment=EGUIA_UPPERLEFT) = 0;
 
@@ -472,9 +471,7 @@ namespace gui
 		\param border: Specifies if the border should be drawn.
 		\param background: Specifies if the background should be drawn.
 		\param rect: Defining area where to draw.
-		\param clip: Clip area.
-		\param tabHeight Height of tab.
-		\param alignment Alignment of GUI element. */
+		\param clip: Clip area. */
 		virtual void draw3DTabBody(IGUIElement* element, bool border, bool background,
 			const core::rect<s32>& rect, const core::rect<s32>* clip=0, s32 tabHeight=-1, gui::EGUI_ALIGNMENT alignment=EGUIA_UPPERLEFT ) = 0;
 
@@ -513,4 +510,7 @@ namespace gui
 } // end namespace irr
 
 #endif
+
+
+
 

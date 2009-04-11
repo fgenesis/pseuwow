@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -184,16 +184,9 @@ IImage* CImageLoaderPng::loadImage(io::IReadFile* file) const
 
 	// Update the changes
 	png_read_update_info(png_ptr, info_ptr);
-	{
-		// Use temporary variables to avoid passing casted pointers
-		png_uint_32 w,h;
-		// Extract info
-		png_get_IHDR(png_ptr, info_ptr,
-			&w, &h,
-			&BitDepth, &ColorType, NULL, NULL, NULL);
-		Width=w;
-		Height=h;
-	}
+	png_get_IHDR(png_ptr, info_ptr,
+		(png_uint_32*)&Width, (png_uint_32*)&Height,
+		&BitDepth, &ColorType, NULL, NULL, NULL);
 
 	// Convert RGBA to BGRA
 	if (ColorType==PNG_COLOR_TYPE_RGB_ALPHA)
@@ -206,16 +199,9 @@ IImage* CImageLoaderPng::loadImage(io::IReadFile* file) const
 	}
 
 	// Update the changes
-	{
-		// Use temporary variables to avoid passing casted pointers
-		png_uint_32 w,h;
-		// Extract info
-		png_get_IHDR(png_ptr, info_ptr,
-			&w, &h,
-			&BitDepth, &ColorType, NULL, NULL, NULL);
-		Width=w;
-		Height=h;
-	}
+	png_get_IHDR(png_ptr, info_ptr,
+		(png_uint_32*)&Width, (png_uint_32*)&Height,
+		&BitDepth, &ColorType, NULL, NULL, NULL);
 
 	// Create the image structure to be filled by png data
 	if (ColorType==PNG_COLOR_TYPE_RGB_ALPHA)

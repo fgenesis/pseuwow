@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -207,9 +207,7 @@ core::stringc CFileSystem::getAbsolutePath(const core::stringc& filename) const
 	c8 *p=0;
 
 #ifdef _IRR_WINDOWS_API_
-	#if defined ( _WIN32_WCE )
-	return filename;
-	#else
+	#if !defined ( _WIN32_WCE )
 	c8 fpath[_MAX_PATH];
 	p = _fullpath( fpath, filename.c_str(), _MAX_PATH);
 	#endif

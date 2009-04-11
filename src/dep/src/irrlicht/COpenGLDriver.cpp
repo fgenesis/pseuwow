@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -116,7 +116,7 @@ bool COpenGLDriver::initDriver(irr::SIrrlichtCreationParameters params)
 		HWND temporary_wnd=CreateWindow(ClassName, "", style, windowLeft, windowTop,
 			realWidth, realHeight,   NULL, NULL, lhInstance, NULL);
 
-		if (!temporary_wnd)
+		if(!temporary_wnd)
 		{
 			os::Printer::log("Cannot create a temporary window.", ELL_ERROR);
 			return false;
@@ -165,7 +165,7 @@ bool COpenGLDriver::initDriver(irr::SIrrlichtCreationParameters params)
 
 		SetPixelFormat(HDc, PixelFormat, &pfd);
 		HRc=wglCreateContext(HDc);
-		if (!HRc)
+		if(!HRc)
 		{
 			os::Printer::log("Cannot create a temporary GL rendering context.", ELL_ERROR);
 			ReleaseDC(temporary_wnd, HDc);
@@ -173,7 +173,7 @@ bool COpenGLDriver::initDriver(irr::SIrrlichtCreationParameters params)
 			return false;
 		}
 
-		if (!wglMakeCurrent(HDc, HRc))
+		if(!wglMakeCurrent(HDc, HRc))
 		{
 			os::Printer::log("Cannot activate a temporary GL rendering context.", ELL_ERROR);
 			wglDeleteContext(HRc);
@@ -183,7 +183,7 @@ bool COpenGLDriver::initDriver(irr::SIrrlichtCreationParameters params)
 		}
 
 		PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormat_ARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
-		if (wglChoosePixelFormat_ARB)
+		if(wglChoosePixelFormat_ARB)
 		{
 			// This value determines the number of samples used for antialiasing
 			// valid numbers are 2, 4, 8.  My experience is that 8 does not
@@ -218,12 +218,12 @@ bool COpenGLDriver::initDriver(irr::SIrrlichtCreationParameters params)
 				u32 numFormats=0;
 				const s32 valid = wglChoosePixelFormat_ARB(HDc,iAttributes,fAttributes,1,&pixelFormat,&numFormats);
 
-				if (valid && numFormats>0)
+				if(valid && numFormats>0)
 					rv = pixelFormat;
 				else
 					iAttributes[19] >>= 1;
 			}
-			if (rv)
+			if(rv)
 				PixelFormat=rv;
 		}
 
@@ -284,7 +284,7 @@ bool COpenGLDriver::initDriver(irr::SIrrlichtCreationParameters params)
 	}
 
 	// set pixel format
-	if (!SetPixelFormat(HDc, PixelFormat, &pfd))
+	if(!SetPixelFormat(HDc, PixelFormat, &pfd))
 	{
 		os::Printer::log("Cannot set the pixel format.", ELL_ERROR);
 		return false;
@@ -299,7 +299,7 @@ bool COpenGLDriver::initDriver(irr::SIrrlichtCreationParameters params)
 	}
 
 	// activate rendering context
-	if (!wglMakeCurrent(HDc, HRc))
+	if(!wglMakeCurrent(HDc, HRc))
 	{
 		os::Printer::log("Cannot activate GL rendering context", ELL_ERROR);
 		wglDeleteContext(HRc);
@@ -503,7 +503,7 @@ bool COpenGLDriver::genericDriverInit(const core::dimension2d<s32>& screenSize, 
 	glClearDepth(1.0);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glDepthFunc(GL_LEQUAL);
-	glFrontFace(GL_CW);
+	glFrontFace( GL_CW );
 
 	if (AntiAlias)
 	{
@@ -660,7 +660,7 @@ void COpenGLDriver::setTransform(E_TRANSFORMATION_STATE state, const core::matri
 	Matrices[state] = mat;
 	Transformation3DChanged = true;
 
-	switch (state)
+	switch(state)
 	{
 	case ETS_VIEW:
 	case ETS_WORLD:
@@ -714,7 +714,6 @@ void COpenGLDriver::setTransform(E_TRANSFORMATION_STATE state, const core::matri
 		break;
 	}
 }
-
 
 bool COpenGLDriver::updateVertexHardwareBuffer(SHWBufferLink_opengl *HWBuffer)
 {
@@ -779,8 +778,7 @@ bool COpenGLDriver::updateVertexHardwareBuffer(SHWBufferLink_opengl *HWBuffer)
 	if (!HWBuffer->vbo_verticesID)
 	{
 		extGlGenBuffers(1, &HWBuffer->vbo_verticesID);
-		if (!HWBuffer->vbo_verticesID)
-			return false;
+		if (!HWBuffer->vbo_verticesID) return false;
 		newBuffer=true;
 	}
 	else if (HWBuffer->vbo_verticesSize < vertexCount*vertexSize)
@@ -788,7 +786,7 @@ bool COpenGLDriver::updateVertexHardwareBuffer(SHWBufferLink_opengl *HWBuffer)
 		newBuffer=true;
 	}
 
-	extGlBindBuffer(GL_ARRAY_BUFFER, HWBuffer->vbo_verticesID);
+	extGlBindBuffer(GL_ARRAY_BUFFER, HWBuffer->vbo_verticesID );
 
 	//copy data to graphics card
 	glGetError(); // clear error storage
@@ -820,7 +818,7 @@ bool COpenGLDriver::updateIndexHardwareBuffer(SHWBufferLink_opengl *HWBuffer)
 	if (!HWBuffer)
 		return false;
 
-	if (!FeatureAvailable[IRR_ARB_vertex_buffer_object])
+	if(!FeatureAvailable[IRR_ARB_vertex_buffer_object])
 		return false;
 
 #if defined(GL_ARB_vertex_buffer_object)
@@ -832,12 +830,12 @@ bool COpenGLDriver::updateIndexHardwareBuffer(SHWBufferLink_opengl *HWBuffer)
 	GLenum indexSize;
 	switch (mb->getIndexType())
 	{
-		case EIT_16BIT:
+		case (EIT_16BIT):
 		{
 			indexSize=sizeof(u16);
 			break;
 		}
-		case EIT_32BIT:
+		case (EIT_32BIT):
 		{
 			indexSize=sizeof(u32);
 			break;
@@ -854,8 +852,7 @@ bool COpenGLDriver::updateIndexHardwareBuffer(SHWBufferLink_opengl *HWBuffer)
 	if (!HWBuffer->vbo_indicesID)
 	{
 		extGlGenBuffers(1, &HWBuffer->vbo_indicesID);
-		if (!HWBuffer->vbo_indicesID)
-			return false;
+		if (!HWBuffer->vbo_indicesID) return false;
 		newBuffer=true;
 	}
 	else if (HWBuffer->vbo_indicesSize < indexCount*indexSize)
@@ -963,8 +960,8 @@ COpenGLDriver::SHWBufferLink *COpenGLDriver::createHardwareBuffer(const scene::I
 
 void COpenGLDriver::deleteHardwareBuffer(SHWBufferLink *_HWBuffer)
 {
-	if (!_HWBuffer)
-		return;
+	if (!_HWBuffer) return;
+
 
 #if defined(GL_ARB_vertex_buffer_object)
 	SHWBufferLink_opengl *HWBuffer=(SHWBufferLink_opengl*)_HWBuffer;
@@ -981,6 +978,7 @@ void COpenGLDriver::deleteHardwareBuffer(SHWBufferLink *_HWBuffer)
 #endif
 
 	CNullDriver::deleteHardwareBuffer(_HWBuffer);
+
 }
 
 
@@ -990,13 +988,16 @@ void COpenGLDriver::drawHardwareBuffer(SHWBufferLink *_HWBuffer)
 	if (!_HWBuffer)
 		return;
 
-	updateHardwareBuffer(_HWBuffer); //check if update is needed
-	_HWBuffer->LastUsed=0; //reset count
-
-#if defined(GL_ARB_vertex_buffer_object)
 	SHWBufferLink_opengl *HWBuffer=(SHWBufferLink_opengl*)_HWBuffer;
 
+	updateHardwareBuffer(HWBuffer); //check if update is needed
+
+	HWBuffer->LastUsed=0;//reset count
+
+#if defined(GL_ARB_vertex_buffer_object)
 	const scene::IMeshBuffer* mb = HWBuffer->MeshBuffer;
+
+
 	const void *vertices=mb->getVertices();
 	const void *indexList=mb->getIndices();
 
@@ -1012,12 +1013,17 @@ void COpenGLDriver::drawHardwareBuffer(SHWBufferLink *_HWBuffer)
 		indexList=0;
 	}
 
+
 	drawVertexPrimitiveList(vertices, mb->getVertexCount(), indexList, mb->getIndexCount()/3, mb->getVertexType(), scene::EPT_TRIANGLES, mb->getIndexType());
 
 	if (HWBuffer->Mapped_Vertex!=scene::EHM_NEVER)
 		extGlBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	if (HWBuffer->Mapped_Index!=scene::EHM_NEVER)
 		extGlBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+
 #endif
 }
 
@@ -1054,7 +1060,7 @@ void COpenGLDriver::drawVertexPrimitiveList(const void* vertices, u32 vertexCoun
 			case EVT_STANDARD:
 			{
 				const S3DVertex* p = static_cast<const S3DVertex*>(vertices);
-				for (i=0; i<vertexCount; i+=4)
+				for ( i=0; i<vertexCount; i+=4)
 				{
 					p->Color.toOpenGLColor(&ColorBuffer[i]);
 					++p;
@@ -1064,7 +1070,7 @@ void COpenGLDriver::drawVertexPrimitiveList(const void* vertices, u32 vertexCoun
 			case EVT_2TCOORDS:
 			{
 				const S3DVertex2TCoords* p = static_cast<const S3DVertex2TCoords*>(vertices);
-				for (i=0; i<vertexCount; i+=4)
+				for ( i=0; i<vertexCount; i+=4)
 				{
 					p->Color.toOpenGLColor(&ColorBuffer[i]);
 					++p;
@@ -1074,7 +1080,7 @@ void COpenGLDriver::drawVertexPrimitiveList(const void* vertices, u32 vertexCoun
 			case EVT_TANGENTS:
 			{
 				const S3DVertexTangents* p = static_cast<const S3DVertexTangents*>(vertices);
-				for (i=0; i<vertexCount; i+=4)
+				for ( i=0; i<vertexCount; i+=4)
 				{
 					p->Color.toOpenGLColor(&ColorBuffer[i]);
 					++p;
@@ -1178,7 +1184,7 @@ void COpenGLDriver::drawVertexPrimitiveList(const void* vertices, u32 vertexCoun
 					glTexCoordPointer(3, GL_FLOAT, sizeof(S3DVertexTangents), buffer_offset(36));
 
 				extGlClientActiveTexture(GL_TEXTURE2_ARB);
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
 				if (vertices)
 					glTexCoordPointer(3, GL_FLOAT, sizeof(S3DVertexTangents), &(static_cast<const S3DVertexTangents*>(vertices))[0].Binormal);
 				else
@@ -1191,12 +1197,12 @@ void COpenGLDriver::drawVertexPrimitiveList(const void* vertices, u32 vertexCoun
 
 	switch (iType)
 	{
-		case EIT_16BIT:
+		case (EIT_16BIT):
 		{
 			indexSize=GL_UNSIGNED_SHORT;
 			break;
 		}
-		case EIT_32BIT:
+		case (EIT_32BIT):
 		{
 			indexSize=GL_UNSIGNED_INT;
 			break;
@@ -1645,7 +1651,7 @@ void COpenGLDriver::draw2DLine(const core::position2d<s32>& start,
 void COpenGLDriver::drawPixel(u32 x, u32 y, const SColor &color)
 {
 	const core::dimension2d<s32>& renderTargetSize = getCurrentRenderTargetSize();
-	if (x > (u32)renderTargetSize.Width || y > (u32)renderTargetSize.Height)
+	if(x > (u32)renderTargetSize.Width || y > (u32)renderTargetSize.Height)
 		return;
 
 	disableTextures();
@@ -1751,7 +1757,7 @@ void COpenGLDriver::setMaterial(const SMaterial& material)
 
 	for (s32 i = MaxTextureUnits-1; i>= 0; --i)
 	{
-		setTransform ((E_TRANSFORMATION_STATE) (ETS_TEXTURE_0 + i),
+		setTransform ((E_TRANSFORMATION_STATE) ( ETS_TEXTURE_0 + i ),
 				material.getTextureMatrix(i));
 	}
 }
@@ -1762,7 +1768,7 @@ bool COpenGLDriver::testGLError()
 {
 #ifdef _DEBUG
 	GLenum g = glGetError();
-	switch (g)
+	switch(g)
 	{
 	case GL_NO_ERROR:
 		return false;
@@ -1815,7 +1821,7 @@ void COpenGLDriver::setRenderStates3DMode()
 		ResetRenderStates = true;
 	}
 
-	if (ResetRenderStates || LastMaterial != Material)
+	if ( ResetRenderStates || LastMaterial != Material)
 	{
 		// unset old material
 
@@ -1982,22 +1988,22 @@ void COpenGLDriver::setBasicRenderStates(const SMaterial& material, const SMater
 		else if (i>0)
 			break;
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
 			(material.TextureLayer[i].BilinearFilter || material.TextureLayer[i].TrilinearFilter) ? GL_LINEAR : GL_NEAREST);
 
 		if (material.getTexture(i) && material.getTexture(i)->hasMipMaps())
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 				material.TextureLayer[i].TrilinearFilter ? GL_LINEAR_MIPMAP_LINEAR :
 				material.TextureLayer[i].BilinearFilter ? GL_LINEAR_MIPMAP_NEAREST :
-				GL_NEAREST_MIPMAP_NEAREST);
+				GL_NEAREST_MIPMAP_NEAREST );
 		else
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 				(material.TextureLayer[i].BilinearFilter || material.TextureLayer[i].TrilinearFilter) ? GL_LINEAR : GL_NEAREST);
 
 #ifdef GL_EXT_texture_filter_anisotropic
 		if (AnisotropyExtension)
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
-				material.TextureLayer[i].AnisotropicFilter ? MaxAnisotropy : 1.0f);
+				material.TextureLayer[i].AnisotropicFilter ? MaxAnisotropy : 1.0f );
 #endif
 	}
 
@@ -2033,11 +2039,11 @@ void COpenGLDriver::setBasicRenderStates(const SMaterial& material, const SMater
 				break;
 			case 1:
 				glEnable(GL_DEPTH_TEST);
-				glDepthFunc(GL_LEQUAL);
+				glDepthFunc ( GL_LEQUAL );
 				break;
 			case 2:
 				glEnable(GL_DEPTH_TEST);
-				glDepthFunc(GL_EQUAL);
+				glDepthFunc ( GL_EQUAL );
 				break;
 		}
 	}
@@ -2161,8 +2167,8 @@ void COpenGLDriver::setRenderStates2DMode(bool alpha, bool texture, bool alphaCh
 
 	if (texture)
 	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -2374,7 +2380,7 @@ void COpenGLDriver::drawStencilShadowVolume(const core::vector3df* triangles, s3
 	glDisable(GL_FOG);
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_FALSE); // no depth buffer writing
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // no color buffer drawing
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE ); // no color buffer drawing
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(0.0f, 1.0f);
@@ -2512,19 +2518,19 @@ void COpenGLDriver::drawStencilShadow(bool clearStencilBuffer, video::SColor lef
 	disableTextures();
 
 	// store attributes
-	glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT | GL_STENCIL_BUFFER_BIT);
+	glPushAttrib( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT | GL_STENCIL_BUFFER_BIT );
 
-	glDisable(GL_LIGHTING);
+	glDisable( GL_LIGHTING );
 	glDisable(GL_FOG);
 	glDepthMask(GL_FALSE);
 
-	glShadeModel(GL_FLAT);
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glShadeModel( GL_FLAT );
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glEnable(GL_STENCIL_TEST);
+	glEnable( GL_STENCIL_TEST );
 	glStencilFunc(GL_NOTEQUAL, 0, ~0);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
@@ -2535,17 +2541,17 @@ void COpenGLDriver::drawStencilShadow(bool clearStencilBuffer, video::SColor lef
 
 	glBegin(GL_QUADS);
 
-	glColor4ub(leftDownEdge.getRed(), leftDownEdge.getGreen(), leftDownEdge.getBlue(), leftDownEdge.getAlpha());
+	glColor4ub (leftDownEdge.getRed(), leftDownEdge.getGreen(), leftDownEdge.getBlue(), leftDownEdge.getAlpha() );
 	glVertex3f(-1.1f,-1.1f,0.9f);
 
-	glColor4ub(leftUpEdge.getRed(), leftUpEdge.getGreen(), leftUpEdge.getBlue(), leftUpEdge.getAlpha());
+	glColor4ub (leftUpEdge.getRed(), leftUpEdge.getGreen(), leftUpEdge.getBlue(), leftUpEdge.getAlpha() );
 	glVertex3f(-1.1f, 1.1f,0.9f);
 
-	glColor4ub(rightUpEdge.getRed(), rightUpEdge.getGreen(), rightUpEdge.getBlue(), rightUpEdge.getAlpha());
-	glVertex3f(1.1f, 1.1f,0.9f);
+	glColor4ub (rightUpEdge.getRed(), rightUpEdge.getGreen(), rightUpEdge.getBlue(), rightUpEdge.getAlpha() );
+	glVertex3f( 1.1f, 1.1f,0.9f);
 
-	glColor4ub(rightDownEdge.getRed(), rightDownEdge.getGreen(), rightDownEdge.getBlue(), rightDownEdge.getAlpha());
-	glVertex3f(1.1f,-1.1f,0.9f);
+	glColor4ub (rightDownEdge.getRed(), rightDownEdge.getGreen(), rightDownEdge.getBlue(), rightDownEdge.getAlpha() );
+	glVertex3f( 1.1f,-1.1f,0.9f);
 
 	glEnd();
 
@@ -2570,7 +2576,7 @@ void COpenGLDriver::setFog(SColor c, bool linearFog, f32 start,
 		glFogi(GL_FOG_COORDINATE_SOURCE, GL_FRAGMENT_DEPTH);
 #endif
 
-	if (linearFog)
+	if(linearFog)
 	{
 		glFogf(GL_FOG_START, start);
 		glFogf(GL_FOG_END, end);
@@ -2734,20 +2740,14 @@ ITexture* COpenGLDriver::addRenderTargetTexture(const core::dimension2d<s32>& si
 		rtt = new COpenGLFBOTexture(size, name, this);
 		if (rtt)
 		{
-			bool success = false;
 			addTexture(rtt);
 			ITexture* tex = createDepthTexture(rtt);
 			if (tex)
 			{
-				success = static_cast<video::COpenGLFBODepthTexture*>(tex)->attach(rtt);
+				static_cast<video::COpenGLFBODepthTexture*>(tex)->attach(rtt);
 				tex->drop();
 			}
 			rtt->drop();
-			if (!success)
-			{
-				removeTexture(rtt);
-				rtt=0;
-			}
 		}
 	}
 	else
@@ -2841,7 +2841,7 @@ bool COpenGLDriver::setRenderTarget(video::ITexture* texture, bool clearBackBuff
 // returns the current size of the screen or rendertarget
 const core::dimension2d<s32>& COpenGLDriver::getCurrentRenderTargetSize() const
 {
-	if (CurrentRendertargetSize.Width == 0)
+	if ( CurrentRendertargetSize.Width == 0 )
 		return ScreenSize;
 	else
 		return CurrentRendertargetSize;

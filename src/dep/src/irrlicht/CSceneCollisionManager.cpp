@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -64,7 +64,7 @@ ISceneNode* CSceneCollisionManager::getSceneNodeFromRayBB(core::line3d<f32> ray,
 	ISceneNode* best = 0;
 	f32 dist = FLT_MAX;
 
-	getPickedNodeBB(SceneManager->getRootSceneNode(), ray,
+	getPickedNodeBB(SceneManager->getRootSceneNode(), ray, 
 		idBitMask, bNoDebugObjects, dist, best);
 
 	return best;
@@ -88,60 +88,46 @@ void CSceneCollisionManager::getPickedNodeBB(ISceneNode* root,
    {
       ISceneNode* current = *it;
 
-      if (current->isVisible())
-	  {
-		  if((bNoDebugObjects ? !current->isDebugObject() : true) &&
-			(bits==0 || (bits != 0 && (current->getID() & bits))))
-		  {
-			 // get world to object space transform
-			 core::matrix4 mat;
-			 if (!current->getAbsoluteTransformation().getInverse(mat))
-				continue;
+      if (current->isVisible() &&
+          (bNoDebugObjects ? !current->isDebugObject() : true) &&
+          (bits==0 || (bits != 0 && (current->getID() & bits))))
+      {
+         // get world to object space transform
+         core::matrix4 mat;
+         if (!current->getAbsoluteTransformation().getInverse(mat))
+            continue;
 
-			 // transform vector from world space to object space
-			 core::line3df line(ray);
-			 mat.transformVect(line.start);
-			 mat.transformVect(line.end);
+         // transform vector from world space to object space
+         core::line3df line(ray);
+         mat.transformVect(line.start);
+         mat.transformVect(line.end);
 
-			 const core::aabbox3df& box = current->getBoundingBox();
+         const core::aabbox3df& box = current->getBoundingBox();
 
-			 // do the initial intersection test in object space, since the
-			 // object space box is more accurate.
-			 if (box.intersectsWithLine(line))
-			 {
-				box.getEdges(edges);
-				f32 distance = 0.0f;
+         // do intersection test in object space
+         if (box.intersectsWithLine(line))
+         {
+            box.getEdges(edges);
+            f32 distance = 0.0f;
 
-				for (s32 e=0; e<8; ++e)
-				{
-				   // Transform the corner into world coordinates, to take
-				   // scaling into account.
-				   current->getAbsoluteTransformation().transformVect(edges[e]);
+            for (s32 e=0; e<8; ++e)
+            {
+               f32 t = edges[e].getDistanceFromSQ(line.start);
+               if (t > distance)
+                  distance = t;
+            }
 
-				   // and compare it against the world space ray start position
-				   f32 t = edges[e].getDistanceFromSQ(ray.start);
+            if (distance < outbestdistance)
+            {
+               outbestnode = current;
+               outbestdistance = distance;
+            }
+         }
+      }
 
-				   // We're looking for the furthest corner; this is a crude
-				   // test; we should be checking the actual ray/plane
-				   // intersection.
-				   // http://irrlicht.sourceforge.net/phpBB2/viewtopic.php?p=181419
-				   if (t > distance)
-					  distance = t;
-				}
-
-				if (distance < outbestdistance)
-				{
-				   outbestnode = current;
-				   outbestdistance = distance;
-				}
-			 }
-		  }
-
-		  // Only check the children if this node is visible.
-	      getPickedNodeBB(current, ray, bits, bNoDebugObjects, outbestdistance, outbestnode);
-	  }
+      getPickedNodeBB(current, ray, bits, bNoDebugObjects, outbestdistance, outbestnode);
    }
-}
+} 
 
 
 
@@ -209,6 +195,11 @@ bool CSceneCollisionManager::getCollisionPoint(const core::line3d<f32>& ray,
 		if(minZ > triangle.pointA.Z && minZ > triangle.pointB.Z && minZ > triangle.pointC.Z)
 			continue;
 		if(maxZ < triangle.pointA.Z && maxZ < triangle.pointB.Z && maxZ < triangle.pointC.Z)
+			continue;
+
+		if(ray.start.getDistanceFromSQ(triangle.pointA) >= nearest &&
+			ray.start.getDistanceFromSQ(triangle.pointB) >= nearest &&
+			ray.start.getDistanceFromSQ(triangle.pointC) >= nearest)
 			continue;
 
 		if (triangle.getIntersectionWithLine(ray.start, linevect, intersection))
@@ -589,7 +580,7 @@ core::vector3df CSceneCollisionManager::collideWithWorld(s32 recursionDepth,
 
 	core::matrix4 scaleMatrix;
 	scaleMatrix.setScale(
-		core::vector3df(1.0f / colData.eRadius.X,
+		core::vector3df(1.0f / colData.eRadius.X, 
 						1.0f / colData.eRadius.Y,
 						1.0f / colData.eRadius.Z)
 					);

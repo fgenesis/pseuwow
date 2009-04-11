@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -295,8 +295,8 @@ bool CGUIMessageBox::OnEvent(const SEvent& event)
 					{
 						// cancel press
 						if (OkButton) OkButton->setPressed(false);
-						if (YesButton) YesButton->setPressed(false);
-						if (NoButton) NoButton->setPressed(false);
+						if (YesButton) OkButton->setPressed(false);
+						if (NoButton) OkButton->setPressed(false);
 						Pressed = false;
 					}
 					else
@@ -397,7 +397,6 @@ bool CGUIMessageBox::OnEvent(const SEvent& event)
 	return CGUIWindow::OnEvent(event);
 }
 
-
 //! Writes attributes of the element.
 void CGUIMessageBox::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0) const
 {
@@ -410,7 +409,6 @@ void CGUIMessageBox::serializeAttributes(io::IAttributes* out, io::SAttributeRea
 
 	out->addString	("MessageText",		MessageText.c_str());
 }
-
 
 //! Reads attributes of the element
 void CGUIMessageBox::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options=0)
@@ -432,6 +430,7 @@ void CGUIMessageBox::deserializeAttributes(io::IAttributes* in, io::SAttributeRe
 
 } // end namespace gui
 } // end namespace irr
+
 
 #endif // _IRR_COMPILE_WITH_GUI_
 
