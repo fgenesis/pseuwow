@@ -1,3 +1,11 @@
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// This file is part of the "Irrlicht Engine".
+// For conditions of distribution and use, see copyright notice in irrlicht.h
+
+#include "IrrCompileConfig.h" 
+
+#ifdef _IRR_COMPILE_WITH_IRR_WRITER_
+
 #include "CIrrMeshWriter.h"
 #include "os.h"
 #include "IWriteFile.h"
@@ -15,6 +23,10 @@ CIrrMeshWriter::CIrrMeshWriter(video::IVideoDriver* driver,
 				io::IFileSystem* fs)
 	: FileSystem(fs), VideoDriver(driver), Writer(0)
 {
+	#ifdef _DEBUG
+	setDebugName("CIrrMeshWriter");
+	#endif
+
 	if (VideoDriver)
 		VideoDriver->grab();
 
@@ -81,7 +93,7 @@ bool CIrrMeshWriter::writeMesh(io::IWriteFile* file, scene::IMesh* mesh, s32 fla
 	Writer->writeLineBreak();
 
 	// write mesh buffers
-	
+
 	for (int i=0; i<(int)mesh->getMeshBufferCount(); ++i)
 	{
 		scene::IMeshBuffer* buffer = mesh->getMeshBuffer(i);
@@ -102,8 +114,8 @@ bool CIrrMeshWriter::writeMesh(io::IWriteFile* file, scene::IMesh* mesh, s32 fla
 void CIrrMeshWriter::writeBoundingBox(const core::aabbox3df& box)
 {
 	Writer->writeElement(L"boundingBox", true,
-        L"minEdge", getVectorAsStringLine(box.MinEdge).c_str(),
-		L"maxEdge", getVectorAsStringLine(box.MaxEdge).c_str()	);
+		L"minEdge", getVectorAsStringLine(box.MinEdge).c_str(),
+		L"maxEdge", getVectorAsStringLine(box.MaxEdge).c_str());
 }
 
 
@@ -116,7 +128,7 @@ core::stringw CIrrMeshWriter::getVectorAsStringLine(const core::vector3df& v) co
 	str += core::stringw(v.Y);
 	str += L" ";
 	str += core::stringw(v.Z);
-	
+
 	return str;
 }
 
@@ -128,7 +140,7 @@ core::stringw CIrrMeshWriter::getVectorAsStringLine(const core::vector2df& v) co
 	str = core::stringw(v.X);
 	str += L" ";
 	str += core::stringw(v.Y);
-	
+
 	return str;
 }
 
@@ -151,7 +163,7 @@ void CIrrMeshWriter::writeMeshBuffer(const scene::IMeshBuffer* buffer)
 
 	const core::stringw vertexTypeStr = video::sBuiltInVertexTypeNames[buffer->getVertexType()];
 
-	Writer->writeElement(L"vertices", false, 
+	Writer->writeElement(L"vertices", false,
 		L"type", vertexTypeStr.c_str(),
 		L"vertexCount", core::stringw(buffer->getVertexCount()).c_str());
 
@@ -176,7 +188,7 @@ void CIrrMeshWriter::writeMeshBuffer(const scene::IMeshBuffer* buffer)
 
 				str += getVectorAsStringLine(vtx[j].TCoords);
 
-                Writer->writeText(str.c_str());
+				Writer->writeText(str.c_str());
 				Writer->writeLineBreak();
 			}
 		}
@@ -198,7 +210,7 @@ void CIrrMeshWriter::writeMeshBuffer(const scene::IMeshBuffer* buffer)
 				str += L" ";
 				str += getVectorAsStringLine(vtx[j].TCoords2);
 
-                Writer->writeText(str.c_str());
+				Writer->writeText(str.c_str());
 				Writer->writeLineBreak();
 			}
 		}
@@ -222,7 +234,7 @@ void CIrrMeshWriter::writeMeshBuffer(const scene::IMeshBuffer* buffer)
 				str += L" ";
 				str += getVectorAsStringLine(vtx[j].Binormal);
 
-                Writer->writeText(str.c_str());
+				Writer->writeText(str.c_str());
 				Writer->writeLineBreak();
 			}
 		}
@@ -234,7 +246,7 @@ void CIrrMeshWriter::writeMeshBuffer(const scene::IMeshBuffer* buffer)
 
 	// write indices
 
-	Writer->writeElement(L"indices", false, 
+	Writer->writeElement(L"indices", false,
 		L"indexCount", core::stringw(buffer->getIndexCount()).c_str());
 
 	Writer->writeLineBreak();
@@ -247,7 +259,7 @@ void CIrrMeshWriter::writeMeshBuffer(const scene::IMeshBuffer* buffer)
 	{
 		core::stringw str((int)idx[i]);
 		Writer->writeText(str.c_str());
-		
+
 		if (i % maxIndicesPerLine != maxIndicesPerLine)
 		{
 			if (i % maxIndicesPerLine == maxIndicesPerLine-1)
@@ -273,7 +285,7 @@ void CIrrMeshWriter::writeMaterial(const video::SMaterial& material)
 {
 	// simply use irrlichts built-in attribute serialization capabilities here:
 
-	io::IAttributes* attributes = 
+	io::IAttributes* attributes =
 		VideoDriver->createAttributesFromMaterial(material);
 
 	if (attributes)
@@ -286,4 +298,6 @@ void CIrrMeshWriter::writeMaterial(const video::SMaterial& material)
 
 } // end namespace
 } // end namespace
+
+#endif
 

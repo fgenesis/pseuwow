@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -26,7 +26,7 @@ namespace video
 
 		virtual ~IImagePresenter() {};
 		//! presents a surface in the client area
-		virtual void present(video::IImage* surface, s32 windowId=0, core::rect<s32>* src=0 ) = 0;
+		virtual bool present(video::IImage* surface, void* windowId=0, core::rect<s32>* src=0 ) = 0;
 	};
 
 } // end namespace video

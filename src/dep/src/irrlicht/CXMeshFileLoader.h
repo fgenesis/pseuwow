@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -14,6 +14,7 @@ namespace irr
 {
 namespace io
 {
+	class IFileSystem;
 	class IReadFile;
 } // end namespace io
 namespace scene
@@ -26,7 +27,7 @@ class CXMeshFileLoader : public IMeshLoader
 public:
 
 	//! Constructor
-	CXMeshFileLoader(scene::ISceneManager* smgr);
+	CXMeshFileLoader(scene::ISceneManager* smgr, io::IFileSystem* fs);
 
 	//! returns true if the file maybe is able to be loaded by this class
 	//! based on the file extension (e.g. ".cob")
@@ -78,7 +79,8 @@ public:
 		bool HasSkinning;
 		bool HasVertexColors;
 
-		core::array<ISkinnedMesh::SWeight*> Weights;
+		core::array<u32> WeightJoint;
+		core::array<u32> WeightNum;
 	};
 
 private:
@@ -161,13 +163,12 @@ private:
 	f32 readFloat();
 	bool readVector2(core::vector2df& vec);
 	bool readVector3(core::vector3df& vec);
-	bool readRGB(video::SColorf& color);
-	bool readRGBA(video::SColorf& color);
-
+	bool readMatrix(core::matrix4& mat);
 	bool readRGB(video::SColor& color);
 	bool readRGBA(video::SColor& color);
 
 	ISceneManager*	SceneManager;
+	io::IFileSystem*	FileSystem;
 
 	core::array<CSkinnedMesh::SJoint*> *AllJoints;
 
@@ -183,6 +184,7 @@ private:
 	const c8* P;
 	c8* End;
 	c8 FloatSize;
+	u32 Line;
 	core::stringc FilePath;
 
 	CSkinnedMesh::SJoint *CurFrame;

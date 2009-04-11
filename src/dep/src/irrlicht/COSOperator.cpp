@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -10,8 +10,10 @@
 #else
 #include <string.h>
 #include <unistd.h>
-#ifdef MACOSX
-#include "OSXClipboard.h"
+#ifdef _IRR_USE_OSX_DEVICE_
+#include "MacOSX/OSXClipboard.h"
+#endif
+#ifdef _IRR_OSX_PLATFORM_
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
@@ -23,7 +25,11 @@ namespace irr
 
 // constructor
 COSOperator::COSOperator(const c8* osVersion) : OperatingSystem(osVersion)
-{ }
+{
+	#ifdef _DEBUG
+	setDebugName("COSOperator");
+	#endif
+}
 
 
 //! returns the current operating system version as string.
@@ -59,9 +65,10 @@ void COSOperator::copyToClipboard(const c8* text) const
 	CloseClipboard();
 
 // MacOSX version
-#elif defined(MACOSX)
+#elif defined(_IRR_USE_OSX_DEVICE_)
 
 	OSXCopyToClipboard(text);
+#else
 
 // todo: Linux version
 #endif
@@ -84,7 +91,7 @@ c8* COSOperator::getTextFromClipboard() const
 	CloseClipboard();
 	return buffer;
 
-#elif defined(MACOSX)
+#elif defined(_IRR_USE_OSX_DEVICE_)
 	return (OSXCopyFromClipboard());
 #else
 
@@ -97,7 +104,7 @@ c8* COSOperator::getTextFromClipboard() const
 
 bool COSOperator::getProcessorSpeedMHz(u32* MHz) const
 {
-#if defined(_IRR_WINDOWS_API_)
+#if defined(_IRR_WINDOWS_API_) && !defined(_WIN32_WCE )
 	LONG Error;
 	
 	HKEY Key;
@@ -121,7 +128,7 @@ bool COSOperator::getProcessorSpeedMHz(u32* MHz) const
 	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 	return true;
 
-#elif defined(MACOSX)
+#elif defined(_IRR_OSX_PLATFORM_)
 	struct clockinfo CpuClock;
 	size_t Size = sizeof(clockinfo);
 
@@ -164,9 +171,9 @@ bool COSOperator::getSystemMemory(u32* Total, u32* Avail) const
 		return false;
 
 	if (Total)
-		*Total = ((ps*(long long)pp)>>10);
+		*Total = (u32)((ps*(long long)pp)>>10);
 	if (Avail)
-		*Avail = ((ps*(long long)ap)>>10);
+		*Avail = (u32)((ps*(long long)ap)>>10);
 	return true;
 #else
 	// TODO: implement for non-availablity of symbols/features

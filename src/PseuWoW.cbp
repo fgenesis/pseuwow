@@ -8,7 +8,7 @@
 		<Build>
 			<Target title="Debug">
 				<Option platforms="Unix;" />
-				<Option output="bin/Debug/pseuwow" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/pseuwow" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -48,6 +48,8 @@
 			<Add library="Xxf86vm" />
 			<Add library="/usr/local/ssl/lib/libssl.a" />
 			<Add library="/usr/local/ssl/lib/libcrypto.a" />
+			<Add library="../bin/ikpMP3.so" />
+			<Add library="../bin/libIrrKlang.so" />
 		</Linker>
 		<Unit filename="Client/Cli.cpp" />
 		<Unit filename="Client/Cli.h" />
@@ -70,29 +72,55 @@
 		<Unit filename="Client/DefScriptInterface.cpp" />
 		<Unit filename="Client/DefScriptInterface.h" />
 		<Unit filename="Client/DefScriptInterfaceInclude.h" />
+		<Unit filename="Client/GUI/CBoneSceneNode.cpp" />
+		<Unit filename="Client/GUI/CBoneSceneNode.h" />
 		<Unit filename="Client/GUI/CCursorController.cpp" />
 		<Unit filename="Client/GUI/CCursorController.h" />
 		<Unit filename="Client/GUI/CImageLoaderBLP.cpp" />
 		<Unit filename="Client/GUI/CImageLoaderBLP.h" />
+		<Unit filename="Client/GUI/CIrrKlangAudioStreamLoaderMP3.cpp" />
+		<Unit filename="Client/GUI/CIrrKlangAudioStreamLoaderMP3.h" />
+		<Unit filename="Client/GUI/CIrrKlangAudioStreamMP3.cpp" />
+		<Unit filename="Client/GUI/CIrrKlangAudioStreamMP3.h" />
 		<Unit filename="Client/GUI/CM2MeshFileLoader.cpp" />
 		<Unit filename="Client/GUI/CM2MeshFileLoader.h" />
 		<Unit filename="Client/GUI/DrawObjMgr.cpp" />
 		<Unit filename="Client/GUI/DrawObjMgr.h" />
 		<Unit filename="Client/GUI/DrawObject.cpp" />
 		<Unit filename="Client/GUI/DrawObject.h" />
+		<Unit filename="Client/GUI/GUIEventReceiver.h" />
 		<Unit filename="Client/GUI/MCamera.h" />
 		<Unit filename="Client/GUI/MInput.h" />
 		<Unit filename="Client/GUI/PseuGUI.cpp" />
 		<Unit filename="Client/GUI/PseuGUI.h" />
 		<Unit filename="Client/GUI/SImage.cpp" />
 		<Unit filename="Client/GUI/SImage.h" />
+		<Unit filename="Client/GUI/SSkinnedMesh.cpp" />
+		<Unit filename="Client/GUI/SSkinnedMesh.h" />
 		<Unit filename="Client/GUI/Scene.cpp" />
 		<Unit filename="Client/GUI/Scene.h" />
+		<Unit filename="Client/GUI/SceneCharselection.cpp" />
+		<Unit filename="Client/GUI/SceneData.h" />
 		<Unit filename="Client/GUI/SceneGuiStart.cpp" />
+		<Unit filename="Client/GUI/SceneLogin.cpp" />
 		<Unit filename="Client/GUI/SceneWorld.cpp" />
 		<Unit filename="Client/GUI/ShTlTerrainSceneNode.cpp" />
 		<Unit filename="Client/GUI/ShTlTerrainSceneNode.h" />
 		<Unit filename="Client/GUI/TlTMesh.h" />
+		<Unit filename="Client/GUI/TlTSector.h" />
+		<Unit filename="Client/GUI/decoder/bits.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Client/GUI/decoder/internal.h" />
+		<Unit filename="Client/GUI/decoder/mpaudec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Client/GUI/decoder/mpaudec.h" />
+		<Unit filename="Client/GUI/decoder/mpaudectab.h" />
+		<Unit filename="Client/GUI/decoder/mpegaudio.h" />
+		<Unit filename="Client/GUI/ikpMP3.cpp" />
+		<Unit filename="Client/GUI/irrKlangSceneNode.cpp" />
+		<Unit filename="Client/GUI/irrKlangSceneNode.h" />
 		<Unit filename="Client/HelperDefs.h" />
 		<Unit filename="Client/MemoryDataHolder.cpp" />
 		<Unit filename="Client/MemoryDataHolder.h" />
@@ -159,6 +187,8 @@
 		<Unit filename="shared/Auth/AuthCrypt.h" />
 		<Unit filename="shared/Auth/BigNumber.cpp" />
 		<Unit filename="shared/Auth/BigNumber.h" />
+		<Unit filename="shared/Auth/Hmac.cpp" />
+		<Unit filename="shared/Auth/Hmac.h" />
 		<Unit filename="shared/Auth/MD5Hash.h" />
 		<Unit filename="shared/Auth/Sha1.cpp" />
 		<Unit filename="shared/Auth/Sha1.h" />
@@ -202,6 +232,8 @@
 		<Unit filename="shared/Network/Utility.h" />
 		<Unit filename="shared/Network/socket_include.cpp" />
 		<Unit filename="shared/Network/socket_include.h" />
+		<Unit filename="shared/ProgressBar.cpp" />
+		<Unit filename="shared/ProgressBar.h" />
 		<Unit filename="shared/SysDefs.h" />
 		<Unit filename="shared/WDTFile.cpp" />
 		<Unit filename="shared/WDTFile.h" />

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -55,16 +55,15 @@ void CSceneNodeAnimatorTexture::animateNode(ISceneNode* node, u32 timeMs)
 {
 	if (Textures.size())
 	{
-		u32 t = (timeMs-StartTime);
+		const u32 t = (timeMs-StartTime);
 
-		s32 idx = 0;
-
+		u32 idx = 0;
 		if (!Loop && timeMs >= EndTime)
 			idx = Textures.size() - 1;
 		else
 			idx = (t/TimePerFrame) % Textures.size();
 
-		if (idx < (s32)Textures.size())
+		if (idx < Textures.size())
 			node->setMaterialTexture(0, Textures[idx]);
 	}
 }
@@ -119,6 +118,13 @@ void CSceneNodeAnimatorTexture::deserializeAttributes(io::IAttributes* in, io::S
 	}
 }
 
+ISceneNodeAnimator* CSceneNodeAnimatorTexture::createClone(ISceneNode* node, ISceneManager* newManager)
+{
+	CSceneNodeAnimatorTexture * newAnimator = 
+		new CSceneNodeAnimatorTexture(Textures, TimePerFrame, Loop, StartTime);
+
+	return newAnimator;
+}
 
 } // end namespace scene
 } // end namespace irr

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -1477,7 +1477,7 @@ void CAttributes::readAttributeFromXML(io::IXMLReader* reader)
 		const core::stringw tmpName(L"value");
 		for (; n<count; ++n)
 		{
-			tmpArray.push_back(reader->getAttributeValue((tmpName+n).c_str()));
+			tmpArray.push_back(reader->getAttributeValue((tmpName+core::stringw(n)).c_str()));
 		}
 		addArray(name.c_str(),tmpArray);
 	}
@@ -1523,7 +1523,7 @@ bool CAttributes::write(io::IXMLWriter* writer, bool writeXMLHeader,
 			const core::stringw tmpName(L"value");
 			for (; n < arrayinput.size(); ++n)
 			{
-				arraynames.push_back((tmpName+n).c_str());
+				arraynames.push_back((tmpName+core::stringw(n)).c_str());
 				arrayvalues.push_back(arrayinput[n]);
 			}
 

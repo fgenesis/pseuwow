@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -56,6 +56,13 @@ void CSceneNodeAnimatorRotation::deserializeAttributes(io::IAttributes* in, io::
 	Rotation = in->getAttributeAsVector3d("Rotation");
 }
 
+ISceneNodeAnimator* CSceneNodeAnimatorRotation::createClone(ISceneNode* node, ISceneManager* newManager)
+{
+	CSceneNodeAnimatorRotation * newAnimator = 
+		new CSceneNodeAnimatorRotation(StartTime, Rotation);
+
+	return newAnimator;
+}
 
 } // end namespace scene
 } // end namespace irr

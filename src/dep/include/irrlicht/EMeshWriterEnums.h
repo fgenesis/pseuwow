@@ -1,9 +1,11 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __E_MESH_WRITER_ENUMS_H_INCLUDED__
 #define __E_MESH_WRITER_ENUMS_H_INCLUDED__
+
+#include "irrTypes.h"
 
 namespace irr
 {
@@ -23,7 +25,10 @@ namespace scene
 		EMWT_COLLADA      = MAKE_IRR_ID('c','o','l','l'),
 
 		//! STL mesh writer for .stl files
-		EMWT_STL          = MAKE_IRR_ID('s','t','l',0)
+		EMWT_STL          = MAKE_IRR_ID('s','t','l',0),
+
+		//! OBJ mesh writer for .obj files
+		EMWT_OBJ          = MAKE_IRR_ID('o','b','j',0)
 	};
 
 

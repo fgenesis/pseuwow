@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -14,13 +14,13 @@ namespace scene
 	enum E_DEBUG_SCENE_TYPE
 	{
 		//! No Debug Data ( Default )
-		EDS_OFF	= 0,
+		EDS_OFF = 0,
 
 		//! Show Bounding Boxes of SceneNode
 		EDS_BBOX = 1,
 
 		//! Show Vertex Normals
-		EDS_NORMALS	= 2,
+		EDS_NORMALS = 2,
 
 		//! Shows Skeleton/Tags
 		EDS_SKELETON = 4,
@@ -33,6 +33,9 @@ namespace scene
 
 		//! Show Bounding Boxes of all MeshBuffers
 		EDS_BBOX_BUFFERS = 32,
+
+		//! EDS_BBOX | EDS_BBOX_BUFFERS
+		EDS_BBOX_ALL = EDS_BBOX | EDS_BBOX_BUFFERS,
 
 		//! Show all debug infos
 		EDS_FULL = 0xffffffff

@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -32,6 +32,7 @@
 #include "CGUIComboBox.h"
 #include "CGUIMenu.h"
 #include "CGUIToolBar.h"
+#include "CGUITable.h"
 
 #include "CDefaultGUIElementFactory.h"
 #include "IWriteFile.h"
@@ -136,9 +137,14 @@ CGUIEnvironment::~CGUIEnvironment()
 		CurrentSkin = 0;
 	}
 
-	// delete all fonts
 	u32 i;
 
+	// delete all sprite banks
+	for (i=0; i<Banks.size(); ++i)
+		if (Banks[i].Bank)
+			Banks[i].Bank->drop();
+
+	// delete all fonts
 	for (i=0; i<Fonts.size(); ++i)
 		Fonts[i].Font->drop();
 
@@ -156,7 +162,7 @@ void CGUIEnvironment::loadBuiltInFont()
 	CGUIFont* font = new CGUIFont(this, "#DefaultFont");
 	if (!font->load(file))
 	{
-		os::Printer::log("Error: Could not load built-in Font.", ELL_ERROR);
+		os::Printer::log("Error: Could not load built-in Font. Did you compile without the BMP loader?", ELL_ERROR);
 		font->drop();
 		file->drop();
 		return;
@@ -186,7 +192,7 @@ void CGUIEnvironment::drawAll()
 			AbsoluteClippingRect = DesiredRect;
 			AbsoluteRect = DesiredRect;
 			updateAbsolutePosition();
-		}		
+		}
 	}
 
 	// make sure tooltip is always on top
@@ -237,7 +243,7 @@ bool CGUIEnvironment::setFocus(IGUIElement* element)
 		currentFocus->drop();
 		currentFocus = 0;
 	}
-	
+
 	if (element)
 	{
 		currentFocus = Focus;
@@ -269,8 +275,7 @@ bool CGUIEnvironment::setFocus(IGUIElement* element)
 
 	// element is the new focus so it doesn't have to be dropped
 	Focus = element;
-	
-	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
+
 	return true;
 }
 
@@ -303,8 +308,7 @@ bool CGUIEnvironment::removeFocus(IGUIElement* element)
 		Focus->drop();
 		Focus = 0;
 	}
-	
-	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
+
 	return true;
 }
 
@@ -313,7 +317,7 @@ bool CGUIEnvironment::removeFocus(IGUIElement* element)
 bool CGUIEnvironment::hasFocus(IGUIElement* element) const
 {
 	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
-	return (element == Focus); 
+	return (element == Focus);
 }
 
 
@@ -323,17 +327,20 @@ video::IVideoDriver* CGUIEnvironment::getVideoDriver() const
 	return Driver;
 }
 
+
 //! returns the current file system
 io::IFileSystem* CGUIEnvironment::getFileSystem() const
 {
 	return FileSystem;
 }
 
+
 //! returns the current file system
 IOSOperator* CGUIEnvironment::getOSOperator() const
 {
 	return Operator;
 }
+
 
 //! clear all GUI elements
 void CGUIEnvironment::clear()
@@ -362,13 +369,17 @@ void CGUIEnvironment::clear()
 //! called by ui if an event happened.
 bool CGUIEnvironment::OnEvent(const SEvent& event)
 {
-	if (UserReceiver && (event.EventType != EET_MOUSE_INPUT_EVENT) &&
-		(event.EventType != EET_GUI_EVENT || event.GUIEvent.Caller != this))
+	bool ret = false;
+	if (UserReceiver
+		&& (event.EventType != EET_MOUSE_INPUT_EVENT)
+		&& (event.EventType != EET_KEY_INPUT_EVENT)
+		&& (event.EventType != EET_GUI_EVENT || event.GUIEvent.Caller != this))
 	{
-		return UserReceiver->OnEvent(event);
+		ret = UserReceiver->OnEvent(event);
 	}
 
-	return false;
+	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
+	return ret;
 }
 
 
@@ -383,7 +394,7 @@ void CGUIEnvironment::OnPostRender( u32 time )
 		ToolTip.Element == 0 &&
 		Hovered != ToolTip.Element &&
 		Hovered->getToolTipText().size() &&
-		getSkin() && 
+		getSkin() &&
 		getSkin()->getFont(EGDF_TOOLTIP)
 		)
 	{
@@ -435,7 +446,7 @@ void CGUIEnvironment::updateHoveredElement(core::position2d<s32> mousePos)
 
 		if (Hovered != lastHovered)
 		{
-			SEvent event; 
+			SEvent event;
 			event.EventType = EET_GUI_EVENT;
 
 			if (lastHovered)
@@ -470,7 +481,7 @@ void CGUIEnvironment::updateHoveredElement(core::position2d<s32> mousePos)
 			event.GUIEvent.EventType = EGET_ELEMENT_HOVERED;
 			Hovered->OnEvent(event);
 		}
-	}	
+	}
 
 	if (lastHovered && lastHovered != this)
 		lastHovered->drop();
@@ -509,14 +520,17 @@ bool CGUIEnvironment::postEventFromUser(const SEvent& event)
 
 		// focus could have died in last call
 		if (!Focus && Hovered)
+		{
+			_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 			return Hovered->OnEvent(event);
+		}
 
 		break;
 	case EET_KEY_INPUT_EVENT:
 		{
 			// send focus changing event
-			if (event.EventType == EET_KEY_INPUT_EVENT && 
-				event.KeyInput.PressedDown && 
+			if (event.EventType == EET_KEY_INPUT_EVENT &&
+				event.KeyInput.PressedDown &&
 				event.KeyInput.Key == KEY_TAB)
 			{
 				IGUIElement *next = getNextElement(event.KeyInput.Shift, event.KeyInput.Control);
@@ -527,13 +541,17 @@ bool CGUIEnvironment::postEventFromUser(const SEvent& event)
 				}
 			}
 			if (Focus)
+			{
+				_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 				return Focus->OnEvent(event);
+			}
 		}
 		break;
 	default:
 		break;
 	} // end switch
 
+	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 	return false;
 }
 
@@ -548,6 +566,9 @@ IGUISkin* CGUIEnvironment::getSkin() const
 //! Sets a new GUI Skin
 void CGUIEnvironment::setSkin(IGUISkin* skin)
 {
+	if (CurrentSkin==skin)
+		return;
+
 	if (CurrentSkin)
 		CurrentSkin->drop();
 
@@ -641,10 +662,14 @@ bool CGUIEnvironment::saveGUI(const c8* filename, IGUIElement* start)
 {
 	io::IWriteFile* file = FileSystem->createAndWriteFile(filename);
 	if (!file)
+	{
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return false;
+	}
 
 	bool ret = saveGUI(file, start);
 	file->drop();
+	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 	return ret;
 }
 
@@ -653,11 +678,17 @@ bool CGUIEnvironment::saveGUI(const c8* filename, IGUIElement* start)
 bool CGUIEnvironment::saveGUI(io::IWriteFile* file, IGUIElement* start)
 {
 	if (!file)
+	{
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return false;
+	}
 
 	io::IXMLWriter* writer = FileSystem->createXMLWriter(file);
 	if (!writer)
+	{
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return false;
+	}
 
 	writer->writeXMLHeader();
 	writeGUIElement(writer, start ? start : this);
@@ -675,12 +706,14 @@ bool CGUIEnvironment::loadGUI(const c8* filename, IGUIElement* parent)
 	if (!read)
 	{
 		os::Printer::log("Unable to open gui file", filename, ELL_ERROR);
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return false;
 	}
 
 	bool ret = loadGUI(read, parent);
 	read->drop();
 
+	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 	return ret;
 }
 
@@ -691,6 +724,7 @@ bool CGUIEnvironment::loadGUI(io::IReadFile* file, IGUIElement* parent)
 	if (!file)
 	{
 		os::Printer::log("Unable to open GUI file", ELL_ERROR);
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return false;
 	}
 
@@ -698,9 +732,10 @@ bool CGUIEnvironment::loadGUI(io::IReadFile* file, IGUIElement* parent)
 	if (!reader)
 	{
 		os::Printer::log("GUI is not a valid XML file", file->getFileName(), ELL_ERROR);
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return false;
 	}
-	
+
 	// read file
 	while(reader->read())
 	{
@@ -709,8 +744,8 @@ bool CGUIEnvironment::loadGUI(io::IReadFile* file, IGUIElement* parent)
 
 	// finish up
 
-	reader->drop(); 
-	return true; 
+	reader->drop();
+	return true;
 }
 
 
@@ -778,7 +813,7 @@ void CGUIEnvironment::readGUIElement(io::IXMLReader* reader, IGUIElement* parent
 			else
 			{
 				os::Printer::log("Found unknown element in irrlicht GUI file",
-								 core::stringc(reader->getNodeName()).c_str());
+						core::stringc(reader->getNodeName()).c_str());
 			}
 
 			break;
@@ -886,8 +921,8 @@ void CGUIEnvironment::deserializeAttributes(io::IAttributes* in, io::SAttributeR
 
 	}
 
-	RelativeRect = AbsoluteRect = 
-			core::rect<s32>(core::position2d<s32>(0,0), 
+	RelativeRect = AbsoluteRect =
+			core::rect<s32>(core::position2d<s32>(0,0),
 					Driver ? Driver->getScreenSize() : core::dimension2d<s32>(0,0));
 }
 
@@ -908,7 +943,7 @@ IGUIButton* CGUIEnvironment::addButton(const core::rect<s32>& rectangle, IGUIEle
 
 
 //! adds a window. The returned pointer must not be dropped.
-IGUIWindow* CGUIEnvironment::addWindow(const core::rect<s32>& rectangle, bool modal, 
+IGUIWindow* CGUIEnvironment::addWindow(const core::rect<s32>& rectangle, bool modal,
 		const wchar_t* text, IGUIElement* parent, s32 id)
 {
 	parent = parent ? parent : this;
@@ -985,7 +1020,15 @@ IGUIScrollBar* CGUIEnvironment::addScrollBar(bool horizontal, const core::rect<s
 }
 
 
-//! Adds an image element. 
+IGUITable* CGUIEnvironment::addTable(const core::rect<s32>& rectangle, IGUIElement* parent, s32 id, bool drawBackground)
+{
+	CGUITable* b = new CGUITable(this, parent ? parent : this, id, rectangle, true, drawBackground, false);
+	b->drop();
+	return b;
+}
+
+
+//! Adds an image element.
 IGUIImage* CGUIEnvironment::addImage(video::ITexture* image, core::position2d<s32> pos,
 	bool useAlphaChannel, IGUIElement* parent, s32 id, const wchar_t* text)
 {
@@ -1041,7 +1084,7 @@ IGUIMeshViewer* CGUIEnvironment::addMeshViewer(const core::rect<s32>& rectangle,
 //! adds a checkbox
 IGUICheckBox* CGUIEnvironment::addCheckBox(bool checked, const core::rect<s32>& rectangle, IGUIElement* parent, s32 id, const wchar_t* text)
 {
-	IGUICheckBox* b = new CGUICheckBox(checked, this, 
+	IGUICheckBox* b = new CGUICheckBox(checked, this,
 		parent ? parent : this , id , rectangle);
 
 	if (text)
@@ -1053,9 +1096,8 @@ IGUICheckBox* CGUIEnvironment::addCheckBox(bool checked, const core::rect<s32>& 
 
 
 //! adds a list box
-IGUIListBox* CGUIEnvironment::addListBox(const core::rect<s32>& rectangle, 
-					 IGUIElement* parent, s32 id,
-					 bool drawBackground)
+IGUIListBox* CGUIEnvironment::addListBox(const core::rect<s32>& rectangle,
+					IGUIElement* parent, s32 id, bool drawBackground)
 {
 	IGUIListBox* b = new CGUIListBox(this, parent ? parent : this, id, rectangle,
 		true, drawBackground, false);
@@ -1075,9 +1117,8 @@ IGUIListBox* CGUIEnvironment::addListBox(const core::rect<s32>& rectangle,
 
 
 //! adds a file open dialog. The returned pointer must not be dropped.
-IGUIFileOpenDialog* CGUIEnvironment::addFileOpenDialog(const wchar_t* title, 
-						   bool modal,
-						   IGUIElement* parent, s32 id)
+IGUIFileOpenDialog* CGUIEnvironment::addFileOpenDialog(const wchar_t* title,
+				bool modal, IGUIElement* parent, s32 id)
 {
 	parent = parent ? parent : this;
 
@@ -1095,9 +1136,8 @@ IGUIFileOpenDialog* CGUIEnvironment::addFileOpenDialog(const wchar_t* title,
 
 
 //! adds a color select dialog. The returned pointer must not be dropped.
-IGUIColorSelectDialog* CGUIEnvironment::addColorSelectDialog(const wchar_t* title, 
-						   bool modal,
-						   IGUIElement* parent, s32 id)
+IGUIColorSelectDialog* CGUIEnvironment::addColorSelectDialog(const wchar_t* title,
+				bool modal, IGUIElement* parent, s32 id)
 {
 	parent = parent ? parent : this;
 
@@ -1116,11 +1156,10 @@ IGUIColorSelectDialog* CGUIEnvironment::addColorSelectDialog(const wchar_t* titl
 
 
 //! adds a static text. The returned pointer must not be dropped.
-IGUIStaticText* CGUIEnvironment::addStaticText(const wchar_t* text,  
-					   const core::rect<s32>& rectangle,
-					   bool border, bool wordWrap,
-					   IGUIElement* parent, s32 id,
-					   bool background)
+IGUIStaticText* CGUIEnvironment::addStaticText(const wchar_t* text,
+				const core::rect<s32>& rectangle,
+				bool border, bool wordWrap,
+				IGUIElement* parent, s32 id, bool background)
 {
 	IGUIStaticText* d = new CGUIStaticText(text, border, this,
 			parent ? parent : this, id, rectangle, background);
@@ -1133,10 +1172,9 @@ IGUIStaticText* CGUIEnvironment::addStaticText(const wchar_t* text,
 
 
 //! Adds an edit box. The returned pointer must not be dropped.
-IGUIEditBox* CGUIEnvironment::addEditBox(const wchar_t* text, 
-					 const core::rect<s32>& rectangle, 
-					 bool border, IGUIElement* parent,
-					 s32 id)
+IGUIEditBox* CGUIEnvironment::addEditBox(const wchar_t* text,
+			const core::rect<s32>& rectangle, bool border,
+			IGUIElement* parent, s32 id)
 {
 	IGUIEditBox* d = new CGUIEditBox(text, border, this,
 			parent ? parent : this, id, rectangle);
@@ -1147,9 +1185,9 @@ IGUIEditBox* CGUIEnvironment::addEditBox(const wchar_t* text,
 
 
 //! Adds a spin box to the environment
-IGUISpinBox* CGUIEnvironment::addSpinBox(const wchar_t* text, 
-					 const core::rect<s32> &rectangle, 
-					 IGUIElement* parent, s32 id)
+IGUISpinBox* CGUIEnvironment::addSpinBox(const wchar_t* text,
+				const core::rect<s32> &rectangle,
+				IGUIElement* parent, s32 id)
 {
 	IGUISpinBox* d = new CGUISpinBox(text, this, parent ? parent : this, id, rectangle);
 
@@ -1169,7 +1207,7 @@ IGUITabControl* CGUIEnvironment::addTabControl(const core::rect<s32>& rectangle,
 }
 
 
-//! Adds tab to the environment. 
+//! Adds tab to the environment.
 IGUITab* CGUIEnvironment::addTab(const core::rect<s32>& rectangle,
 	IGUIElement* parent, s32 id)
 {
@@ -1184,7 +1222,7 @@ IGUITab* CGUIEnvironment::addTab(const core::rect<s32>& rectangle,
 IGUIContextMenu* CGUIEnvironment::addContextMenu(const core::rect<s32>& rectangle,
 	IGUIElement* parent, s32 id)
 {
-	IGUIContextMenu* c = new CGUIContextMenu(this, 
+	IGUIContextMenu* c = new CGUIContextMenu(this,
 		parent ? parent : this, id, rectangle, true);
 	c->drop();
 	return c;
@@ -1197,7 +1235,7 @@ IGUIContextMenu* CGUIEnvironment::addMenu(IGUIElement* parent, s32 id)
 	if (!parent)
 		parent = this;
 
-	IGUIContextMenu* c = new CGUIMenu(this, 
+	IGUIContextMenu* c = new CGUIMenu(this,
 		parent, id, core::rect<s32>(0,0,
 				parent->getAbsolutePosition().getWidth(),
 				parent->getAbsolutePosition().getHeight()));
@@ -1227,9 +1265,8 @@ IGUIInOutFader* CGUIEnvironment::addInOutFader(const core::rect<s32>* rectangle,
 
 	if (rectangle)
 		rect = *rectangle;
-	else
-		if (Driver)
-			rect = core::rect<s32>(core::position2d<s32>(0,0), Driver->getScreenSize());
+	else if (Driver)
+		rect = core::rect<s32>(core::position2d<s32>(0,0), Driver->getScreenSize());
 
 	if (!parent)
 		parent = this;
@@ -1399,10 +1436,9 @@ IGUISpriteBank* CGUIEnvironment::addEmptySpriteBank(const c8 *name)
 	else
 		b.Filename = name;
 
-	s32 index = Banks.binary_search(b);
+	const s32 index = Banks.binary_search(b);
 	if (index != -1)
-		return 0; 
-
+		return 0;
 
 	// create a new sprite bank
 
@@ -1424,8 +1460,7 @@ IGUIFont* CGUIEnvironment::getBuiltInFont() const
 }
 
 
-
-//! Returns the root gui element. 
+//! Returns the root gui element.
 IGUIElement* CGUIEnvironment::getRootGUIElement()
 {
 	return this;
@@ -1444,13 +1479,13 @@ IGUIElement* CGUIEnvironment::getNextElement(bool reverse, bool group)
 	{
 		startOrder = startPos->getTabOrder();
 	}
-	else 
+	else
 	if (!group && Focus && !Focus->isTabGroup())
 	{
 		startOrder = Focus->getTabOrder();
 		if (startOrder == -1)
 		{
-			// this element is not part of the tab cycle, 
+			// this element is not part of the tab cycle,
 			// but its parent might be...
 			IGUIElement *el = Focus;
 			while (el && el->getParent() && startOrder == -1)

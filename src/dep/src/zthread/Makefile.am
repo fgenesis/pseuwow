@@ -17,24 +17,24 @@
 ## WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 ## CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AM_CXXFLAGS = @COMPILER_OPTIONS@ @EXTRA_COMPILER_OPTIONS@
-INCLUDES += -I$(srcdir)/../../include -I$(srcdir)/../../include/zthread
+#AM_CXXFLAGS = @COMPILER_OPTIONS@ @EXTRA_COMPILER_OPTIONS@
+INCLUDES = -I../../include/zthread -I../../include
 SUBDIRS=.
 
-libdir=$(prefix)/lib
+#libdir=$(top_builddir)/src/dep/lib/linux-gcc
+noinst_LIBRARIES = libZThread.a
+# lib_LTLIBRARIES = libZThread.la
 
-lib_LTLIBRARIES = libZThread.la
-
-libZThread_la_LIBADD=@LINKER_OPTIONS@ @EXTRA_LINKER_OPTIONS@
-libZThread_la_LDFLAGS= \
-        -release $(LT_RELEASE)  \
-        -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
-
-
-LIBADD=@LINKER_OPTIONS@ @EXTRA_LINKER_OPTIONS@
+#libZThread_la_LIBADD=@LINKER_OPTIONS@ @EXTRA_LINKER_OPTIONS@
+#libZThread_a_LDFLAGS= \
+#        -release $(LT_RELEASE)  \
+#        -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
 
-libZThread_la_SOURCES = \
+#LIBADD=@LINKER_OPTIONS@ @EXTRA_LINKER_OPTIONS@
+
+
+libZThread_a_SOURCES = \
 AtomicCount.cxx \
 Condition.cxx \
 ConcurrentExecutor.cxx \

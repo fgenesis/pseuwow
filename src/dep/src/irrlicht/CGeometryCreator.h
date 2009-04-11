@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -34,7 +34,7 @@ public:
 	static IMesh* createTerrainMesh(video::IImage* texture,
 		video::IImage* heightmap, const core::dimension2d<f32>& stretchSize,
 		f32 maxHeight, video::IVideoDriver* driver,
-		const core::dimension2d<s32> defaultVertexBlockSize,
+		const core::dimension2d<s32>& defaultVertexBlockSize,
 		bool debugBorders=false);
 
 	static IMesh* createArrowMesh(const u32 tesselationCylinder,
@@ -44,6 +44,10 @@ public:
 			const video::SColor vtxColor1);
 
 	static IMesh* createSphereMesh(f32 radius, u32 polyCountX, u32 polyCountY);
+
+	static IMesh* createCylinderMesh(f32 radius, f32 length, u32 tesselation, const video::SColor& color=video::SColor(0xffffffff), bool closeTop=true, f32 oblique=0.f);
+
+	static IMesh* createConeMesh(f32 radius, f32 length, u32 tesselation, const video::SColor& colorTop=video::SColor(0xffffffff), const video::SColor& colorBottom=video::SColor(0xffffffff), f32 oblique=0.f);
 };
 
 

@@ -1,4 +1,4 @@
-INCLUDES += -I$(srcdir)/../../include -I$(srcdir)/../../include/zlib
+INCLUDES = -I../../include/zlib -I../../include
 
 noinst_LIBRARIES = libzlib.a
 

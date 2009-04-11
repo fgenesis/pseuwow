@@ -185,6 +185,7 @@ void SImage::setPixel(u32 x, u32 y, const SColor &color )
 }
 
 
+
 //! returns a pixel
 SColor SImage::getPixel(u32 x, u32 y) const
 {
@@ -267,6 +268,40 @@ void SImage::copyToScaling(void* target, s32 width, s32 height, ECOLOR_FORMAT fo
 		syval=((s32)sy)*Pitch;
 		yval+=pitch;
 	}
+}
+
+
+//! copies this surface into another, using the alpha mask, an cliprect and a color to add with
+void SImage::copyToWithAlpha(IImage* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect, const SColor &color, const core::rect<s32>* clipRect)
+{
+	// color blend only necessary on not full spectrum aka. color.color != 0xFFFFFFFF
+//	Blit(color.color == 0xFFFFFFFF ? BLITTER_TEXTURE_ALPHA_BLEND: BLITTER_TEXTURE_ALPHA_COLOR_BLEND, target, clipRect, &pos, this, &sourceRect, color.color);
+}
+
+//! fills the surface with given color
+void SImage::fill(const SColor &color)
+{
+	u32 c;
+
+	switch ( Format )
+	{
+		case ECF_A1R5G5B5:
+			c = video::A8R8G8B8toA1R5G5B5( color.color );
+			c |= c << 16;
+			break;
+		case ECF_R5G6B5:
+			c = video::A8R8G8B8toR5G6B5( color.color );
+			c |= c << 16;
+			break;
+		case ECF_A8R8G8B8:
+			c = color.color;
+			break;
+		default:
+//			os::Printer::log("CImage::Format not supported", ELL_ERROR);
+			return;
+	}
+
+	//memset32( Data, c, getImageDataSizeInBytes() );
 }
 
 //! copies this surface into another, scaling it to the target image size

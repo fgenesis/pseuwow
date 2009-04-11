@@ -1,4 +1,4 @@
-// Copyright (C) 2007 Christian Stehno
+// Copyright (C) 2007-2009 Christian Stehno
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -39,7 +39,7 @@ bool CImageLoaderPPM::isALoadableFileExtension(const c8* fileName) const
 //! returns true if the file maybe is able to be loaded by this class
 bool CImageLoaderPPM::isALoadableFileFormat(io::IReadFile* file) const
 {
-	c8 id[2];
+	c8 id[2]={0};
 	file->read(&id, 2);
 	return (id[0]=='P' && id[1]>'0' && id[1]<'7');
 }
@@ -144,7 +144,7 @@ IImage* CImageLoaderPPM::loadImage(io::IReadFile* file) const
 					for (u32 i=0; i<size; ++i)
 					{
 						getNextToken(file, token);
-						const u32 num = core::strtol10(token.c_str());
+						const u8 num = (u8)core::strtol10(token.c_str());
 						*ptr++ = num;
 						*ptr++ = num;
 						*ptr++ = num;
@@ -186,11 +186,11 @@ IImage* CImageLoaderPPM::loadImage(io::IReadFile* file) const
 					for (u32 i=0; i<size; ++i)
 					{
 						getNextToken(file, token);
-						*ptr++ = core::strtol10(token.c_str());
+						*ptr++ = (u8)core::strtol10(token.c_str());
 						getNextToken(file, token);
-						*ptr++ = core::strtol10(token.c_str());
+						*ptr++ = (u8)core::strtol10(token.c_str());
 						getNextToken(file, token);
-						*ptr++ = core::strtol10(token.c_str());
+						*ptr++ = (u8)core::strtol10(token.c_str());
 						*ptr++ = 255;
 					}
 				}

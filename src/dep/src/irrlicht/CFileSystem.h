@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -62,12 +62,23 @@ public:
 	/** \param filename: The file to get the directory from */
 	virtual core::stringc getFileDir(const core::stringc& filename) const;
 
+	//! Returns the base part of a filename, i.e. the name without the directory
+	//! part. If no directory is prefixed, the full name is returned.
+	/** \param filename: The file to get the basename from */
+	core::stringc getFileBasename(const core::stringc& filename, bool keepExtension=true) const;
+
 	//! Creates a list of files and directories in the current working directory 
 	//! and returns it.
 	virtual IFileList* createFileList() const;
 
 	//! determinates if a file exists and would be able to be opened.
 	virtual bool existFile(const c8* filename) const;
+
+	//! determines if a file exists and would be able to be opened.
+	bool existFile(const core::stringc& filename) const
+	{
+		return existFile(filename.c_str());
+	}
 
 	//! Creates a XML Reader from a file.
 	virtual IXMLReader* createXMLReader(const c8* filename);

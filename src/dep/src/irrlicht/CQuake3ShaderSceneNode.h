@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt / Thomas Alten
+// Copyright (C) 2002-2009 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -23,10 +23,9 @@ public:
 
 	CQuake3ShaderSceneNode( ISceneNode* parent, ISceneManager* mgr,s32 id,
 				io::IFileSystem *fileSystem,IMeshBuffer *buffer,
-				const quake3::SShader * shader
-		);
+				const quake3::SShader * shader);
 
-	virtual ~CQuake3ShaderSceneNode ();
+	virtual ~CQuake3ShaderSceneNode();
 
 	virtual void OnRegisterSceneNode();
 	virtual void render();
@@ -37,9 +36,9 @@ public:
 	virtual video::SMaterial& getMaterial(u32 i);
 
 private:
-	SMeshBuffer MeshBuffer;
-	SMeshBufferLightMap Original;
-	const quake3::SShader * Shader;
+	SMeshBuffer* MeshBuffer;
+	SMeshBufferLightMap* Original;
+	const quake3::SShader* Shader;
 
 	struct SQ3Texture
 	{
@@ -63,18 +62,15 @@ private:
 	void vertextransform_wave ( f32 dt, quake3::SModifierFunction &function );
 	void vertextransform_bulge( f32 dt, quake3::SModifierFunction &function );
 	void vertextransform_autosprite( f32 dt, quake3::SModifierFunction &function );
-
-	void rgbgen ( f32 dt, quake3::SModifierFunction &function );
-	u32 tcgen ( f32 dt, quake3::SModifierFunction &function, core::matrix4 &texture );
+	void vertextransform_tcgen ( f32 dt, quake3::SModifierFunction &function );
+	void vertextransform_rgbgen ( f32 dt, quake3::SModifierFunction &function );
 
 	void transformtex ( const core::matrix4 &m, const u32 clamp );
 
 	f32 TimeAbs;
-	u32 animate( u32 stage, core::matrix4 &texture );
+	void animate( u32 stage, core::matrix4 &texture );
 
-
-	s32 PassedCulling;
-	s32 StageCall;
+	bool isTransparent() const;
 
 };
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -16,6 +16,9 @@ CParticleAttractionAffector::CParticleAttractionAffector(
 	: Point(point), Speed(speed), AffectX(affectX), AffectY(affectY),
 		AffectZ(affectZ), Attract(attract), LastTime(0)
 {
+	#ifdef _DEBUG
+	setDebugName("CParticleAttractionAffector");
+	#endif
 }
 
 

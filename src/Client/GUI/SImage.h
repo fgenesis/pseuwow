@@ -64,6 +64,14 @@ public:
 	//! copies this surface into another
 	void copyTo(IImage* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect=0);
 
+	//! copies this surface into another, using the alpha mask, an cliprect and a color to add with
+	virtual void copyToWithAlpha(IImage* target, const core::position2d<s32>& pos,
+			const core::rect<s32>& sourceRect, const SColor &color,
+			const core::rect<s32>* clipRect = 0);
+
+	//! fills the surface with black or white
+	virtual void fill(const SColor &color);
+
 	//! copies this surface into another, scaling it to fit.
 	void copyToScaling(void* target, s32 width, s32 height, ECOLOR_FORMAT format, u32 pitch=0);
 

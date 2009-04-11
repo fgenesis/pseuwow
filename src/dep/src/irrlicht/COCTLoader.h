@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 //
@@ -46,23 +46,24 @@
 #include "IMeshLoader.h"
 #include "IReadFile.h"
 #include "SMesh.h"
-#include "IVideoDriver.h"
 #include "irrString.h"
-
-#include "ISceneManager.h"
 
 namespace irr
 {
+namespace io
+{
+	class IFileSystem;
+} // end namespace io
 namespace scene
 {
+	class ISceneManager;
+	class ISceneNode;
 
 	class COCTLoader : public IMeshLoader
 	{
 	public:
-		void OCTLoadLights(io::IReadFile* file, ISceneManager * scene, ISceneNode * parent = 0, f32 radius = 500.0f, f32 intensityScale = 0.0000001f*2.5, bool rewind = true);
-
 		//! constructor
-		COCTLoader(video::IVideoDriver* driver);
+		COCTLoader(ISceneManager* smgr, io::IFileSystem* fs);
 
 		//! destructor
 		virtual ~COCTLoader();
@@ -77,9 +78,12 @@ namespace scene
 		//! See IReferenceCounted::drop() for more information.
 		virtual IAnimatedMesh* createMesh(io::IReadFile* file);
 
-	private:
-		core::vector3df GetFaceNormal(f32 a[3], f32 b[3], f32 c[3]);
+		void OCTLoadLights(io::IReadFile* file,
+				ISceneNode * parent = 0, f32 radius = 500.0f,
+				f32 intensityScale = 0.0000001f*2.5,
+				bool rewind = true);
 
+	private:
 		struct octHeader {
 			u32 numVerts;
 			u32 numFaces;
@@ -126,7 +130,8 @@ namespace scene
 			u32 intensity;
 		};
 
-		video::IVideoDriver* Driver;
+		ISceneManager* SceneManager;
+		io::IFileSystem* FileSystem;
 	};
 
 } // end namespace scene

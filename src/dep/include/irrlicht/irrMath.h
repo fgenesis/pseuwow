@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -8,11 +8,15 @@
 #include "IrrCompileConfig.h"
 #include "irrTypes.h"
 #include <math.h>
+#include <stdlib.h> // for abs() etc.
 
-#if defined(_IRR_SOLARIS_PLATFORM_) || defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
+#if defined(_IRR_SOLARIS_PLATFORM_) || defined(__BORLANDC__) || defined (__BCPLUSPLUS__) || defined (_WIN32_WCE)
 	#define sqrtf(X) (f32)sqrt((f64)(X))
 	#define sinf(X) (f32)sin((f64)(X))
 	#define cosf(X) (f32)cos((f64)(X))
+	#define asinf(X) (f32)asin((f64)(X))
+	#define acosf(X) (f32)acos((f64)(X))
+	#define atan2f(X,Y) (f32)atan2((f64)(X),(f64)(Y))
 	#define ceilf(X) (f32)ceil((f64)(X))
 	#define floorf(X) (f32)floor((f64)(X))
 	#define powf(X,Y) (f32)pow((f64)(X),(f64)(Y))
@@ -28,30 +32,36 @@ namespace core
 	//! Rounding error constant often used when comparing f32 values.
 
 #ifdef IRRLICHT_FAST_MATH
-	const f32 ROUNDING_ERROR_32	= 0.00005f;
-	const f64 ROUNDING_ERROR_64	= 0.000005f;
+	const f32 ROUNDING_ERROR_32 = 0.00005f;
+	const f64 ROUNDING_ERROR_64 = 0.000005;
 #else
-	const f32 ROUNDING_ERROR_32	= 0.000001f;
-	const f64 ROUNDING_ERROR_64	= 0.00000001f;
+	const f32 ROUNDING_ERROR_32 = 0.000001f;
+	const f64 ROUNDING_ERROR_64 = 0.00000001;
 #endif
 
+#ifdef PI // make sure we don't collide with a define
+#undef PI
+#endif
 	//! Constant for PI.
-	const f32 PI			= 3.14159265359f;
+	const f32 PI		= 3.14159265359f;
 
 	//! Constant for reciprocal of PI.
-	const f32 RECIPROCAL_PI		= 1.0f/PI;
+	const f32 RECIPROCAL_PI	= 1.0f/PI;
 
 	//! Constant for half of PI.
-	const f32 HALF_PI		= PI/2.0f;
+	const f32 HALF_PI	= PI/2.0f;
 
+#ifdef PI64 // make sure we don't collide with a define
+#undef PI64
+#endif
 	//! Constant for 64bit PI.
-	const f64 PI64			= 3.1415926535897932384626433832795028841971693993751;
+	const f64 PI64		= 3.1415926535897932384626433832795028841971693993751;
 
 	//! Constant for 64bit reciprocal of PI.
-	const f64 RECIPROCAL_PI64	= 1.0/PI64;
+	const f64 RECIPROCAL_PI64 = 1.0/PI64;
 
 	//! 32bit Constant for converting from degrees to radians
-	const f32 DEGTORAD   = PI / 180.0f;
+	const f32 DEGTORAD = PI / 180.0f;
 
 	//! 32bit constant for converting from radians to degrees (formally known as GRAD_PI)
 	const f32 RADTODEG   = 180.0f / PI;
@@ -61,6 +71,42 @@ namespace core
 
 	//! 64bit constant for converting from radians to degrees
 	const f64 RADTODEG64 = 180.0 / PI64;
+
+	//! Utility function to convert a radian value to degrees
+	/** Provided as it can be clearer to write radToDeg(X) than RADTODEG * X
+	\param radians	The radians value to convert to degrees.
+	*/
+	inline f32 radToDeg(f32 radians)
+	{
+		return RADTODEG * radians;
+	}
+
+	//! Utility function to convert a radian value to degrees
+	/** Provided as it can be clearer to write radToDeg(X) than RADTODEG * X
+	\param radians	The radians value to convert to degrees.
+	*/
+	inline f64 radToDeg(f64 radians)
+	{
+		return RADTODEG64 * radians;
+	}
+
+	//! Utility function to convert a degrees value to radians
+	/** Provided as it can be clearer to write degToRad(X) than DEGTORAD * X
+	\param degrees	The degrees value to convert to radians.
+	*/
+	inline f32 degToRad(f32 degrees)
+	{
+		return DEGTORAD * degrees;
+	}
+
+	//! Utility function to convert a degrees value to radians
+	/** Provided as it can be clearer to write degToRad(X) than DEGTORAD * X
+	\param degrees	The degrees value to convert to radians.
+	*/
+	inline f64 degToRad(f64 degrees)
+	{
+		return DEGTORAD64 * degrees;
+	}
 
 	//! returns minimum of two values. Own implementation to get rid of the STL (VS6 problems)
 	template<class T>
@@ -102,14 +148,20 @@ namespace core
 	template<class T>
 	inline T lerp(const T& a, const T& b, const f32 t)
 	{
-		return (a*(1.f-t)) + (b*t);
+		return (T)(a*(1.f-t)) + (b*t);
 	}
 
 	//! clamps a value between low and high
 	template <class T>
-	inline const T clamp (const T& value, const T& low, const T& high) 
+	inline const T clamp (const T& value, const T& low, const T& high)
 	{
 		return min_ (max_(value,low), high);
+	}
+
+	//! returns if a equals b, taking possible rounding errors into account
+	inline bool equals(const f64 a, const f64 b, const f64 tolerance = ROUNDING_ERROR_64)
+	{
+		return (a + tolerance >= b) && (a - tolerance <= b);
 	}
 
 	//! returns if a equals b, taking possible rounding errors into account
@@ -160,13 +212,12 @@ namespace core
 		return (b & mask) | (a & ~mask);
 	}
 
-	inline s32 s32_clamp (s32 value, s32 low, s32 high) 
+	inline s32 s32_clamp (s32 value, s32 low, s32 high)
 	{
 		return s32_min (s32_max(value,low), high);
 	}
 
-	/* 
-	
+	/*
 		float IEEE-754 bit represenation
 
 		0      0x00000000
@@ -179,27 +230,40 @@ namespace core
 		in general: number = (sign ? -1:1) * 2^(exponent) * 1.(mantissa bits)
 	*/
 
+	typedef union { u32 u; s32 s; f32 f; } inttofloat;
+
 	#define F32_AS_S32(f)		(*((s32 *) &(f)))
 	#define F32_AS_U32(f)		(*((u32 *) &(f)))
 	#define F32_AS_U32_POINTER(f)	( ((u32 *) &(f)))
 
 	#define F32_VALUE_0		0x00000000
-	#define F32_VALUE_1		0x3f800000	
+	#define F32_VALUE_1		0x3f800000
 	#define F32_SIGN_BIT		0x80000000U
 	#define F32_EXPON_MANTISSA	0x7FFFFFFFU
 
 	//! code is taken from IceFPU
 	//! Integer representation of a floating-point value.
-	#define IR(x)					((u32&)(x))
+#ifdef IRRLICHT_FAST_MATH
+	#define IR(x)                           ((u32&)(x))
+#else
+	inline u32 IR(f32 x) {inttofloat tmp; tmp.f=x; return tmp.u;}
+#endif
 
 	//! Absolute integer representation of a floating-point value
-	#define AIR(x)					(IR(x)&0x7fffffff)
+	#define AIR(x)				(IR(x)&0x7fffffff)
 
 	//! Floating-point representation of an integer value.
-	#define FR(x)					((f32&)(x))
+#ifdef IRRLICHT_FAST_MATH
+	#define FR(x)                           ((f32&)(x))
+#else
+	inline f32 FR(u32 x) {inttofloat tmp; tmp.u=x; return tmp.f;}
+	inline f32 FR(s32 x) {inttofloat tmp; tmp.s=x; return tmp.f;}
+#endif
 
-	#define IEEE_1_0			0x3f800000						//!<	integer representation of 1.0
-	#define IEEE_255_0			0x437f0000						//!<	integer representation of 255.0
+	//! integer representation of 1.0
+	#define IEEE_1_0			0x3f800000
+	//! integer representation of 255.0
+	#define IEEE_255_0			0x437f0000
 
 #ifdef IRRLICHT_FAST_MATH
 	#define	F32_LOWER_0(f)		(F32_AS_U32(f) >  F32_SIGN_BIT)
@@ -210,8 +274,10 @@ namespace core
 	#define	F32_EQUAL_0(f)		( (F32_AS_U32(f) & F32_EXPON_MANTISSA ) == F32_VALUE_0)
 
 	// only same sign
-	#define	F32_A_GREATER_B(a,b)	(F32_AS_S32((a)) >  F32_AS_S32((b)))
+	#define	F32_A_GREATER_B(a,b)	(F32_AS_S32((a)) > F32_AS_S32((b)))
+
 #else
+
 	#define	F32_LOWER_0(n)		((n) <  0.0f)
 	#define	F32_LOWER_EQUAL_0(n)	((n) <= 0.0f)
 	#define	F32_GREATER_0(n)	((n) >  0.0f)
@@ -244,16 +310,14 @@ namespace core
 	}
 
 	/*
-		if (condition) state |= m; else state &= ~m; 
+		if (condition) state |= m; else state &= ~m;
 	*/
-	REALINLINE void setbit ( u32 &state, s32 condition, u32 mask )
+	REALINLINE void setbit_cond ( u32 &state, s32 condition, u32 mask )
 	{
 		// 0, or any postive to mask
 		//s32 conmask = -condition >> 31;
 		state ^= ( ( -condition >> 31 ) ^ state ) & mask;
 	}
-
-
 
 	inline f32 round_( f32 x )
 	{
@@ -274,14 +338,14 @@ namespace core
 #endif
 #endif
 	}
-		
+
 	REALINLINE f32 reciprocal_squareroot(const f32 x)
 	{
 #ifdef IRRLICHT_FAST_MATH
 		// comes from Nvidia
 #if 1
-		u32 tmp = (u32(IEEE_1_0 << 1) + IEEE_1_0 - *(u32*)&x) >> 1;   
-		f32 y = *(f32*)&tmp;                                             
+		u32 tmp = (u32(IEEE_1_0 << 1) + IEEE_1_0 - *(u32*)&x) >> 1;
+		f32 y = *(f32*)&tmp;
 		return y * (1.47f - 0.47f * x * y * y);
 #elif defined(_MSC_VER)
 		// an sse2 version

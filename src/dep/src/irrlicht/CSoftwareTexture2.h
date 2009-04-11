@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt / Thomas Alten
+// Copyright (C) 2002-2009 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -29,7 +29,7 @@ public:
 	virtual ~CSoftwareTexture2();
 
 	//! lock function
-	virtual void* lock()
+	virtual void* lock(bool readOnly = false)
 	{
 		return MipMap[MipMapLOD]->lock();
 	}
@@ -48,9 +48,9 @@ public:
 	}
 
 	//! Returns the size of the largest mipmap.
-	const core::dimension2d<s32>& getMaxSize() const
+	f32 getLODFactor( const f32 texArea ) const
 	{
-		return MipMap[0]->getDimension();
+		return MipMap[0]->getImageDataSizeInPixels () * texArea;
 	}
 
 	//! Returns (=size) of the texture.
@@ -81,7 +81,7 @@ public:
 	//! returns color format of texture
 	virtual ECOLOR_FORMAT getColorFormat() const
 	{
-		return ECF_SOFTWARE2;
+		return BURNINGSHADER_COLOR_FORMAT;
 	}
 
 	//! returns pitch of texture (in bytes)
@@ -114,10 +114,6 @@ public:
 	}
 
 private:
-
-	//! returns the size of a texture which would be the optimize size for rendering it
-	inline s32 getTextureSizeFromSurfaceSize(s32 size) const;
-
 	core::dimension2d<s32> OrigSize;
 
 	CImage * MipMap[SOFTWARE_DRIVER_2_MIPMAPPING_MAX];

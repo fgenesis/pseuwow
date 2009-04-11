@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -15,20 +15,19 @@ namespace scene
 {
 
 //! constructor
-CLightSceneNode::CLightSceneNode(ISceneNode* parent, ISceneManager* mgr, s32 id,	
-	const core::vector3df& position, video::SColorf color,f32 radius)
+CLightSceneNode::CLightSceneNode(ISceneNode* parent, ISceneManager* mgr, s32 id,
+		const core::vector3df& position, video::SColorf color, f32 radius)
 : ILightSceneNode(parent, mgr, id, position)
 {
 	#ifdef _DEBUG
 	setDebugName("CLightSceneNode");
 	#endif
 
-	LightData.Radius = radius;
 	LightData.DiffuseColor = color;
-
 	// set some useful specular color
 	LightData.SpecularColor = color.getInterpolated(video::SColor(255,255,255,255),0.7f);
 
+	setRadius(radius);
 	doLightRecalc();
 }
 
@@ -39,10 +38,9 @@ void CLightSceneNode::OnRegisterSceneNode()
 	doLightRecalc();
 
 	if (IsVisible)
-	{
 		SceneManager->registerNodeForRendering(this, ESNRP_LIGHT);
-		ISceneNode::OnRegisterSceneNode();
-	}
+
+	ISceneNode::OnRegisterSceneNode();
 }
 
 
@@ -103,6 +101,62 @@ video::SLight& CLightSceneNode::getLightData()
 const core::aabbox3d<f32>& CLightSceneNode::getBoundingBox() const
 {
 	return BBox;
+}
+
+
+//! Sets the light's radius of influence.
+/** Outside this radius the light won't lighten geometry and cast no
+shadows. Setting the radius will also influence the attenuation, setting
+it to (0,1/radius,0). If you want to override this behavior, set the
+attenuation after the radius.
+\param radius The new radius. */
+void CLightSceneNode::setRadius(f32 radius)
+{
+	LightData.Radius=radius;
+	LightData.Attenuation.set(0.f, 1.f/radius, 0.f);
+}
+
+
+//! Gets the light's radius of influence.
+/** \return The current radius. */
+f32 CLightSceneNode::getRadius() const
+{
+	return LightData.Radius;
+}
+
+
+//! Sets the light type.
+/** \param type The new type. */
+void CLightSceneNode::setLightType(video::E_LIGHT_TYPE type)
+{
+	LightData.Type=type;
+}
+
+
+//! Gets the light type.
+/** \return The current light type. */
+video::E_LIGHT_TYPE CLightSceneNode::getLightType() const
+{
+	return LightData.Type;
+}
+
+
+//! Sets whether this light casts shadows.
+/** Enabling this flag won't automatically cast shadows, the meshes
+will still need shadow scene nodes attached. But one can enable or
+disable distinct lights for shadow casting for performance reasons.
+\param shadow True if this light shall cast shadows. */
+void CLightSceneNode::enableCastShadow(bool shadow)
+{
+	LightData.CastShadows=shadow;
+}
+
+
+//! Check whether this light casts shadows.
+/** \return True if light would cast shadows, else false. */
+bool CLightSceneNode::getCastShadow() const
+{
+	return LightData.CastShadows;
 }
 
 
@@ -176,7 +230,7 @@ ISceneNode* CLightSceneNode::clone(ISceneNode* newParent, ISceneManager* newMana
 	if (!newManager)
 		newManager = SceneManager;
 
-	CLightSceneNode* nb = new CLightSceneNode(newParent, 
+	CLightSceneNode* nb = new CLightSceneNode(newParent,
 		newManager, ID, RelativeTranslation, LightData.DiffuseColor, LightData.Radius);
 
 	nb->cloneMembers(this, newManager);

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -6,6 +6,7 @@
 #define __S_MATERIAL_LAYER_H_INCLUDED__
 
 #include "matrix4.h"
+#include "irrAllocator.h"
 
 namespace irr
 {
@@ -34,20 +35,21 @@ namespace video
 			"texture_clamp_clamp_to_border",
 			"texture_clamp_mirror", 0};
 
-	//! struct for holding material parameters which exist per texture layer
+	//! Struct for holding material parameters which exist per texture layer
 	class SMaterialLayer
 	{
 	public:
-		//! default constructor
+		//! Default constructor
 		SMaterialLayer()
-			: Texture(0), TextureMatrix(0),
+			: Texture(0),
 				TextureWrap(ETC_REPEAT),
 				BilinearFilter(true),
 				TrilinearFilter(false),
-				AnisotropicFilter(false)
+				AnisotropicFilter(false), TextureMatrix(0)
 			{}
 
-		//! copy constructor
+		//! Copy constructor
+		/** \param other Material layer to copy from. */
 		SMaterialLayer(const SMaterialLayer& other)
 		{
 			// This pointer is checked during assignment
@@ -55,15 +57,22 @@ namespace video
 			*this = other;
 		}
 
-		//! destructor
+		//! Destructor
 		~SMaterialLayer()
 		{
-			delete TextureMatrix;
+			MatrixAllocator.destruct(TextureMatrix);
+			MatrixAllocator.deallocate(TextureMatrix); 
 		}
 
 		//! Assignment operator
+		/** \param other Material layer to copy from.
+		\return This material layer, updated. */
 		SMaterialLayer& operator=(const SMaterialLayer& other)
 		{
+			// Check for self-assignment!
+			if (this == &other)
+				return *this;
+
 			Texture = other.Texture;
 			if (TextureMatrix)
 			{
@@ -71,14 +80,18 @@ namespace video
 					*TextureMatrix = *other.TextureMatrix;
 				else
 				{
-					delete TextureMatrix;
+					MatrixAllocator.destruct(TextureMatrix);
+					MatrixAllocator.deallocate(TextureMatrix); 
 					TextureMatrix = 0;
 				}
 			}
 			else
 			{
 				if (other.TextureMatrix)
-					TextureMatrix = new core::matrix4(*other.TextureMatrix);
+				{
+					TextureMatrix = MatrixAllocator.allocate(1);
+					MatrixAllocator.construct(TextureMatrix,*other.TextureMatrix);
+				}
 				else
 					TextureMatrix = 0;
 			}
@@ -93,11 +106,6 @@ namespace video
 		//! Texture
 		ITexture* Texture;
 
-		//! Texture Matrix
-		//! Do not acces this element directly as the internal
-		//! ressource management has to cope with Null pointers etc.
-		core::matrix4* TextureMatrix;
-
 		//! Texture Clamp Mode
 		E_TEXTURE_CLAMP TextureWrap;
 
@@ -111,20 +119,25 @@ namespace video
 
 		//! Is anisotropic filtering enabled? Default: false
 		/** In Irrlicht you can use anisotropic texture filtering
-		    in conjunction with bilinear or trilinear texture
-		    filtering to improve rendering results. Primitives
-		    will look less blurry with this flag switched on. */
+		in conjunction with bilinear or trilinear texture
+		filtering to improve rendering results. Primitives
+		will look less blurry with this flag switched on. */
 		bool AnisotropicFilter;
 
 		//! Gets the texture transformation matrix
+		/** \return Texture matrix of this layer. */
 		core::matrix4& getTextureMatrix()
 		{
 			if (!TextureMatrix)
-				TextureMatrix = new core::matrix4(core::matrix4::EM4CONST_IDENTITY);
+			{
+				TextureMatrix = MatrixAllocator.allocate(1);
+				MatrixAllocator.construct(TextureMatrix,core::IdentityMatrix);
+			}
 			return *TextureMatrix;
 		}
 
 		//! Gets the immutable texture transformation matrix
+		/** \return Texture matrix of this layer. */
 		const core::matrix4& getTextureMatrix() const
 		{
 			if (TextureMatrix)
@@ -134,18 +147,24 @@ namespace video
 		}
 
 		//! Sets the texture transformation matrix to mat
+		/** \param mat New texture matrix for this layer. */
 		void setTextureMatrix(const core::matrix4& mat)
 		{
 			if (!TextureMatrix)
-				TextureMatrix = new core::matrix4(mat);
+			{
+				TextureMatrix = MatrixAllocator.allocate(1);
+				MatrixAllocator.construct(TextureMatrix,mat);
+			}
 			else
 				*TextureMatrix = mat;
 		}
 
 		//! Inequality operator
+		/** \param b Layer to compare to.
+		\return True if layers are different, else false. */
 		inline bool operator!=(const SMaterialLayer& b) const
 		{
-			bool different = 
+			bool different =
 				Texture != b.Texture ||
 				TextureWrap != b.TextureWrap ||
 				BilinearFilter != b.BilinearFilter ||
@@ -154,17 +173,29 @@ namespace video
 			if (different)
 				return true;
 			else
-				different |= (TextureMatrix != b.TextureMatrix);
+				different |= (TextureMatrix != b.TextureMatrix) &&
+					TextureMatrix && b.TextureMatrix &&
+					(*TextureMatrix != *(b.TextureMatrix));
 			return different;
 		}
 
 		//! Equality operator
+		/** \param b Layer to compare to.
+		\return True if layers are equal, else false. */
 		inline bool operator==(const SMaterialLayer& b) const
 		{ return !(b!=*this); }
+
+	private:
+		friend class SMaterial;
+		irr::core::irrAllocator<irr::core::matrix4> MatrixAllocator;
+
+		//! Texture Matrix
+		/** Do not access this element directly as the internal
+		ressource management has to cope with Null pointers etc. */
+		core::matrix4* TextureMatrix;
 	};
 
 } // end namespace video
 } // end namespace irr
 
 #endif // __S_MATERIAL_LAYER_H_INCLUDED__
-

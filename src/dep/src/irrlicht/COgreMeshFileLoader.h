@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // orginally written by Christian Stehno, modified by Nikolaus Gebhardt
@@ -27,7 +27,7 @@ class COgreMeshFileLoader : public IMeshLoader
 public:
 
 	//! Constructor
-	COgreMeshFileLoader(IMeshManipulator* manip,io::IFileSystem* fs, video::IVideoDriver* driver);
+	COgreMeshFileLoader(io::IFileSystem* fs, video::IVideoDriver* driver);
 
 	//! destructor
 	virtual ~COgreMeshFileLoader();
@@ -135,7 +135,7 @@ private:
 	struct OgreVertexBuffer
 	{
 		OgreVertexBuffer() : BindIndex(0), VertexSize(0), Data(0) {}
-		void destroy() { delete [] Data; Data = 0; };
+		void destroy() { delete [] Data; Data = 0; }
 
 		u16 BindIndex,
 		VertexSize;
@@ -230,7 +230,6 @@ private:
 	core::array<OgreMaterial> Materials;
 
 	SMesh* Mesh;
-	IMeshManipulator* Manipulator;
 	u32 NumUV;
 };
 

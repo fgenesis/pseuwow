@@ -1,11 +1,13 @@
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// This file is part of the "Irrlicht Engine".
+// For conditions of distribution and use, see copyright notice in irrlicht.h
+
 #ifndef __C_BONE_SCENE_NODE_H_INCLUDED__
 #define __C_BONE_SCENE_NODE_H_INCLUDED__
 
 // Used with SkinnedMesh and IAnimatedMeshSceneNode, for boned meshes
 
 #include "IBoneSceneNode.h"
-#include "irrString.h"
-
 
 namespace irr
 {
@@ -20,12 +22,6 @@ namespace scene
 		CBoneSceneNode(ISceneNode* parent, ISceneManager* mgr,
 			s32 id=-1, u32 boneIndex=0, const c8* boneName=0);
 
-		//! destructor
-		~CBoneSceneNode();
-
-		//! Returns the name of the bone
-		virtual const c8* getBoneName() const;
-
 		//! Returns the index of the bone
 		virtual u32 getBoneIndex() const;
 
@@ -38,13 +34,12 @@ namespace scene
 		//! returns the axis aligned bounding box of this node
 		virtual const core::aabbox3d<f32>& getBoundingBox() const;
 
+		/*
 		//! Returns the relative transformation of the scene node.
 		//virtual core::matrix4 getRelativeTransformation() const;
+		*/
 
 		virtual void OnAnimate(u32 timeMs);
-
-
-		void helper_updateAbsolutePositionOfAllChildren(ISceneNode *Node);
 
 		virtual void updateAbsolutePositionOfAllChildren();
 
@@ -60,29 +55,25 @@ namespace scene
 			SkinningSpace=space;
 		}
 
-		virtual E_BONE_SKINNING_SPACE getSkinningSpace()
+		virtual E_BONE_SKINNING_SPACE getSkinningSpace() const
 		{
 			return SkinningSpace;
 		}
 
 	private:
-		E_BONE_ANIMATION_MODE AnimationMode;
-		E_BONE_SKINNING_SPACE SkinningSpace;
+		void helper_updateAbsolutePositionOfAllChildren(ISceneNode *Node);
 
 		u32 BoneIndex;
-		core::stringc BoneName;
-
-
-
-
 
 		core::aabbox3d<f32> Box;
+
+		E_BONE_ANIMATION_MODE AnimationMode;
+		E_BONE_SKINNING_SPACE SkinningSpace;
 	};
+
 
 } // end namespace scene
 } // end namespace irr
-
-
 
 #endif
 

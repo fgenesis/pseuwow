@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -16,6 +16,11 @@ CParticleFadeOutAffector::CParticleFadeOutAffector(
 	const video::SColor& targetColor, u32 fadeOutTime)
 	: IParticleFadeOutAffector(), TargetColor(targetColor)
 {
+
+	#ifdef _DEBUG
+	setDebugName("CParticleFadeOutAffector");
+	#endif
+
 	FadeOutTime = fadeOutTime ? static_cast<f32>(fadeOutTime) : 1.0f;
 }
 

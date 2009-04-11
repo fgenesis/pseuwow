@@ -1,20 +1,18 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
-
 
 //New skinned mesh
 
 #ifndef __C_SKINNED_MESH_H_INCLUDED__
 #define __C_SKINNED_MESH_H_INCLUDED__
 
+#include "ISkinnedMesh.h"
+#include "SMeshBuffer.h"
 #include "S3DVertex.h"
 #include "irrString.h"
 #include "matrix4.h"
-#include "SMeshBuffer.h"
-#include <quaternion.h>
-
-#include "ISkinnedMesh.h"
+#include "quaternion.h"
 
 namespace irr
 {
@@ -68,6 +66,12 @@ namespace scene
 		//! sets a flag of all contained materials to a new value
 		virtual void setMaterialFlag(video::E_MATERIAL_FLAG flag, bool newvalue);
 
+		//! set the hardware mapping hint, for driver
+		virtual void setHardwareMappingHint(E_HARDWARE_MAPPING newMappingHint, E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX);
+
+		//! flags the meshbuffer as changed, reloads hardware buffers
+		virtual void setDirty(E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX);
+
 		//! Returns the type of the animated mesh.
 		virtual E_ANIMATED_MESH_TYPE getMeshType() const;
 
@@ -97,15 +101,22 @@ namespace scene
 		//! Tranfers the joint data to the mesh
 		virtual void transferJointsToMesh(const core::array<IBoneSceneNode*> &JointChildSceneNodes);
 
+		//! Tranfers the joint hints to the mesh
+		virtual void transferOnlyJointsHintsToMesh(const core::array<IBoneSceneNode*> &JointChildSceneNodes);
+
 		//! Creates an array of joints from this mesh
-		virtual void createJoints(core::array<IBoneSceneNode*> &JointChildSceneNodes, IAnimatedMeshSceneNode* AnimatedMeshSceneNode, ISceneManager* SceneManager);
+		virtual void createJoints(core::array<IBoneSceneNode*> &JointChildSceneNodes,
+				IAnimatedMeshSceneNode* AnimatedMeshSceneNode,
+				ISceneManager* SceneManager);
 
-
+		//! Convertes the mesh to contain tangent information
 		virtual void convertMeshToTangents();
 
+		//! Does the mesh have no animation
+		virtual bool isStatic();
 
-
-
+		//! (This feature is not implemented in irrlicht yet)
+		virtual bool setHardwareSkinning(bool on);
 
 		//Interface for the mesh loaders (finalize should lock these functions, and they should have some prefix like loader_
 
@@ -123,22 +134,17 @@ namespace scene
 		//! loaders should call this after populating the mesh
 		virtual void finalize();
 
-
-
-
 		virtual SSkinMeshBuffer *createBuffer();
 
 		virtual SJoint *createJoint(SJoint *parent=0);
 
 		virtual SPositionKey *createPositionKey(SJoint *joint);
-		virtual SScaleKey *createScaleKey(SJoint *joint);
 		virtual SRotationKey *createRotationKey(SJoint *joint);
+		virtual SScaleKey *createScaleKey(SJoint *joint);
 
 		virtual SWeight *createWeight(SJoint *joint);
 
-
-
-
+		virtual void updateBoundingBox(void);
 
 private:
 
@@ -150,9 +156,12 @@ private:
 
 		void buildAll_GlobalAnimatedMatrices(SJoint *Joint=0, SJoint *ParentJoint=0);
 
-		void getFrameData(f32 frame,SJoint *Node,core::vector3df &position, s32 &positionHint, core::vector3df &scale, s32 &scaleHint, core::quaternion &rotation, s32 &rotationHint);
+		void getFrameData(f32 frame, SJoint *Node,
+				core::vector3df &position, s32 &positionHint,
+				core::vector3df &scale, s32 &scaleHint,
+				core::quaternion &rotation, s32 &rotationHint);
 
-		void CalculateGlobalMatrixes(SJoint *Joint,SJoint *ParentJoint);
+		void CalculateGlobalMatrices(SJoint *Joint,SJoint *ParentJoint);
 
 		void SkinJoint(SJoint *Joint, SJoint *ParentJoint);
 
@@ -160,9 +169,6 @@ private:
 			core::vector3df& tangent, core::vector3df& binormal,
 			core::vector3df& vt1, core::vector3df& vt2, core::vector3df& vt3,
 			core::vector2df& tc1, core::vector2df& tc2, core::vector2df& tc3);
-
-		//void createSkelton_Helper(ISceneManager* SceneManager, core::array<IBoneSceneNode*> &JointChildSceneNodes, IAnimatedMeshSceneNode *AnimatedMeshSceneNode, ISceneNode* ParentNode, SJoint *ParentNode, SJoint *Node);
-
 
 		core::array<SSkinMeshBuffer*> *SkinningBuffers; //Meshbuffer to skin, default is to skin localBuffers
 
@@ -177,11 +183,14 @@ private:
 
 		f32 AnimationFrames;
 
-		f32 lastAnimatedFrame;
-		f32 lastSkinnedFrame;
+		f32 LastAnimatedFrame;
+		f32 LastSkinnedFrame;
 		bool BoneControlUsed;
 
 		bool AnimateNormals;
+
+		bool HardwareSkinning;
+
 
 		E_INTERPOLATION_MODE InterpolationMode;
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -17,15 +17,14 @@ class IParticleGravityAffector : public IParticleAffector
 {
 public:
 
-	//! Set the time in milliseconds when the gravity force is totally
-	//! lost and the particle does not move any more.
+	//! Set the time in milliseconds when the gravity force is totally lost
+	/** At that point the particle does not move any more. */
 	virtual void setTimeForceLost( f32 timeForceLost ) = 0;
 
 	//! Set the direction and force of gravity in all 3 dimensions.
 	virtual void setGravity( const core::vector3df& gravity ) = 0;
 
-	//! Get the time in milliseconds when the gravity force is totally
-	//! lost and the particle does not move any more.
+	//! Get the time in milliseconds when the gravity force is totally lost
 	virtual f32 getTimeForceLost() const = 0;
 
 	//! Get the direction and force of gravity.

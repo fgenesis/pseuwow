@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -13,6 +13,9 @@ namespace scene
 CParticleRotationAffector::CParticleRotationAffector( const core::vector3df& speed, const core::vector3df& pivotPoint )
 		: PivotPoint(pivotPoint), Speed(speed), LastTime(0)
 {
+	#ifdef _DEBUG
+	setDebugName("CParticleRotationAffector");
+	#endif
 }
 
 

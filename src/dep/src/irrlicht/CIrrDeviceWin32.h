@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -15,6 +15,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include <mmsystem.h> // For JOYCAPS
+
+
 namespace irr
 {
 	class CIrrDeviceWin32 : public CIrrDeviceStub, video::IImagePresenter
@@ -22,13 +25,7 @@ namespace irr
 	public:
 
 		//! constructor
-		CIrrDeviceWin32(video::E_DRIVER_TYPE deviceType, 
-			core::dimension2d<s32> windowSize, u32 bits,
-			bool fullscreen, bool stencilbuffer, bool vsync, 
-			bool antiAlias, bool highPrecisionFPU,
-			IEventReceiver* receiver,
-			HWND window,
-			const char* version);
+		CIrrDeviceWin32(const SIrrlichtCreationParameters& params);
 
 		//! destructor
 		virtual ~CIrrDeviceWin32();
@@ -49,8 +46,14 @@ namespace irr
 		//! returns if window is active. if not, nothing need to be drawn
 		virtual bool isWindowActive() const;
 
+		//! returns if window has focus
+		virtual bool isWindowFocused() const;
+
+		//! returns if window is minimized
+		virtual bool isWindowMinimized() const;
+
 		//! presents a surface in the client area
-		virtual void present(video::IImage* surface, s32 windowId = 0, core::rect<s32>* src=0 );
+		virtual bool present(video::IImage* surface, void* windowId=0, core::rect<s32>* src=0);
 
 		//! notifies the device that it should close itself
 		virtual void closeDevice();
@@ -64,6 +67,9 @@ namespace irr
 
 		//! Sets if the window should be resizeable in windowed mode.
 		virtual void setResizeAble(bool resize=false);
+
+		//! Activate any joysticks, and generate events for them.
+		virtual bool activateJoysticks(core::array<SJoystickInfo> & joystickInfo);
 
 		//! Implementation of the win32 cursor control
 		class CCursorControl : public gui::ICursorControl
@@ -90,7 +96,12 @@ namespace irr
 			//! Changes the visible state of the mouse cursor.
 			virtual void setVisible(bool visible)
 			{
-				IsVisible = visible;
+				if(visible != IsVisible)
+				{
+					IsVisible = visible;
+					updateInternalCursorPosition();
+					setPosition(CursorPos.X, CursorPos.Y);
+				}
 			}
 
 			//! Returns if the cursor is currently visible.
@@ -225,16 +236,13 @@ namespace irr
 			core::rect<s32> ReferenceRect;
 		};
 
-
 		//! returns the win32 cursor control
 		CCursorControl* getWin32CursorControl();
 
 	private:
 
 		//! create the driver
-		void createDriver(video::E_DRIVER_TYPE driverType,
-			const core::dimension2d<s32>& windowSize, u32 bits, bool fullscreen,
-			bool stencilbuffer, bool vsync, bool antiAlias, bool highPrecisionFPU);
+		void createDriver();
 
 		//! switchs to fullscreen
 		bool switchToFullScreen(s32 width, s32 height, s32 bits);
@@ -243,16 +251,23 @@ namespace irr
 
 		void resizeIfNecessary();
 
+		void pollJoysticks(); 
+
 		HWND HWnd;
 
 		bool ChangedToFullScreen;
-		bool FullScreen;
 		bool IsNonNTWindows;
 		bool Resized;
 		bool ExternalWindow;
 		CCursorControl* Win32CursorControl;
-	};
 
+		struct JoystickInfo
+		{
+			u32		Index;
+			JOYCAPS Caps;
+		};
+		core::array<JoystickInfo> ActiveJoysticks;
+	};
 
 } // end namespace irr
 

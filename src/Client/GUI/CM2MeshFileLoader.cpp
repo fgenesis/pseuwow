@@ -1,32 +1,7 @@
 #include <iostream>
 #include "CM2MeshFileLoader.h"
 #include "SSkinnedMesh.h"
-#define _DEBUG
 #include "common.h"
-#ifdef _DEBUG
-#define DEBUG(code) code;
-#else
-#define DEBUG(code) ;
-#endif
-
-/*
-
-void logdebug(const char *str, ...)
-{
-    if(!str)
-        return;
-    va_list ap;
-//    _log_setcolor(true,LBLUE);
-    va_start(ap, str);
-    vprintf( str, ap );
-    va_end(ap);
-//    _log_resetcolor(true);
-
-
-    printf("\n");
-
-  fflush(stdout);
-}*/
 
 namespace irr
 {
@@ -207,7 +182,7 @@ for(u32 i=0;i<header.nTexLookup;i++)
 {
     MeshFile->read(&tempM2TexLookup,sizeof(u16));
     M2MTextureLookup.push_back(tempM2TexLookup);
-    printf("Texture %u Type %u\n",i,tempM2TexLookup);
+    DEBUG(logdebug("Texture %u Type %u\n",i,tempM2TexLookup));
 }
 DEBUG(logdebug("Read %u Texture lookup entries",M2MTextureLookup.size()));
 
@@ -222,7 +197,7 @@ for(u32 i=0;i<header.nTextures;i++)
 {
     MeshFile->read(&tempM2TexDef,sizeof(TextureDefinition));
     M2MTextureDef.push_back(tempM2TexDef);
-    printf("Texture %u Type %u\n",i,tempM2TexDef.texType);
+    DEBUG(logdebug("Texture %u Type %u\n",i,tempM2TexDef.texType));
 }
 DEBUG(logdebug("Read %u Texture Definition entries",M2MTextureDef.size()));
 
@@ -241,10 +216,6 @@ for(u32 i=0;i<header.nTexFlags;i++)
 }
 DEBUG(logdebug("Read %u Renderflags",M2MRenderFlags.size()));
 
-
-
-//std::cout << M2MTextureUnit[0].submeshIndex1 <<","<<M2MTextureUnit[0].submeshIndex1 <<","<<M2MTextureUnit[0].textureIndex<<";\n";
-
 if(!M2MTextureFiles.empty())
     M2MTextureFiles.clear();
 
@@ -258,7 +229,6 @@ for(u32 i=0; i<M2MTextureDef.size(); i++)
     M2MTextureFiles.push_back(tempTexFileName.c_str());
     DEBUG(logdebug("Texture: %u (%s)",M2MTextureFiles.size(),M2MTextureFiles[i].c_str()));
 }
-//    std::cout << "Read "<<M2MTextureFiles.size()<<"/"<<M2MTextureDef.size()<<" Texture file names\n";
 
 ///////////////////////////////////////
 //      Animation related stuff      //
@@ -491,7 +461,7 @@ for(u32 i=0; i < currentView.nSub;i++)//
     {
         MeshBuffer->Indices.push_back(M2MIndices[M2MTriangles[j]]-M2MSubmeshes[i].ofsVertex);
     }
-  //  std::cout << i << ": " << MeshBuffer->Indices.size() << "\n";
+
     for(u32 j=M2MSubmeshes[i].ofsVertex;j<M2MSubmeshes[i].ofsVertex+M2MSubmeshes[i].nVertex;j++)
     {
         MeshBuffer->Vertices_Standard.push_back(M2Vertices[j]);

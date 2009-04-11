@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -31,9 +31,6 @@ namespace gui
 		//! constructor
 		IGUIMeshViewer(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(EGUIET_MESH_VIEWER, environment, parent, id, rectangle) {}
-
-		//! destructor
-		virtual ~IGUIMeshViewer() {}
 
 		//! Sets the mesh to be shown
 		virtual void setMesh(scene::IAnimatedMesh* mesh) = 0;

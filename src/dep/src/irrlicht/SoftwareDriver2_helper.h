@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt / Thomas Alten
+// Copyright (C) 2002-2009 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -13,6 +13,7 @@
 #include "SoftwareDriver2_compile_config.h"
 #include "irrMath.h"
 #include "CSoftwareTexture2.h"
+#include "SMaterial.h"
 
 
 
@@ -107,7 +108,7 @@ REALINLINE void memcpy32_small ( void * dest, const void *source, u32 bytesize )
 
 	do
 	{
-		((u32*) dest ) [ c + -1 ] = ((u32*) source) [ c + -1 ];
+		((u32*) dest ) [ c-1 ] = ((u32*) source) [ c-1 ];
 	} while ( --c );
 
 }
@@ -117,7 +118,7 @@ REALINLINE void memcpy32_small ( void * dest, const void *source, u32 bytesize )
 // integer log2 of a float ieee 754. TODO: non ieee floating point
 static inline s32 s32_log2_f32( f32 f)
 {
-	u32 x = IR ( f );
+	u32 x = core::IR ( f );
 
 	return ((x & 0x7F800000) >> 23) - 127;
 }
@@ -134,21 +135,11 @@ static inline s32 s32_abs(s32 x)
 }
 
 
-// TODO: don't stick on 32 Bit Pointer
-#define PointerAsValue(x) ( (u32) (u32*) (x) ) 
-
-
 //! conditional set based on mask and arithmetic shift
 REALINLINE u32 if_mask_a_else_b ( const u32 mask, const u32 a, const u32 b )
 {
 	return ( mask & ( a ^ b ) ) ^ b;
 }
-
-inline void setbits ( u32 &state, s32 condition, u32 mask )
-{
-	state ^= ( ( -condition >> 31 ) ^ state ) & mask;
-}
-
 
 // ------------------ Video---------------------------------------
 /*!
@@ -208,7 +199,7 @@ inline u16 PixelBlend16 ( const u16 c2, const u32 c1, const u32 alpha )
 	rb &= 0x7C1F;
 	xg &= 0x03E0;
 
-	return rb | xg; 
+	return (u16)(rb | xg);
 }
 
 /*!
@@ -246,7 +237,7 @@ inline u32 extractAlpha ( const u32 c )
 */
 inline u16 PixelMul16 ( const u16 c0, const u16 c1)
 {
-	return ((( ( (c0 & 0x7C00) * (c1 & 0x7C00) ) & 0x3E000000 ) >> 15 ) |
+	return (u16)((( ( (c0 & 0x7C00) * (c1 & 0x7C00) ) & 0x3E000000 ) >> 15 ) |
 			(( ( (c0 & 0x03E0) * (c1 & 0x03E0) ) & 0x000F8000 ) >> 10 ) |
 			(( ( (c0 & 0x001F) * (c1 & 0x001F) ) & 0x000003E0 ) >> 5 ) |
 			(c0 & 0x8000));
@@ -257,10 +248,10 @@ inline u16 PixelMul16 ( const u16 c0, const u16 c1)
 */
 inline u16 PixelMul16_2 ( u16 c0, u16 c1)
 {
-	return	( ( (c0 & 0x7C00) * (c1 & 0x7C00) ) & 0x3E000000 ) >> 15 |
+	return	(u16)(( ( (c0 & 0x7C00) * (c1 & 0x7C00) ) & 0x3E000000 ) >> 15 |
 			( ( (c0 & 0x03E0) * (c1 & 0x03E0) ) & 0x000F8000 ) >> 10 |
 			( ( (c0 & 0x001F) * (c1 & 0x001F) ) & 0x000003E0 ) >> 5  |
-			( c0 & c1 & 0x8000);
+			( c0 & c1 & 0x8000));
 }
 
 /*
@@ -702,7 +693,24 @@ inline void getSample_texture ( tFixPoint &r, tFixPoint &g, tFixPoint &b,
 	(tFixPointu &) r	 =	(t00 & MASK_R) >> ( SHIFT_R - FIX_POINT_PRE);
 	(tFixPointu &) g	 =	(t00 & MASK_G) << ( FIX_POINT_PRE - SHIFT_G );
 	(tFixPointu &) b	 =	(t00 & MASK_B) << ( FIX_POINT_PRE - SHIFT_B );
+}
 
+inline void getSample_texture ( tFixPointu &a, tFixPointu &r, tFixPointu &g, tFixPointu &b, 
+						const sInternalTexture * t, const tFixPointu tx, const tFixPointu ty
+								)
+{
+	u32 ofs;
+
+	ofs = ( ( ty & t->textureYMask ) >> FIX_POINT_PRE ) << t->pitchlog2;
+	ofs |= ( tx & t->textureXMask ) >> ( FIX_POINT_PRE - VIDEO_SAMPLE_GRANULARITY );
+
+	// texel
+	const tVideoSample t00 = *((tVideoSample*)( (u8*) t->data + ofs ));
+
+	(tFixPointu &)a	 =	(t00 & MASK_A) >> ( SHIFT_A - FIX_POINT_PRE);
+	(tFixPointu &)r	 =	(t00 & MASK_R) >> ( SHIFT_R - FIX_POINT_PRE);
+	(tFixPointu &)g	 =	(t00 & MASK_G) << ( FIX_POINT_PRE - SHIFT_G );
+	(tFixPointu &)b	 =	(t00 & MASK_B) << ( FIX_POINT_PRE - SHIFT_B );
 }
 
 

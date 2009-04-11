@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -34,14 +34,19 @@ namespace scene
 		//! Collision respose scene node animator
 		ESNAT_COLLISION_RESPONSE,
 
+		//! FPS camera animator
+		ESNAT_CAMERA_FPS,
+
+		//! Maya camera animator
+		ESNAT_CAMERA_MAYA,
+
 		//! Amount of built-in scene node animators
 		ESNAT_COUNT,
 
 		//! Unknown scene node animator
 		ESNAT_UNKNOWN,
 
-		//! This enum is never used, it only forces the compiler to
-		//! compile these enumeration values to 32 bit.
+		//! This enum is never used, it only forces the compiler to compile this enumeration to 32 bit.
 		ESNAT_FORCE_32_BIT = 0x7fffffff
 	};
 

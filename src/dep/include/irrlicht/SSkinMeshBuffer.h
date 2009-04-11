@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -15,96 +15,129 @@ namespace scene
 {
 
 
-//! A mesh buffer able to choose between
-//! S3DVertex2TCoords, S3DVertex and S3DVertexTangents at runtime
+//! A mesh buffer able to choose between S3DVertex2TCoords, S3DVertex and S3DVertexTangents at runtime
 struct SSkinMeshBuffer : public IMeshBuffer
 {
-	SSkinMeshBuffer(video::E_VERTEX_TYPE vt=video::EVT_STANDARD) : VertexType(vt)
+	//! Default constructor
+	SSkinMeshBuffer(video::E_VERTEX_TYPE vt=video::EVT_STANDARD) : 
+		ChangedID_Vertex(1),ChangedID_Index(1),MappingHint_Vertex(EHM_NEVER),
+		MappingHint_Index(EHM_NEVER),VertexType(vt),BoundingBoxNeedsRecalculated(true)
 	{
 		#ifdef _DEBUG
 		setDebugName("SSkinMeshBuffer");
 		#endif
 	}
 
-	virtual ~SSkinMeshBuffer() {}
-
+	//! Get Material of this buffer.
 	virtual const video::SMaterial& getMaterial() const
 	{
 		return Material;
 	}
 
+	//! Get Material of this buffer.
 	virtual video::SMaterial& getMaterial()
 	{
 		return Material;
 	}
 
+	//! Get standard vertex at given index
 	virtual video::S3DVertex *getVertex(u32 index)
 	{
 		switch (VertexType)
 		{
-			case video::EVT_2TCOORDS:	return (video::S3DVertex*)&Vertices_2TCoords[index];
-			case video::EVT_TANGENTS:	return (video::S3DVertex*)&Vertices_Tangents[index];
-			default:			return &Vertices_Standard[index];
+			case video::EVT_2TCOORDS:
+				return (video::S3DVertex*)&Vertices_2TCoords[index];
+			case video::EVT_TANGENTS:
+				return (video::S3DVertex*)&Vertices_Tangents[index];
+			default:
+				return &Vertices_Standard[index];
 		}
 	}
 
+	//! Get pointer to vertex array
 	virtual const void* getVertices() const
 	{
 		switch (VertexType)
 		{
-			case video::EVT_2TCOORDS:	return Vertices_2TCoords.const_pointer();
-			case video::EVT_TANGENTS:	return Vertices_Tangents.const_pointer();
-			default:			return Vertices_Standard.const_pointer();
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords.const_pointer();
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents.const_pointer();
+			default:
+				return Vertices_Standard.const_pointer();
 		}
 	}
 
+	//! Get pointer to vertex array
 	virtual void* getVertices()
 	{
 		switch (VertexType)
 		{
-			case video::EVT_2TCOORDS:	return Vertices_2TCoords.pointer();
-			case video::EVT_TANGENTS:	return Vertices_Tangents.pointer();
-			default:			return Vertices_Standard.pointer();
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords.pointer();
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents.pointer();
+			default:
+				return Vertices_Standard.pointer();
 		}
 	}
 
+	//! Get vertex count
 	virtual u32 getVertexCount() const
 	{
 		switch (VertexType)
 		{
-			case video::EVT_2TCOORDS:	return Vertices_2TCoords.size();
-			case video::EVT_TANGENTS:	return Vertices_Tangents.size();
-			default:			return Vertices_Standard.size();
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords.size();
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents.size();
+			default:
+				return Vertices_Standard.size();
 		}
 	}
 
+	//! Get type of index data which is stored in this meshbuffer.
+	/** \return Index type of this buffer. */
+	virtual video::E_INDEX_TYPE getIndexType() const { return video::EIT_16BIT; }
+
+	//! Get pointer to index array
 	virtual const u16* getIndices() const
 	{
 		return Indices.const_pointer();
 	}
 
+	//! Get pointer to index array
 	virtual u16* getIndices()
 	{
 		return Indices.pointer();
 	}
 
+	//! Get index count
 	virtual u32 getIndexCount() const
 	{
 		return Indices.size();
 	}
 
+	//! Get bounding box
 	virtual const core::aabbox3d<f32>& getBoundingBox() const
 	{
 		return BoundingBox;
 	}
 
+	//! Set bounding box
 	virtual void setBoundingBox( const core::aabbox3df& box)
 	{
 		BoundingBox = box;
 	}
 
+	//! Recalculate bounding box
 	virtual void recalculateBoundingBox()
 	{
+		if(!BoundingBoxNeedsRecalculated)
+			return;
+
+		BoundingBoxNeedsRecalculated = false;
+
 		switch (VertexType)
 		{
 			case video::EVT_STANDARD:
@@ -146,11 +179,13 @@ struct SSkinMeshBuffer : public IMeshBuffer
 		}
 	}
 
+	//! Get vertex type
 	virtual video::E_VERTEX_TYPE getVertexType() const
 	{
 		return VertexType;
 	}
 
+	//! Convert to 2tcoords vertex type
 	virtual void MoveTo_2TCoords()
 	{
 		if (VertexType==video::EVT_STANDARD)
@@ -169,6 +204,7 @@ struct SSkinMeshBuffer : public IMeshBuffer
 		}
 	}
 
+	//! Convert to tangents vertex type
 	virtual void MoveTo_Tangents()
 	{
 		if (VertexType==video::EVT_STANDARD)
@@ -201,12 +237,144 @@ struct SSkinMeshBuffer : public IMeshBuffer
 		}
 	}
 
+	//! returns position of vertex i
+	virtual const core::vector3df& getPosition(u32 i) const
+	{
+		switch (VertexType)
+		{
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords[i].Pos;
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents[i].Pos;
+			default:
+				return Vertices_Standard[i].Pos;
+		}
+	}
+
+	//! returns position of vertex i
+	virtual core::vector3df& getPosition(u32 i)
+	{
+		switch (VertexType)
+		{
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords[i].Pos;
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents[i].Pos;
+			default:
+				return Vertices_Standard[i].Pos;
+		}
+	}
+
+	//! returns normal of vertex i
+	virtual const core::vector3df& getNormal(u32 i) const
+	{
+		switch (VertexType)
+		{
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords[i].Normal;
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents[i].Normal;
+			default:
+				return Vertices_Standard[i].Normal;
+		}
+	}
+
+	//! returns normal of vertex i
+	virtual core::vector3df& getNormal(u32 i)
+	{
+		switch (VertexType)
+		{
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords[i].Normal;
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents[i].Normal;
+			default:
+				return Vertices_Standard[i].Normal;
+		}
+	}
+
+	//! returns texture coords of vertex i
+	virtual const core::vector2df& getTCoords(u32 i) const
+	{
+		switch (VertexType)
+		{
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords[i].TCoords;
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents[i].TCoords;
+			default:
+				return Vertices_Standard[i].TCoords;
+		}
+	}
+
+	//! returns texture coords of vertex i
+	virtual core::vector2df& getTCoords(u32 i)
+	{
+		switch (VertexType)
+		{
+			case video::EVT_2TCOORDS:
+				return Vertices_2TCoords[i].TCoords;
+			case video::EVT_TANGENTS:
+				return Vertices_Tangents[i].TCoords;
+			default:
+				return Vertices_Standard[i].TCoords;
+		}
+	}
+
 	//! append the vertices and indices to the current buffer
 	virtual void append(const void* const vertices, u32 numVertices, const u16* const indices, u32 numIndices) {}
 
 	//! append the meshbuffer to the current buffer
 	virtual void append(const IMeshBuffer* const other) {}
 
+	//! get the current hardware mapping hint for vertex buffers
+	virtual E_HARDWARE_MAPPING getHardwareMappingHint_Vertex() const
+	{
+		return MappingHint_Vertex;
+	}
+
+	//! get the current hardware mapping hint for index buffers
+	virtual E_HARDWARE_MAPPING getHardwareMappingHint_Index() const
+	{
+		return MappingHint_Index;
+	}
+
+	//! set the hardware mapping hint, for driver
+	virtual void setHardwareMappingHint( E_HARDWARE_MAPPING NewMappingHint, E_BUFFER_TYPE Buffer=EBT_VERTEX_AND_INDEX )
+	{
+		if (Buffer==EBT_VERTEX)
+			MappingHint_Vertex=NewMappingHint;
+		else if (Buffer==EBT_INDEX)
+			MappingHint_Index=NewMappingHint;
+		else if (Buffer==EBT_VERTEX_AND_INDEX)
+		{
+			MappingHint_Vertex=NewMappingHint;
+			MappingHint_Index=NewMappingHint;
+		}
+	}
+
+	//! flags the mesh as changed, reloads hardware buffers
+	virtual void setDirty(E_BUFFER_TYPE Buffer=EBT_VERTEX_AND_INDEX)
+	{
+		if (Buffer==EBT_VERTEX_AND_INDEX || Buffer==EBT_VERTEX)
+			++ChangedID_Vertex;
+		if (Buffer==EBT_VERTEX_AND_INDEX || Buffer==EBT_INDEX)
+			++ChangedID_Index;
+	}
+
+	virtual u32 getChangedID_Vertex() const {return ChangedID_Vertex;}
+
+	virtual u32 getChangedID_Index() const {return ChangedID_Index;}
+
+	//! Call this after changing the positions of any vertex.
+	void boundingBoxNeedsRecalculated(void) { BoundingBoxNeedsRecalculated = true; }
+
+	u32 ChangedID_Vertex;
+	u32 ChangedID_Index;
+
+	// hardware mapping hint
+	E_HARDWARE_MAPPING MappingHint_Vertex;
+	E_HARDWARE_MAPPING MappingHint_Index;
 
 	//ISkinnedMesh::SJoint *AttachedJoint;
 	core::matrix4 Transformation;
@@ -218,6 +386,7 @@ struct SSkinMeshBuffer : public IMeshBuffer
 	core::array<video::S3DVertex> Vertices_Standard;
 	core::array<u16> Indices;
 	core::aabbox3d<f32> BoundingBox;
+	bool BoundingBoxNeedsRecalculated;
 };
 
 

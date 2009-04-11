@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2007 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -28,9 +28,6 @@ namespace scene
 		//! destructor
 		virtual ~CAnimatedMeshMD2();
 
-		//! loads an md2 file
-		virtual bool loadFile(io::IReadFile* file);
-
 		//! returns the amount of frames in milliseconds. If the amount is 1, it is a static (=non animated) mesh.
 		virtual u32 getFrameCount() const;
 
@@ -58,6 +55,12 @@ namespace scene
 		//! sets a flag of all contained materials to a new value
 		virtual void setMaterialFlag(video::E_MATERIAL_FLAG flag, bool newvalue);
 
+		//! set the hardware mapping hint, for driver
+		virtual void setHardwareMappingHint(E_HARDWARE_MAPPING newMappingHint, E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX);
+
+		//! flags the meshbuffer as changed, reloads hardware buffers
+		virtual void setDirty(E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX);
+
 		//! Returns the type of the animated mesh.
 		virtual E_ANIMATED_MESH_TYPE getMeshType() const;
 
@@ -76,22 +79,16 @@ namespace scene
 		//! \param nr: Zero based index of animation.
 		virtual const c8* getAnimationName(s32 nr) const;
 
-	private:
 
-		//! updates the interpolation buffer
-		void updateInterpolationBuffer(s32 frame, s32 startFrame, s32 endFrame);
+		//
+		// exposed for loader
+		//
 
-		//! calculates the bounding box
-		virtual void calculateBoundingBox();
+		//! the buffer that contains the most recent animation
+		SMeshBuffer* InterpolationBuffer;
 
-		core::array<video::S3DVertex> *FrameList;
-		core::array<core::aabbox3d<f32> > BoxList;
-		u32 FrameCount;
-		s32 TriangleCount;
-
-		SMeshBuffer InterpolationBuffer;
-
-		struct SFrameData
+		//! named animations
+		struct SAnimationData
 		{
 			core::stringc name;
 			s32 begin;
@@ -99,7 +96,44 @@ namespace scene
 			s32 fps;
 		};
 
-		core::array< SFrameData > FrameData;
+		//! scale and translations for keyframes
+		struct SKeyFrameTransform
+		{
+			core::vector3df scale;
+			core::vector3df translate;
+		};
+
+		//! md2 vertex data
+		struct SMD2Vert
+		{
+			core::vector3d<u8> Pos;
+			u8                 NormalIdx;
+		};
+
+		//! keyframe transformations
+		core::array<SKeyFrameTransform> FrameTransforms; 
+
+		//! keyframe vertex data
+		core::array<SMD2Vert> *FrameList;
+		
+		//! bounding boxes for each keyframe
+		core::array<core::aabbox3d<f32> > BoxList;
+
+		//! named animations
+		core::array< SAnimationData > AnimationData;
+
+		//! calculates the bounding box
+		virtual void calculateBoundingBox();
+
+		u32 FrameCount;
+		s32 TriangleCount;
+
+	private:
+
+		//! updates the interpolation buffer
+		void updateInterpolationBuffer(s32 frame, s32 startFrame, s32 endFrame);
+
+
 	};
 
 } // end namespace scene
