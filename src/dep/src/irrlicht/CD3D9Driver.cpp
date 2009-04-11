@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -2321,9 +2321,6 @@ bool CD3D9Driver::reset()
 		if(DepthBuffers[i]->Surface)
 			DepthBuffers[i]->Surface->Release();
 	}
-	// this does not require a restore in the reset method, it's updated
-	// automatically in the next render cycle.
-	removeAllHardwareBuffers();
 
 	DriverWasReset=true;
 

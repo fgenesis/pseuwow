@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -27,6 +27,9 @@ namespace scene
 
 		//! destructor
 		virtual ~CAnimatedMeshMD2();
+
+		//! loads an md2 file
+		virtual bool loadFile(io::IReadFile* file);
 
 		//! returns the amount of frames in milliseconds. If the amount is 1, it is a static (=non animated) mesh.
 		virtual u32 getFrameCount() const;
@@ -79,16 +82,19 @@ namespace scene
 		//! \param nr: Zero based index of animation.
 		virtual const c8* getAnimationName(s32 nr) const;
 
+	private:
 
-		//
-		// exposed for loader
-		//
+		//! updates the interpolation buffer
+		void updateInterpolationBuffer(s32 frame, s32 startFrame, s32 endFrame);
 
-		//! the buffer that contains the most recent animation
+		//! calculates the bounding box
+		virtual void calculateBoundingBox();
+
 		SMeshBuffer* InterpolationBuffer;
+		core::array<video::S3DVertex> *FrameList;
+		core::array<core::aabbox3d<f32> > BoxList;
 
-		//! named animations
-		struct SAnimationData
+		struct SFrameData
 		{
 			core::stringc name;
 			s32 begin;
@@ -96,44 +102,10 @@ namespace scene
 			s32 fps;
 		};
 
-		//! scale and translations for keyframes
-		struct SKeyFrameTransform
-		{
-			core::vector3df scale;
-			core::vector3df translate;
-		};
-
-		//! md2 vertex data
-		struct SMD2Vert
-		{
-			core::vector3d<u8> Pos;
-			u8                 NormalIdx;
-		};
-
-		//! keyframe transformations
-		core::array<SKeyFrameTransform> FrameTransforms; 
-
-		//! keyframe vertex data
-		core::array<SMD2Vert> *FrameList;
-		
-		//! bounding boxes for each keyframe
-		core::array<core::aabbox3d<f32> > BoxList;
-
-		//! named animations
-		core::array< SAnimationData > AnimationData;
-
-		//! calculates the bounding box
-		virtual void calculateBoundingBox();
+		core::array< SFrameData > FrameData;
 
 		u32 FrameCount;
 		s32 TriangleCount;
-
-	private:
-
-		//! updates the interpolation buffer
-		void updateInterpolationBuffer(s32 frame, s32 startFrame, s32 endFrame);
-
-
 	};
 
 } // end namespace scene

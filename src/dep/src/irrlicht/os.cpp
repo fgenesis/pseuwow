@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -69,9 +69,11 @@ namespace os
 	void Printer::print(const c8* message)
 	{
 #if !defined (_WIN32_WCE )
-		OutputDebugString(message);
-		OutputDebugString("\n");
-		printf("%s\n", message);
+		c8* tmp = new c8[strlen(message) + 2];
+		sprintf(tmp, "%s\n", message);
+		OutputDebugString(tmp);
+		printf(tmp);
+		delete [] tmp;
 #endif
 	}
 

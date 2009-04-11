@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -16,7 +16,7 @@ namespace scene
 	struct SSharedMeshBuffer : public IMeshBuffer
 	{
 		//! constructor
-		SSharedMeshBuffer() : IMeshBuffer(), ChangedID_Vertex(1), ChangedID_Index(1), Vertices(0), MappingHintVertex(EHM_NEVER), MappingHintIndex(EHM_NEVER)
+		SSharedMeshBuffer() : IMeshBuffer(), ChangedID_Vertex(1), ChangedID_Index(1), Vertices(0), MappingHint(EHM_NEVER)
 		{
 			#ifdef _DEBUG
 			setDebugName("SSharedMeshBuffer");
@@ -127,32 +127,23 @@ namespace scene
 
 
 		//! get the current hardware mapping hint
-		virtual E_HARDWARE_MAPPING getHardwareMappingHint_Vertex() const
+		virtual E_HARDWARE_MAPPING getHardwareMappingHint() const
 		{
-			return MappingHintVertex;
-		}
-
-		//! get the current hardware mapping hint
-		virtual E_HARDWARE_MAPPING getHardwareMappingHint_Index() const
-		{
-			return MappingHintIndex;
+			return MappingHint;
 		}
 
 		//! set the hardware mapping hint, for driver
-		virtual void setHardwareMappingHint( E_HARDWARE_MAPPING NewMappingHint, E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX )
+		virtual void setHardwareMappingHint( E_HARDWARE_MAPPING NewMappingHint )
 		{
-			if (buffer==EBT_VERTEX_AND_INDEX || buffer==EBT_VERTEX)
-				MappingHintVertex=NewMappingHint;
-			if (buffer==EBT_VERTEX_AND_INDEX || buffer==EBT_INDEX)
-				MappingHintIndex=NewMappingHint;
+			MappingHint=NewMappingHint;
 		}
 
 		//! flags the mesh as changed, reloads hardware buffers
-		virtual void setDirty(E_BUFFER_TYPE buffer=EBT_VERTEX_AND_INDEX)
+		virtual void setDirty(E_BUFFER_TYPE Buffer=EBT_VERTEX_AND_INDEX)
 		{
-			if (buffer==EBT_VERTEX_AND_INDEX || buffer==EBT_VERTEX)
+			if (Buffer==EBT_VERTEX_AND_INDEX || Buffer==EBT_VERTEX)
 				++ChangedID_Vertex;
-			if (buffer==EBT_VERTEX_AND_INDEX || buffer==EBT_INDEX)
+			if (Buffer==EBT_VERTEX_AND_INDEX || Buffer==EBT_INDEX)
 				++ChangedID_Index;
 		}
 
@@ -179,8 +170,7 @@ namespace scene
 		//! Bounding box
 		core::aabbox3df BoundingBox;
 		//! hardware mapping hint
-		E_HARDWARE_MAPPING MappingHintVertex;
-		E_HARDWARE_MAPPING MappingHintIndex;
+		E_HARDWARE_MAPPING MappingHint;
 
 	};
 

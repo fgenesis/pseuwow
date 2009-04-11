@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2008 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -185,7 +185,7 @@ bool CGUIScrollBar::OnEvent(const SEvent& event)
 								return true;
 						}
 					}
-
+					
 					if (DraggedBySlider)
 					{
 						setPos(newPos);
@@ -219,7 +219,6 @@ bool CGUIScrollBar::OnEvent(const SEvent& event)
 	return IGUIElement::OnEvent(event);
 }
 
-
 //! draws the element and its children
 void CGUIScrollBar::draw()
 {
@@ -240,10 +239,10 @@ void CGUIScrollBar::draw()
 
 		if (DesiredPos >= Pos + LargeStep)
 			setPos(Pos + LargeStep);
-		else
+		else 
 		if (DesiredPos <= Pos - LargeStep)
 			setPos(Pos - LargeStep);
-		else
+		else 
 		if (DesiredPos >= Pos - LargeStep && DesiredPos <= Pos + LargeStep)
 			setPos(DesiredPos);
 
@@ -284,7 +283,6 @@ void CGUIScrollBar::draw()
 	IGUIElement::draw();
 }
 
-
 void CGUIScrollBar::updateAbsolutePosition()
 {
 	IGUIElement::updateAbsolutePosition();
@@ -323,6 +321,7 @@ s32 CGUIScrollBar::getPosFromMousePos(s32 x, s32 y) const
 		return s32( p/h * f32(Max) );
 	}
 }
+
 
 
 //! sets the position of the scrollbar
@@ -369,7 +368,6 @@ void CGUIScrollBar::setSmallStep(s32 step)
 		SmallStep = 10;
 }
 
-
 //! gets the small step value
 s32 CGUIScrollBar::getLargeStep() const
 {
@@ -385,6 +383,7 @@ void CGUIScrollBar::setLargeStep(s32 step)
 	else
 		LargeStep = 50;
 }
+
 
 
 //! gets the maximum value of the scrollbar.
