@@ -1,4 +1,6 @@
 #include <iostream>
+#include "MemoryDataHolder.h"
+#include "MemoryInterface.h"
 #include "CM2MeshFileLoader.h"
 #include "SSkinnedMesh.h"
 #include "common.h"
@@ -56,7 +58,7 @@ DEBUG(logdebug("Trying to open file %s",MeshFile->getFileName()));
 
 MeshFile->read(&header,sizeof(ModelHeader));
 if (header.version[0] != 8 || header.version[1] != 1 || header.version[2] != 0 || header.version[3] != 0) {
-     printf("Wrong header! File version doesn't match or file is not a M2 file.");
+    logerror("M2: [%s] Wrong header! File version doesn't match or file is not a M2 file.",MeshFile->getFileName());
      return 0;
      }
      else
@@ -98,7 +100,7 @@ DEBUG(logdebug("Read %u/%u Vertices",M2MVertices.size(),header.nVertices));
 
 std::string SkinName = MeshFile->getFileName();
 SkinName = SkinName.substr(0, SkinName.length()-3) + "00.skin"; // FIX ME (and stuffextract) ! as we need more skins
-io::IReadFile* SkinFile = io::createReadFile(SkinName.c_str());
+io::IReadFile* SkinFile = io::IrrCreateIReadFileBasic(Device, SkinName.c_str());
 if (!SkinFile)
 {
     logerror("Error! Skin file not found: %s", SkinName.c_str());

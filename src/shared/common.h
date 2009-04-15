@@ -17,7 +17,9 @@
 #include <vector>
 
 #ifndef _COMMON_SKIP_THREADS
+# include "zthread/Condition.h"
 # include "zthread/FastMutex.h"
+# include "zthread/FastRecursiveMutex.h"
 # include "zthread/LockedQueue.h"
 # include "zthread/Runnable.h"
 # include "zthread/Thread.h"

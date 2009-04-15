@@ -131,6 +131,9 @@ public:
     void ProcessCliQueue(void);
     void AddCliCommand(std::string);
 
+    void WaitForCondition(InstanceConditions c, uint32 timeout = 0);
+    inline ZThread::Condition *GetCondition(InstanceConditions c) { return _condition[c]; }
+
 private:
 
     PseuInstanceRunnable *_runnable;
@@ -153,6 +156,8 @@ private:
     ZThread::LockedQueue<std::string,ZThread::FastMutex> _cliQueue;
     PseuGUI *_gui;
     ZThread::Thread *_guithread;
+    ZThread::Condition *_condition[COND_MAX];
+    ZThread::FastRecursiveMutex _mutex;
 
 };
 

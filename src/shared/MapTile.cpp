@@ -90,8 +90,8 @@ void MapTile::ImportFromADT(ADTFile *adt)
         d.flags = mddf.flags;
         d.uniqueid = mddf.uniqueid;
         d.model = std::string("./data/model/") + NormalizeFilename(_PathToFileName(adt->_models[mddf.id]));
-        // this .mdx -> .m2 transformation is annoying >.< - replace "mdx" and end of string with "m2\0"
-        memcpy(&d.model[0] + d.model.size() - 3, "m2\0", 3);
+        // this .mdx -> .m2 transformation is annoying >.< - replace "mdx" and end of string with "m2"
+        d.model = d.model.substr(0, d.model.length() - 3) + "m2";
         d.scale = mddf.scale / 1024.0f;
         if(d.scale < 0.00001f)
             d.scale = 1;

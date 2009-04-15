@@ -19,7 +19,16 @@ namespace MemoryDataHolder
     void Init(void)
     {
         if(!executor)
-            executor = new ZThread::PoolExecutor(1); // TODO: fix memleak on shutdown?
+            executor = new ZThread::PoolExecutor(1);
+    }
+
+    void Shutdown(void)
+    {
+        //ZThread::Guard<ZThread::FastMutex> g(mutex);
+        logdev("MDH: Interrupting work...");
+        executor->cancel(); // stop accepting new threads
+        executor->interrupt(); // interrupt all working threads
+        // executor will delete itself automatically
     }
     
     void SetThreadCount(uint32 t)
@@ -48,43 +57,54 @@ namespace MemoryDataHolder
         }
         ~DataLoaderRunnable()
         {
-            logdev("~DataLoaderRunnable(%s)", _name.c_str());
+            logdev("~DataLoaderRunnable(%s) 0x%X", _name.c_str(), this);
+        }
+        void SetStores(TypeStorage<memblock> *mem, TypeStorage<DataLoaderRunnable> *ldrs)
+        {
+            _storage = mem;
+            _loaders = ldrs;
         }
         // the threaded part
         void run()
-        {
-            const char *name = _name.c_str();
+        { 
             memblock *mb = new memblock();
 
-            mb->size = GetFileSize(name);
+            mb->size = GetFileSize(_name.c_str());
             // couldnt open file if size is 0
             if(!mb->size)
             {
-                logerror("DataLoaderRunnable: Error opening file: '%s'", name);
-                loaders.Unlink(name);
-                DoCallbacks(name, MDH_FILE_ERROR); // call callback func, 'false' to indicate file couldnt be loaded
+                ZThread::Guard<ZThread::FastMutex> g(_mut);
+                logerror("DataLoaderRunnable: Error opening file: '%s'", _name.c_str());
+                _loaders->Unlink(_name);
+                DoCallbacks(_name, MDH_FILE_ERROR); // call callback func, 'false' to indicate file couldnt be loaded
                 delete mb;
                 return;
             }
             mb->alloc(mb->size);
             std::ifstream fh;
-            fh.open(name, std::ios_base::in | std::ios_base::binary);
+            fh.open(_name.c_str(), std::ios_base::in | std::ios_base::binary);
             if(!fh.is_open())
             {
-                logerror("DataLoaderRunnable: Error opening file: '%s'", name);
-                loaders.Unlink(name);
+                {
+                    ZThread::Guard<ZThread::FastMutex> g(_mut);
+                    logerror("DataLoaderRunnable: Error opening file: '%s'", _name.c_str());
+                    _loaders->Unlink(_name);
+                }
                 mb->free();
                 delete mb;
-                DoCallbacks(name, MDH_FILE_ERROR);
+                DoCallbacks(_name, MDH_FILE_ERROR);
                 return;
             }
-            logdev("DataLoaderRunnable: Reading '%s'... (%s)", name, FilesizeFormat(mb->size).c_str());
+            logdev("DataLoaderRunnable: Reading '%s'... (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
             fh.read((char*)mb->ptr, mb->size);
             fh.close();
-            storage.Assign(name, mb);
-            loaders.Unlink(name); // must be unlinked after the file is fully loaded, but before the callbacks are processed!
-            logdev("DataLoaderRunnable: Done with '%s' (%s)", name, FilesizeFormat(mb->size).c_str());
-            DoCallbacks(name, MDH_FILE_OK | MDH_FILE_JUST_LOADED);
+            {
+                ZThread::Guard<ZThread::FastMutex> g(_mut);
+                _storage->Assign(_name, mb);
+                _loaders->Unlink(_name); // must be unlinked after the file is fully loaded, but before the callbacks are processed!
+            }
+            logdev("DataLoaderRunnable: Done with '%s' (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
+            DoCallbacks(_name, MDH_FILE_OK | MDH_FILE_JUST_LOADED);
         }
 
         inline void AddCallback(callback_func func, void *ptr = NULL, ZThread::Condition *cond = NULL)
@@ -121,6 +141,10 @@ namespace MemoryDataHolder
        CallbackStore _callbacks;
        bool _threaded;
        std::string _name;
+       ZThread::FastMutex _mut;
+       TypeStorage<memblock> *_storage;
+       TypeStorage<DataLoaderRunnable> *_loaders;
+       
     };
 
 
@@ -133,7 +157,7 @@ namespace MemoryDataHolder
 
         // manage reference counter
         uint32 *refcount = refs.GetNoCreate(s);
-        if(!refcount || !*refcount)
+        if(!refcount)
         {
             refcount = new uint32;
             *refcount = ref_counted ? 1 : 0;
@@ -149,6 +173,7 @@ namespace MemoryDataHolder
 
         if(memblock *mb = storage.GetNoCreate(s))
         {
+            DEBUG(logdev("MDH: Reusing '%s' from memory",s.c_str()));
             // the file was requested some other time, is still present in memory and the pointer can simply be returned...
             mutex.release(); // everything ok, mutex can be unloaded safely
             // execute callback and broadcast condition (must check for MDH_FILE_ALREADY_EXIST in callback func)
@@ -161,33 +186,36 @@ namespace MemoryDataHolder
         }
         else
         {
-            DataLoaderRunnable *r = loaders.GetNoCreate(s);
-            if(r == NULL)
+            DataLoaderRunnable *ldr = loaders.GetNoCreate(s);
+            DEBUG(logdev("MDH: Found Loader 0x%X for '%s'",ldr,s.c_str()));
+            if(ldr == NULL)
             {
                 // no loader thread is working on that file...
-                r = new DataLoaderRunnable();
-                loaders.Assign(s,r);
-                r->AddCallback(func,ptr,cond); // not threadsafe!
-                r->SetThreaded(threaded);
-                r->SetName(s); // here we set the filename the thread should load
-                // the mutex can be released safely now
-                mutex.release();
+                ldr = loaders.Get(s);
+                ldr->SetStores(&storage,&loaders);
+                ldr->AddCallback(func,ptr,cond); // not threadsafe!
+                mutex.release(); // the mutex can be released safely now
+                ldr->SetThreaded(threaded);
+                ldr->SetName(s); // here we set the filename the thread should load
+
                 if(threaded)
                 {
-                    ZThread::Task task(r);
+                    ZThread::Task task(ldr);
                     executor->execute(task);
+
                 }
                 else
                 {
-                    r->run(); // will exit after the whole file is loaded and the callbacks were run
-                    memblock *mb = storage.GetNoCreate(s);
-                    delete r;
-                    return *mb;
+                    ldr->run(); // will exit after the whole file is loaded and the callbacks were run
+                    delete ldr;
+                    memblock *mbret = storage.GetNoCreate(s);
+                    DEBUG(logdev("Non-threaded loader returning memblock at 0x%X",mbret));
+                    return mbret ? *mbret : memblock();
                 }
             }
             else // if a loader is already existing, add callbacks to that loader.
             {  
-                r->AddCallback(func,ptr,cond);
+                ldr->AddCallback(func,ptr,cond);
                 mutex.release();
             }
         }
@@ -218,7 +246,7 @@ namespace MemoryDataHolder
         }
         else
         {
-            if(*refcount)
+            if(*refcount > 0)
                 (*refcount)--;
             logdev("MemoryDataHolder::Delete(\"%s\"): refcount dropped to %u", s.c_str(), *refcount);
         }
@@ -227,7 +255,7 @@ namespace MemoryDataHolder
             refs.Delete(s);
             if(memblock *mb = storage.GetNoCreate(s))
             {
-                logdev("MemoryDataHolder:: deleting 0x%X (size %u)", mb->ptr, mb->size);
+                logdev("MemoryDataHolder:: deleting 0x%X (size %s)", mb->ptr, FilesizeFormat(mb->size).c_str());
                 mb->free();
                 storage.Delete(s);
                 return true;
