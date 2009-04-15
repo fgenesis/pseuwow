@@ -308,9 +308,16 @@ void SceneWorld::OnUpdate(s32 timediff)
     if(eventrecv->key.pressed_once(KEY_HOME))
     {
         _freeCameraMove = !_freeCameraMove;
+
         // TODO: uncomment this as soon as the camera isn't adjusted anymore every single frame
         //if(!_freeCameraMove)
         //    RelocateCameraBehindChar();
+
+        //TODO: this will not be needed anymore with the above code uncommented
+        // make player always visble when switching to freefly mode
+        scene::ISceneNode *charnode = GetMyCharacterSceneNode(); // NOTE: this call is absolutely not optimized!
+        if(charnode)
+            charnode->setVisible(true);
     }
 
     if(eventrecv->key.pressed_once(KEY_BACK))

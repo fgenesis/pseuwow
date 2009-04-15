@@ -90,6 +90,7 @@ public:
     inline uint32 GetCharsCount(void) { return _charList.size(); }
     inline CharacterListExt& GetCharFromList(uint32 id) { return _charList[id]; }
     void EnterWorldWithCharacter(std::string);
+    void PreloadDataBeforeEnterWorld(PlayerEnum&);
 
 
     // CMSGConstructor

@@ -16,7 +16,7 @@ public:
     void DeleteByPtr(T*);
 	T *Get(std::string);
     T *GetNoCreate(std::string);
-    void Assign(std::string,T*);
+    void Assign(std::string,T*,bool overwrite = true);
     void Unlink(std::string);
     void UnlinkByPtr(T*);
     std::string GetNameByPtr(T*);
@@ -25,11 +25,25 @@ public:
     inline unsigned int Size(void) { return _storage.size(); }
     void Clear(bool keep = false);
 
+    void dump(void);
+
+
+
 private:
     T *_Create(std::string);
     _TypeMap _storage;
     bool _keep;
 };
+
+template <class T> void TypeStorage<T>::dump(void)
+{
+    printf("TypeStorage dump, size=%u\n",Size());
+    _TypeIter it;
+    for(it = _storage.begin(); it != _storage.end(); it++)
+    {
+        printf("[%s] => 0x%X\n", it->first.c_str(), it->second);
+    }
+}
 
 // check whether an object with this name is already present
 template<class T> bool TypeStorage<T>::Exists(std::string s)
@@ -41,7 +55,7 @@ template<class T> bool TypeStorage<T>::Exists(std::string s)
 template<class T> T *TypeStorage<T>::_Create(std::string s)
 {
     T *elem = new T;
-    _storage[s] = elem;
+    Assign(s,elem);
     return elem;
 }
 
@@ -106,12 +120,19 @@ template<class T> void TypeStorage<T>::Clear(bool keep)
     }
 }
 
-// stores an already existing object's pointer under a specific name; deletes and overwrites old of present
-template<class T> void TypeStorage<T>::Assign(std::string s,T *elem)
+// stores an already existing object's pointer under a specific name; deletes and overwrites old if present
+template<class T> void TypeStorage<T>::Assign(std::string s,T *elem, bool overwrite /* = true */ )
 {
-    if(Exists(s))
-        Delete(s);
-    _storage[s] = elem;
+    _TypeIter it = _storage.find(s);
+    if(it != _storage.end())
+    {
+        if(overwrite)
+        {
+            delete it->second;
+        }
+        _storage.erase(it);
+    }
+    _storage.insert(make_pair(s,elem));
 }
 
 // removes the pointer from the storage without deleting it

@@ -65,6 +65,10 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _creaters=false;
     _error=false;
     _initialized=false;
+    for(uint32 i = 0; i < COND_MAX; i++)
+    {
+        _condition[i] = new ZThread::Condition(_mutex);
+    }
 
 }
 
@@ -94,6 +98,11 @@ PseuInstance::~PseuInstance()
 
     delete _scp;
     delete _conf;
+
+    for(uint32 i = 0; i < COND_MAX; i++)
+    {
+        delete _condition[i];
+    }
 
     log("--- Instance shut down ---");
 }
@@ -454,6 +463,15 @@ bool PseuInstance::ConnectToRealm(void)
     return true;
 }
 
+void PseuInstance::WaitForCondition(InstanceConditions c, uint32 timeout /* = 0 */)
+{
+    _mutex.acquire();
+    if(timeout)
+        _condition[c]->wait(timeout);
+    else
+        _condition[c]->wait();
+    _mutex.release();
+}
 
 PseuInstanceConf::PseuInstanceConf()
 {

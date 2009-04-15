@@ -22,7 +22,7 @@
 #include "CNullDriver.h"
 #include "IMaterialRendererServices.h"
 
-#include <d3d8.h>
+#include "d3d8.h"
 
 namespace irr
 {

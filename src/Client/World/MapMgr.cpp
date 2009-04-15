@@ -1,5 +1,6 @@
 #include "common.h"
 #include "log.h"
+#include "MemoryDataHolder.h"
 #include "MapTile.h"
 #include "MapMgr.h"
 
@@ -101,8 +102,13 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
         ADTFile *adt = new ADTFile();
         char buf[300];
         MakeMapFilename(buf,m,gx,gy);
-        if(adt->Load(buf))
+        MemoryDataHolder::memblock mb = MemoryDataHolder::GetFileBasic(buf);
+        if(mb.size)
         {
+            ByteBuffer bb(mb.size);
+            bb.append(mb.ptr,mb.size);
+            MemoryDataHolder::Delete(buf);
+            adt->LoadMem(bb);
             logdebug("MAPMGR: Loaded ADT '%s'",buf);
             MapTile *tile = new MapTile();
             tile->ImportFromADT(adt);

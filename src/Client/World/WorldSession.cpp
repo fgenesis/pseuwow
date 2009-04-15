@@ -9,6 +9,8 @@
 #include "Channel.h"
 #include "ObjMgr.h"
 #include "World.h"
+#include "MapMgr.h"
+#include "MapTile.h"
 #include "RealmSession.h"
 #include "WorldSession.h"
 #include "MemoryDataHolder.h"
@@ -696,11 +698,13 @@ void WorldSession::EnterWorldWithCharacter(std::string name)
 {
     logdebug("EnterWorldWithCharacter(%s)",name.c_str());
     _myGUID = 0;
+    CharacterListExt charex;
     for(CharList::iterator it = _charList.begin(); it != _charList.end(); it++)
     {
         if(!stricmp(it->p._name.c_str(), name.c_str()))
         {
             _myGUID = it->p._guid;
+            charex = *it;
             GetInstance()->GetScripts()->variables.Set("@myguid",DefScriptTools::toString(_myGUID));
             GetInstance()->GetScripts()->variables.Set("@myrace",DefScriptTools::toString(it->p._race));
         }
@@ -710,6 +714,8 @@ void WorldSession::EnterWorldWithCharacter(std::string name)
         logerror("Character '%s' does not exist on this account");
         return;
     }
+
+    PreloadDataBeforeEnterWorld(charex.p);
 
     log("Entering World with Character \"%s\"...", name.c_str());
 
@@ -732,6 +738,35 @@ void WorldSession::EnterWorldWithCharacter(std::string name)
     if(!MustDie() && _socket->IsOk() && GetInstance()->GetRSession())
     {
         GetInstance()->GetRSession()->SetMustDie(); // realm session is no longer needed
+    }
+}
+
+void WorldSession::PreloadDataBeforeEnterWorld(PlayerEnum& pl)
+{
+    log("Loading data before entering world...");
+    GetWorld()->GetMapMgr()->Update(pl._x, pl._y, pl._mapId); // make it load the map files
+
+    for(uint32 tiley = 0; tiley < 3; tiley++)
+    {
+        for(uint32 tilex = 0; tilex < 3; tilex++)
+        {
+            MapTile *maptile = GetWorld()->GetMapMgr()->GetNearTile(tilex - 1, tiley - 1);
+            if(maptile)
+            {
+                for(uint32 i = 0; i < maptile->GetDoodadCount(); i++)
+                {
+                    Doodad *doo = maptile->GetDoodad(i);
+
+                    // it is useless to load the file here, since its loaded when irrlicht needs it and kept in the MeshCache for later use
+                    //MemoryDataHolder::BackgroundLoadFile(doo->model);
+
+                    // but we need to preload the .skin files, since they are not held in the MeshCache
+                    // TODO: load *all* necessary skin files, also fix stuffextract for this!
+                    std::string skinfile = doo->model.substr(0, doo->model.length()-3) + "00.skin";
+                    MemoryDataHolder::BackgroundLoadFile(skinfile);
+                }
+            }
+        }
     }
 }
 
