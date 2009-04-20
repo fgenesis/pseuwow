@@ -22,6 +22,7 @@ enum Color
 
 void log_prepare(char *fn, char *mode);
 void log_setloglevel(uint8 lvl);
+void log_setlogtime(bool b);
 void log(const char *str, ...);
 void logdetail(const char *str, ...);
 void logdebug(const char *str, ...);

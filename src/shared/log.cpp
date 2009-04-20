@@ -6,9 +6,9 @@
 #include <windows.h>
 #endif
 
-FILE *logfile=NULL;
-uint8 loglevel=0;
-
+FILE *logfile = NULL;
+uint8 loglevel = 0;
+bool logtime = false;
 
 void log_prepare(char *fn, char *mode = NULL)
 {
@@ -27,12 +27,19 @@ void log_setloglevel(uint8 lvl)
     loglevel = lvl;
 }
 
+void log_setlogtime(bool b)
+{
+    logtime = b;
+}
+
 void log(const char *str, ...)
 {
     if(!str)
         return;
     va_list ap;
     _log_setcolor(true,GREY);
+    if(logtime)
+        printf("%s ", GetTimeString().c_str());
     va_start(ap, str);
     vprintf( str, ap );
     va_end(ap);
@@ -58,6 +65,8 @@ void logdetail(const char *str, ...)
         return;
     va_list ap;
     _log_setcolor(true,LCYAN);
+    if(logtime)
+        printf("%s ", GetTimeString().c_str());
     va_start(ap, str);
     vprintf( str, ap );
     va_end(ap);
@@ -83,6 +92,8 @@ void logdebug(const char *str, ...)
         return;
     va_list ap;
     _log_setcolor(true,LBLUE);
+    if(logtime)
+        printf("%s ", GetTimeString().c_str());
     va_start(ap, str);
     vprintf( str, ap );
     va_end(ap);
@@ -109,6 +120,8 @@ void logdev(const char *str, ...)
 		return;
 	va_list ap;
 	_log_setcolor(true,LMAGENTA);
+    if(logtime)
+        printf("%s ", GetTimeString().c_str());
 	va_start(ap, str);
 	vprintf( str, ap );
 	va_end(ap);
@@ -133,6 +146,8 @@ void logerror(const char *str, ...)
 {
     va_list ap;
     _log_setcolor(false,LRED);
+    if(logtime)
+        printf("%s ", GetTimeString().c_str());
     va_start(ap, str);
     vfprintf( stderr,  str, ap );
     va_end(ap);
@@ -156,6 +171,8 @@ void logcritical(const char *str, ...)
 {
     va_list ap;
     _log_setcolor(false,RED);
+    if(logtime)
+        printf("%s ", GetTimeString().c_str());
     va_start(ap, str);
     vfprintf( stderr, str, ap );
     va_end(ap);
@@ -181,6 +198,8 @@ void logcustom(uint8 lvl, Color color, const char *str, ...)
         return;
     va_list ap;
     _log_setcolor(true,color);
+    if(logtime)
+        printf("%s ", GetTimeString().c_str());
     va_start(ap, str);
     vprintf( str, ap );
     va_end(ap);
