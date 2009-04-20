@@ -162,12 +162,14 @@ bool PseuInstance::Init(void)
         _rmcontrol = new RemoteController(this,GetConf()->rmcontrolport);
     }
 
+#if !(PLATFORM == PLATFORM_WIN32 && !defined(_CONSOLE))
     if(GetConf()->enablecli)
     {
         log("Starting CLI...");
         _cli = new CliRunnable(this);
         ZThread::Thread t(_cli);
     }
+#endif
 
     if(_error)
     {
@@ -188,11 +190,11 @@ bool PseuInstance::InitGUI(void)
         return false;
     }
 
-    if (!GetConf()->enablegui)
+    /*if (!GetConf()->enablegui)
     {
         logdebug("GUI: Can't start, gui disabled in config");
         return false;
-    }
+    }*/
 
     uint16 x,y,depth;
     uint8 driver;

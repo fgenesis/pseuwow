@@ -10,6 +10,7 @@
 #   include <windows.h>
 #   include <mmsystem.h>
 #   include <time.h>
+#   include <direct.h>
 #else
 #   include <sys/dir.h>
 #   include <sys/stat.h>
@@ -17,6 +18,11 @@
 #       include <time.h>
 #   endif
 #   include <sys/timeb.h>
+#   include <unistd.h>
+#endif
+
+#ifndef MAX_PATH
+#define MAX_PATH 1024
 #endif
 
 
@@ -268,4 +274,62 @@ std::string FilesizeFormat(uint32 b)
         sprintf(buf,"%.2f GB",(b / double(1024*1024*1024)));
     }
     return buf;
+}
+
+//! Returns the string of the current working directory
+std::string GetWorkingDir(void)
+{
+    char d[MAX_PATH];
+#if PLATFORM == PLATFORM_WIN32
+    _getcwd(d, MAX_PATH);
+#else
+    getcwd(d, MAX_PATH);
+#endif
+    return d;
+}
+
+
+//! Changes the current Working Directory to the given string.
+bool SetWorkingDir(const char *dir)
+{
+    bool success=false;
+#ifdef _MSC_VER
+    success=(_chdir(dir) == 0);
+#else
+    success=(chdir(dir) == 0);
+#endif
+    return success;
+}
+
+
+std::string GetAbsolutePath(const char *filename)
+{
+    char *p = NULL;
+
+#if PLATFORM == PLATFORM_WIN32
+    char fpath[MAX_PATH];
+    p = _fullpath( fpath, filename, MAX_PATH);
+
+#else
+    char fpath[4096];
+    fpath[0]=0;
+    p = realpath(filename, fpath);
+    if (!p)
+    {
+        // content in fpath is undefined at this point
+        if ('0'==fpath[0]) // seems like fpath wasn't altered
+        {
+            // at least remove a ./ prefix
+            if ('.'==filename[0] && '/'==filename[1])
+                return &filename[2]; // skip first 2 chars
+            else
+                return filename;
+        }
+        else
+            return fpath;
+    }
+
+#endif
+
+    return p;
 }

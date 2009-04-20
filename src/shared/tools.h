@@ -7,6 +7,7 @@
 #define M_UNSETBIT(var,bit) ( (var)&=(~(1<<(bit))) )
 #define M_HASBIT(var,bit) ( (var)&(1<<(bit)) )
 
+
 void printchex(std::string,bool);
 void printchex(char *in, uint32 len, bool);
 std::string stringToUpper(std::string);
@@ -24,5 +25,8 @@ void _FixFileName(std::string&);
 std::string _PathToFileName(std::string);
 std::string NormalizeFilename(std::string);
 std::string FilesizeFormat(uint32);
+std::string GetWorkingDir(void);
+bool SetWorkingDir(const char*);
+std::string GetAbsolutePath(const char*);
 
 #endif
