@@ -82,6 +82,15 @@ std::string getDateString(void)
     return std::string(str);
 }
 
+std::string GetTimeString(void)
+{
+    time_t t = time(NULL);
+    tm* aTm = localtime(&t);
+    char str[15];
+    sprintf(str,"%02d:%02d:%02d", aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
+    return std::string(str);
+}
+
 uint64 toInt(std::string str)
 {
     if(str.empty())
