@@ -550,6 +550,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
 
     // cleanups, internal settings, etc.
     log_setloglevel(debug);
+    log_setlogtime((bool)atoi(v.Get("LOGTIME").c_str()));
     MemoryDataHolder::SetThreadCount(dataLoaderThreads);
 }
 

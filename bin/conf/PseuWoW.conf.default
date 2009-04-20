@@ -13,6 +13,9 @@
 // 3=max, 0=no debug output
 debug=0
 
+// log time to console?
+logtime=1
+
 // defines if the program should quit on error/exception or stay opened (for debugging)
 exitonerror=0
 
