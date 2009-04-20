@@ -1,3 +1,4 @@
+
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
@@ -14,6 +15,7 @@ std::string stringToUpper(std::string);
 std::string stringToLower(std::string);
 std::string toString(uint64);
 std::string getDateString(void);
+std::string GetTimeString(void);
 uint64 toInt(std::string);
 std::string toHexDump(uint8* array,uint32 size,bool spaces=true,uint32 per_line=0);
 std::deque<std::string> GetFileList(std::string);
