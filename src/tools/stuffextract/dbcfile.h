@@ -54,6 +54,11 @@ public:
 			assert(field < file.fieldCount);
 			return *reinterpret_cast<int*>(offset+field*4);
 		}
+		unsigned char getUChar(size_t field) const
+		{
+			assert(field < file.fieldCount);
+			return *reinterpret_cast<unsigned char*>(offset+field);
+		}
 		const char *getString(size_t field) const
 		{
 			assert(field < file.fieldCount);

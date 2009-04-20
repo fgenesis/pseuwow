@@ -427,6 +427,16 @@ static const char *GameObjectDisplayInfoFormat = {
 };
 
 
+// GameObjectDisplayInfo
+
+enum ChrBaseInfoEnum
+{
+    CBI_RACE = 0, 
+    CBI_CLASS = 1,
+    CBI_END = 2
+};
+
+
 
 
 #endif

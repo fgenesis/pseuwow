@@ -1,6 +1,8 @@
 #ifndef GUIEVENTRECEIVER_H
 #define GUIEVENTRECEIVER_H
 
+#include <queue>
+
 
 class GUIEventReceiver : public IEventReceiver
 {
@@ -9,30 +11,24 @@ public:
     {
         buttons = 0;
         react_to_keys = true;
-        memset(&guievent, 0 , sizeof(SEvent));
-        memset(&keyevent, 0 , sizeof(SEvent));
-        memset(&mouseevent, 0 , sizeof(SEvent));
-        guievent_proc = false;
-        mouseevent_proc = false;
-        keyevent_proc = false;
+        store_gui = true;
+        store_keys = true;
+        store_mouse = true;
     }
     virtual bool OnEvent(const SEvent& event)
     {
         // copy all 3 event types into different stores for later external use
         if(event.EventType == EET_GUI_EVENT)
         {
-            guievent = event;
-            guievent_proc = false;
+            guieventqueue.push_back(event.GUIEvent);
         }
         else if(event.EventType == EET_KEY_INPUT_EVENT)
         {
-            keyevent = event;
-            keyevent_proc = false;
+            keyeventqueue.push_back(event.KeyInput);
         }
         else if(event.EventType == EET_MOUSE_INPUT_EVENT)
         {
-            mouseevent = event;
-            mouseevent_proc = false;
+            mouseeventqueue.push_back(event.MouseInput);
         }
 
         bool proc = false;
@@ -74,12 +70,44 @@ public:
         return proc;
     }
 
-    bool react_to_keys;
+    inline bool HasMouseEvent(void) { return mouseeventqueue.size(); }
+    inline bool HasGUIEvent(void) { return guieventqueue.size(); }
+    inline bool HasKeyEvent(void) { return keyeventqueue.size(); }
+
+
+    inline SEvent::SMouseInput NextMouseEvent(void)
+    {
+        ASSERT(HasMouseEvent())
+        const SEvent::SMouseInput ev = mouseeventqueue.front();
+        mouseeventqueue.pop_front();
+        return ev;
+    }
+
+    inline SEvent::SGUIEvent NextGUIEvent(void)
+    {
+        ASSERT(HasGUIEvent())
+        SEvent::SGUIEvent ev = guieventqueue.front();
+        guieventqueue.pop_front();
+        return ev;
+    }
+
+    inline SEvent::SKeyInput NextKeyEvent(void)
+    {
+        ASSERT(HasKeyEvent())
+        SEvent::SKeyInput ev = keyeventqueue.front();
+        keyeventqueue.pop_front();
+        return ev;
+    }
+
+    bool react_to_keys, store_mouse, store_keys, store_gui;
     u32 buttons;
-    SEvent guievent, mouseevent, keyevent;
-    bool keyevent_proc, mouseevent_proc, guievent_proc;
     std::map<u32,u32> keyToButtonMap; // to simulate button press on key input
     std::set<u32> customHandledEvents;
+
+protected:
+    std::list<SEvent::SGUIEvent> guieventqueue;
+    std::list<SEvent::SMouseInput> mouseeventqueue;
+    std::list<SEvent::SKeyInput> keyeventqueue;
 
 };
 
