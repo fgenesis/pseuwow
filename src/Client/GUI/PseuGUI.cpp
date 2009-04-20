@@ -317,13 +317,11 @@ void PseuGUI::_UpdateSceneState(void)
             case SCENESTATE_REALMSELECT:
                 _scene = new SceneCharSelection(this);
                 _scene->SetData(ISCENE_CHARSEL_REALMFIRST, 1);
-                _scene->OnResize();
                 _scenestate_new = SCENESTATE_CHARSELECT;
                 break;
             case SCENESTATE_CHARSELECT:
                 _scene = new SceneCharSelection(this);
                 _scene->SetData(ISCENE_CHARSEL_REALMFIRST, 0);
-                _scene->OnResize();
                 break;
             default: _scene = new Scene(this); // will draw nothing, just yield the gui
         }

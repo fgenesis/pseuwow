@@ -577,17 +577,19 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
     PlayerEnum plr[10]; // max characters per realm is 10
     uint8 dummy8;
     uint32 dummy32;
-
+    bool char_found;
     _charList.clear();
 
     recvPacket >> num;
     if(num==0)
     {
-        logerror("No chars found!");
-        GetInstance()->SetError();
-        return;
+        logdetail("No chars found!");
+        char_found = false;
+        //GetInstance()->SetError();
+        //return;
     }
-    
+    else
+    {
         logdetail("Chars in list: %u",num);
         _LoadCache(); // we are about to login, so we need cache data
         // TODO: load cache on loadingscreen
@@ -623,7 +625,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             plrNameCache.AddInfo(plr[i]._guid, plr[i]._name); // TODO: set after loadingscreen, after loading cache
 
         }
-        bool char_found=false;
+        char_found=false;
 
         SCPDatabase *zonedb = GetDBMgr().GetDB("zone"),
                     *racedb = GetDBMgr().GetDB("race"),
@@ -667,13 +669,14 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
                 if(plr[i]._items[inv].displayId)
                     logdebug("-> Has Item: Model=%u InventoryType=%u",plr[i]._items[inv].displayId,plr[i]._items[inv].inventorytype);
             }
-            if(plr[i]._name==GetInstance()->GetConf()->charname || num == 1)
+            if(plr[i]._name==GetInstance()->GetConf()->charname)
             {
                 charId = i;
                 char_found=true;
             }
 
         }
+     }
         if(!char_found)
         {
             if(PseuGUI *gui = GetInstance()->GetGUI())

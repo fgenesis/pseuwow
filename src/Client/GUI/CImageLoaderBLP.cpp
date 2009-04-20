@@ -5,12 +5,6 @@
 #include "SImage.h"
 #include "CImageLoaderBLP.h"
 
-#if defined(_DEBUG) && !defined(DEBUG)
-#define DEBUG(code) code;
-#else
-#define DEBUG(code) ;
-#endif
-
 namespace irr
 {
 namespace video

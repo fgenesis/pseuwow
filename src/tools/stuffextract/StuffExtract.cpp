@@ -187,6 +187,14 @@ std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 
         s << (*it).getFloat(field);
         return s.str();
     }
+    else if(format[field]=='c')
+    {
+        if((*it).getUChar(field) == 0 && skip_null)
+            return ""; // do not explicitly write float fields that are 0
+        std::stringstream s;
+        s << (int)(*it).getUChar(field);
+        return s.str();
+    }
     else if(format[field]=='s' && (*it).getUInt(field))
     {
         return (*it).getString(field);
@@ -254,10 +262,11 @@ void OutMD5(char *path, MD5FileMap& fm)
 bool ConvertDBC(void)
 {
     std::map<uint8,std::string> racemap; // needed to extract other dbc files correctly
+    std::map<uint8,uint32> classmask; //from CharBaseInfo.dbc
     SCPStorageMap EmoteDataStorage,RaceDataStorage,SoundDataStorage,MapDataStorage,ZoneDataStorage,ItemDisplayInfoStorage,
-        CreatureModelStorage,CreatureDisplayInfoStorage,NPCSoundStorage,CharSectionStorage, GameObjectDisplayInfoStorage; // will store the converted data from dbc files
+        CreatureModelStorage,CreatureDisplayInfoStorage,NPCSoundStorage,CharSectionStorage, GameObjectDisplayInfoStorage, ChrBaseInfoStorage; // will store the converted data from dbc files
     DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo,
-        CreatureModelData,CreatureDisplayInfo,NPCSounds,CharSections,GameObjectDisplayInfo;
+        CreatureModelData,CreatureDisplayInfo,NPCSounds,CharSections,GameObjectDisplayInfo, ChrBaseInfo;
     printf("Opening DBC archive...\n");
     MPQHelper mpq("dbc");
 
@@ -275,10 +284,20 @@ bool ConvertDBC(void)
     GameObjectDisplayInfo.openmem(mpq.ExtractFile("DBFilesClient\\GameObjectDisplayInfo.dbc"));
     NPCSounds.openmem(mpq.ExtractFile("DBFilesClient\\NPCSounds.dbc"));
     CharSections.openmem(mpq.ExtractFile("DBFilesClient\\CharSections.dbc"));
+    ChrBaseInfo.openmem(mpq.ExtractFile("DBFilesClient\\CharBaseInfo.dbc"));
     //...
     printf("DBC files opened.\n");
     //...
-    printf("Reading data: races..");
+    printf("Reading data: chrbaseinfo..");
+    for(DBCFile::Iterator it = ChrBaseInfo.begin(); it != ChrBaseInfo.end(); ++it)
+    {
+        uint32 race = (uint32)(*it).getUChar(CBI_RACE);
+        uint32 cclass = (uint32)(*it).getUChar(CBI_CLASS);
+        classmask[race] |= 1<<cclass;
+
+    }
+
+    printf("races..");
     for(DBCFile::Iterator it = ChrRaces.begin(); it != ChrRaces.end(); ++it)
     {
         uint32 id = (*it).getUInt(CHRRACES_RACEID);
@@ -292,6 +311,9 @@ bool ConvertDBC(void)
 					RaceDataStorage[id].push_back(std::string(ChrRacesFieldNames[field]).append("=").append(value));
             }
         }
+        std::stringstream temp;
+        temp << classmask[id];
+        RaceDataStorage[id].push_back(std::string("classmask").append("=").append(temp.str()));
     }
 
     printf("emotes..");
@@ -560,7 +582,6 @@ bool ConvertDBC(void)
             }
         }
     }
-
 
 
     //...

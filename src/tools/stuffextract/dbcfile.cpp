@@ -76,7 +76,8 @@ bool DBCFile::openmem(ByteBuffer bb)
 
     if(fieldCount*4 != recordSize)
     {
-        return false;
+       printf("DBCFile::openmem():Nonstandard record size\n");
+       // return false;//records in CharBaseData are 2*1byte
     }
 
     data = new unsigned char[recordSize*recordCount+stringSize];

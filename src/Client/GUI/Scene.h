@@ -63,7 +63,7 @@ protected:
     CCursorController *cursor;
     SceneState _scenestate;
     uint32 scenedata[SCENEDATA_SIZE]; // generic storage for anything the PseuInstance thread wants to tell us
-    SCPDatabase *textdb;
+    SCPDatabase *textdb, *racedb, *classdb;
     ZThread::FastMutex mutex;
 };
 
@@ -107,6 +107,12 @@ private:
     IGUIWindow *realmwin;
     IGUIListBox *realmlistbox;
     IGUIListBox *charlistbox; // temporary until something better found
+    //Character creation //temporary. maybe a whole new character creation scene should be used?
+    IGUIWindow  *newcharwin;
+    IGUIComboBox *raceselect; 
+    IGUIComboBox *classselect;
+    IGUIEditBox *charname;
+    std::map<u32,u32> racemap, classmap; //<comboBoxId,dbId> maps DB IDs in db to IDs in the combobox, because irrlicht does not allow custom ids in comboboxes
 };
 
 
