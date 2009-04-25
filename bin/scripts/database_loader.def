@@ -36,6 +36,9 @@ LoadDB sound
 LoadDB gui_login_text
 LoadDB gui_charselect_text
 
+// misc data
+LoadDB generic_text
+
 
 log ** Databases loaded.
 

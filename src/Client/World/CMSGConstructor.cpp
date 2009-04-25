@@ -207,5 +207,23 @@ void WorldSession::SendQueryGameobject(uint32 entry, uint64 guid)
     SendWorldPacket(wp);
 }
 
+void WorldSession::SendCharCreate(std::string name, uint8 race, uint8 class_, // below here all values default is 0
+                    uint8 gender, uint8 skin, uint8 face,
+                    uint8 hairstyle, uint8 haircolor, uint8 facial, uint8 outfit)
+{
+    log("Creating Character '%s', race=%u, class=%u gender=%u", name.c_str(), race, class_, gender);
+    WorldPacket wp(CMSG_CHAR_CREATE, name.length()+1 + 9);
+    wp << name;
+    wp << race;
+    wp << class_;
+    wp << gender;
+    wp << skin;
+    wp << face;
+    wp << hairstyle;
+    wp << haircolor;
+    wp << facial;
+    wp << outfit;
+    AddSendWorldPacket(wp);
+}
 
 

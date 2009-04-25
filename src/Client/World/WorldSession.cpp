@@ -347,6 +347,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_WHO, &WorldSession::_HandleWhoOpcode},
         {SMSG_CREATURE_QUERY_RESPONSE, &WorldSession::_HandleCreatureQueryResponseOpcode},
         {SMSG_GAMEOBJECT_QUERY_RESPONSE, &WorldSession::_HandleGameobjectQueryResponseOpcode},
+        {SMSG_CHAR_CREATE, &WorldSession::_HandleCharCreateOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -556,11 +557,11 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
     recvPacket >> dummy32 >> dummy8 >> dummy32;
     recvPacket >> expansion;
 
-    if(errcode == 0xC)
+    // TODO: add data to generic_text.scp and use the strings here
+    if(errcode == AUTH_OK)
     {
         logdetail("World Authentication successful, preparing for char list request...");
-        WorldPacket pkt;
-        pkt.SetOpcode(CMSG_CHAR_ENUM);
+        WorldPacket pkt(CMSG_CHAR_ENUM, 0);
         SendWorldPacket(pkt);
     }
     else
@@ -591,7 +592,6 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
     else
     {
         logdetail("Chars in list: %u",num);
-        _LoadCache(); // we are about to login, so we need cache data
         // TODO: load cache on loadingscreen
         for(unsigned int i=0;i<num;i++)
         {
@@ -622,7 +622,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             {
                 recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype >> dummy32;
             }
-            plrNameCache.AddInfo(plr[i]._guid, plr[i]._name); // TODO: set after loadingscreen, after loading cache
+            plrNameCache.Add(plr[i]._guid, plr[i]._name); // TODO: set after loadingscreen, after loading cache
 
         }
         char_found=false;
@@ -747,6 +747,7 @@ void WorldSession::EnterWorldWithCharacter(std::string name)
 void WorldSession::PreloadDataBeforeEnterWorld(PlayerEnum& pl)
 {
     log("Loading data before entering world...");
+    _LoadCache(); // we are about to login, so we need cache data
     GetWorld()->GetMapMgr()->Update(pl._x, pl._y, pl._mapId); // make it load the map files
 
     // preload additional map data only when the GUI is enabled
@@ -1023,12 +1024,8 @@ void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
     if(pname.length()>MAX_PLAYERNAME_LENGTH || pname.length()<MIN_PLAYERNAME_LENGTH)
         return; // playernames maxlen=12, minlen=2
     // rest of the packet is not interesting for now
-    if(plrNameCache.AddInfo(pguid,pname))
-    {
-        logdetail("CACHE: Assigned new player name: '%s' = " I64FMTD ,pname.c_str(),pguid);
-        //if(GetInstance()->GetConf()->debug > 1)
-        //    SendChatMessage(CHAT_MSG_SAY,0,"Player "+pname+" added to cache.","");
-    }
+    plrNameCache.Add(pguid,pname);
+    logdetail("CACHE: Assigned new player name: '%s' = " I64FMTD ,pname.c_str(),pguid);
     WorldObject *wo = (WorldObject*)objmgr.GetObj(pguid);
     if(wo)
         wo->SetName(pname);
@@ -1040,7 +1037,7 @@ void WorldSession::_HandlePongOpcode(WorldPacket& recvPacket)
     recvPacket >> pong;
     _lag_ms = clock() - pong;
     if(GetInstance()->GetConf()->notifyping)
-        log("Recieved Ping reply: %u ms latency.", _lag_ms);
+        log("Received Ping reply: %u ms latency.", _lag_ms);
 }
 void WorldSession::_HandleTradeStatusOpcode(WorldPacket& recvPacket)
 {
@@ -1049,6 +1046,7 @@ void WorldSession::_HandleTradeStatusOpcode(WorldPacket& recvPacket)
     recvPacket >> unk;
     if(unk==1)
     {
+        // TODO: Implement this!!
         SendChatMessage(CHAT_MSG_SAY,0,"It has no sense trying to trade with me, that feature is not yet implemented!","");
         WorldPacket pkt;
         pkt.SetOpcode(CMSG_CANCEL_TRADE);
@@ -1678,6 +1676,35 @@ void WorldSession::_HandleGameobjectQueryResponseOpcode(WorldPacket& recvPacket)
     objmgr.Add(go);
     objmgr.AssignNameToObj(entry, TYPEID_GAMEOBJECT, go->name);
 }
+
+void WorldSession::_HandleCharCreateOpcode(WorldPacket& recvPacket)
+{
+    uint8 response;
+    recvPacket >> response;
+    if(response == CHAR_CREATE_SUCCESS)
+    {
+        log("Character created successfully.");
+        WorldPacket pkt(CMSG_CHAR_ENUM, 0);
+        SendWorldPacket(pkt);
+        logdebug("Requested new CMSG_CHAR_ENUM");
+    }
+    else
+    {
+        logerror("Character creation error, response=%u", response);
+    }
+    if(SCPDatabase *db = GetInstance()->dbmgr.GetDB("generic_text"))
+    {
+        // convert response number to field name (simple int to string)
+        char buf[20];
+        sprintf(buf,"%u",response);
+        std::string response_str = db->GetString(0, buf); // data are expected to be at index 0
+        log("Response String: '%s'",response_str.c_str());
+    }
+
+    if(PseuGUI *gui = GetInstance()->GetGUI())
+        gui->SetSceneData(ISCENE_CHARSEL_ERRMSG, response);
+}
+
 
 
 // TODO: delete world on LogoutComplete once implemented

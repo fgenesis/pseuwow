@@ -60,10 +60,11 @@ Scene::~Scene()
     DEBUG(logdebug("Scene::~Scene()"));
 }
 
-core::stringw Scene::GetStringFromDB(u32 index, u32 entry)
+core::stringw Scene::GetStringFromDB(u32 index, u32 entry, SCPDatabase *other_db /* = NULL */)
 {
     core::stringw r = "";
-    if(!textdb)
+    SCPDatabase *db = other_db ? other_db : textdb;
+    if(!db)
     {
         r += L"<string ";
         r += index;
@@ -74,6 +75,6 @@ core::stringw Scene::GetStringFromDB(u32 index, u32 entry)
     }
     char buf[20];
     sprintf(buf,"%u",entry);
-    r += textdb->GetString(index, buf);
+    r += db->GetString(index, buf);
     return r;
 }

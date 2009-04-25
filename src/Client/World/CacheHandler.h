@@ -1,25 +1,22 @@
 #ifndef _CACHEHANDLER_H
 #define _CACHEHANDLER_H
 
-struct PlayerNameCacheItem {
-    uint64 _guid;
-    std::string _name;
-};
+typedef std::map<uint64,std::string> PlayerNameMap; 
 
-class PlayerNameCache {
+class PlayerNameCache
+{
 public:
 	~PlayerNameCache();
 
     std::string GetName(uint64);
     bool IsKnown(uint64);
     uint64 GetGuid(std::string);
-    bool AddInfo(uint64 guid, std::string name);
-    bool AddInfo(PlayerNameCacheItem*);
+    void Add(uint64 guid, std::string name);
     bool SaveToFile(void);
     bool ReadFromFile(void);
     uint32 GetSize(void);
 private:
-    std::vector<PlayerNameCacheItem*> _cache;
+    PlayerNameMap _cache;
 };
 
 void ItemProtoCache_InsertDataToSession(WorldSession *session);
