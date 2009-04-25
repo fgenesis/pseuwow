@@ -40,7 +40,7 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->Stackable;
         recvPacket >> proto->ContainerSlots;
         recvPacket >> proto->StatsCount;
-        for(int i = 0; i < proto->StatsCount; i++)
+        for(uint32 i = 0; i < proto->StatsCount; i++)
         {
             recvPacket >> proto->ItemStat[i].ItemStatType;
             recvPacket >> proto->ItemStat[i].ItemStatValue;

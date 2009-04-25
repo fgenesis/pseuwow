@@ -104,6 +104,7 @@ public:
     void SendWhoListRequest(uint32 minlvl=0, uint32 maxlvl=100, uint32 racemask=-1, uint32 classmask=-1, std::string name="", std::string guildname="", std::vector<uint32> *zonelist=NULL, std::vector<std::string> *strlist=NULL);
     void SendQueryCreature(uint32 entry, uint64 guid = 0);
     void SendQueryGameobject(uint32 entry, uint64 guid = 0);
+    void SendCharCreate(std::string name, uint8 race, uint8 class_, uint8 gender=0, uint8 skin=0, uint8 face=0, uint8 hairstyle=0, uint8 haircolor=0, uint8 facial=0, uint8 outfit=0);
 
     void HandleWorldPacket(WorldPacket*);
 
@@ -161,6 +162,7 @@ private:
     void _HandleWhoOpcode(WorldPacket& recvPacket);
     void _HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket);
     void _HandleGameobjectQueryResponseOpcode(WorldPacket& recvPacket);
+    void _HandleCharCreateOpcode(WorldPacket& recvPacket);
 
     // helper functions to keep SMSG_(COMPRESSED_)UPDATE_OBJECT easy to handle
 	void _MovementUpdate(uint8 objtypeid, uint64 guid, WorldPacket& recvPacket); // Helper for _HandleUpdateObjectOpcode

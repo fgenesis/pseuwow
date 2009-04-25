@@ -39,7 +39,7 @@ class Scene
 public:
     Scene(PseuGUI *g);
     ~Scene();
-    core::stringw GetStringFromDB(u32 index, u32 entry);
+    core::stringw GetStringFromDB(u32 index, u32 entry, SCPDatabase *other_db = NULL);
     inline void SetState(SceneState sc) { _scenestate = sc; }
     inline SceneState GetState(void) { return _scenestate; }
     virtual void OnUpdate(s32);
@@ -99,8 +99,11 @@ class SceneCharSelection : public Scene
 public:
     SceneCharSelection(PseuGUI *gui);
     void OnUpdate(s32);
+    void OnManualUpdate(void);
     void OnDelete(void);
     void OnResize(void);
+
+    void FillCharlist(void);
 
 private:
     GUIEventReceiver *eventrecv;
@@ -112,6 +115,8 @@ private:
     IGUIComboBox *raceselect; 
     IGUIComboBox *classselect;
     IGUIEditBox *charname;
+    IGUIElement *msgbox; // display status/result of character creation
+    uint32 msgbox_textid; // stores old textid
     std::map<u32,u32> racemap, classmap; //<comboBoxId,dbId> maps DB IDs in db to IDs in the combobox, because irrlicht does not allow custom ids in comboboxes
 };
 

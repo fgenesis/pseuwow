@@ -49,6 +49,7 @@ enum SceneCharSelectDataIndexes
 {
     ISCENE_CHARSEL_BUTTONS = 1, // text
     ISCENE_CHARSEL_LABELS = 2, // text
+    ISCENE_CHARSEL_ERRMSG = 3, // uint32 response code, see enum ResponseCodes in SharedDefines.h for IDs
     ISCENE_CHARSEL_REALMFIRST = 255, // flag that is set when connecting to a realm wasnt possible and the realm list must be shown first
     ISCENE_CHARSEL_END
 };
@@ -71,6 +72,7 @@ enum SceneCharSelectLabels
     DSCENE_CHARSEL_LABEL_REALMWIN = 0,
     DSCENE_CHARSEL_LABEL_NEWCHARWIN = 1,
 };
+
 
     
 

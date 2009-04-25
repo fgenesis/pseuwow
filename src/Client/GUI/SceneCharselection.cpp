@@ -50,7 +50,22 @@ SceneCharSelection::SceneCharSelection(PseuGUI *gui) : Scene(gui)
     rect<s32> clb_rect = CalcRelativeScreenPos(driver, 0.65f, 0.12f, 0.34f, 0.67f);
     charlistbox = guienv->addListBox(clb_rect);
 
-    mutex.acquire();
+    FillCharlist();
+
+    if(soundengine)
+    {
+        ISoundSource *main_theme = soundengine->getSoundSource("data/misc/main_theme.ogg");
+        if(main_theme && !soundengine->isCurrentlyPlaying(main_theme))
+        {
+            soundengine->play2D(main_theme,true);
+        }
+    }
+}
+
+void SceneCharSelection::FillCharlist(void)
+{
+    ZThread::Guard<ZThread::FastMutex> g(mutex);
+    charlistbox->clear();
     WorldSession *ws = instance->GetWSession();
     if(ws)
     {
@@ -75,27 +90,17 @@ SceneCharSelection::SceneCharSelection(PseuGUI *gui) : Scene(gui)
             charlistbox->addItem(entry.c_str());
 
             uint32 faction = racedb->GetInt(c.p._race, ffaction);
-            
+
             SColor col;
             switch(faction)
             {
-                case 1: col.set(0xFF, 0xFF, 0x30, 0x30); break;
-                case 7: col.set(0xFF, 0x30, 0x30, 0xFF); break;
-                default: col.set(0xFFFFFFFF);
+            case 1: col.set(0xFF, 0xFF, 0x30, 0x30); break;
+            case 7: col.set(0xFF, 0x30, 0x30, 0xFF); break;
+            default: col.set(0xFFFFFFFF);
             }
             charlistbox->setItemOverrideColor(i,EGUI_LBC_TEXT,col);
             charlistbox->setItemOverrideColor(i,EGUI_LBC_TEXT_HIGHLIGHT,col);
 
-        }
-    }
-    mutex.release();
-    
-    if(soundengine)
-    {
-        ISoundSource *main_theme = soundengine->getSoundSource("data/misc/main_theme.ogg");
-        if(main_theme && !soundengine->isCurrentlyPlaying(main_theme))
-        {
-            soundengine->play2D(main_theme,true);
         }
     }
 }
@@ -182,10 +187,11 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
     {
         guienv->addMessageBox(L"Not yet implemented!", L"Deleting a character does not yet work!");
     }
-    if(eventrecv->buttons & BUTTON_NEW_CHARACTER)
+    if(eventrecv->buttons & BUTTON_NEW_CHARACTER && !newcharwin)
     {
         dimension2d<s32> dim;
         rect<s32> pos;
+        msgbox_textid = 0;
         newcharwin = guienv->addWindow(CalcRelativeScreenPos(driver, 0.2f, 0.2f, 0.6f, 0.6f), true,
             GetStringFromDB(ISCENE_CHARSEL_LABELS, DSCENE_CHARSEL_LABEL_NEWCHARWIN).c_str());
         pos = newcharwin->getAbsolutePosition(); // get absolute position and transform <dim> to absolute in-window position
@@ -213,7 +219,7 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
         //newcharwin->addChild(classselect);
         guienv->addStaticText(L"Char Name", CalcRelativeScreenPos(dim,0.1f,0.3f,0.8f,0.05f),false,true,newcharwin);
         charname = guienv->addEditBox(L"", CalcRelativeScreenPos(dim,0.1f,0.35f,0.8f,0.05f),true, newcharwin);
-        //guienv->addMessageBox(L"Not yet implemented!", L"Creating a new character does not yet work!");
+        msgbox = guienv->addStaticText(L"",CalcRelativeScreenPos(dim,0.2f,0.6f,0.6f,0.1f), true, true, newcharwin);
     }
     if(eventrecv->buttons & BUTTON_SELECT_REALM || scenedata[ISCENE_CHARSEL_REALMFIRST])
     {
@@ -299,21 +305,20 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
 
     if(eventrecv->buttons & BUTTON_NEWCHARWIN_OK && newcharwin)
     {
-        core::stringc tmp=charname->getText();
+        core::stringc chname = charname->getText();
         u8 race = racemap[raceselect->getSelected()];
         u8 cclass = classmap[classselect->getSelected()];
-        log("Creating character Race %i Class %i Name %s",race,cclass,tmp.c_str());
-        if(tmp.size() && race && cclass)
+        if(chname.size() && race && cclass)
         {
             WorldSession *ws=instance->GetWSession();
             if(ws)
             {
-                WorldPacket packet(CMSG_CHAR_CREATE,(tmp.size()+1)+1+1+1+1+1+1+1+1+1);
-                packet<<tmp.c_str();
-                // name, race, class, gender, skin, face, hairstyle, haircolor, facialhair, outfitID
-                packet << race << cclass <<(u8)0 <<(u8)0 <<(u8)0 <<(u8)0 <<(u8)0 <<(u8)0 <<(u8)0;
-                ws->AddSendWorldPacket(packet);
-                eventrecv->buttons |= BUTTON_NEWCHARWIN_CANCEL; // easiest way to close the window without much additional code
+                ws->SendCharCreate(chname.c_str(), race, cclass);
+
+                msgbox->setText(GetStringFromDB(3,0).c_str());
+                msgbox_textid = 0;
+
+                // do not close window until character created (will when getting response code 0)
             }
             else
                 logerror("Trying to create new Character, but no WorldSession exists.");
@@ -323,18 +328,31 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
     }
 
     // realmlist window
-
     if(eventrecv->buttons & BUTTON_REALMWIN_CANCEL && realmwin)
     {
         realmwin->remove();
-        realmwin=NULL;
+        realmwin = NULL;
     }
 
     // new character window
     if(eventrecv->buttons & BUTTON_NEWCHARWIN_CANCEL && newcharwin)
     {
         newcharwin->remove();
-        newcharwin=NULL;
+        newcharwin = NULL;
+    }
+    
+    if(newcharwin && msgbox_textid != scenedata[ISCENE_CHARSEL_ERRMSG])
+    {
+        msgbox_textid = scenedata[ISCENE_CHARSEL_ERRMSG];
+        if(SCPDatabase *generictext = instance->dbmgr.GetDB("generic_text"))
+        {
+            msgbox->setText(GetStringFromDB(0, msgbox_textid, generictext).c_str());
+        }
+        if(scenedata[ISCENE_CHARSEL_ERRMSG] == CHAR_CREATE_SUCCESS)
+        {
+            newcharwin->remove();
+            newcharwin = NULL;
+        }
     }
 
     eventrecv->buttons = 0;
@@ -349,5 +367,12 @@ void SceneCharSelection::OnResize(void)
 {
 //TODO: Handle Resizes correctly. This goes for the loginscreen as well
 
+}
+
+// called when receiving SMSG_CHAR_ENUM
+void SceneCharSelection::OnManualUpdate(void)
+{
+    Scene::OnManualUpdate();
+    FillCharlist();
 }
 
