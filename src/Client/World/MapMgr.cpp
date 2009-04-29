@@ -99,7 +99,7 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 
     if( !_tiles->GetTile(gx,gy) )
     {
-        ADTFile *adt = new ADTFile();
+
         char buf[300];
         MakeMapFilename(buf,m,gx,gy);
         MemoryDataHolder::memblock mb = MemoryDataHolder::GetFileBasic(buf);
@@ -108,10 +108,12 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
             ByteBuffer bb(mb.size);
             bb.append(mb.ptr,mb.size);
             MemoryDataHolder::Delete(buf);
+            ADTFile *adt = new ADTFile();
             adt->LoadMem(bb);
             logdebug("MAPMGR: Loaded ADT '%s'",buf);
             MapTile *tile = new MapTile();
             tile->ImportFromADT(adt);
+            delete adt;
             _tiles->SetTile(tile,gx,gy);
             logdebug("MAPMGR: Imported MapTile (%u, %u) for map %u",gx,gy,m);
         }
@@ -119,7 +121,6 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
         {
             logerror("MAPMGR: Loading ADT '%s' failed!",buf);
         }
-        delete adt;
     }
     else
     {
