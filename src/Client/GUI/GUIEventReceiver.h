@@ -75,7 +75,7 @@ public:
     inline bool HasKeyEvent(void) { return keyeventqueue.size(); }
 
 
-    inline SEvent::SMouseInput NextMouseEvent(void)
+    inline const SEvent::SMouseInput NextMouseEvent(void)
     {
         ASSERT(HasMouseEvent())
         const SEvent::SMouseInput ev = mouseeventqueue.front();
@@ -83,7 +83,7 @@ public:
         return ev;
     }
 
-    inline SEvent::SGUIEvent NextGUIEvent(void)
+    inline const SEvent::SGUIEvent NextGUIEvent(void)
     {
         ASSERT(HasGUIEvent())
         SEvent::SGUIEvent ev = guieventqueue.front();
@@ -91,7 +91,7 @@ public:
         return ev;
     }
 
-    inline SEvent::SKeyInput NextKeyEvent(void)
+    inline const SEvent::SKeyInput NextKeyEvent(void)
     {
         ASSERT(HasKeyEvent())
         SEvent::SKeyInput ev = keyeventqueue.front();

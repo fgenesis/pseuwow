@@ -10,7 +10,10 @@
 [#uppercase]
 [#noprefix]
 
-// 3=max, 0=no debug output
+// 0 - No debug output (white text) (Default)
+// 1 - Log some details (cyan text)
+// 2 - Full debug log (dark blue text)
+// 3 - Even more debug logging (purple text, useful only for developers)
 debug=0
 
 // log time to console?
@@ -31,7 +34,7 @@ softquit=1
 // default: 5000 ms (5 secs)
 reconnect=5000
 
-// 0 - show none
+// 0 - show none (Default)
 // 1 - show only known/handled
 // 2 - show only unknown/unhandled
 // 3 - show all
@@ -84,19 +87,19 @@ NetworkSleepTime=1
 
 // defines if players may say/yell/whisper commands to PseuWoW
 // set this to 0 and PseuWoW will not react to given commands
-allowgamecmd=1
+allowgamecmd=0
 
 // enable this if you plan to enter commands on the console
 enablecli=1
 
 // enable's chat ai which makes you bot respond to simple senteces
 // like "Hi" and "What do you think of x" etc.
-enablechatai=1
+enablechatai=0
 
 // show ping responses
-notifyping=1
+notifyping=0
 
-// shows the opcodes pseuwow sends to the server
+// show the opcodes pseuwow sends to the server?
 showmyopcodes=0
 
 // disable the check for learned spells.
@@ -107,12 +110,9 @@ disablespellcheck=0
 
 // will be used for all sendchatmessage calls. remove number/leave blank
 // to use the default language for your race (defined in race.scp)
-defaultlang=0
+defaultlang=
 
 // set this to 1 if you want to have a 3D-window showing stuff
-// NOTE: this is only to activate the window for now, 3D-stuff will come later!!
-// until some frame-limiter is implemented, it will always use 100% CPU usage when
-// the GUI is enabled and activated. (if its in background - way less CPU load.)
 enablegui=0
 
 // options for remote control:
