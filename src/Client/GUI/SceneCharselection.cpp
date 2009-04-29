@@ -110,7 +110,7 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
     // treat doubleclick on listboxes as OK button click
     if(eventrecv->HasGUIEvent())
     {
-        SEvent::SGUIEvent& ev = eventrecv->NextGUIEvent();
+        const SEvent::SGUIEvent& ev = eventrecv->NextGUIEvent();
         if(ev.EventType == EGET_LISTBOX_SELECTED_AGAIN)
         {
             if(ev.Caller == realmlistbox)
