@@ -1,0 +1,19 @@
+#dbname=generic_text
+
+
+// Server auth, login, charlist, char create,... response code texts
+[0]
+47=Character created.
+48=The server had an error when creating the character!
+49=Character creation failed!
+50=The name you have chosen is already in use.
+51=Character creation is currently disabled on this realm!
+52=You cannot create a character on this side; it would violate PVP rules!
+53=You have reached the limit of characters on this realm!
+54=You have reached the limit of characters on this account!
+55=CHAR_CREATE_SERVER_QUEUE
+56=CHAR_CREATE_ONLY_EXISTING
+57=You do not have the required explainsion installed to create this character!
+58=You do not have the required expansion installed to create characters of this class!
+59=Your characters do not have reached the a level that is required to create this character!
+60=You have reached the limit of characters of this class!

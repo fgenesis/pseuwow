@@ -89,7 +89,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
     {
         buf.read(fourcc,4); flipcc(fourcc); 
         buf.read((uint8*)&size,4);
-        //DEBUG(printf("ADT: reading '%s' size %u\n",fourcc,size));
+        DEBUG(printf("ADT: reading '%s' size %u\n",fourcc,size));
 
         if(!strcmp((char*)fourcc,"MVER"))
         {
@@ -226,11 +226,13 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 buf.read(mfcc,4); flipcc(mfcc); 
                 buf.read((uint8*)&msize,4);
 
+                DEBUG(printf("ADT:MCNK[%u]: reading '%s' size %u\n",mcnkid,mfcc,msize));
+
                 // HACKS to make it work properly
                 if(!msize && !strcmp((char*)mfcc,"MCAL"))
                     continue;
-                //if((!msize) && !strcmp((char*)mfcc,"MCLQ"))
-                //    msize = _chunks[mcnkid].hdr.sizeLiquid;
+                if((!msize) && !strcmp((char*)mfcc,"MCLQ")) // size for MCLQ block is always 0
+                    msize = _chunks[mcnkid].hdr.sizeLiquid - 8; // but even the size in the header is somewhat wrong.. pfff
 
                 //DEBUG(printf("ADT: MCNK: reading '%s' size %u\n",mfcc,msize));
 
@@ -290,7 +292,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                         }
                     }
                 }
-                /*else if(!strcmp((char*)mfcc,"MCLQ")) // MCLQ changed to MH2O chunk for whole ADT file
+                else if(!strcmp((char*)mfcc,"MCLQ")) // MCLQ changed to MH2O chunk for whole ADT file
                 {
                     uint8 _cc3[5];
                     uint8 *fcc1 = &_cc3[0];
@@ -310,13 +312,13 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                         float tmp;
                         buf.rpos(buf.rpos()-4);
                         uint32 bufpos=buf.rpos();
-                        uint32 rbytes,diffbytes;
                         buf >> _chunks[mcnkid].waterlevel;
                         buf >> tmp;
                         //DEBUG(printf("ADT: MCNK: MCLQ base floats: %f %f\n",_chunks[mcnkid].waterlevel,tmp));
                         //buf.rpos(buf.rpos()+4); // base height??
                         if(msize > 8) // just to be sure
                         {
+                            uint32 rbytes,diffbytes;
                             for(uint32 i = 0; i < 81; i++)
                             {
                                 _chunks[mcnkid].lqvertex[i] = buf.read<LiquidVertex>();
@@ -326,18 +328,18 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                                 buf >> _chunks[mcnkid].lqflags[i];
                             }
                             rbytes = buf.rpos() - bufpos;
-                            //DEBUG(printf("ADT: MCNK: MCLQ block loaded. %u / %u bytes.\n",rbytes,msize));
+                            DEBUG(printf("ADT: MCNK: MCLQ block loaded. %u / %u bytes.\n",rbytes,msize));
+                            // HACK: skip some unk junk bytes
+                            diffbytes = msize - rbytes; // difference should always be 84 (0x54) bytes
+                            buf.rpos(buf.rpos()+diffbytes);
+                            DEBUG(printf("ADT: MCNK: MCLQ - %u junk bytes skipped\n",diffbytes));
                         }
                         else
                         {
                             //DEBUG(printf("ADT: MCNK: MCLQ block has only %u bytes\n",msize));
                         }
-                        // HACK: skip some unk junk bytes
-                        diffbytes = (msize-8) - rbytes; // dont forget to skip the 8 initial bytes
-                        buf.rpos(buf.rpos()+diffbytes);
-                        //DEBUG(printf("ADT: MCNK: MCLQ - %u junk bytes skipped\n",diffbytes));
                     }
-                }*/
+                }
                 else if(!strcmp((char*)mfcc,"MCSE"))
                 {
                     uint32 emm = _chunks[mcnkid].hdr.nSndEmitters;

@@ -748,32 +748,35 @@ void WorldSession::PreloadDataBeforeEnterWorld(PlayerEnum& pl)
 {
     log("Loading data before entering world...");
     _LoadCache(); // we are about to login, so we need cache data
-    GetWorld()->GetMapMgr()->Update(pl._x, pl._y, pl._mapId); // make it load the map files
-
-    // preload additional map data only when the GUI is enabled
-    // TODO: at some later point we will need the geometry for correct collision calculation, etc...
-    if(GetInstance()->GetConf()->enablegui)
+    if(MapMgr *mmgr = GetWorld()->GetMapMgr())
     {
-        for(uint32 tiley = 0; tiley < 3; tiley++)
+        mmgr->Update(pl._x, pl._y, pl._mapId); // make it load the map files
+
+        // preload additional map data only when the GUI is enabled
+        // TODO: at some later point we will need the geometry for correct collision calculation, etc...
+        if(GetInstance()->GetConf()->enablegui)
         {
-            for(uint32 tilex = 0; tilex < 3; tilex++)
+            for(uint32 tiley = 0; tiley < 3; tiley++)
             {
-                MapTile *maptile = GetWorld()->GetMapMgr()->GetNearTile(tilex - 1, tiley - 1);
-                if(maptile)
+                for(uint32 tilex = 0; tilex < 3; tilex++)
                 {
-                    for(uint32 i = 0; i < maptile->GetDoodadCount(); i++)
+                    MapTile *maptile = GetWorld()->GetMapMgr()->GetNearTile(tilex - 1, tiley - 1);
+                    if(maptile)
                     {
-                        Doodad *doo = maptile->GetDoodad(i);
+                        for(uint32 i = 0; i < maptile->GetDoodadCount(); i++)
+                        {
+                            Doodad *doo = maptile->GetDoodad(i);
 
-                        // it is useless to load the file here, since its loaded when irrlicht needs it and kept in the MeshCache for later use
-                        //MemoryDataHolder::BackgroundLoadFile(doo->model);
+                            // it is useless to load the file here, since its loaded when irrlicht needs it and kept in the MeshCache for later use
+                            //MemoryDataHolder::BackgroundLoadFile(doo->model);
 
-                        // but we need to preload the .skin files, since they are not held in the MeshCache
-                        // TODO: load *all* necessary skin files, also fix stuffextract for this!
-                        std::string skinfile = doo->model.substr(0, doo->model.length()-3) + "00.skin";
-                        skinfile = GetAbsolutePath(skinfile.c_str());
-                        _FixFileName(skinfile);
-                        MemoryDataHolder::BackgroundLoadFile(skinfile);
+                            // but we need to preload the .skin files, since they are not held in the MeshCache
+                            // TODO: load *all* necessary skin files, also fix stuffextract for this!
+                            std::string skinfile = doo->model.substr(0, doo->model.length()-3) + "00.skin";
+                            skinfile = GetAbsolutePath(skinfile.c_str());
+                            _FixFileName(skinfile);
+                            MemoryDataHolder::BackgroundLoadFile(skinfile);
+                        }
                     }
                 }
             }
