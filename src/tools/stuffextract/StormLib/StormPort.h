@@ -226,7 +226,7 @@
   
   void  SetLastError(int err);
   int   GetLastError();
-  char *ErrString(int err);
+  const char *ErrString(int err);
 
   // Emulation of functions for file I/O available in Win32
   HANDLE CreateFile(const char * lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, void * lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
