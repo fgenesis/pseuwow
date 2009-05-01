@@ -23,7 +23,7 @@
 * Copyright (c) 2001 BMX-Chemnitz.DE All rights reserved.
 *
 ********************************************************************/
-
+#include <string>
 #ifndef _WIN32
 #include "StormPort.h"
 
@@ -39,35 +39,42 @@ int GetLastError()
     return(globalerr);
 }
 
-char *ErrString(int err)
+const char *ErrString(int err)
 {
+    std::string strings[] =
+{
+"function not implemented",  "file not found", "access denied", "not enough memory",
+"bad format", "no more files",  "access beyond EOF", "no space left on device", 
+"invalid parameter", "no space left on device", "file exists", "operation cannot be completed",
+"unknown error"
+};
     switch (err) {
     case ERROR_INVALID_FUNCTION:
-        return "function not implemented";
+        return strings[0].c_str();
     case ERROR_FILE_NOT_FOUND:
-        return "file not found";
+        return strings[1].c_str();
     case ERROR_ACCESS_DENIED:
-        return "access denied";
+        return strings[2].c_str();
     case ERROR_NOT_ENOUGH_MEMORY:
-        return "not enough memory";
+        return strings[3].c_str();
     case ERROR_BAD_FORMAT:
-        return "bad format";
+        return strings[4].c_str();
     case ERROR_NO_MORE_FILES:
-        return "no more files";
+        return strings[5].c_str();
     case ERROR_HANDLE_EOF:
-        return "access beyound EOF";
+        return strings[6].c_str();
     case ERROR_HANDLE_DISK_FULL:
-        return "no space left on device";
+        return strings[7].c_str();
     case ERROR_INVALID_PARAMETER:
-        return "invalid parameter";
+        return strings[8].c_str();
     case ERROR_DISK_FULL:
-        return "no space left on device";
+        return strings[9].c_str();
     case ERROR_ALREADY_EXISTS:
-        return "file exists";
+        return strings[10].c_str();
     case ERROR_CAN_NOT_COMPLETE:
-        return "operation cannot be completed";
+        return strings[11].c_str();
     default:
-        return "unknown error";
+        return strings[12].c_str();
     }
 }
 
@@ -87,7 +94,7 @@ HANDLE CreateFile(const char *sFileName, DWORD ulMode, DWORD ulSharing, void *pS
 
 BOOL CloseHandle(HANDLE hFile)
 {
-    return (close((int)hFile) == 0);
+    return (close((unsigned long long)hFile) == 0);
 }
 
 DWORD GetFileSize(HANDLE hFile, DWORD *ulOffSetHigh)
@@ -96,25 +103,25 @@ DWORD GetFileSize(HANDLE hFile, DWORD *ulOffSetHigh)
         return 0xffffffff;
 
     struct stat fileinfo;
-    fstat((int)hFile, &fileinfo);
+    fstat((unsigned long long)hFile, &fileinfo);
     
     return fileinfo.st_size;
 }
 
 DWORD SetFilePointer(HANDLE hFile, LONG lOffSetLow, LONG *pOffSetHigh, DWORD ulMethod)
 {
-    return lseek64((int)hFile, (off64_t)(*pOffSetHigh) << 32 | (DWORD)lOffSetLow, ulMethod);
+    return lseek64((unsigned long long)hFile, (off64_t)(*pOffSetHigh) << 32 | (DWORD)lOffSetLow, ulMethod);
 }
 
 BOOL SetEndOfFile(HANDLE hFile)
 {
-    return (ftruncate((int)hFile, lseek((int)hFile, 0, SEEK_CUR)) == 0);
+    return (ftruncate((unsigned long long)(hFile), lseek((unsigned long long)hFile, 0, SEEK_CUR)) == 0);
 }
 
 BOOL ReadFile(HANDLE hFile, void *pBuffer, DWORD ulLen, DWORD *ulRead, void *pOverLapped)
 {
     ssize_t count;
-    if ((count = read((int)hFile, pBuffer, ulLen)) == -1) {
+    if ((count = read((unsigned long long)hFile, pBuffer, ulLen)) == -1) {
         *ulRead = 0;
         return false;
     }
@@ -125,7 +132,7 @@ BOOL ReadFile(HANDLE hFile, void *pBuffer, DWORD ulLen, DWORD *ulRead, void *pOv
 BOOL WriteFile(HANDLE hFile, const void *pBuffer, DWORD ulLen, DWORD *ulWritten, void *pOverLapped)
 {
     ssize_t count;
-    if ((count = write((int)hFile, pBuffer, ulLen)) == -1) {
+    if ((count = write((unsigned long long)hFile, pBuffer, ulLen)) == -1) {
         *ulWritten = 0;
         return false;
     }
