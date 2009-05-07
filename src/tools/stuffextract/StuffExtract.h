@@ -32,8 +32,8 @@ int main(int argc, char *argv[]);
 void ProcessCmdArgs(int argc, char *argv[]);
 void PrintConfig(void);
 void PrintHelp(void);
-void OutSCP(char*, SCPStorageMap&, std::string);
-void OutMD5(char*, MD5FileMap&);
+void OutSCP(const char*, SCPStorageMap&, std::string);
+void OutMD5(const char*, MD5FileMap&);
 bool ConvertDBC(void);
 void ExtractMaps(void);
 void ExtractMapDependencies(void);
@@ -41,7 +41,7 @@ void ExtractSoundFiles(void);
 
 void FetchTexturesFromModel(ByteBuffer);
 
-void ADT_ExportStringSetByOffset(const uint8*, uint32, std::set<NameAndAlt>&, char*);
+void ADT_ExportStringSetByOffset(const uint8*, uint32, std::set<NameAndAlt>&, const char*);
 void ADT_FillTextureData(const uint8*,std::set<NameAndAlt>&);
 void ADT_FillWMOData(const uint8*,std::set<NameAndAlt>&);
 void ADT_FillModelData(const uint8*,std::set<NameAndAlt>&);

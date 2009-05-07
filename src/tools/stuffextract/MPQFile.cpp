@@ -12,13 +12,13 @@ MPQFile::~MPQFile()
 	Close();
 }
 
-bool MPQFile::HasFile(char *fn)
+bool MPQFile::HasFile(const char *fn)
 {
     return SFileHasFile(_mpq,fn);
 }
 
 // get size of a file within an mpq archive
-ByteBuffer MPQFile::ReadFile(char *fn)
+ByteBuffer MPQFile::ReadFile(const char *fn)
 {
     ByteBuffer bb;
     HANDLE fh;
@@ -31,7 +31,7 @@ ByteBuffer MPQFile::ReadFile(char *fn)
     return bb;
 }
 
-uint32 MPQFile::GetFileSize(char *fn)
+uint32 MPQFile::GetFileSize(const char *fn)
 {
     HANDLE fh;
     if(!SFileOpenFileEx(_mpq, fn, 0, &fh))

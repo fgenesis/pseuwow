@@ -51,6 +51,8 @@ public:
                 react_to_keys = true; // popup is gone, main window can react to keys again
                 proc = true;
                 break;
+	    default:DEBUG(logdev("Unhandled event type %u ID %u",event.GUIEvent.EventType,id));
+		break;
             }
 
             if(customHandledEvents.find(event.GUIEvent.EventType) != customHandledEvents.end())

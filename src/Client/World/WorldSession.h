@@ -85,7 +85,7 @@ public:
     inline World *GetWorld(void) { return _world; }
 
     std::string GetOrRequestPlayerName(uint64);
-    std::string DumpPacket(WorldPacket& pkt, int errpos = -1, char *errstr = NULL);
+    std::string DumpPacket(WorldPacket& pkt, int errpos = -1, const char *errstr = NULL);
 
     inline uint32 GetCharsCount(void) { return _charList.size(); }
     inline CharacterListExt& GetCharFromList(uint32 id) { return _charList[id]; }

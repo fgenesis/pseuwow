@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
         std::set_new_handler(_new_handler);
         log_prepare("logfile.txt","a");
         logcustom(0,LGREEN,"+----------------------------------+");
-        logcustom(0,LGREEN,"| (C) 2006-2008 Snowstorm Software |");
+        logcustom(0,LGREEN,"| (C) 2006-2009 Snowstorm Software |");
         logcustom(0,LGREEN,"|  http://www.mangosclient.org     |");
         logcustom(0,LGREEN,"+----------------------------------+");
         logcustom(0,GREEN,"Platform: %s",PLATFORM_NAME);

@@ -55,7 +55,7 @@ bool PlayerNameCache::SaveToFile(void)
         return true; // no data to save, so we are fine
 
     logdebug("Saving PlayerNameCache...");
-    char *fn="./cache/playernames.cache";
+    const char *fn="./cache/playernames.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::out | std::ios_base::binary);
     if(!fh)
@@ -85,7 +85,7 @@ bool PlayerNameCache::SaveToFile(void)
 
 bool PlayerNameCache::ReadFromFile(void)
 {
-    char *fn="./cache/playernames.cache";
+    const char *fn="./cache/playernames.cache";
     log("Loading PlayerNameCache...");
     bool success=true;
     std::fstream fh;
@@ -139,7 +139,7 @@ uint32 PlayerNameCache::GetSize(void)
 void ItemProtoCache_InsertDataToSession(WorldSession *session)
 {
     logdetail("ItemProtoCache: Loading...");
-    char* fn = "./cache/ItemPrototypes.cache";
+    const char* fn = "./cache/ItemPrototypes.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::in | std::ios_base::binary);
     if(!fh)
@@ -288,7 +288,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
 	if (!session->objmgr.GetItemProtoCount())
 		return;
 
-    char* fn = "./cache/ItemPrototypes.cache";
+    const char* fn = "./cache/ItemPrototypes.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::out | std::ios_base::binary);
     if(!fh)
@@ -411,7 +411,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
 void CreatureTemplateCache_InsertDataToSession(WorldSession *session)
 {
     logdetail("CreatureTemplateCache: Loading...");
-    char* fn = "./cache/CreatureTemplates.cache";
+    const char* fn = "./cache/CreatureTemplates.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::in | std::ios_base::binary);
     if(!fh)
@@ -482,7 +482,7 @@ void CreatureTemplateCache_WriteDataToCache(WorldSession *session)
     if (!session->objmgr.GetCreatureTemplateCount())
         return;
 
-    char* fn = "./cache/CreatureTemplates.cache";
+    const char* fn = "./cache/CreatureTemplates.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::out | std::ios_base::binary);
     if(!fh)
@@ -526,7 +526,7 @@ void CreatureTemplateCache_WriteDataToCache(WorldSession *session)
 void GOTemplateCache_InsertDataToSession(WorldSession *session)
 {
     logdetail("GOTemplateCache: Loading...");
-    char* fn = "./cache/GOTemplates.cache";
+    const char* fn = "./cache/GOTemplates.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::in | std::ios_base::binary);
     if(!fh)
@@ -594,7 +594,7 @@ void GOTemplateCache_WriteDataToCache(WorldSession *session)
     if (!session->objmgr.GetGOTemplateCount())
         return;
 
-    char* fn = "./cache/GOTemplates.cache";
+    const char* fn = "./cache/GOTemplates.cache";
     std::fstream fh;
     fh.open(fn, std::ios_base::out | std::ios_base::binary);
     if(!fh)

@@ -60,7 +60,7 @@ void SCPDatabase::DropTextData(void)
     fields.clear();
 }
 
-void *SCPDatabase::GetPtr(uint32 index, char *entry)
+void *SCPDatabase::GetPtr(uint32 index, const char *entry)
 {
     std::map<uint32,uint32>::iterator it = _indexes.find(index);
     if(it == _indexes.end())
@@ -84,7 +84,7 @@ void *SCPDatabase::GetPtrByField(uint32 index, uint32 entry)
     return (void*)&_intbuf[(_fields_per_row * target_row) + entry];
 }
 
-uint32 SCPDatabase::GetFieldByUint32Value(char *entry, uint32 val)
+uint32 SCPDatabase::GetFieldByUint32Value(const char *entry, uint32 val)
 {
     std::map<std::string,SCPFieldDef>::iterator fi = _fielddefs.find(entry);
     if(fi == _fielddefs.end())
@@ -102,7 +102,7 @@ uint32 SCPDatabase::GetFieldByUint32Value(uint32 entry, uint32 val)
     return SCP_INVALID_INT;
 }
 
-uint32 SCPDatabase::GetFieldByIntValue(char *entry, int32 val)
+uint32 SCPDatabase::GetFieldByIntValue(const char *entry, int32 val)
 {
     std::map<std::string,SCPFieldDef>::iterator fi = _fielddefs.find(entry);
     if(fi == _fielddefs.end())
@@ -120,7 +120,7 @@ uint32 SCPDatabase::GetFieldByIntValue(uint32 entry, int32 val)
     return (int)SCP_INVALID_INT;
 }
 
-uint32 SCPDatabase::GetFieldByStringValue(char *entry, char *val)
+uint32 SCPDatabase::GetFieldByStringValue(const char *entry, const char *val)
 {
     std::map<std::string,SCPFieldDef>::iterator fi = _fielddefs.find(entry);
     if(fi == _fielddefs.end())
@@ -130,7 +130,7 @@ uint32 SCPDatabase::GetFieldByStringValue(char *entry, char *val)
     return GetFieldByStringValue(field_id,val);
 }
 
-uint32 SCPDatabase::GetFieldByStringValue(uint32 entry, char *val)
+uint32 SCPDatabase::GetFieldByStringValue(uint32 entry, const char *val)
 {
     for(uint32 row = 0; row < _rowcount; row++)
         if(!stricmp(GetStringByOffset(_intbuf[row * _fields_per_row + entry]), val))
@@ -138,7 +138,7 @@ uint32 SCPDatabase::GetFieldByStringValue(uint32 entry, char *val)
     return SCP_INVALID_INT;
 }
 
-uint32 SCPDatabase::GetFieldType(char *entry)
+uint32 SCPDatabase::GetFieldType(const char *entry)
 {
     std::map<std::string,SCPFieldDef>::iterator it = _fielddefs.find(entry);
     if(it != _fielddefs.end())
@@ -146,7 +146,7 @@ uint32 SCPDatabase::GetFieldType(char *entry)
     return SCP_INVALID_INT;
 }
 
-uint32 SCPDatabase::GetFieldId(char *entry)
+uint32 SCPDatabase::GetFieldId(const char *entry)
 {
     std::map<std::string,SCPFieldDef>::iterator it = _fielddefs.find(entry);
     if(it != _fielddefs.end())
@@ -159,7 +159,7 @@ SCPDatabase *SCPDatabaseMgr::GetDB(std::string n, bool create)
     return create ? _map.Get(n) : _map.GetNoCreate(n);
 }
 
-uint32 SCPDatabaseMgr::AutoLoadFile(char *fn)
+uint32 SCPDatabaseMgr::AutoLoadFile(const char *fn)
 {
     char *buf;
     uint32 size;
@@ -241,7 +241,7 @@ uint32 SCPDatabaseMgr::AutoLoadFile(char *fn)
 
 
 // check the datatype that will be used for this string value
-uint32 SCPDatabaseMgr::GetDataTypeFromString(char *s)
+uint32 SCPDatabaseMgr::GetDataTypeFromString(const char *s)
 {
     bool isint = true, first = true;
     for(;*s;s++) // check every char until \0 is reached
@@ -257,7 +257,7 @@ uint32 SCPDatabaseMgr::GetDataTypeFromString(char *s)
     return isint ? SCP_TYPE_INT : SCP_TYPE_FLOAT;
 }
 
-bool SCPDatabaseMgr::Compact(char *dbname, char *outfile, uint32 compression)
+bool SCPDatabaseMgr::Compact(const char *dbname, const char *outfile, uint32 compression)
 {
     logdebug("Compacting database '%s' into file '%s'", dbname, outfile);
     SCPDatabase *db = GetDB(dbname);
@@ -587,7 +587,7 @@ void SCPDatabaseMgr::_FilterFiles(std::deque<std::string>& files, std::string db
     DEBUG(logdebug("-> %u files belong to this DB",files.size()));
 }
 
-uint32 SCPDatabaseMgr::SearchAndLoad(char *dbname, bool no_compiled)
+uint32 SCPDatabaseMgr::SearchAndLoad(const char *dbname, bool no_compiled)
 {
     uint32 count = 0;
     std::deque<std::string> goodfiles;
@@ -668,7 +668,7 @@ uint32 SCPDatabaseMgr::SearchAndLoad(char *dbname, bool no_compiled)
     return count;
 }
 
-void SCPDatabaseMgr::AddSearchPath(char *path)
+void SCPDatabaseMgr::AddSearchPath(const char *path)
 {
     std::string p;
 
@@ -700,7 +700,7 @@ void SCPDatabaseMgr::AddSearchPath(char *path)
     _paths.push_back(p);
 }
 
-bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname, uint32 nSourcefiles)
+bool SCPDatabaseMgr::LoadCompactSCP(const char *fn, const char *dbname, uint32 nSourcefiles)
 {
     uint32 filesize = GetFileSize(fn);
     if(filesize < HEADER_SIZE)
@@ -911,7 +911,7 @@ bool SCPDatabaseMgr::LoadCompactSCP(char *fn, char *dbname, uint32 nSourcefiles)
 }
 
 // used only for debugging
-void SCPDatabase::DumpStructureToFile(char *fn)
+void SCPDatabase::DumpStructureToFile(const char *fn)
 {
     std::ofstream f;
     f.open(fn);

@@ -7,7 +7,7 @@
 #define DATADIR "Data"
 
 
-MPQHelper::MPQHelper(char *archive)
+MPQHelper::MPQHelper(const char *archive)
 {
     // TODO: check which files are needed and which are not + recheck for correct ordering
     std::string dir = "Data/";
@@ -25,7 +25,7 @@ MPQHelper::MPQHelper(char *archive)
     for(uint32 i=1; i<=MAX_PATCH_NUMBER; i++)
     {
         char buf[200];
-        sprintf(buf,"%spatch-%u%s",dir.c_str(),i,ext.c_str());
+        sprintf(buf,"%spatch-%lu%s",dir.c_str(),i,ext.c_str());
         _patches.push_front(buf);
     }
     _patches.push_front(ldir+"speech-"+GetLocale()+ext);
@@ -40,7 +40,7 @@ MPQHelper::MPQHelper(char *archive)
     for(uint32 i=1; i<=MAX_PATCH_NUMBER; i++)
     {
         char buf[200];
-        sprintf(buf,"%spatch-%s-%u%s",ldir.c_str(),GetLocale(),i,ext.c_str());
+        sprintf(buf,"%spatch-%s-%lu%s",ldir.c_str(),GetLocale(),i,ext.c_str());
         //if(FileExists(buf))
         _patches.push_front(buf);
     }
@@ -64,7 +64,7 @@ MPQHelper::~MPQHelper()
     }
 }
 
-ByteBuffer MPQHelper::ExtractFile(char* fn)
+ByteBuffer MPQHelper::ExtractFile(const char* fn)
 {
     ByteBuffer bb;
     for(std::list<MPQFile*>::iterator i = _files.begin(); i != _files.end(); i++)
@@ -80,7 +80,7 @@ ByteBuffer MPQHelper::ExtractFile(char* fn)
     return bb; // will be empty if returned here
 }
 
-bool MPQHelper::FileExists(char *fn)
+bool MPQHelper::FileExists(const char *fn)
 {
     for(std::list<MPQFile*>::iterator i = _files.begin(); i != _files.end(); i++)
     {

@@ -45,32 +45,32 @@ public:
     void DropTextData(void);
 
     // access funcs
-    void *GetPtr(uint32 index, char *entry);
+    void *GetPtr(uint32 index, const char *entry);
     void *GetPtrByField(uint32 index, uint32 entry);
     inline char *GetStringByOffset(uint32 offs) { return (char*)(offs < _stringsize ? _stringbuf + offs : ""); }
-    inline char *GetString(uint32 index, char *entry) { return GetStringByOffset(GetUint32(index,entry)); }
+    inline char *GetString(uint32 index, const char *entry) { return GetStringByOffset(GetUint32(index,entry)); }
     inline char *GetString(uint32 index, uint32 entry) { return GetStringByOffset(GetUint32(index,entry)); }
-    inline uint32 GetUint32(uint32 index, char *entry) { uint32 *t = (uint32*)GetPtr(index,entry); return t ? *t : 0; }
+    inline uint32 GetUint32(uint32 index, const char *entry) { uint32 *t = (uint32*)GetPtr(index,entry); return t ? *t : 0; }
     inline uint32 GetUint32(uint32 index, uint32 entry) { uint32 *t = (uint32*)GetPtrByField(index,entry); return t ? *t : 0; }
-    inline int32 GetInt(uint32 index, char *entry) { int32 *t = (int32*)GetPtr(index,entry); return t ? *t : 0; }
+    inline int32 GetInt(uint32 index, const char *entry) { int32 *t = (int32*)GetPtr(index,entry); return t ? *t : 0; }
     inline int32 GetInt(uint32 index, uint32 entry) { int32 *t = (int32*)GetPtrByField(index,entry); return t ? *t : 0; }
-    inline float GetFloat(uint32 index, char *entry) { float *t = (float*)GetPtr(index,entry); return t ? *t : 0; }
+    inline float GetFloat(uint32 index, const char *entry) { float *t = (float*)GetPtr(index,entry); return t ? *t : 0; }
     inline float GetFloat(uint32 index, uint32 entry) { float *t = (float*)GetPtrByField(index,entry); return t ? *t : 0; }
-    uint32 GetFieldType(char *entry);
-    uint32 GetFieldId(char *entry);
+    uint32 GetFieldType(const char *entry);
+    uint32 GetFieldId(const char *entry);
     inline void *GetRowByIndex(uint32 index) { return GetPtrByField(index,0); }
-    uint32 GetFieldByUint32Value(char *entry, uint32 val);
+    uint32 GetFieldByUint32Value(const char *entry, uint32 val);
     uint32 GetFieldByUint32Value(uint32 entry, uint32 val);
-    uint32 GetFieldByIntValue(char *entry, int32 val);
+    uint32 GetFieldByIntValue(const char *entry, int32 val);
     uint32 GetFieldByIntValue(uint32 entry, int32 val);
-    uint32 GetFieldByStringValue(char *entry, char *val);
-    uint32 GetFieldByStringValue(uint32 entry, char *val);
+    uint32 GetFieldByStringValue(const char *entry, const char *val);
+    uint32 GetFieldByStringValue(uint32 entry, const char *val);
     // float value lookup not necessary
     inline uint32 GetFieldsCount(void) { return _fields_per_row; }
     inline uint32 GetRowsCount(void) { return _rowcount; }
 
 
-    void DumpStructureToFile(char *fn);
+    void DumpStructureToFile(const char *fn);
 private:
     // text data related
     SCPSourceList sources;
@@ -97,13 +97,13 @@ class SCPDatabaseMgr
 public:
     SCPDatabaseMgr() : _compr(0) {}
     SCPDatabase *GetDB(std::string n, bool create = false);
-    uint32 AutoLoadFile(char *fn);
+    uint32 AutoLoadFile(const char *fn);
     inline void DropDB(std::string s) { _map.Delete(stringToLower(s)); }
-    bool Compact(char *dbname, char *outfile, uint32 compression = 0);
-    static uint32 GetDataTypeFromString(char *s);
-    uint32 SearchAndLoad(char*,bool);
-    void AddSearchPath(char*);
-    bool LoadCompactSCP(char*, char*, uint32);
+    bool Compact(const char *dbname, const char *outfile, uint32 compression = 0);
+    static uint32 GetDataTypeFromString(const char *s);
+    uint32 SearchAndLoad(const char*,bool);
+    void AddSearchPath(const char*);
+    bool LoadCompactSCP(const char*, const char*, uint32);
     void SetCompression(uint32 c) { _compr = c; } // min=0, max=9
     uint32 GetCompression(void) { return _compr; }
 

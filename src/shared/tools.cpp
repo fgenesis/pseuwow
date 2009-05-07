@@ -110,7 +110,7 @@ std::string toHexDump(uint8* array, uint32 size, bool spaces, uint32 per_line)
     {
         if(array[i])
         {
-            sprintf(buf,(array[i]<=0x0F)?"0%X":"%X",(uint32)array[i]);
+            sprintf(buf,(array[i]<=0x0F)?"0%lX":"%lX",(uint32)array[i]);
             ss << buf;
         }
         else
@@ -268,7 +268,7 @@ std::string FilesizeFormat(uint32 b)
     char buf[15];
     if (b < 1024)
     {
-        sprintf(buf,"%u B",b);
+        sprintf(buf,"%lu B",b);
     }
     else if(b < 1024*1024)
     {
