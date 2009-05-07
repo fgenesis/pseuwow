@@ -24,7 +24,7 @@
 *
 ********************************************************************/
 #include <string>
-#ifndef _WIN32
+#if defined(__linux) || defined(linux)
 #include "StormPort.h"
 
 int globalerr;
@@ -41,40 +41,33 @@ int GetLastError()
 
 const char *ErrString(int err)
 {
-    std::string strings[] =
-{
-"function not implemented",  "file not found", "access denied", "not enough memory",
-"bad format", "no more files",  "access beyond EOF", "no space left on device", 
-"invalid parameter", "no space left on device", "file exists", "operation cannot be completed",
-"unknown error"
-};
-    switch (err) {
-    case ERROR_INVALID_FUNCTION:
-        return strings[0].c_str();
-    case ERROR_FILE_NOT_FOUND:
-        return strings[1].c_str();
-    case ERROR_ACCESS_DENIED:
-        return strings[2].c_str();
-    case ERROR_NOT_ENOUGH_MEMORY:
-        return strings[3].c_str();
-    case ERROR_BAD_FORMAT:
-        return strings[4].c_str();
-    case ERROR_NO_MORE_FILES:
-        return strings[5].c_str();
-    case ERROR_HANDLE_EOF:
-        return strings[6].c_str();
-    case ERROR_HANDLE_DISK_FULL:
-        return strings[7].c_str();
-    case ERROR_INVALID_PARAMETER:
-        return strings[8].c_str();
-    case ERROR_DISK_FULL:
-        return strings[9].c_str();
-    case ERROR_ALREADY_EXISTS:
-        return strings[10].c_str();
-    case ERROR_CAN_NOT_COMPLETE:
-        return strings[11].c_str();
-    default:
-        return strings[12].c_str();
+    switch (err)
+    {
+      case ERROR_INVALID_FUNCTION:
+          return "function not implemented";
+      case ERROR_FILE_NOT_FOUND:
+          return "file not found";
+      case ERROR_ACCESS_DENIED:
+          return "access denied";
+      case ERROR_NOT_ENOUGH_MEMORY:
+          return "not enough memory";
+      case ERROR_BAD_FORMAT:
+          return "bad format";
+      case ERROR_NO_MORE_FILES:
+          return "no more files";
+      case ERROR_HANDLE_EOF:
+          return "access beyond EOF";
+      case ERROR_INVALID_PARAMETER:
+          return "invalid parameter";
+      case ERROR_HANDLE_DISK_FULL:
+      case ERROR_DISK_FULL:
+          return "no space left on device";
+      case ERROR_ALREADY_EXISTS:
+          return "file exists";
+      case ERROR_CAN_NOT_COMPLETE:
+          return "operation cannot be completed";
+      default:
+          return "unknown error";
     }
 }
 
