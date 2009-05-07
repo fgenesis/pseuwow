@@ -166,7 +166,7 @@ int WINAPI SFileEnumLocales(
 //   szFileName    - Name of file to look for
 
 // TODO: Test for archives > 4GB
-BOOL WINAPI SFileHasFile(HANDLE hMPQ, char * szFileName)
+BOOL WINAPI SFileHasFile(HANDLE hMPQ, const char * szFileName)
 {
     TMPQArchive * ha = (TMPQArchive *)hMPQ;
     int nError = ERROR_SUCCESS;

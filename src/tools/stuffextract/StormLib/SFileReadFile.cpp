@@ -25,7 +25,7 @@
 struct TID2Ext
 {
     DWORD dwID;
-    char * szExt;
+    const char * szExt;
 };
 
 //-----------------------------------------------------------------------------
@@ -630,7 +630,7 @@ static TID2Ext id2ext[] =
 BOOL WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
 {
     TMPQFile * hf = (TMPQFile *)hFile;  // MPQ File handle
-    char * szExt = "xxx";               // Default extension
+    const char * szExt = "xxx";               // Default extension
     DWORD dwFirstBytes[2];              // The first 4 bytes of the file
     DWORD dwFilePos;                    // Saved file position
     int nError = ERROR_SUCCESS;

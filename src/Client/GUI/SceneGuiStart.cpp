@@ -8,7 +8,7 @@ SceneGuiStart::SceneGuiStart(PseuGUI *gui) : Scene(gui)
 {
     
     irrlogo = guienv->addImage(driver->getTexture("data/misc/irrlichtlogo.png"), core::position2d<s32>(5,5));
-    char *fn;
+    const char *fn;
     switch(gui->_driverType)
     {
         case video::EDT_DIRECT3D8:

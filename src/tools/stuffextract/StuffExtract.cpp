@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 {
     char input[200];
     printf("StuffExtract [version %u]\n",SE_VERSION);
-    printf("Use -help or -? to display help about command line arguments and config.\n\n",SE_VERSION);
+    printf("Use -help or -? to display help about command line arguments and config.\n\n");
     ProcessCmdArgs(argc, argv);
     PrintConfig();
     if(!GetLocale())
@@ -205,7 +205,7 @@ std::string AutoGetDataString(DBCFile::Iterator& it, const char* format, uint32 
 
 
 // output a formatted scp file
-void OutSCP(char *fn, SCPStorageMap& scp, std::string dbName="")
+void OutSCP(const char *fn, SCPStorageMap& scp, std::string dbName="")
 {
     std::fstream f;
     f.open(fn, std::ios_base::out);
@@ -232,7 +232,7 @@ void OutSCP(char *fn, SCPStorageMap& scp, std::string dbName="")
     }
 }
 
-void OutMD5(char *path, MD5FileMap& fm)
+void OutMD5(const char *path, MD5FileMap& fm)
 {
     if(!doMd5)
         return;
@@ -331,7 +331,7 @@ bool ConvertDBC(void)
                 for(DBCFile::Iterator ix = EmotesTextData.begin(); ix != EmotesTextData.end(); ++ix)
                 {
                     textid = (*ix).getUInt(EMOTESTEXTDATA_TEXTID);
-                    if(textid == (*it).getInt(field))
+                    if(textid == (*it).getUInt(field))
                     {
                         fname = EmotesTextFieldNames[field];
 						for(uint8 stringpos=EMOTESTEXTDATA_STRING1; stringpos<=EMOTESTEXTDATA_STRING8; stringpos++) // we have 8 locales, so...
@@ -482,7 +482,7 @@ bool ConvertDBC(void)
                     {
                         // lookup for model path
                         DBCFile::Iterator itm = CreatureModelData.begin();
-                        for(; itm != CreatureDisplayInfo.end() && itm->getInt(CREATUREMODELDATA_ID) != modelid;) ++itm;
+                        for(; itm != CreatureDisplayInfo.end() && itm->getUInt(CREATUREMODELDATA_ID) != modelid;) ++itm;
 
                         std::string str = itm->getString(CREATUREMODELDATA_FILE);
                         uint32 pathend = str.find_last_of("/\\");
@@ -625,7 +625,7 @@ void ExtractMaps(void)
         // extract the WDT file that stores tile information
         char wdt_name[300], wdt_out[300];
         sprintf(wdt_name,"World\\Maps\\%s\\%s.wdt",it->second.c_str(),it->second.c_str());
-        sprintf(wdt_out,MAPSDIR"/%u.wdt",it->first);
+        sprintf(wdt_out,MAPSDIR"/%lu.wdt",it->first);
         const ByteBuffer& wdt_bb = mpq.ExtractFile(wdt_name);
         std::fstream wdt_fh;
         wdt_fh.open(wdt_out, std::ios_base::out|std::ios_base::binary);
@@ -648,8 +648,8 @@ void ExtractMaps(void)
             {
                 uint32 olddeps;
                 uint32 depdiff;
-                sprintf(namebuf,"World\\Maps\\%s\\%s_%u_%u.adt",it->second.c_str(),it->second.c_str(),x,y);
-                sprintf(outbuf,MAPSDIR"/%u_%u_%u.adt",it->first,x,y);
+                sprintf(namebuf,"World\\Maps\\%s\\%s_%lu_%lu.adt",it->second.c_str(),it->second.c_str(),x,y);
+                sprintf(outbuf,MAPSDIR"/%lu_%lu_%lu.adt",it->first,x,y);
                 if(mpq.FileExists(namebuf))
                 {
                     const ByteBuffer& bb = mpq.ExtractFile(namebuf);
@@ -683,7 +683,7 @@ void ExtractMaps(void)
                             memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
                         }
                         extr++;
-                        printf("[%u:%u] %s; %u new deps.\n",extr,it->first,namebuf,depdiff);
+                        printf("[%lu:%lu] %s; %lu new deps.\n",extr,it->first,namebuf,depdiff);
                     }
                 }
             }
@@ -692,7 +692,7 @@ void ExtractMaps(void)
         printf("\n");
     }
 
-    printf("\nDONE - %u maps extracted, %u total dependencies.\n",extrtotal, texNames.size() + modelNames.size() + wmoNames.size());
+    printf("\nDONE - %lu maps extracted, %u total dependencies.\n",extrtotal, texNames.size() + modelNames.size() + wmoNames.size());
     OutMD5(MAPSDIR,md5map);
 }
 
@@ -951,7 +951,7 @@ void ExtractSoundFiles(void)
     printf("\n");
 }
 
-void ADT_ExportStringSetByOffset(const uint8* data, uint32 off, std::set<NameAndAlt>& st, char* stop)
+void ADT_ExportStringSetByOffset(const uint8* data, uint32 off, std::set<NameAndAlt>& st,const char* stop)
 {
     data += ((uint32*)data)[off]; // seek to correct absolute offset
     data += 28; // move ptr to real start of data

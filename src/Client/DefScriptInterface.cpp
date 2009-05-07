@@ -90,10 +90,10 @@ DefReturnResult DefScriptPackage::SCSendChatMessage(CmdSet& Set){
     if(ss.str()!=Set.arg[1]) // given lang is NOT a number
     {
         SCPDatabase *langdb = dbmgr.GetDB("language");
-        uint32 dblang = langdb->GetFieldByStringValue("name",(char*)Set.arg[1].c_str());
+        uint32 dblang = langdb->GetFieldByStringValue("name",Set.arg[1].c_str());
         logdev("looking up language id for lang '%s', found %i",Set.arg[1].c_str(),dblang);
         // TODO: comment this out to enable using addon language??!
-        if(dblang != -1)
+        if(dblang != SCP_INVALID_INT)
             lang = dblang;
     }
 
@@ -1237,7 +1237,7 @@ DefReturnResult DefScriptPackage::SCPreloadFile(CmdSet& Set)
 
 void DefScriptPackage::My_LoadUserPermissions(VarSet &vs)
 {
-    static char *prefix = "USERS::";
+    static const char *prefix = "USERS::";
     std::string sub,usr;
     for(uint32 i=0;i<variables.Size();i++)
     {

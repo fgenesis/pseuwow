@@ -20,7 +20,7 @@ enum Color
     WHITE
 };
 
-void log_prepare(char *fn, char *mode);
+void log_prepare(const char *fn, const char *mode);
 void log_setloglevel(uint8 lvl);
 void log_setlogtime(bool b);
 void log(const char *str, ...);

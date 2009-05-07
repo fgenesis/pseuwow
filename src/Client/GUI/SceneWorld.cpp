@@ -668,7 +668,7 @@ void SceneWorld::UpdateTerrain(void)
                 {
                     for(uint32 i = 0; i < 10; i++)
                     {
-                        sprintf(fieldname_t,"file%u",i + 1); // starts with "file1"
+                        sprintf(fieldname_t,"file%lu",i + 1); // starts with "file1"
                         fieldId[i] = sounddb->GetFieldId(fieldname_t);
                     }
 

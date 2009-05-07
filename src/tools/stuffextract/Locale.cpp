@@ -5,8 +5,8 @@
 
 bool locale_set=false;
 char my_locale[5];
-char *cconf = "WTF/config.wtf";
-char *cconfentry = "SET locale \"";
+const char *cconf = "WTF/config.wtf";
+const char *cconfentry = "SET locale \"";
 
 void SetLocale(char *loc)
 {

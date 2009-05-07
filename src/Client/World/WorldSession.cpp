@@ -245,7 +245,7 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
     catch (ByteBufferException bbe)
     {
         char errbuf[200];
-        sprintf(errbuf,"attempt to \"%s\" %u bytes at position %u out of total %u bytes. (wpos=%u)", bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
+        sprintf(errbuf,"attempt to \"%s\" %lu bytes at position %lu out of total %lu bytes. (wpos=%lu)", bbe.action, bbe.readsize, bbe.rpos, bbe.cursize, bbe.wpos);
         logerror("Exception while handling opcode %u [%s]!",packet->GetOpcode(),GetOpcodeName(packet->GetOpcode()));
         logerror("WorldSession: ByteBufferException");
         logerror("ByteBuffer reported: %s", errbuf);
@@ -441,7 +441,7 @@ void WorldSession::_DoTimedActions(void)
     }
 }
 
-std::string WorldSession::DumpPacket(WorldPacket& pkt, int errpos, char *errstr)
+std::string WorldSession::DumpPacket(WorldPacket& pkt, int errpos, const char *errstr)
 {
     static std::map<uint32,uint32> opstore;
     std::stringstream s;
@@ -1584,7 +1584,7 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
         for(uint8 i = strlen(racename); strlen(racename) < 12; i++)
             racename[i] = ' ';
         char tmp[12];
-        sprintf(tmp,"%u",wle.level);
+        sprintf(tmp,"%lu",wle.level);
         std::string lvl_str = tmp;
         while(lvl_str.length() < 3)
             lvl_str = " " + lvl_str;

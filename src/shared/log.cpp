@@ -10,7 +10,7 @@ FILE *logfile = NULL;
 uint8 loglevel = 0;
 bool logtime = false;
 
-void log_prepare(char *fn, char *mode = NULL)
+void log_prepare(const char *fn, const char *mode = NULL)
 {
     if(!mode)
         mode = "a";
@@ -49,7 +49,7 @@ void log(const char *str, ...)
 
     if(logfile)
     {
-        fprintf(logfile, getDateString().c_str());
+        fprintf(logfile, "%s", getDateString().c_str());
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -76,7 +76,7 @@ void logdetail(const char *str, ...)
 
     if(logfile)
     {
-        fprintf(logfile, getDateString().c_str());
+        fprintf(logfile, "%s", getDateString().c_str());
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -104,7 +104,7 @@ void logdebug(const char *str, ...)
 
     if(logfile)
     {
-        fprintf(logfile, getDateString().c_str());
+        fprintf(logfile, "%s", getDateString().c_str());
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -132,7 +132,7 @@ void logdev(const char *str, ...)
 
 	if(logfile)
 	{
-		fprintf(logfile, getDateString().c_str());
+		fprintf(logfile, "%s", getDateString().c_str());
 		va_start(ap, str);
 		vfprintf(logfile, str, ap);
 		fprintf(logfile, "\n" );
@@ -157,7 +157,7 @@ void logerror(const char *str, ...)
 
     if(logfile)
     {
-        fprintf(logfile, getDateString().c_str());
+        fprintf(logfile, "%s", getDateString().c_str());
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -182,7 +182,7 @@ void logcritical(const char *str, ...)
 
     if(logfile)
     {
-        fprintf(logfile, getDateString().c_str());
+        fprintf(logfile, "%s", getDateString().c_str());
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -209,7 +209,7 @@ void logcustom(uint8 lvl, Color color, const char *str, ...)
 
     if(logfile)
     {
-        fprintf(logfile, getDateString().c_str());
+        fprintf(logfile, "%s", getDateString().c_str());
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );

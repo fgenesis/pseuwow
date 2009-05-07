@@ -573,7 +573,7 @@ bool IsFloatField(uint8 ty, uint32 f)
     };
 
     if(ty & TYPE_OBJECT)
-        for(uint32 i = 0; floats_object[i] != (-1); i++)
+        for(uint32 i = 0; floats_object[i] != (uint32)(-1); i++)
             if(floats_object[i] == f)
                 return true;
     /*
@@ -587,23 +587,23 @@ bool IsFloatField(uint8 ty, uint32 f)
                 return true;
     */
     if(ty & TYPE_UNIT)
-        for(uint32 i = 0; floats_unit[i] != (-1); i++)
+        for(uint32 i = 0; floats_unit[i] != (uint32)(-1); i++)
             if(floats_unit[i] == f)
                 return true;
     if(ty & TYPE_PLAYER)
-        for(uint32 i = 0; floats_player[i] != (-1); i++)
+        for(uint32 i = 0; floats_player[i] != (uint32)(-1); i++)
             if(floats_player[i] == f)
                 return true;
     if(ty & TYPE_GAMEOBJECT)
-        for(uint32 i = 0; floats_gameobject[i] != (-1); i++)
+        for(uint32 i = 0; floats_gameobject[i] != (uint32)(-1); i++)
             if(floats_gameobject[i] == f)
                 return true;
     if(ty & TYPE_DYNAMICOBJECT)
-        for(uint32 i = 0; floats_dynobject[i] != (-1); i++)
+        for(uint32 i = 0; floats_dynobject[i] != (uint32)(-1); i++)
             if(floats_dynobject[i] == f)
                 return true;
     if(ty & TYPE_CORPSE)
-        for(uint32 i = 0; floats_corpse[i] != (-1); i++)
+        for(uint32 i = 0; floats_corpse[i] != (uint32)(-1); i++)
             if(floats_corpse[i] == f)
                 return true;
     

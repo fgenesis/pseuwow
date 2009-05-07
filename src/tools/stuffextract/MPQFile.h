@@ -12,9 +12,9 @@ public:
     MPQFile(const char*);
 	~MPQFile();
     inline bool IsOpen(void) { return _isopen; }
-    ByteBuffer ReadFile(char*);
-    uint32 GetFileSize(char*);
-    bool HasFile(char*);
+    ByteBuffer ReadFile(const char*);
+    uint32 GetFileSize(const char*);
+    bool HasFile(const char*);
 	void Close(void);
 
 private:

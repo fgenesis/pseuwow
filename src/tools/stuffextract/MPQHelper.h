@@ -8,10 +8,10 @@ class MPQFile;
 class MPQHelper
 {
 public:
-    MPQHelper(char*);
+    MPQHelper(const char*);
     ~MPQHelper();
-    ByteBuffer ExtractFile(char*);
-    bool FileExists(char*);
+    ByteBuffer ExtractFile(const char*);
+    bool FileExists(const char*);
 private:
     std::list<MPQFile*> _files;
     std::list<std::string> _patches;

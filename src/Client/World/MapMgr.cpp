@@ -6,7 +6,7 @@
 
 void MakeMapFilename(char *fn, uint32 m, uint32 x, uint32 y)
 {
-    sprintf(fn,"./data/maps/%u_%u_%u.adt",m,x,y);
+    sprintf(fn,"./data/maps/%lu_%lu_%lu.adt",m,x,y);
 }
 
 bool TileExistsInFile(uint32 m, uint32 x, uint32 y)
@@ -38,7 +38,7 @@ void MapMgr::Update(float x, float y, uint32 m)
         Flush(); // we teleported to a new map, drop all loaded maps
         WDTFile *wdt = new WDTFile();
         char buf[100];
-        sprintf(buf,"data/maps/%u.wdt",m);
+        sprintf(buf,"data/maps/%lu.wdt",m);
         if(!wdt->Load(buf))
         {
             logerror("MAPMGR: Could not load WDT file '%s'",buf);

@@ -148,7 +148,7 @@ private:
     bool _error;
     bool _createws, _creaters; // must create world/realm session?
     BigNumber _sessionkey;
-    char *_ver,*_ver_short;
+    const char *_ver,*_ver_short;
     SocketHandler _sh;
     CliRunnable *_cli;
     ZThread::Thread _clithread;
