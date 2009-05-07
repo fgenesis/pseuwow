@@ -15,7 +15,8 @@
 *
 ********************************************************************/
 
-#ifndef _WIN32 || _WIN64
+#if defined(__APPLE__) & defined( __MACH__)
+
 #include "StormPort.h"
 #include "StormLib.h"
 
@@ -269,7 +270,7 @@ int GetLastError()
 /********************************************************************
 *    ErrString
 ********************************************************************/
-char *ErrString(int err)
+const char *ErrString(int err)
 {
     switch (err) 
     {
