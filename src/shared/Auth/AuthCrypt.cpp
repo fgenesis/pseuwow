@@ -34,7 +34,8 @@ void AuthCrypt::DecryptRecv(uint8 *data, size_t len, bool temp)
 {
     if (!_initialized) return;
     //if (len < CRYPTED_RECV_LEN) return;
-    uint8 ti, tj;
+    uint8 ti = 0;
+    uint8 tj = 0;
     if (temp)
     {
         ti = _recv_i;
