@@ -11,7 +11,8 @@ CM2MeshFileLoader.h    MCamera.h       SceneGuiStart.cpp  SImage.cpp       Scene
 CIrrKlangAudioStreamLoaderMP3.cpp	CIrrKlangAudioStreamLoaderMP3.h	CIrrKlangAudioStreamMP3.cpp	CIrrKlangAudioStreamMP3.h\
 ikpMP3.cpp decoder/bits.c  decoder/internal.h  decoder/mpaudec.c  decoder/mpaudec.h  decoder/mpaudectab.h  decoder/mpegaudio.h\
 irrKlangSceneNode.cpp irrKlangSceneNode.h CBoneSceneNode.cpp CBoneSceneNode.h SSkinnedMesh.cpp SSkinnedMesh.h\
-CMDHMemoryReadFile.cpp CMDHMemoryReadFile.h MemoryInterface.cpp MemoryInterface.h
+CMDHMemoryReadFile.cpp CMDHMemoryReadFile.h MemoryInterface.cpp MemoryInterface.h\
+CWMOMeshFileLoader.cpp CWMOMeshFileLoader.h
 
 
 libgui_a_LIBADD = $(top_builddir)/src/shared/libshared.a $(top_builddir)/src/shared/Auth/libauth.a  $(top_builddir)/src/shared/Network/libnetwork.a

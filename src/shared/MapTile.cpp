@@ -98,6 +98,24 @@ void MapTile::ImportFromADT(ADTFile *adt)
         _doodads.push_back(d);
     }
 
+    // copy over wmos and do some transformations
+    DEBUG(logdebug("%u wmos", adt->_wmosp.size()));
+    for(uint32 i = 0; i < adt->_wmosp.size(); i++)
+    {
+        WorldMapObject wmo;
+        MODF_chunk& modf = adt->_wmosp[i];
+        wmo.y = -(modf.x - ZEROPOINT);
+        wmo.z = modf.y;
+        wmo.x = -(modf.z - ZEROPOINT);
+        wmo.ox = modf.ox;
+        wmo.oy = modf.oy;
+        wmo.oz = modf.oz;
+        wmo.flags = modf.flags;
+        wmo.uniqueid = modf.uniqueid;
+        wmo.model = std::string("./data/wmo/") + NormalizeFilename(_PathToFileName(adt->_wmos[modf.id]));
+        _wmo_data.push_back(wmo);
+    }
+
     // copy sound emitters
     _soundemm = adt->_soundemm;
 
@@ -115,7 +133,7 @@ void MapTileStorage::_DebugDump(void)
     {
         for(uint32 j=0; j<64; j++)
         {
-            
+
             out += (_hasTile[i*64 + j] ? "1" : "0");
         }
         out += "\n";

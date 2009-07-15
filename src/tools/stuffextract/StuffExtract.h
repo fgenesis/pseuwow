@@ -41,6 +41,8 @@ void ExtractSoundFiles(void);
 
 void FetchTexturesFromModel(ByteBuffer);
 
+void WMO_Parse_Data(ByteBuffer, const char*, bool, bool, bool);
+
 void ADT_ExportStringSetByOffset(const uint8*, uint32, std::set<NameAndAlt>&, const char*);
 void ADT_FillTextureData(const uint8*,std::set<NameAndAlt>&);
 void ADT_FillWMOData(const uint8*,std::set<NameAndAlt>&);

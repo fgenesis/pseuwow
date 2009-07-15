@@ -112,7 +112,7 @@ private:
     IGUIListBox *charlistbox; // temporary until something better found
     //Character creation //temporary. maybe a whole new character creation scene should be used?
     IGUIWindow  *newcharwin;
-    IGUIComboBox *raceselect; 
+    IGUIComboBox *raceselect;
     IGUIComboBox *classselect;
     IGUIEditBox *charname;
     IGUIElement *msgbox; // display status/result of character creation
@@ -167,6 +167,7 @@ private:
     IGUIStaticText *debugText;
     bool debugmode;
     std::map<uint32,SceneNodeWithGridPos> _doodads;
+    std::map<uint32,SceneNodeWithGridPos> _wmos;
     std::map<uint32,SceneNodeWithGridPos> _sound_emitters;
     scene::ISceneNode *sky;
     scene::ISceneNode *selectedNode, *oldSelectedNode, *focusedNode, *oldFocusedNode;

@@ -58,6 +58,19 @@ namespace scene
 		//! set user axis aligned bounding box
 		virtual void setBoundingBox( const core::aabbox3df& box);
 
+        //! recalculates the bounding box
+        void recalculateBoundingBox()
+        {
+                if (LocalBuffers.size())
+                {
+                        BoundingBox = LocalBuffers[0]->getBoundingBox();
+                        for (u32 i=1; i<LocalBuffers.size(); ++i)
+                                BoundingBox.addInternalBox(LocalBuffers[i]->getBoundingBox());
+                }
+                else
+                        BoundingBox.reset(0.0f, 0.0f, 0.0f);
+        }
+
 		//! sets a flag of all contained materials to a new value
 		virtual void setMaterialFlag(video::E_MATERIAL_FLAG flag, bool newvalue);
 

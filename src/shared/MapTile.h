@@ -35,6 +35,14 @@ struct Doodad
     std::string model;
 };
 
+struct WorldMapObject
+{
+    uint32 uniqueid;
+    float x,y,z,ox,oy,oz;
+    uint16 flags,doodadset;
+    std::string model;
+};
+
 // generic map tile class. stores the information previously stored in an ADT file
 // in an easier to use form.
 class MapTile
@@ -53,6 +61,8 @@ public:
     inline Doodad *GetDoodad(uint32 i) { return &_doodads[i]; }
     inline uint32 GetSoundEmitterCount(void) { return _soundemm.size(); }
     inline MCSE_chunk *GetSoundEmitter(uint32 i) { return &_soundemm[i]; }
+    inline uint32 GetWMOCount(void) { return _wmo_data.size(); }
+    inline WorldMapObject *GetWMO(uint32 i) { return &_wmo_data[i]; }
 
 private:
     MapChunk _chunks[256]; // 16x16
@@ -60,6 +70,7 @@ private:
     std::vector<std::string> _wmos;
     std::vector<std::string> _models;
     std::vector<Doodad> _doodads;
+    std::vector<WorldMapObject> _wmo_data;
     std::vector<MCSE_chunk> _soundemm;
 
     float _xbase,_ybase,_hbase;
