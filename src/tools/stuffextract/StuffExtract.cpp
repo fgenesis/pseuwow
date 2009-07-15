@@ -13,6 +13,7 @@
 #include "Locale.h"
 #include "ProgressBar.h"
 #include "../../Client/GUI/CM2MeshFileLoader.h"
+#include "../../Client/GUI/CWMOMeshFileLoader.h"
 
 int replaceSpaces (int i) { return i==(int)' ' ? (int)'_' : i; }
 
@@ -21,11 +22,12 @@ std::map<uint32,std::string> mapNames;
 std::set<NameAndAlt> texNames;
 std::set<NameAndAlt> modelNames;
 std::set<NameAndAlt> wmoNames;
+std::set<NameAndAlt> wmoGroupNames;
 std::set<NameAndAlt> soundFileSet;
 
 
 // default config; SCPs are done always
-bool doMaps=true, doSounds=false, doTextures=false, doWmos=false, doModels=false, doMd5=true, doAutoclose=false;
+bool doMaps=true, doSounds=false, doTextures=false, doWmos=false, doWmogroups=false, doModels=false, doMd5=true, doAutoclose=false;
 
 
 
@@ -52,7 +54,7 @@ int main(int argc, char *argv[])
         CreateDir("stuffextract/data");
 		ConvertDBC();
         if(doMaps) ExtractMaps();
-        if(doTextures || doModels || doWmos) ExtractMapDependencies();
+        if(doTextures || doModels || doWmos || doWmogroups) ExtractMapDependencies();
         if(doSounds) ExtractSoundFiles();
 		//...
 		if (!doAutoclose)
@@ -96,6 +98,7 @@ void ProcessCmdArgs(int argc, char *argv[])
             if     (!stricmp(what,"maps"))        doMaps = on;
             else if(!stricmp(what,"textures"))    doTextures = on;
             else if(!stricmp(what,"wmos"))        doWmos = on;
+            else if(!stricmp(what,"wmogroups"))   doWmogroups = on;
             else if(!stricmp(what,"models"))      doModels = on;
             else if(!stricmp(what,"sounds"))      doSounds = on;
             else if(!stricmp(what,"md5"))         doMd5 = on;
@@ -125,6 +128,11 @@ void ProcessCmdArgs(int argc, char *argv[])
     {
         doWmos = false;
     }
+    if(!doWmos)
+    {
+        doWmogroups = false;
+    }
+
     if(help)
     {
         PrintHelp();
@@ -139,6 +147,7 @@ void PrintConfig(void)
     printf("config: Do maps:      %s\n",doMaps?"yes":"no");
     printf("config: Do textures:  %s\n",doTextures?"yes":"no");
     printf("config: Do wmos:      %s\n",doWmos?"yes":"no");
+    printf("config: Do wmogroups: %s\n",doWmogroups?"yes":"no");
     printf("config: Do models:    %s\n",doModels?"yes":"no");
     printf("config: Do sounds:    %s\n",doSounds?"yes":"no");
     printf("config: Calc md5:     %s\n",doMd5?"yes":"no");
@@ -153,6 +162,7 @@ void PrintHelp(void)
     printf("maps      - map extraction\n");
     printf("textures  - extract textures\n");
     printf("wmos      - extract map WMOs (requires maps extraction)\n");
+    printf("wmogroups - extract map WMO group files (requires maps and wmos extraction)\n");
     printf("models    - extract models\n");
     printf("sounds    - extract sound files (wav/mp3)\n");
     printf("md5       - write MD5 checksum lists of extracted files\n");
@@ -515,12 +525,16 @@ bool ConvertDBC(void)
                 if(value.size()) // only store if not null
                 {
                     // TODO: add check for wmo model files ?
-                    if(doModels)
+                    if(doModels && stricmp(value.c_str()+value.length()-4,".wmo"))
                         modelNames.insert(NameAndAlt(value)); // we need to extract model later, store it
-
+                    else
+                        wmoNames.insert(NameAndAlt(value)); //this is a WMO
+                    //Interestingly, some of the files referenced here have MDL extension - WTF?
                     std::string fn = _PathToFileName(value);
-                    if(stricmp(fn.c_str()+fn.length()-4, "mdx"))
+                    if(!stricmp(fn.c_str()+fn.length()-3, "mdx") or !stricmp(fn.c_str()+fn.length()-3, "mdl"))
                         fn = fn.substr(0,fn.length()-3) + "m2";
+                    else
+                        logdebug("This should be a WMO: %s\n",fn.c_str());
                     GameObjectDisplayInfoStorage[id].push_back(std::string(GameObjectDisplayInfoFieldNames[field]) + "=" + fn);
 
                     std::string texture = value.substr(0,value.length()-3) + "blp";
@@ -709,11 +723,98 @@ void ExtractMapDependencies(void)
     std::string pathmodel = path + "/model";
     std::string pathwmo = path + "/wmo";
     std::string mpqfn,realfn,altfn;
-    MD5FileMap md5Tex, md5Wmo, md5Model;
+    MD5FileMap md5Tex, md5Wmo, md5Wmogroup, md5Model;
     CreateDir(pathtex.c_str());
     CreateDir(pathmodel.c_str());
     CreateDir(pathwmo.c_str());
     uint32 wmosdone=0,texdone=0,mdone=0;
+
+    if(doWmos)
+    {
+        printf("Extracting WMOS...\n");
+        bar = new barGoLink(wmoNames.size(),true);
+        for(std::set<NameAndAlt>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
+        {
+            bar->step();
+            mpqfn = i->name;
+            altfn = i->alt;
+            if(altfn.empty())
+                altfn = mpqfn;
+            if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
+                continue;
+            realfn = pathwmo + "/" + _PathToFileName(altfn);
+            std::fstream fh;
+            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+            if(fh.is_open())
+            {
+                const ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
+                fh.write((const char*)bb.contents(),bb.size());
+                //Extract number of group files, Texture file names and M2s from WMO
+                if(doWmogroups || doTextures || doModels) WMO_Parse_Data(bb,mpqfn.c_str(),doWmogroups,doTextures,doModels);
+                if(doMd5)
+                {
+                    MD5Hash h;
+                    h.Update((uint8*)bb.contents(), bb.size());
+                    h.Finalize();
+                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                    md5Wmo[_PathToFileName(realfn)] = md5ptr;
+                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                }
+                wmosdone++;
+            }
+            else
+                printf("Could not write WMO %s\n",realfn.c_str());
+            fh.close();
+        }
+        printf("\n");
+        if(wmoNames.size())
+            OutMD5((char*)pathwmo.c_str(),md5Wmo);
+        delete bar;
+    }
+
+    if(doWmogroups)
+    {
+        printf("Extracting WMO Group Files...\n");
+        bar = new barGoLink(wmoGroupNames.size(),true);
+        for(std::set<NameAndAlt>::iterator i = wmoGroupNames.begin(); i != wmoGroupNames.end(); i++)
+        {
+            bar->step();
+            mpqfn = i->name;
+            altfn = i->alt;
+            if(altfn.empty())
+                altfn = mpqfn;
+            if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
+                continue;
+            realfn = pathwmo + "/" + _PathToFileName(altfn);
+            std::fstream fh;
+            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
+            if(fh.is_open())
+            {
+                const ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
+                fh.write((const char*)bb.contents(),bb.size());
+                if(doMd5)
+                {
+                    MD5Hash h;
+                    h.Update((uint8*)bb.contents(), bb.size());
+                    h.Finalize();
+                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
+                    md5Wmogroup[_PathToFileName(realfn)] = md5ptr;
+                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
+                }
+                wmosdone++;
+            }
+            else
+                printf("Could not write WMO %s\n",realfn.c_str());
+            fh.close();
+        }
+        printf("\n");
+        if(wmoGroupNames.size())
+            OutMD5((char*)pathwmo.c_str(),md5Wmogroup);
+        delete bar;
+    }
+
+
+
 
     if(doModels)
     {
@@ -858,46 +959,6 @@ void ExtractMapDependencies(void)
         delete bar;
     }
 
-    if(doWmos)
-    {
-        printf("Extracting WMOS...\n");
-        bar = new barGoLink(wmoNames.size(),true);
-        for(std::set<NameAndAlt>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
-        {
-            bar->step();
-            mpqfn = i->name;
-            altfn = i->alt;
-            if(altfn.empty())
-                altfn = mpqfn;
-            if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
-                continue;
-            realfn = pathwmo + "/" + _PathToFileName(altfn);
-            std::fstream fh;
-            fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
-            if(fh.is_open())
-            {
-                const ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
-                fh.write((const char*)bb.contents(),bb.size());
-                if(doMd5)
-                {
-                    MD5Hash h;
-                    h.Update((uint8*)bb.contents(), bb.size());
-                    h.Finalize();
-                    uint8 *md5ptr = new uint8[MD5_DIGEST_LENGTH];
-                    md5Wmo[_PathToFileName(realfn)] = md5ptr;
-                    memcpy(md5ptr, h.GetDigest(), MD5_DIGEST_LENGTH);
-                }
-                wmosdone++;
-            }
-            else
-                printf("Could not write WMO %s\n",realfn.c_str());
-            fh.close();
-        }
-        printf("\n");
-        if(wmoNames.size())
-            OutMD5((char*)pathwmo.c_str(),md5Wmo);
-        delete bar;
-    }
 
 }
 
@@ -951,6 +1012,77 @@ void ExtractSoundFiles(void)
     printf("\n");
 }
 
+void WMO_Parse_Data(ByteBuffer bb, const char* _filename, bool groups, bool textures, bool models)
+{
+    bb.rpos(20); //Skip MVER chunk and header of MHDR
+    irr::scene::RootHeader header;
+    if (bb.size() < sizeof(header))
+        return;
+    bb.read((uint8*)&header, sizeof(header));
+    if(groups)
+    {
+        std::string filename=_filename;
+        for(uint32 i=0; i<header.nGroups; i++)
+        {
+            char grpfilename[255];
+            sprintf(grpfilename,"%s_%03lu.wmo",filename.substr(0,filename.length()-4).c_str(),i);
+            wmoGroupNames.insert(NameAndAlt(grpfilename));
+        }
+
+    }
+    if(models || textures)
+    {
+        uint32 size;
+        uint8 _cc[5];
+        uint8 *fourcc = &_cc[0];
+        fourcc[4]=0;
+
+        while(bb.rpos()<bb.size())
+        {
+            bb.read((uint8*)fourcc,4);
+            bb.read((uint8*)&size,4);
+            if(!strcmp((char*)fourcc,"XTOM") && textures)
+            {
+                std::string temp;
+                char c;
+                uint32 read=0;
+                while(read<size)
+                {
+                    bb.read((uint8*)&c,sizeof(char));
+                    if(c=='\x0' && temp.size()>0)
+                    {
+                        texNames.insert(NameAndAlt(temp));
+                        temp.clear();
+                    }
+                    else if(c!=0)
+                        temp += c;
+                    read++;
+                }
+            }
+            else if(!strcmp((char*)fourcc,"NDOM") && models)
+            {
+                std::string temp;
+                char c;
+                uint32 read=0;
+                while(read<size)
+                {
+                    bb.read((uint8*)&c,sizeof(char));
+                    if(c=='\x0' && temp.size()>0)
+                    {
+                        modelNames.insert(NameAndAlt(temp));
+                        temp.clear();
+                    }
+                    else if(c!=0)
+                        temp += c;
+                    read++;
+                }
+            }
+            else
+                bb.rpos(bb.rpos()+size);
+        }
+    }
+
+}
 void ADT_ExportStringSetByOffset(const uint8* data, uint32 off, std::set<NameAndAlt>& st,const char* stop)
 {
     data += ((uint32*)data)[off]; // seek to correct absolute offset

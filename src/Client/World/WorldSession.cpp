@@ -60,7 +60,7 @@ WorldSession::~WorldSession()
             GetInstance()->Sleep(1);                       // (it can cause crash otherwise)
         logdebug("~WorldSession(): ... world GUI deleted, continuing to close session");
     }
-        
+
     _instance->GetScripts()->RunScriptIfExists("_onworldsessiondelete");
 
     logdebug("~WorldSession(): %u packets left unhandled, and %u delayed. deleting.",pktQueue.size(),delayedPktQueue.size());
@@ -108,7 +108,7 @@ void WorldSession::Start(void)
         _sh.Select(3,0);
         GetInstance()->Sleep(100);
     }
-    logdev("WorldSession::Start() done, mustdie:%u, socket_ok:%u stopped:%u",MustDie(),_socket->IsOk(),GetInstance()->Stopped()); 
+    logdev("WorldSession::Start() done, mustdie:%u, socket_ok:%u stopped:%u",MustDie(),_socket->IsOk(),GetInstance()->Stopped());
 }
 
 void WorldSession::_LoadCache(void)
@@ -263,7 +263,7 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
         logerror("Data: pktsize=%u, handler=0x%X queuesize=%u",packet->size(),table[hpos].handler,pktQueue.size());
         logerror("Packet Hexdump:");
         logerror("%s",toHexDump((uint8*)packet->contents(),packet->size(),true).c_str());
-        
+
         if(GetInstance()->GetConf()->dumpPackets)
             DumpPacket(*packet, packet->rpos(), "unknown exception");
     }
@@ -399,7 +399,7 @@ void WorldSession::AddSendWorldPacket(WorldPacket& pkt)
     if(pkt.size())
         wp->append(pkt.contents(),pkt.size());
     sendPktQueue.add(wp);
-}    
+}
 
 void WorldSession::SetTarget(uint64 guid)
 {
@@ -457,7 +457,7 @@ std::string WorldSession::DumpPacket(WorldPacket& pkt, int errpos, const char *e
         s << "DATA-HEX:\n";
         s << toHexDump((uint8*)pkt.contents(),pkt.size(),true,32);
         s << "\n";
-        
+
         s << "DATA-TEXT:\n";
         for(uint32 i = 0; i < pkt.size(); i++)
         {
@@ -508,7 +508,7 @@ std::string WorldSession::GetOrRequestPlayerName(uint64 guid)
     }
     return name;
 }
-    
+
 
 
 
@@ -836,7 +836,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 
     recvPacket >> source_guid >> unk; // added in 2.1.0
     if (type == CHAT_MSG_CHANNEL)
-    {	
+    {
         recvPacket >> channel; // extract channel name
     }
     recvPacket >> target_guid >> msglen >> msg;
@@ -1334,11 +1334,11 @@ void WorldSession::_HandleCastSuccessOpcode(WorldPacket& recvPacket)
 
     if (GetMyChar()->GetGUID() == casterGuid)
         logdetail("Cast of spell %u successful.",spellId);
-    else 
+    else
     {
         Object *caster = objmgr.GetObj(casterGuid);
         if(caster)
-            logdetail("%s casted spell %u", caster->GetName(), spellId);
+            logdetail("%s casted spell %u", caster->GetName().c_str(), spellId);
         else
             logerror("Caster of spell %u (GUID "I64FMT") is unknown object!",spellId,casterGuid);
     }
@@ -1550,7 +1550,7 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
         {
             _whoList.clear(); // need to clear current list only if requesting more then one player name
         }
-    }        
+    }
 
     for(uint32 i = 0; i < count; i++)
     {
@@ -1641,7 +1641,7 @@ void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
     objmgr.Add(ct);
     objmgr.AssignNameToObj(entry, TYPEID_UNIT, ct->name);
 }
-    
+
 void WorldSession::_HandleGameobjectQueryResponseOpcode(WorldPacket& recvPacket)
 {
     uint32 entry;

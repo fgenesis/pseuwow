@@ -1,6 +1,7 @@
 #include "common.h"
 #include "irrlicht/irrlicht.h"
 #include "CM2MeshFileLoader.h"
+#include "CWMOMeshFileLoader.h"
 #include "CImageLoaderBLP.h"
 #include "Object.h"
 #include "DrawObject.h"
@@ -132,6 +133,8 @@ void PseuGUI::_Init(void)
 	_driver->addExternalImageLoader(BLPloader);
     scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device, "./data/texture");
     _smgr->addExternalMeshLoader(m2loader);
+    scene::CWMOMeshFileLoader* wmoloader = new scene::CWMOMeshFileLoader(_device, "./data/texture");
+    _smgr->addExternalMeshLoader(wmoloader);
     _throttle=0;
     _initialized = true;
 

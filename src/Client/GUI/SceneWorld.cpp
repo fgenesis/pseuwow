@@ -645,16 +645,59 @@ void SceneWorld::UpdateTerrain(void)
                                 // here:
                                 // doodad->setRotation(core::vector3df(-d->ox,0,-d->oz)); // rotated axes looks good
                                 // doodad->setRotation(core::vector3df(0,-d->oy,0));      // same here
-                                doodad->setRotation(core::vector3df(-d->ox,-d->oy,-d->oz)); // very ugly with some rotations, |ang|>360? 
-                                
+                                doodad->setRotation(core::vector3df(-d->ox,-d->oy,-d->oz)); // very ugly with some rotations, |ang|>360?
+
                                 doodad->setScale(core::vector3df(d->scale, d->scale, d->scale));
-                                
+
                                 // smgr->addTextSceneNode(this->device->getGUIEnvironment()->getBuiltInFont(), (irr::core::stringw(L"")+(float)d->uniqueid).c_str() , irr::video::SColor(255,255,255,255),doodad, irr::core::vector3df(0,5,0));
                                 SceneNodeWithGridPos gp;
                                 gp.gx = mapmgr->GetGridX() + tilex - 1;
                                 gp.gy = mapmgr->GetGridY() + tiley - 1;
                                 gp.scenenode = doodad;
                                 _doodads[d->uniqueid] = gp;
+                            }
+                        }
+                    }
+                }
+                // create WorldMapObjects (WMOs)
+                logdebug("Loading %u WMOs for tile (%u, %u)", maptile->GetWMOCount(), tile_real_x, tile_real_y);
+                for(uint32 i = 0; i < maptile->GetWMOCount(); i++)
+                {
+                    WorldMapObject *wmo = maptile->GetWMO(i);
+                    if(_wmos.find(wmo->uniqueid) == _wmos.end()) // only add wmos that dont exist yet
+                    {
+                        scene::IAnimatedMesh *mesh = smgr->getMesh(wmo->model.c_str());
+                        if(mesh)
+                        {
+                            scene::IAnimatedMeshSceneNode *wmo_node = smgr->addAnimatedMeshSceneNode(mesh);
+                            if(wmo_node)
+                            {
+                                for(u32 m = 0; m < wmo_node->getMaterialCount(); m++)
+                                {
+                                    wmo_node->getMaterial(m).setFlag(EMF_FOG_ENABLE, true);
+                                }
+                                wmo_node->setAutomaticCulling(EAC_BOX);
+                                // this is causing the framerate to drop to ~1. better leave it disabled for now :/
+                                //doodad->addShadowVolumeSceneNode();
+                                wmo_node->setPosition(core::vector3df(-wmo->x, wmo->z, -wmo->y));
+
+                                // Rotation problems
+                                // MapTile.cpp - changed to
+                                // d.ox = mddf.c; d.oy = mddf.b; d.oz = mddf.a;
+                                // its nonsense to do d.oy = mddf.b-90; and rotation with -d->oy-90 = -(mddf.b-90)-90 = -mddf.b
+                                // here:
+                                // doodad->setRotation(core::vector3df(-d->ox,0,-d->oz)); // rotated axes looks good
+                                // doodad->setRotation(core::vector3df(0,-d->oy,0));      // same here
+                                //wmo_node->setRotation(core::vector3df(-wmo->ox,-wmo->oy,-wmo->oz)); // very ugly with some rotations, |ang|>360?
+
+                                //wmo_node->setScale(core::vector3df(5,5,5));
+
+                                // smgr->addTextSceneNode(this->device->getGUIEnvironment()->getBuiltInFont(), (irr::core::stringw(L"")+(float)d->uniqueid).c_str() , irr::video::SColor(255,255,255,255),doodad, irr::core::vector3df(0,5,0));
+                                SceneNodeWithGridPos gp;
+                                gp.gx = mapmgr->GetGridX() + tilex - 1;
+                                gp.gy = mapmgr->GetGridY() + tiley - 1;
+                                gp.scenenode = wmo_node;
+                                _wmos[wmo->uniqueid] = gp;
                             }
                         }
                     }
