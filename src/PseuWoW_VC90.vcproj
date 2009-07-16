@@ -206,6 +206,105 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="Release noconsole|Win32"
+			OutputDirectory="$(SolutionDir)/bin"
+			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release/PseuWoW.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="shared;Client;Client/World;Client/Realm;dep/include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_IRR_STATIC_LIB_"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="false"
+				EnableEnhancedInstructionSet="0"
+				PrecompiledHeaderFile=".\Release/PseuWoW.pch"
+				AssemblerListingLocation="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ObjectFile="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="0"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.LIB irrKlang.lib"
+				ShowProgress="0"
+				OutputFile="$(OutDir)/$(InputName)_noconsole.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(SolutionDir)\src\dep\lib\static"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames="libci.lib"
+				AssemblyDebug="0"
+				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/Release/PseuWoW.pdb"
+				SubSystem="2"
+				OptimizeReferences="2"
+				SetChecksum="true"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -280,10 +379,6 @@
 			</File>
 			<File
 				RelativePath=".\Client\SCPDatabase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Client\SysDefs.h"
 				>
 			</File>
 			<Filter
@@ -557,19 +652,19 @@
 				Name="GUI"
 				>
 				<File
-					RelativePath=".\Client\GUI\CCursorController.cpp"
+					RelativePath=".\Client\Gui\CCursorController.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Client\GUI\CCursorController.h"
+					RelativePath=".\Client\Gui\CCursorController.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Client\GUI\CImageLoaderBLP.cpp"
+					RelativePath=".\Client\Gui\CImageLoaderBLP.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Client\GUI\CImageLoaderBLP.h"
+					RelativePath=".\Client\Gui\CImageLoaderBLP.h"
 					>
 				</File>
 				<File
@@ -578,6 +673,22 @@
 				</File>
 				<File
 					RelativePath=".\Client\Gui\CM2MeshFileLoader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\Gui\CMDHMemoryReadFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\Gui\CMDHMemoryReadFile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\GUI\CWMOMeshFileLoader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\GUI\CWMOMeshFileLoader.h"
 					>
 				</File>
 				<File
@@ -593,15 +704,23 @@
 					>
 				</File>
 				<File
-                    RelativePath=".\Client\Gui\GUIEventReceiver.h"
-                    >
-				</File>
-				<File
 					RelativePath=".\Client\Gui\DrawObjMgr.h"
 					>
 				</File>
 				<File
+					RelativePath=".\Client\Gui\GUIEventReceiver.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Client\Gui\MCamera.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\Gui\MemoryInterface.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\Gui\MemoryInterface.h"
 					>
 				</File>
 				<File
@@ -621,15 +740,15 @@
 					>
 				</File>
 				<File
-                    RelativePath=".\Client\Gui\SceneCharselection.cpp"
-                    >
-				</File>
-				<File
 					RelativePath=".\Client\Gui\Scene.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Client\GUI\SceneData.h"
+					RelativePath=".\Client\Gui\SceneCharselection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Client\Gui\SceneData.h"
 					>
 				</File>
 				<File
@@ -637,7 +756,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Client\GUI\SceneLogin.cpp"
+					RelativePath=".\Client\Gui\SceneLogin.cpp"
 					>
 				</File>
 				<File
@@ -653,11 +772,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Client\GUI\SImage.cpp"
+					RelativePath=".\Client\Gui\SImage.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Client\GUI\SImage.h"
+					RelativePath=".\Client\Gui\SImage.h"
 					>
 				</File>
 				<File
@@ -665,52 +784,66 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Client\Gui\TlTSector.h">
+					RelativePath=".\Client\Gui\TlTSector.h"
+					>
 				</File>
 				<Filter
 					Name="irrklang"
-					Filter="">
+					>
 					<File
-						RelativePath=".\Client\Gui\CIrrKlangAudioStreamLoaderMP3.cpp">
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamLoaderMP3.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Client\Gui\CIrrKlangAudioStreamLoaderMP3.h">
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamLoaderMP3.h"
+						>
 					</File>
 					<File
-						RelativePath=".\Client\Gui\CIrrKlangAudioStreamMP3.cpp">
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamMP3.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Client\Gui\CIrrKlangAudioStreamMP3.h">
+						RelativePath=".\Client\Gui\CIrrKlangAudioStreamMP3.h"
+						>
 					</File>
 					<File
-						RelativePath=".\Client\Gui\ikpMP3.cpp">
+						RelativePath=".\Client\Gui\ikpMP3.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Client\Gui\irrKlangSceneNode.cpp">
+						RelativePath=".\Client\Gui\irrKlangSceneNode.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Client\Gui\irrKlangSceneNode.h">
+						RelativePath=".\Client\Gui\irrKlangSceneNode.h"
+						>
 					</File>
 					<Filter
 						Name="decoder"
-						Filter="">
+						>
 						<File
-							RelativePath=".\Client\Gui\decoder\bits.c">
+							RelativePath=".\Client\Gui\decoder\bits.c"
+							>
 						</File>
 						<File
-							RelativePath=".\Client\Gui\decoder\internal.h">
+							RelativePath=".\Client\Gui\decoder\internal.h"
+							>
 						</File>
 						<File
-							RelativePath=".\Client\Gui\decoder\mpaudec.c">
+							RelativePath=".\Client\Gui\decoder\mpaudec.c"
+							>
 						</File>
 						<File
-							RelativePath=".\Client\Gui\decoder\mpaudec.h">
+							RelativePath=".\Client\Gui\decoder\mpaudec.h"
+							>
 						</File>
 						<File
-							RelativePath=".\Client\Gui\decoder\mpaudectab.h">
+							RelativePath=".\Client\Gui\decoder\mpaudectab.h"
+							>
 						</File>
 						<File
-							RelativePath=".\Client\Gui\decoder\mpegaudio.h">
+							RelativePath=".\Client\Gui\decoder\mpegaudio.h"
+							>
 						</File>
 					</Filter>
 				</Filter>
