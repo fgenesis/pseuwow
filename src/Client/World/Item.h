@@ -327,6 +327,8 @@ enum ITEM_SUBCLASS_QUIVER
     ITEM_SUBCLASS_AMMO_POUCH        = 3
 };
 
+#define MAX_ITEM_PROTO_DAMAGES 2
+
 struct _ItemStat
 {
     uint32 ItemStatType;
@@ -429,6 +431,7 @@ struct ItemProto
 	float  ArmorDamageModifier;
     int32  Duration;                                        // negative = realtime, positive = ingame time
     uint32 ItemLimitCategory;                               // id from ItemLimitCategory.dbc
+    uint32 HolidayId;
 };
 
 class Item : public Object

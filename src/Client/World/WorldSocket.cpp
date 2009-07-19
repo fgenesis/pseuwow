@@ -80,26 +80,28 @@ void WorldSocket::OnRead()
 
             // read first byte and check if size is 3 or 2 bytes
             uint8 firstSizeByte;
-            ibuf.SoftRead((char*)&firstSizeByte, 1);
-            _crypt.DecryptRecv(&firstSizeByte, 1, true);
+            ibuf.Read((char*)&firstSizeByte, 1);
+            _crypt.DecryptRecv(&firstSizeByte, 1);
 
             if (firstSizeByte & 0x80) // got large packet
             {
                 ServerPktHeaderBig hdr;
-                ibuf.Read((char*)&hdr, 3+2);
-                _crypt.DecryptRecv((uint8*)&hdr, 3+2, false);
+                ibuf.Read(((char*)&hdr) + 1, sizeof(ServerPktHeaderBig) - 1); // read *big* header, except first byte
+                _crypt.DecryptRecv(((uint8*)&hdr) + 1, sizeof(ServerPktHeaderBig) - 1); // decrypt 2 of 3 bytes (first one already decrypted above) of size, and cmd
+                hdr.size[0] = firstSizeByte; // assign missing first byte
 
-                uint32 realsize = ((hdr.size[0]&0x7F)<<16) | (hdr.size[1]<<8) | hdr.size[2];
+                uint32 realsize = ((hdr.size[0]&0x7F) << 16) | (hdr.size[1] << 8) | hdr.size[2];
                 _remaining = realsize - 2;
                 _opcode = hdr.cmd;
             }
             else // "normal" packet
             {
                 ServerPktHeader hdr;
-                ibuf.Read((char*)&hdr, sizeof(ServerPktHeader));
-                _crypt.DecryptRecv((uint8*)&hdr, sizeof(ServerPktHeader), false);
+                ibuf.Read(((char*)&hdr) + 1, sizeof(ServerPktHeader) - 1); // read header, except first byte
+                _crypt.DecryptRecv(((uint8*)&hdr) + 1, sizeof(ServerPktHeader) - 1); // decrypt all except first
+                hdr.size |= firstSizeByte; // add already decrypted first byte
 
-                _remaining = ntohs(hdr.size)-2;
+                _remaining = ntohs(hdr.size) - 2;
                 _opcode = hdr.cmd;
             }
             
@@ -108,7 +110,7 @@ void WorldSocket::OnRead()
                 logcritical("CRYPT ERROR: opcode=%u, remain=%u",_opcode,_remaining); // this should never be the case!
                 GetSession()->GetInstance()->SetError(); // no way to recover the crypt, must exit
                 // if the crypt gets messy its hardly possible to recover it, especially if we dont know
-                // the lentgh of the following data part
+                // the length of the following data part
                 // TODO: invent some way how to recover the crypt (reconnect?)
                 return;
             }
@@ -146,8 +148,8 @@ void WorldSocket::SendWorldPacket(WorldPacket &pkt)
 
 void WorldSocket::InitCrypt(BigNumber *k)
 {
-    _crypt.SetKey(k);
-    _crypt.Init();
-    std::string tmp = toHexDump(_crypt.GetKey(),_crypt.GetKeySize(), false);
-    logdebug("WorldSocket: Crypt initialized [%s]",tmp.c_str());
+    _crypt.Init(k);
+    const char *hexstr = k->AsHexStr();
+    logdebug("WorldSocket: Crypt initialized [%s]",hexstr);
+    OPENSSL_free((void*)hexstr);
 }

@@ -534,7 +534,7 @@ bool ConvertDBC(void)
                     if(!stricmp(fn.c_str()+fn.length()-3, "mdx") || !stricmp(fn.c_str()+fn.length()-3, "mdl"))
                         fn = fn.substr(0,fn.length()-3) + "m2";
                     else
-                        logdebug("This should be a WMO: %s\n",fn.c_str());
+                        printf("This should be a WMO: %s\n",fn.c_str());
                     GameObjectDisplayInfoStorage[id].push_back(std::string(GameObjectDisplayInfoFieldNames[field]) + "=" + fn);
 
                     std::string texture = value.substr(0,value.length()-3) + "blp";

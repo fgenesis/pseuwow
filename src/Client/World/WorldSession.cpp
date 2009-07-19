@@ -809,37 +809,54 @@ void WorldSession::_HandleAccountDataMD5Opcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
 {
-    uint8 type=0;
-    uint32 lang=0;
-    uint64 source_guid=0;
-    uint64 target_guid=0;
-    uint64 npc_guid=0; // for CHAT_MSG_MONSTER_SAY
-    uint32 msglen=0;
-    uint32 unk=0;
-    uint32 npc_name_len;
-    std::string npc_name;
-    std::string msg,channel="";
-    bool isCmd=false;
+    uint8 type, chatTag;
+    uint32 lang;
+    uint64 source_guid = 0, source_guid2 = 0, listener_guid = 0;
+    uint32 msglen;
+    uint32 unk32;
+    uint32 source_name_len = 0, listener_name_len = 0;
+    std::string source_name, listener_name;
+    std::string msg, channel = "";
 
     recvPacket >> type >> lang;
-
-    if(lang == CHAT_MSG_MONSTER_SAY)
-    {
-        recvPacket >> npc_guid;
-        recvPacket >> unk;
-        recvPacket >> npc_name_len;
-        recvPacket >> npc_name;
-    }
 
     if(lang == LANG_ADDON && GetInstance()->GetConf()->skipaddonchat)
         return;
 
-    recvPacket >> source_guid >> unk; // added in 2.1.0
-    if (type == CHAT_MSG_CHANNEL)
+    recvPacket >> source_guid;
+    recvPacket >> unk32;
+
+    switch(type)
     {
-        recvPacket >> channel; // extract channel name
+        case CHAT_MSG_MONSTER_SAY:
+        case CHAT_MSG_MONSTER_PARTY:
+        case CHAT_MSG_MONSTER_YELL:
+        case CHAT_MSG_MONSTER_WHISPER:
+        case CHAT_MSG_MONSTER_EMOTE:
+        case CHAT_MSG_RAID_BOSS_WHISPER:
+        case CHAT_MSG_RAID_BOSS_EMOTE:
+        case CHAT_MSG_BN:
+            recvPacket >> source_name_len;
+            recvPacket >> source_name;
+            // MaNGOS sends nothing for these, not used
+            recvPacket >> listener_guid; // always 0
+            if(listener_guid && !IS_PLAYER_GUID(listener_guid))
+            {
+                recvPacket >> listener_name_len; // always 1 (\0)
+                recvPacket >> listener_name; // always \0
+                logdebug("CHAT: Listener: '%s' (guid="I64FMT" len=%u type=%u)", listener_name.c_str(), listener_guid, listener_name_len, type);
+            }
+            break;
+
+        default:
+            if(type == CHAT_MSG_CHANNEL)
+                recvPacket >> channel;
+            recvPacket >> source_guid2; // no idea why it is sent twice
     }
-    recvPacket >> target_guid >> msglen >> msg;
+    recvPacket >> msglen;
+    recvPacket >> msg;
+    recvPacket >> chatTag;
+
 
     SCPDatabase *langdb = GetDBMgr().GetDB("language");
     const char* ln;
@@ -847,13 +864,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     if(langdb)
         langname = langdb->GetString(lang,"name");
     ln = langname.c_str();
-    std::string name;
-
-    if(type == CHAT_MSG_MONSTER_SAY)
-    {
-        name = npc_name;
-        source_guid = npc_guid;
-    }
+    std::string name = source_name;
 
     if(source_guid && IS_PLAYER_GUID(source_guid))
     {
@@ -865,11 +876,11 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         }
     }
     GetInstance()->GetScripts()->variables.Set("@thismsg_name",name);
-    GetInstance()->GetScripts()->variables.Set("@thismsg",DefScriptTools::toString(target_guid));
+    GetInstance()->GetScripts()->variables.Set("@thismsg",DefScriptTools::toString(source_guid));
 
 
     DEBUG(logdebug("Chat packet recieved, type=%u lang=%u src="I64FMT" dst="I64FMT" chn='%s' len=%u",
-        type,lang,source_guid,target_guid,channel.c_str(),msglen));
+        type,lang,source_guid,source_guid,channel.c_str(),msglen));
 
     if (type == CHAT_MSG_SYSTEM)
     {
@@ -916,38 +927,17 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
         logcustom(0,WHITE,"UNK CHAT TYPE (%u): %s [%s]: %s",type,name.c_str(),ln,msg.c_str());
     }
 
-    if(target_guid!=GetGuid() && msg.length()>1 && msg.at(0)=='-' && GetInstance()->GetConf()->allowgamecmd)
-        isCmd=true;
-
-    // some fun code :P
-    if(type==CHAT_MSG_SAY && target_guid!=_myGUID && !isCmd)
-    {
-        // TODO: insert a good ChatAI here.
-        if (GetInstance()->GetConf()->enablechatai)
-        {
-            if(msg=="lol")
-                SendChatMessage(CHAT_MSG_SAY,lang,"say \"lol\" if you have nothing else to say... lol xD","");
-            else if(msg.length()>4 && msg.find("you?")!=std::string::npos)
-                SendChatMessage(CHAT_MSG_SAY,lang,GetInstance()->GetScripts()->variables.Get("@version").append(" -- i am a bot, made by False.Genesis, my master."),"");
-            else if(msg=="hi")
-                SendChatMessage(CHAT_MSG_SAY,lang,"Hi, wadup?","");
-            else if(msg.length()<12 && msg.find("wtf")!=std::string::npos)
-                SendChatMessage(CHAT_MSG_SAY,lang,"Yeah, WTF is a good way to say you dont understand anything... :P","");
-            else if(msg.length()<15 && (msg.find("omg")!=std::string::npos || msg.find("omfg")!=std::string::npos) )
-                SendChatMessage(CHAT_MSG_SAY,lang,"OMG a bot logged in, you don't believe it :O","");
-            else if(msg.find("from")!=std::string::npos || msg.find("download")!=std::string::npos)
-                SendChatMessage(CHAT_MSG_SAY,lang,"www.mangosclient.org","");
-            else if(msg.find("Genesis")!=std::string::npos || msg.find("genesis")!=std::string::npos)
-                SendChatMessage(CHAT_MSG_YELL,lang,"False.Genesis, they are calling you!! Come here, master xD","");
-        }
-    }
+    // DefScript bindings below
+    bool isCmd = false;
+    if(source_guid != GetGuid() && msg.length() > 1 && msg.at(0) == '-' && GetInstance()->GetConf()->allowgamecmd)
+        isCmd = true;
 
     if(!isCmd && GetInstance()->GetScripts()->GetScript("_onchatmessage"))
     {
         CmdSet Set;
         Set.arg[0] = DefScriptTools::toString(type);
         Set.arg[1] = DefScriptTools::toString(lang);
-        Set.arg[2] = DefScriptTools::toString(target_guid);
+        Set.arg[2] = DefScriptTools::toString(source_guid);
         Set.arg[3] = channel;
         Set.defaultarg = GetInstance()->GetScripts()->SecureString(msg);
         GetInstance()->GetScripts()->RunScript("_onchatmessage",&Set);
@@ -956,7 +946,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     if(isCmd)
     {
         GetInstance()->GetScripts()->variables.Set("@thiscmd_name",name);
-        GetInstance()->GetScripts()->variables.Set("@thiscmd",DefScriptTools::toString(target_guid));
+        GetInstance()->GetScripts()->variables.Set("@thiscmd",DefScriptTools::toString(source_guid));
         std::string lin=msg.substr(1,msg.length()-1);
         try
         {
@@ -970,7 +960,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket)
     }
 
     // the following block searches for items in chat and queries them if they are unknown
-    if(!isCmd && target_guid!=_myGUID && msg.length()>strlen(CHAT_ITEM_BEGIN_STRING))
+    if(!isCmd && source_guid != GetGuid() && msg.length() > strlen(CHAT_ITEM_BEGIN_STRING))
     {
         for(uint32 pos=0;pos<msg.length()-strlen(CHAT_ITEM_BEGIN_STRING);pos++)
         {
@@ -1022,8 +1012,11 @@ void WorldSession::_HandleNotificationOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
 {
     uint64 pguid;
+    uint8 unk;
     std::string pname;
-    recvPacket >> pguid >> pname;
+    
+    pguid = recvPacket.GetPackedGuid();
+    recvPacket >> unk >> pname;
     if(pname.length()>MAX_PLAYERNAME_LENGTH || pname.length()<MIN_PLAYERNAME_LENGTH)
         return; // playernames maxlen=12, minlen=2
     // rest of the packet is not interesting for now
@@ -1347,7 +1340,8 @@ void WorldSession::_HandleCastSuccessOpcode(WorldPacket& recvPacket)
 void WorldSession::_HandleInitialSpellsOpcode(WorldPacket& recvPacket)
 {
         uint8 unk;
-        uint16 spellid,spellslot,count;
+        uint16 spellslot,count;
+        uint32 spellid;
         recvPacket >> unk >> count;
         logdebug("Got initial spells list, %u spells.",count);
         for(uint16 i = 0; i < count; i++)
@@ -1620,7 +1614,9 @@ void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
     recvPacket >> ct->type;
     recvPacket >> ct->family;
     recvPacket >> ct->rank;
-    recvPacket >> ct->SpellDataId;
+    //recvPacket >> ct->SpellDataId;
+    for(uint32 i = 0; i < MAX_KILL_CREDIT; i++)
+        recvPacket >> ct->killCredit[i];
     recvPacket >> ct->displayid_A;
     recvPacket >> ct->displayid_H;
     recvPacket >> ct->displayid_AF;
@@ -1628,6 +1624,9 @@ void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
     recvPacket >> unkf;
     recvPacket >> unkf;
     recvPacket >> ct->RacialLeader;
+    for(uint32 i = 0; i < 4; i++)
+        recvPacket >> ct->questItems[i];
+    recvPacket >> ct->movementId;
 
     std::stringstream ss;
     ss << "Got info for creature " << entry << ":" << ct->name;
@@ -1666,9 +1665,12 @@ void WorldSession::_HandleGameobjectQueryResponseOpcode(WorldPacket& recvPacket)
     recvPacket >> other_names; // name3 (all unused)
     recvPacket >> unks;
     recvPacket >> go->castBarCaption;
-    recvPacket >> unks;
+    recvPacket >> go->unk1;
     for(uint32 i = 0; i < GAMEOBJECT_DATA_FIELDS; i++)
         recvPacket >> go->raw.data[i];
+    recvPacket >> go->size;
+    for(uint32 i = 0; i < 4; i++)
+        recvPacket >> go->questItems[i];
 
     std::stringstream ss;
     ss << "Got info for gameobject " << entry << ":" << go->name;

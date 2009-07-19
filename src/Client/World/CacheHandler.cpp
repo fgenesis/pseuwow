@@ -11,9 +11,9 @@
 #include "Item.h"
 
 // increase this number whenever you change something that makes old files unusable
-uint32 ITEMPROTOTYPES_CACHE_VERSION = 4;
-uint32 CREATURETEMPLATES_CACHE_VERSION = 0;
-uint32 GOTEMPLATES_CACHE_VERSION = 0;
+uint32 ITEMPROTOTYPES_CACHE_VERSION = 5;
+uint32 CREATURETEMPLATES_CACHE_VERSION = 1;
+uint32 GOTEMPLATES_CACHE_VERSION = 1;
 
 PlayerNameCache::~PlayerNameCache()
 {
@@ -262,6 +262,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
 		buf >> proto->ArmorDamageModifier;
         buf >> proto->Duration;
         buf >> proto->ItemLimitCategory;
+        buf >> proto->HolidayId;
 
         if(proto->Id)
         {
@@ -396,6 +397,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
 		buf << proto->ArmorDamageModifier;
         buf << proto->Duration;
         buf << proto->ItemLimitCategory;
+        buf << proto->HolidayId;
 
         //DEBUG(logdebug("ItemProtoCache: Saved %u [%s]",proto->Id, proto->Name[0].c_str()));
         uint32 size = buf.size();
@@ -451,12 +453,17 @@ void CreatureTemplateCache_InsertDataToSession(WorldSession *session)
         buf >> ct->type;
         buf >> ct->family;
         buf >> ct->rank;
-        buf >> ct->SpellDataId;
+        //buf >> ct->SpellDataId;
+        for(uint32 i = 0; i < MAX_KILL_CREDIT; i++)
+            buf >> ct->killCredit[i];
         buf >> ct->displayid_A;
         buf >> ct->displayid_H;
         buf >> ct->displayid_AF;
         buf >> ct->displayid_HF;
         buf >> ct->RacialLeader;
+        for(uint32 i = 0; i < 4; i++)
+            buf >> ct->questItems[i];
+        buf >> ct->movementId;
 
         if(ct->entry)
         {
@@ -506,12 +513,17 @@ void CreatureTemplateCache_WriteDataToCache(WorldSession *session)
         buf << ct->type;
         buf << ct->family;
         buf << ct->rank;
-        buf << ct->SpellDataId;
+        //buf << ct->SpellDataId;
+        for(uint32 i = 0; i < MAX_KILL_CREDIT; i++)
+            buf << ct->killCredit[i];
         buf << ct->displayid_A;
         buf << ct->displayid_H;
         buf << ct->displayid_AF;
         buf << ct->displayid_HF;
         buf << ct->RacialLeader;
+        for(uint32 i = 0; i < 4; i++)
+            buf << ct->questItems[i];
+        buf << ct->movementId;
 
         uint32 size = buf.size();
         fh.write((char*)&size,sizeof(uint32));
@@ -564,11 +576,15 @@ void GOTemplateCache_InsertDataToSession(WorldSession *session)
             buf >> go->displayId;
             buf >> go->name;
             buf >> go->castBarCaption;
+            buf >> go->unk1;
             buf >> go->faction;
             buf >> go->flags;
             buf >> go->size;
             for(uint32 i = 0; i < GAMEOBJECT_DATA_FIELDS; i++)
                 buf >> go->raw.data[i];
+            buf >> go->size;
+            for(uint32 i = 0; i < 4; i++)
+                buf >> go->questItems[i];
 
             if(go->entry)
             {
@@ -616,11 +632,15 @@ void GOTemplateCache_WriteDataToCache(WorldSession *session)
         buf << go->displayId;
         buf << go->name;
         buf << go->castBarCaption;
+        buf << go->unk1;
         buf << go->faction;
         buf << go->flags;
         buf << go->size;
         for(uint32 i = 0; i < GAMEOBJECT_DATA_FIELDS; i++)
             buf << go->raw.data[i];
+        buf << go->size;
+        for(uint32 i = 0; i < 4; i++)
+            buf << go->questItems[i];
 
         uint32 size = buf.size();
         fh.write((char*)&size,sizeof(uint32));

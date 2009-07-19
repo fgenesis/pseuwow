@@ -434,6 +434,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\shared\Auth\SARC4.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\shared\Auth\SARC4.h"
+					>
+				</File>
+				<File
 					RelativePath=".\shared\Auth\Sha1.cpp"
 					>
 				</File>
