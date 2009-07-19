@@ -6,14 +6,15 @@
 
 void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 {
-    ItemProto *proto = new ItemProto();
-    recvPacket >> proto->Id;
-    uint8 field[64];
+    uint32 ItemID;
 	uint32 unk;
     std::string s;
-    memset(field,0,64);
-    if(memcmp(recvPacket.contents()+sizeof(uint32),field,64))
+
+    recvPacket >> ItemID;
+    if(!(ItemID & 0x80000000)) // invalid item flag?
     {
+        ItemProto *proto = new ItemProto();
+        proto->Id = ItemID;
         recvPacket >> proto->Class;
         recvPacket >> proto->SubClass;
 		recvPacket >> unk; // dont need that value?
@@ -47,7 +48,7 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         }
         recvPacket >> proto->ScalingStatDistribution;
         recvPacket >> proto->ScalingStatValue;
-        for(int i = 0; i < 5; i++)
+        for(int i = 0; i < MAX_ITEM_PROTO_DAMAGES; i++)
         {
             recvPacket >> proto->Damage[i].DamageMin;
             recvPacket >> proto->Damage[i].DamageMax;
@@ -102,6 +103,7 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 		recvPacket >> proto->ArmorDamageModifier; 
         recvPacket >> proto->Duration;
         recvPacket >> proto->ItemLimitCategory;
+        recvPacket >> proto->HolidayId;
 
         logdetail("Got Item Info: Id=%u Name='%s' ReqLevel=%u Armor=%u Desc='%s'",
             proto->Id, proto->Name.c_str(), proto->RequiredLevel, proto->Armor, proto->Description.c_str());
@@ -111,9 +113,9 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        logdetail("Got info of nonexistent Item %u",proto->Id);
-        objmgr.AddNonexistentItem(proto->Id);
-        delete proto;
+        ItemID &= 0x7FFFFFFF; // remove nonexisting item flag
+        logdetail("Item %u doesn't exist!",ItemID);
+        objmgr.AddNonexistentItem(ItemID);
     }
 }
 

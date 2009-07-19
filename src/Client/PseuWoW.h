@@ -60,7 +60,6 @@ class PseuInstanceConf
     bool hideDisabledOpcodes;
     bool allowgamecmd;
     bool enablecli;
-    bool enablechatai;
     bool notifyping;
     bool showmyopcodes;
     bool disablespellcheck;

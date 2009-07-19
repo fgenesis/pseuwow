@@ -42,6 +42,8 @@ enum UnitFlags
 	UNIT_FLAG_SHEATHE        = 0x40000000
 };
 
+#define MAX_KILL_CREDIT 2
+
 struct CreatureTemplate
 {
     uint32 entry;
@@ -54,6 +56,7 @@ struct CreatureTemplate
     uint32 rank;
     //uint32 unk1;
     uint32 SpellDataId;
+    uint32 killCredit[MAX_KILL_CREDIT];
     uint32 displayid_A;
     uint32 displayid_H;
     uint32 displayid_AF;
@@ -61,6 +64,8 @@ struct CreatureTemplate
     //float unkf1;
     //float unkf2;
     uint8 RacialLeader;
+    uint32 questItems[4];
+    uint32 movementId;
 };
 
 

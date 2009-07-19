@@ -22,12 +22,14 @@ struct ClientPktHeader
 
 struct ServerPktHeader
 {
+    ServerPktHeader() : size(0), cmd(0) {}
     uint16 size;
     uint16 cmd;
 };
 
 struct ServerPktHeaderBig
 {
+    ServerPktHeaderBig() : cmd(0) { memset(size, 0, 3); }
     uint8 size[3];
     uint16 cmd;
 };

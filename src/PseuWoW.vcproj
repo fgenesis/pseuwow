@@ -511,6 +511,12 @@
 					RelativePath=".\Client\Gui\CMDHMemoryReadFile.h">
 				</File>
 				<File
+					RelativePath=".\Client\Gui\CWMOMeshFileLoader.cpp">
+				</File>
+				<File
+					RelativePath=".\Client\Gui\CWMOMeshFileLoader.h">
+				</File>
+				<File
 					RelativePath=".\Client\Gui\DrawObject.cpp">
 				</File>
 				<File

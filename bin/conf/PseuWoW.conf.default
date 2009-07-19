@@ -92,10 +92,6 @@ allowgamecmd=0
 // enable this if you plan to enter commands on the console
 enablecli=1
 
-// enable's chat ai which makes you bot respond to simple senteces
-// like "Hi" and "What do you think of x" etc.
-enablechatai=0
-
 // show ping responses
 notifyping=0
 

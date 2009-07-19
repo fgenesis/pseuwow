@@ -292,6 +292,12 @@
 				<File
 					RelativePath=".\shared\WDTFile.h">
 				</File>
+				<File
+					RelativePath=".\shared\WMOFile.cpp">
+				</File>
+				<File
+					RelativePath=".\shared\WMOFile.h">
+				</File>
 			</Filter>
 			<Filter
 				Name="Auth">

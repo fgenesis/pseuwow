@@ -235,7 +235,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
 void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& recvPacket)
 {
     MovementInfo mi; // TODO: use a reference to a MovementInfo in Unit/Player class once implemented
-    uint8 flags;
+    uint16 flags;
     float unkfx,unkfy,unkfz;
     // uint64 fullguid; // see below
     float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack, speedPitchRate;
@@ -261,15 +261,10 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
     if(flags & UPDATEFLAG_LIVING)
     {
         recvPacket >> mi.flags >> mi.unkFlags >> mi.time;
-    }
-    else
-    {
-        logdev("MovementUpdate: UPDATEFLAG_LIVING *NOT* set! (no MovementInfo)");
-    }
 
     logdev("MovementUpdate: TypeID=%u GUID="I64FMT" pObj=%X flags=%u mi.flags=%u",objtypeid,uguid,obj,flags,mi.flags);
 
-    if(flags & UPDATEFLAG_HAS_POSITION)
+    /*if(flags & UPDATEFLAG_HAS_POSITION)
     {
         if(flags & UPDATEFLAG_TRANSPORT)
         {
@@ -277,19 +272,20 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
             logdev("TRANSPORT_FLOATS @ flags: x=%f y=%f z=%f o=%f", unkfx, unkfy, unkfz, mi.o);
         }
         else
-        {
+        {*/
             recvPacket >> mi.x >> mi.y >> mi.z >> mi.o;
             logdev("FLOATS: x=%f y=%f z=%f o=%f",mi.x, mi.y, mi.z ,mi.o);
             if(obj && obj->IsWorldObject())
                 ((WorldObject*)obj)->SetPosition(mi.x, mi.y, mi.z, mi.o);
-        }
-    }
+        //}
+    //}
 
-    if(flags & UPDATEFLAG_LIVING)
-    {
+    //if(flags & UPDATEFLAG_LIVING)
+    //{
         if(mi.flags & MOVEMENTFLAG_ONTRANSPORT)
         {
-            recvPacket >> mi.t_guid >> mi.t_x >> mi.t_y >> mi.t_z >> mi.t_o;
+            mi.t_guid = recvPacket.GetPackedGuid();
+            recvPacket >> mi.t_x >> mi.t_y >> mi.t_z >> mi.t_o;
             recvPacket >> mi.t_time; // added in 2.0.3
             recvPacket >> mi.t_seat;
             logdev("TRANSPORT @ mi.flags: guid="I64FMT" x=%f y=%f z=%f o=%f", mi.t_guid, mi.t_x, mi.t_y, mi.t_z, mi.t_o);
@@ -341,6 +337,35 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
             logerror("MovementUpdate: MOVEMENTFLAG_SPLINE2 is set, if you see this message please report it!");
             return;
         }
+    //}
+    }
+    else // !LIVING
+    {
+        //logdev("MovementUpdate: UPDATEFLAG_LIVING *NOT* set! (no MovementInfo)");
+        // TODO: Find whats this and FIX!
+        if(flags & UPDATEFLAG_POSITION)
+        {
+            uint64 pguid = recvPacket.GetPackedGuid();
+            float x,y,z,o;
+            recvPacket >> x >> y >> z;
+            recvPacket >> x >> y >> z;
+            recvPacket >> o >> o;
+        } 
+        else
+        {
+            if(flags & UPDATEFLAG_HAS_POSITION)
+            {
+                float x,y,z,o;
+                if(flags & UPDATEFLAG_TRANSPORT)
+                {
+                    recvPacket >> x >> y >> z >> o;
+                } 
+                else
+                {
+                    recvPacket >> x >> y >> z >> o;
+                }
+            }
+        }
     }
 
     if(flags & UPDATEFLAG_LOWGUID)
@@ -375,6 +400,12 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         float facingAdj;
 
         recvPacket >> vehicleId >> facingAdj;
+    }
+
+    if(flags & UPDATEFLAG_ROTATION)
+    {
+        uint64 rotation;
+        recvPacket >> rotation;
     }
 }
 
@@ -548,11 +579,11 @@ bool IsFloatField(uint8 ty, uint32 f)
     };
     static uint32 floats_gameobject[] =
     {
-        (uint32)GAMEOBJECT_ROTATION,
+        /*(uint32)GAMEOBJECT_ROTATION,
         (uint32)GAMEOBJECT_POS_X,
         (uint32)GAMEOBJECT_POS_Y,
         (uint32)GAMEOBJECT_POS_Z,
-        (uint32)GAMEOBJECT_FACING,
+        (uint32)GAMEOBJECT_FACING,*/
         (uint32)-1
     };
     static uint32 floats_dynobject[] =
@@ -565,10 +596,10 @@ bool IsFloatField(uint8 ty, uint32 f)
     };
     static uint32 floats_corpse[] =
     {
-        (uint32)CORPSE_FIELD_FACING,
+        /*(uint32)CORPSE_FIELD_FACING,
         (uint32)CORPSE_FIELD_POS_X,
         (uint32)CORPSE_FIELD_POS_Y,
-        (uint32)CORPSE_FIELD_POS_Z,
+        (uint32)CORPSE_FIELD_POS_Z,*/
         (uint32)-1
     };
 

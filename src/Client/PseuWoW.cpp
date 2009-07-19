@@ -504,7 +504,6 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     hideDisabledOpcodes=(bool)atoi(v.Get("HIDEDISABLEDOPCODES").c_str());
     enablecli=(bool)atoi(v.Get("ENABLECLI").c_str());
     allowgamecmd=(bool)atoi(v.Get("ALLOWGAMECMD").c_str());
-    enablechatai=(bool)atoi(v.Get("ENABLECHATAI").c_str());
     notifyping=(bool)atoi(v.Get("NOTIFYPING").c_str());
     showmyopcodes=(bool)atoi(v.Get("SHOWMYOPCODES").c_str());
     disablespellcheck=(bool)atoi(v.Get("DISABLESPELLCHECK").c_str());

@@ -566,6 +566,7 @@ void SceneWorld::UpdateTerrain(void)
 
     UpdateMapSceneNodes(_doodads); // drop doodads on maps not loaded anymore. no maptile pointers are dereferenced here, so it can be done before acquiring the mutex
     UpdateMapSceneNodes(_sound_emitters); // same with sound emitters
+    UpdateMapSceneNodes(_wmos);
 
     mutex.acquire(); // prevent other threads from deleting maptiles
 
