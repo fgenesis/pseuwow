@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2009 MaNGOS <http://mangosclient.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef _AUTH_SARC4_H
 #define _AUTH_SARC4_H
 
-#include "Common.h"
+#include "common.h"
 #include <openssl/evp.h>
 
 class SARC4
