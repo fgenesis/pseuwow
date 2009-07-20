@@ -68,9 +68,9 @@ struct MODF_chunk
     float x;
     float y;
     float z;
+    float ox;
     float oy;
     float oz;
-    float ox;
     // unk floats (orientation?)
     float ou11;
     float ou12;
@@ -157,13 +157,15 @@ struct MCLY_chunk
 struct MCSE_chunk
 {
     uint32 soundPointID;		
-    uint32 soundNameID;		
     float x;	
     float y;   		
-    float z; 		
+    float z; 	
+
+    // TODO: Find real structure, fields left for references in code
+    uint32 soundNameID;		
     float minDistance;	 		
     float maxDistance;	
-    float cutoffDistance;		
+    /*float cutoffDistance;		
     uint16 startTime;	
     uint16 endTime;
     uint16 groupSilenceMin;		
@@ -173,7 +175,7 @@ struct MCSE_chunk
     uint16 loopCountMin;
     uint16 loopCountMax;
     uint16 interSoundGapMin;
-    uint16 interSoundGapMax; 	
+    uint16 interSoundGapMax;*/
 };
 
 struct LiquidVertex

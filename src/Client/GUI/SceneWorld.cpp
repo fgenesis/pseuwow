@@ -689,7 +689,7 @@ void SceneWorld::UpdateTerrain(void)
                                 // here:
                                 // doodad->setRotation(core::vector3df(-d->ox,0,-d->oz)); // rotated axes looks good
                                 // doodad->setRotation(core::vector3df(0,-d->oy,0));      // same here
-                                //wmo_node->setRotation(core::vector3df(-wmo->ox,-wmo->oy,-wmo->oz)); // very ugly with some rotations, |ang|>360?
+                                wmo_node->setRotation(core::vector3df(-wmo->oz,-wmo->oy,-wmo->ox)); // very ugly with some rotations, |ang|>360?
 
                                 //wmo_node->setScale(core::vector3df(5,5,5));
 
