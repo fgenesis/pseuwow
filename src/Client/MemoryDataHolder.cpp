@@ -148,7 +148,7 @@ namespace MemoryDataHolder
     };
 
 
-    memblock GetFile(std::string s, bool threaded, callback_func func, void *ptr, ZThread::Condition *cond, bool ref_counted)
+    MemoryDataResult GetFile(std::string s, bool threaded, callback_func func, void *ptr, ZThread::Condition *cond, bool ref_counted)
     {
         mutex.acquire(); // we need exclusive access, other threads might unload the requested file during checking
 
@@ -177,12 +177,13 @@ namespace MemoryDataHolder
             // the file was requested some other time, is still present in memory and the pointer can simply be returned...
             mutex.release(); // everything ok, mutex can be unloaded safely
             // execute callback and broadcast condition (must check for MDH_FILE_ALREADY_EXIST in callback func)
+            uint32 rf = MDH_FILE_OK | MDH_FILE_ALREADY_EXIST;
             if(func)
-                (*func)(ptr, s, MDH_FILE_OK | MDH_FILE_ALREADY_EXIST);
+                (*func)(ptr, s, rf);
             if(cond)
                 cond->broadcast();
 
-            return *mb;
+            return MemoryDataResult(*mb, rf);
         }
         else
         {
@@ -194,7 +195,9 @@ namespace MemoryDataHolder
                 ldr = loaders.Get(s);
                 ldr->SetStores(&storage,&loaders);
                 ldr->AddCallback(func,ptr,cond); // not threadsafe!
+
                 mutex.release(); // the mutex can be released safely now
+
                 ldr->SetThreaded(threaded);
                 ldr->SetName(s); // here we set the filename the thread should load
 
@@ -202,7 +205,6 @@ namespace MemoryDataHolder
                 {
                     ZThread::Task task(ldr);
                     executor->execute(task);
-
                 }
                 else
                 {
@@ -210,7 +212,10 @@ namespace MemoryDataHolder
                     delete ldr;
                     memblock *mbret = storage.GetNoCreate(s);
                     DEBUG(logdev("Non-threaded loader returning memblock at 0x%X",mbret));
-                    return mbret ? *mbret : memblock();
+                    uint32 rf = MDH_FILE_JUST_LOADED;
+                    if(mbret)
+                        rf |= MDH_FILE_OK;
+                    return MemoryDataResult(mbret ? *mbret : memblock(), rf);
                 }
             }
             else // if a loader is already existing, add callbacks to that loader.
@@ -219,7 +224,7 @@ namespace MemoryDataHolder
                 mutex.release();
             }
         }
-        return memblock();
+        return MemoryDataResult(memblock(), MDH_FILE_LOADING); // we reach this point only in multithreaded mode
     }
 
     bool IsLoaded(std::string s)

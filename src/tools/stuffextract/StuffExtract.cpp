@@ -321,6 +321,14 @@ bool ConvertDBC(void)
 					RaceDataStorage[id].push_back(std::string(ChrRacesFieldNames[field]).append("=").append(value));
             }
         }
+        if (doModels)
+        {
+            // corpse models
+            
+            modelNames.insert(NameAndAlt("World\\Generic\\PassiveDoodads\\DeathSkeletons\\" + racemap[id] + "MaleDeathSkeleton.m2"));
+            modelNames.insert(NameAndAlt("World\\Generic\\PassiveDoodads\\DeathSkeletons\\" + racemap[id] + "FemaleDeathSkeleton.m2"));
+        }
+
         std::stringstream temp;
         temp << classmask[id];
         RaceDataStorage[id].push_back(std::string("classmask").append("=").append(temp.str()));

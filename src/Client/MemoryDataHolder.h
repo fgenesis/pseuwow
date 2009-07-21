@@ -12,10 +12,11 @@ namespace MemoryDataHolder
 {
     enum ResultFlags
     {
-        MDH_FILE_ERROR = 0, // file doesnt exist, cant be loaded, etc
-        MDH_FILE_OK = 1, // file was loaded properly or already present in memory. point is: we have good data
-        MDH_FILE_ALREADY_EXIST = 2, // file was loaded before
-        MDH_FILE_JUST_LOADED = 4, // file was freshly loaded
+        MDH_FILE_ERROR         = 0x00, // file doesnt exist, cant be loaded, etc
+        MDH_FILE_OK            = 0x01, // file was loaded properly or already present in memory. point is: we have good data
+        MDH_FILE_ALREADY_EXIST = 0x02, // file was loaded before
+        MDH_FILE_JUST_LOADED   = 0x04, // file was freshly loaded
+        MDH_FILE_LOADING       = 0x08, // file is currently beeing loaded (returned only in multithreaded mode)
     };
 
     typedef void (*callback_func)(void *ptr,std::string filename, uint32 flags);
@@ -37,11 +38,18 @@ namespace MemoryDataHolder
         uint32 size;
     };
 
+    struct MemoryDataResult
+    {
+        MemoryDataResult(memblock mb, uint32 f) { data = mb; flags = f; }
+        memblock data;
+        uint32 flags; // see ResultFlags enum
+    };
+
     void Init(void);
     void SetThreadCount(uint32);
 
-    memblock GetFile(std::string s, bool threaded = false, callback_func func = NULL,void *ptr = NULL, ZThread::Condition *cond = NULL, bool ref_counted = true);
-    inline memblock GetFileBasic(std::string s) { return GetFile(s, false, NULL, NULL, NULL, false); }
+    MemoryDataResult GetFile(std::string s, bool threaded = false, callback_func func = NULL,void *ptr = NULL, ZThread::Condition *cond = NULL, bool ref_counted = true);
+    inline MemoryDataResult GetFileBasic(std::string s) { return GetFile(s, false, NULL, NULL, NULL, false); }
     bool IsLoaded(std::string);
     void BackgroundLoadFile(std::string);
     bool Delete(std::string);

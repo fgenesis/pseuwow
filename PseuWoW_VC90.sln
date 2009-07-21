@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PseuWoW", "src\PseuWoW_VC90.vcproj", "{EFFE60F4-DA39-41E8-9E53-E462000A2D91}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E08E042A-6C45-411B-92BE-3CC31331019F} = {E08E042A-6C45-411B-92BE-3CC31331019F}
@@ -121,16 +121,25 @@ Global
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Static lib - Release|Win32.ActiveCfg = Release|Win32
 		{F548FC51-24A4-45FF-A381-BEBC39F18270}.Static lib - Release|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Debug|Win32.Build.0 = Debug|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Relase - Fast FPU|Win32.ActiveCfg = Release|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Relase - Fast FPU|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release - Fast FPU DebugInfo|Win32.ActiveCfg = Release|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release - Fast FPU DebugInfo|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release - Fast FPU|Win32.ActiveCfg = Release|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release - Fast FPU|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release - No console|Win32.ActiveCfg = Release|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release - No console|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release noconsole|Win32.ActiveCfg = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release noconsole|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release|Win32.ActiveCfg = Release|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Release|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Static lib - Debug|Win32.ActiveCfg = Debug|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Static lib - Debug|Win32.Build.0 = Debug|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Static lib - Release - Fast FPU|Win32.ActiveCfg = Release|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Static lib - Release - Fast FPU|Win32.Build.0 = Release|Win32
 		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Static lib - Release|Win32.ActiveCfg = Release|Win32
+		{F14CA928-E505-41F1-BE45-CCF6B85547D2}.Static lib - Release|Win32.Build.0 = Release|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Debug|Win32.Build.0 = Debug|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Relase - Fast FPU|Win32.ActiveCfg = Release - Fast FPU|Win32

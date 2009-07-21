@@ -61,6 +61,21 @@ void DrawObject::_Init(void)
                 texture = std::string("data/texture/") + cdi->GetString(displayid,"name1");
             opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
         } 
+        else if (_obj->IsCorpse())
+        {
+            uint8 race = (_obj->GetUInt32Value(CORPSE_FIELD_BYTES_1) >> 8)&0xFF;
+            uint8 gender = (_obj->GetUInt32Value(CORPSE_FIELD_BYTES_1) >> 16)&0xFF;
+            std::string racename = "", gendername = "";
+
+            SCPDatabase *scprace = _instance->dbmgr.GetDB("race");
+            SCPDatabase *scpgender = _instance->dbmgr.GetDB("gender");
+            if (scprace)
+                racename = scprace->GetString(race, "name_general");
+            if (scpgender)
+                gendername = scpgender->GetString(gender, "name");
+
+            modelfile = std::string("data/model/") + racename + gendername + "DeathSkeleton.m2";
+        }
         else if (_obj->IsGameObject())
         {
             GameobjectTemplate* gotempl = _instance->GetWSession()->objmgr.GetGOTemplate(_obj->GetEntry());
@@ -153,7 +168,7 @@ void DrawObject::Draw(void)
 
         //cube->setRotation(irr::core::vector3df(0,RAD_TO_DEG(((WorldObject*)_obj)->GetO()),0));
         irr::core::stringw tmp = L"";
-        if(_obj->GetName().empty())
+        if(_obj->GetName().empty() && !_obj->IsCorpse())
         {
             tmp += L"unk<";
             tmp += _obj->GetTypeId();
