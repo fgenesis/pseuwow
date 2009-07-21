@@ -321,7 +321,7 @@ bool ConvertDBC(void)
 					RaceDataStorage[id].push_back(std::string(ChrRacesFieldNames[field]).append("=").append(value));
             }
         }
-        if (doModels)
+        if (doModels && classmask[id]) // skip nonplayable races
         {
             // corpse models
             
