@@ -102,11 +102,11 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 
         char buf[300];
         MakeMapFilename(buf,m,gx,gy);
-        MemoryDataHolder::memblock mb = MemoryDataHolder::GetFileBasic(buf);
-        if(mb.size)
+        MemoryDataHolder::MemoryDataResult mdr = MemoryDataHolder::GetFileBasic(buf);
+        if(mdr.flags & MemoryDataHolder::MDH_FILE_OK && mdr.data.size)
         {
-            ByteBuffer bb(mb.size);
-            bb.append(mb.ptr,mb.size);
+            ByteBuffer bb(mdr.data.size);
+            bb.append(mdr.data.ptr,mdr.data.size);
             MemoryDataHolder::Delete(buf);
             ADTFile *adt = new ADTFile();
             adt->LoadMem(bb);
