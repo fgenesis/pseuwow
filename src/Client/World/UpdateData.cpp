@@ -236,7 +236,6 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
 {
     MovementInfo mi; // TODO: use a reference to a MovementInfo in Unit/Player class once implemented
     uint16 flags;
-    float unkfx,unkfy,unkfz;
     // uint64 fullguid; // see below
     float speedWalk, speedRun, speedSwimBack, speedSwim, speedWalkBack, speedTurn, speedFly, speedFlyBack, speedPitchRate;
     uint32 unk32;
@@ -262,26 +261,13 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
     {
         recvPacket >> mi.flags >> mi.unkFlags >> mi.time;
 
-    logdev("MovementUpdate: TypeID=%u GUID="I64FMT" pObj=%X flags=%u mi.flags=%u",objtypeid,uguid,obj,flags,mi.flags);
+        logdev("MovementUpdate: TypeID=%u GUID="I64FMT" pObj=%X flags=%u mi.flags=%u",objtypeid,uguid,obj,flags,mi.flags);
 
-    /*if(flags & UPDATEFLAG_HAS_POSITION)
-    {
-        if(flags & UPDATEFLAG_TRANSPORT)
-        {
-            recvPacket >> unkfx >> unkfy >> unkfz >> mi.o; // 3x (float)0 followed by orientation
-            logdev("TRANSPORT_FLOATS @ flags: x=%f y=%f z=%f o=%f", unkfx, unkfy, unkfz, mi.o);
-        }
-        else
-        {*/
-            recvPacket >> mi.x >> mi.y >> mi.z >> mi.o;
-            logdev("FLOATS: x=%f y=%f z=%f o=%f",mi.x, mi.y, mi.z ,mi.o);
-            if(obj && obj->IsWorldObject())
-                ((WorldObject*)obj)->SetPosition(mi.x, mi.y, mi.z, mi.o);
-        //}
-    //}
+        recvPacket >> mi.x >> mi.y >> mi.z >> mi.o;
+        logdev("FLOATS: x=%f y=%f z=%f o=%f",mi.x, mi.y, mi.z ,mi.o);
+        if(obj && obj->IsWorldObject())
+            ((WorldObject*)obj)->SetPosition(mi.x, mi.y, mi.z, mi.o);
 
-    //if(flags & UPDATEFLAG_LIVING)
-    //{
         if(mi.flags & MOVEMENTFLAG_ONTRANSPORT)
         {
             mi.t_guid = recvPacket.GetPackedGuid();
@@ -312,23 +298,22 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
             logdev("MovementUpdate: MOVEMENTFLAG_SPLINE is set, got %u", mi.u_unk1);
         }
 
-
         recvPacket >> speedWalk >> speedRun >> speedSwimBack >> speedSwim; // speedRun can also be mounted speed if player is mounted
         recvPacket >> speedWalkBack >> speedFly >> speedFlyBack >> speedTurn; // fly added in 2.0.x
         recvPacket >> speedPitchRate;
         logdev("MovementUpdate: Got speeds, walk=%f run=%f turn=%f", speedWalk, speedRun, speedTurn);
         if(u)
         {
-                u->SetPosition(mi.x, mi.y, mi.z, mi.o);
-                u->SetSpeed(MOVE_WALK, speedWalk);
-                u->SetSpeed(MOVE_RUN, speedRun);
-                u->SetSpeed(MOVE_SWIMBACK, speedSwimBack);
-                u->SetSpeed(MOVE_SWIM, speedSwim);
-                u->SetSpeed(MOVE_WALKBACK, speedWalkBack);
-                u->SetSpeed(MOVE_TURN, speedTurn);
-                u->SetSpeed(MOVE_FLY, speedFly);
-                u->SetSpeed(MOVE_FLYBACK, speedFlyBack);
-                u->SetSpeed(MOVE_PITCH_RATE, speedPitchRate);
+            u->SetPosition(mi.x, mi.y, mi.z, mi.o);
+            u->SetSpeed(MOVE_WALK, speedWalk);
+            u->SetSpeed(MOVE_RUN, speedRun);
+            u->SetSpeed(MOVE_SWIMBACK, speedSwimBack);
+            u->SetSpeed(MOVE_SWIM, speedSwim);
+            u->SetSpeed(MOVE_WALKBACK, speedWalkBack);
+            u->SetSpeed(MOVE_TURN, speedTurn);
+            u->SetSpeed(MOVE_FLY, speedFly);
+            u->SetSpeed(MOVE_FLYBACK, speedFlyBack);
+            u->SetSpeed(MOVE_PITCH_RATE, speedPitchRate);
         }
 
         // TODO: correct this one as soon as its meaning is known OR if it appears often and needs to be fixed
@@ -337,19 +322,19 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
             logerror("MovementUpdate: MOVEMENTFLAG_SPLINE2 is set, if you see this message please report it!");
             return;
         }
-    //}
     }
-    else // !LIVING
+    else // !UPDATEFLAG_LIVING
     {
-        //logdev("MovementUpdate: UPDATEFLAG_LIVING *NOT* set! (no MovementInfo)");
-        // TODO: Find whats this and FIX!
         if(flags & UPDATEFLAG_POSITION)
         {
             uint64 pguid = recvPacket.GetPackedGuid();
-            float x,y,z,o;
+            float x,y,z,o,sx,sy,sz,so;
             recvPacket >> x >> y >> z;
-            recvPacket >> x >> y >> z;
-            recvPacket >> o >> o;
+            recvPacket >> sx >> sy >> sz;
+            recvPacket >> o >> so;
+
+            if (obj && obj->IsWorldObject())
+                ((WorldObject*)obj)->SetPosition(x, y, z, o);
         } 
         else
         {
@@ -359,10 +344,13 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
                 if(flags & UPDATEFLAG_TRANSPORT)
                 {
                     recvPacket >> x >> y >> z >> o;
+                    // only zeroes here
                 } 
                 else
                 {
                     recvPacket >> x >> y >> z >> o;
+                    if (obj && obj->IsWorldObject())
+                        ((WorldObject*)obj)->SetPosition(x, y, z, o);
                 }
             }
         }
@@ -406,6 +394,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
     {
         uint64 rotation;
         recvPacket >> rotation;
+        // gameobject rotation
     }
 }
 
@@ -573,17 +562,14 @@ bool IsFloatField(uint8 ty, uint32 f)
         (uint32)PLAYER_FROST_SPELL_CRIT_PERCENTAGE,
         (uint32)PLAYER_SHADOW_SPELL_CRIT_PERCENTAGE,
         (uint32)PLAYER_ARCANE_SPELL_CRIT_PERCENTAGE,
-        /*(uint32)PLAYER_FIELD_MOD_MANA_REGEN,
-        (uint32)PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,*/
         (uint32)-1
     };
     static uint32 floats_gameobject[] =
     {
-        /*(uint32)GAMEOBJECT_ROTATION,
-        (uint32)GAMEOBJECT_POS_X,
-        (uint32)GAMEOBJECT_POS_Y,
-        (uint32)GAMEOBJECT_POS_Z,
-        (uint32)GAMEOBJECT_FACING,*/
+        (uint32)GAMEOBJECT_PARENTROTATION,
+        (uint32)(GAMEOBJECT_PARENTROTATION + 1),
+        (uint32)(GAMEOBJECT_PARENTROTATION + 2),
+        (uint32)(GAMEOBJECT_PARENTROTATION + 3),
         (uint32)-1
     };
     static uint32 floats_dynobject[] =
@@ -592,16 +578,15 @@ bool IsFloatField(uint8 ty, uint32 f)
         (uint32)DYNAMICOBJECT_POS_X,
         (uint32)DYNAMICOBJECT_POS_Y,
         (uint32)DYNAMICOBJECT_POS_Z,
+        (uint32)DYNAMICOBJECT_FACING,
         (uint32)-1
     };
+    /*
     static uint32 floats_corpse[] =
     {
-        /*(uint32)CORPSE_FIELD_FACING,
-        (uint32)CORPSE_FIELD_POS_X,
-        (uint32)CORPSE_FIELD_POS_Y,
-        (uint32)CORPSE_FIELD_POS_Z,*/
         (uint32)-1
     };
+    */
 
     if(ty & TYPE_OBJECT)
         for(uint32 i = 0; floats_object[i] != (uint32)(-1); i++)
@@ -633,10 +618,11 @@ bool IsFloatField(uint8 ty, uint32 f)
         for(uint32 i = 0; floats_dynobject[i] != (uint32)(-1); i++)
             if(floats_dynobject[i] == f)
                 return true;
+    /*
     if(ty & TYPE_CORPSE)
         for(uint32 i = 0; floats_corpse[i] != (uint32)(-1); i++)
             if(floats_corpse[i] == f)
                 return true;
-    
+    */
     return false;
 }

@@ -348,6 +348,7 @@ OpcodeHandler *WorldSession::_GetOpcodeHandlerTable() const
         {SMSG_CREATURE_QUERY_RESPONSE, &WorldSession::_HandleCreatureQueryResponseOpcode},
         {SMSG_GAMEOBJECT_QUERY_RESPONSE, &WorldSession::_HandleGameobjectQueryResponseOpcode},
         {SMSG_CHAR_CREATE, &WorldSession::_HandleCharCreateOpcode},
+        {SMSG_MONSTER_MOVE, &WorldSession::_HandleMonsterMoveOpcode},
 
         // table termination
         { 0,                         NULL }
@@ -1215,9 +1216,13 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 
     logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
+    WorldPacket wp(MSG_MOVE_TELEPORT_ACK,8+4+4);
+    wp << guid << (uint32)0 << (uint32)getMSTime();
+    SendWorldPacket(wp);
+
     // TODO: put this into a capsule class later, that autodetects movement flags etc.
     WorldPacket response(MSG_MOVE_FALL_LAND,4+2+4+4+4+4+4+4);
-    response << uint32(0) << (uint16)0; // no flags; unk
+    response << uint32(0) << (uint16)0 << (uint32)getMSTime(); // no flags; unk
     response << x << y << z << o << uint32(100); // simulate 100 msec fall time
     SendWorldPacket(response);
 
@@ -1614,7 +1619,6 @@ void WorldSession::_HandleCreatureQueryResponseOpcode(WorldPacket& recvPacket)
     recvPacket >> ct->type;
     recvPacket >> ct->family;
     recvPacket >> ct->rank;
-    //recvPacket >> ct->SpellDataId;
     for(uint32 i = 0; i < MAX_KILL_CREDIT; i++)
         recvPacket >> ct->killCredit[i];
     recvPacket >> ct->displayid_A;
@@ -1710,7 +1714,53 @@ void WorldSession::_HandleCharCreateOpcode(WorldPacket& recvPacket)
         gui->SetSceneData(ISCENE_CHARSEL_ERRMSG, response);
 }
 
+void WorldSession::_HandleMonsterMoveOpcode(WorldPacket& recvPacket)
+{
+    uint64 guid;
+    guid = recvPacket.GetPackedGuid();
+    
+    Object* obj = objmgr.GetObj(guid);
+    if (!obj || !obj->IsWorldObject())
+        return;
 
+    uint8 unk, type;
+    uint32 time, flags, movetime, waypoints;
+    float x, y, z;
+    recvPacket >> unk >> x >> y >> z >> time >> type;
+
+    float oldx = ((WorldObject*)obj)->GetX(),
+          oldy = ((WorldObject*)obj)->GetY();
+    float o = atan2f(y - oldy, x - oldx);
+    // not much good, better than nothing
+
+    ((WorldObject*)obj)->SetPosition(x, y, z, o);
+    switch(type) 
+    {
+        case 0: break; // normal packet
+        case 1: break; // stop packet
+        case 2: 
+            float unkf;
+            recvPacket >> unkf >> unkf >> unkf;
+            break;
+        case 3: 
+            uint64 unkguid;
+            recvPacket >> unkguid;
+            break;
+        case 4: 
+            float angle;
+            recvPacket >> angle;
+            break;
+    }
+
+    //  movement flags, time between waypoints, number of waypoints
+    recvPacket >> flags >> movetime >> waypoints;
+
+    /*
+    // waypoint data
+    for (uint32 i = 0; i < waypoints; i++)
+        recvPacket >> x >> y >> z;
+    */
+}
 
 // TODO: delete world on LogoutComplete once implemented
 
