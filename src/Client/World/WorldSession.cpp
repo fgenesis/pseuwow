@@ -1737,7 +1737,7 @@ void WorldSession::_HandleMonsterMoveOpcode(WorldPacket& recvPacket)
     switch(type) 
     {
         case 0: break; // normal packet
-        case 1: break; // stop packet
+        case 1: return; // stop packet
         case 2: 
             float unkf;
             recvPacket >> unkf >> unkf >> unkf;
