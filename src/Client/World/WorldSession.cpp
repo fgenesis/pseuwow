@@ -1,3 +1,4 @@
+#define _DEBUG 1
 #include "common.h"
 
 #include "Auth/Sha1.h"
@@ -182,7 +183,7 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
 
     bool known = false;
     uint16 hpos;
-
+    logdebug("Handling packet with opcode %u",packet->GetOpcode());
     for (hpos = 0; table[hpos].handler != NULL; hpos++)
     {
         if (table[hpos].opcode == packet->GetOpcode())
@@ -521,12 +522,16 @@ std::string WorldSession::GetOrRequestPlayerName(uint64 guid)
 void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
 {
     std::string acc = stringToUpper(GetInstance()->GetConf()->accname);
+        uint32 sp;
+        recvPacket >> sp;
         uint32 serverseed;
         recvPacket >> serverseed;
+
         logdebug("Auth: serverseed=0x%X",serverseed);
         Sha1Hash digest;
         digest.UpdateData(acc);
         uint32 unk=0;
+        uint64 unk4=0;
         digest.UpdateData((uint8*)&unk,sizeof(uint32));
         BigNumber clientseed;
         clientseed.SetRand(8*4);
@@ -536,7 +541,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         digest.UpdateBigNumbers(GetInstance()->GetSessionKey(),NULL);
         digest.Finalize();
         WorldPacket auth;
-        auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<unk<<clientseed_uint32;
+        auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<unk<<clientseed_uint32<<unk4;
         auth.append(digest.GetDigest(),20);
         auth << (uint32)0; // TODO: this is not correct value, expected: 160 bytes of addon_data
 
@@ -557,7 +562,6 @@ void WorldSession::_HandleAuthResponseOpcode(WorldPacket& recvPacket)
     recvPacket >> errcode;
     recvPacket >> dummy32 >> dummy8 >> dummy32;
     recvPacket >> expansion;
-
     // TODO: add data to generic_text.scp and use the strings here
     if(errcode == AUTH_OK)
     {

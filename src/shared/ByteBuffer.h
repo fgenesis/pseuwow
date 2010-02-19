@@ -25,6 +25,7 @@
 #include <string>
 #if defined( __GNUC__ ) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)>=40300
   #include <cstring>
+  #include <stdio.h>
 #endif
 
 class ByteBufferException
