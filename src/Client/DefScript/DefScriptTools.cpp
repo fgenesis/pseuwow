@@ -55,7 +55,7 @@ ldbl DefScriptTools::toNumber(std::string str)
         str.erase(0,1);
         negative=true;
     }
-    unsigned int ppos=str.find('.');
+    size_t ppos=str.find('.');
     str=stringToUpper(str);
 
     if(str.length() > 2 && str[0]=='0' && str[1]=='X')
