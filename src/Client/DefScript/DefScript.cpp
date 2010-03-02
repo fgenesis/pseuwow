@@ -274,7 +274,6 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
         absline++;
 		if(line.empty())
 			continue; // line is empty, proceed with next line
-
 		while( !line.empty() && (line.at(0)==' ' || line.at(0)=='\t') )
 			line.erase(0,1);
         //while( !line.empty() && (line.at(line.length()-1)==13 || line.at(line.length()-1)==10) )
@@ -287,7 +286,7 @@ bool DefScriptPackage::LoadScriptFromFile(std::string fn){
         if(line_strip)
         {
             // strip comments at the end of the line
-            unsigned int cmpos = 0;
+            size_t cmpos = 0;
             while(true)
             {
                 // note: this must also cover lines like: "out blah \// no-comment // comment"

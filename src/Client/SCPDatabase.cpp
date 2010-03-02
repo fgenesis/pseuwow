@@ -206,7 +206,7 @@ uint32 SCPDatabaseMgr::AutoLoadFile(const char *fn)
                 line.clear();
                 continue;
             }
-            uint32 eq = line.find("=");
+            size_t eq = line.find("=");
             if(eq != std::string::npos)
             {
                 entry=stringToLower(line.substr(0,eq));
