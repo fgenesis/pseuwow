@@ -29,7 +29,11 @@
 // Define calling convention
 
 #ifndef PKEXPORT
-#define PKEXPORT  //__cdecl               // Use for normal __cdecl calling 
+#ifdef WIN32
+#define PKEXPORT  __cdecl               // Use for normal __cdecl calling 
+#else
+#define PKEXPORT
+#endif
 #endif
 //#define PKEXPORT  __stdcall
 //#define PKEXPORT  __fastcall

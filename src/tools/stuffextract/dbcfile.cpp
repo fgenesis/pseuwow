@@ -64,11 +64,12 @@ bool DBCFile::openmem(ByteBuffer bb)
 		printf("DBCFile::openmem(): ByteBuffer too small!");
 		return false;
 	}
-
     uint32 hdr;
     bb >> hdr;
+    
     if(memcmp(&hdr,"WDBC",4)) // check if its a valid dbc file
     {
+        printf("not a valid WDB File??\n");
         return false;
     }
 

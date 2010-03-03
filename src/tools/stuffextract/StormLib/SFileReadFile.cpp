@@ -25,7 +25,7 @@
 struct TID2Ext
 {
     DWORD dwID;
-    const char * szExt;
+    char * szExt;
 };
 
 //-----------------------------------------------------------------------------
@@ -38,7 +38,6 @@ struct TID2Ext
 //
 //  Returns number of bytes read.
 
-// TODO: Test for archives > 4GB
 static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer, DWORD blockBytes)
 {
     LARGE_INTEGER FilePos;
@@ -70,10 +69,7 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
     if((hf->pBlock->dwFlags & MPQ_FILE_COMPRESSED) && hf->bBlockPosLoaded == FALSE)
     {
         // Move file pointer to the begin of the file in the MPQ
-        if(hf->MpqFilePos.QuadPart != ha->FilePointer.QuadPart)
-        {
-            SetFilePointer(ha->hFile, hf->MpqFilePos.LowPart, &hf->MpqFilePos.HighPart, FILE_BEGIN);
-        }
+        SetFilePointer(ha->hFile, hf->RawFilePos.LowPart, &hf->RawFilePos.HighPart, FILE_BEGIN);
 
         // Read block positions from begin of file.
         dwToRead = (hf->nBlocks+1) * sizeof(DWORD);
@@ -109,13 +105,20 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
             // Decrypt block positions
             DecryptMPQBlock(hf->pdwBlockPos, dwBytesRead, hf->dwSeed1 - 1);
 
+            //
             // Check if the block positions are correctly decrypted
-            // I don't know why, but sometimes it will result invalid block positions on some files
-            if(hf->pdwBlockPos[0] != dwBytesRead)
+            // Previous versions of StormLib (up to 6.20) had bug in SFileRenameFile.
+            // Incase the file name changed, Stormlib didn't re-crypt the file with changed seed,
+            // so the file remained corrupt after the name change.
+            //
+            // I saw a protector who puts negative offset into the block table.
+            // Because there are always at least 2 block positions, we can check their difference
+            //
+
+            if((hf->pdwBlockPos[1] - hf->pdwBlockPos[0]) > ha->dwBlockSize)
             {
                 // Try once again to detect file seed and decrypt the blocks
-                // TODO: Test with >4GB
-                SetFilePointer(ha->hFile, hf->MpqFilePos.LowPart, &hf->MpqFilePos.HighPart, FILE_BEGIN);
+                SetFilePointer(ha->hFile, hf->RawFilePos.LowPart, &hf->RawFilePos.HighPart, FILE_BEGIN);
                 ReadFile(ha->hFile, hf->pdwBlockPos, dwToRead, &dwBytesRead, NULL);
 
                 BSWAP_ARRAY32_UNSIGNED(hf->pdwBlockPos, (hf->nBlocks+1));
@@ -129,7 +132,6 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
         }
 
         // Update hf's variables
-        ha->FilePointer.QuadPart = hf->MpqFilePos.QuadPart + dwBytesRead;
         hf->bBlockPosLoaded = TRUE;
     }
 
@@ -141,7 +143,12 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
         dwFilePos = hf->pdwBlockPos[blockNum];
         dwToRead  = hf->pdwBlockPos[blockNum + nBlocks] - dwFilePos;
     }
-    FilePos.QuadPart = hf->MpqFilePos.QuadPart + dwFilePos;
+
+    // Warning: dwFilePos, obtained from the block table, might be negative.
+    // Incase of format V1, we have to ignore the overflow.
+    FilePos.QuadPart = hf->RawFilePos.QuadPart + dwFilePos;
+    if((dwFilePos & 0x80000000) && ha->Header.wFormatVersion == MPQ_FORMAT_VERSION_1)
+        FilePos.HighPart = 0;
 
     // Get work buffer for store read data
     tempBuffer = buffer;
@@ -154,22 +161,16 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
         }
     }
 
-    // Set file pointer, if necessary 
-    if(ha->FilePointer.QuadPart != FilePos.QuadPart) 
-    {
-        SetFilePointer(ha->hFile, FilePos.LowPart, &FilePos.HighPart, FILE_BEGIN);
-    }
-
-    // 15018F87 : Read all requested blocks
+    // Set file pointer, if necessary and read all required blocks
+    SetFilePointer(ha->hFile, FilePos.LowPart, &FilePos.HighPart, FILE_BEGIN);
     ReadFile(ha->hFile, tempBuffer, dwToRead, &dwBytesRead, NULL);
-    ha->FilePointer.QuadPart = FilePos.QuadPart + dwBytesRead;
 
     // Block processing part.
     DWORD blockStart = 0;               // Index of block start in work buffer
-    DWORD blockSize  = min(blockBytes, ha->dwBlockSize);
+    DWORD blockSize  = STORMLIB_MIN(blockBytes, ha->dwBlockSize);
     DWORD index      = blockNum;        // Current block index
 
-    dwBytesRead = 0;                      // Clear read byte counter
+    dwBytesRead = 0;                    // Clear read byte counter
 
     // Walk through all blocks
     for(i = 0; i < nBlocks; i++, index++)
@@ -198,7 +199,10 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
                 hf->dwSeed1 = DetectFileSeed2((DWORD *)inputBuffer, 2, 0x00905A4D, 0x00000003);
 
             if(hf->dwSeed1 == 0)
-                return 0;
+            {
+                dwBytesRead = 0;
+                break;
+            }
 
             DecryptMPQBlock((DWORD *)inputBuffer, blockSize, hf->dwSeed1 + index);
             BSWAP_ARRAY32_UNSIGNED((DWORD *)inputBuffer, blockSize / sizeof(DWORD));
@@ -210,14 +214,21 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
         if(blockSize < (DWORD)outLength)
         {
             // Is the file compressed with PKWARE Data Compression Library ?
-            if(hf->pBlock->dwFlags & MPQ_FILE_COMPRESS_PKWARE)
+            if(hf->pBlock->dwFlags & MPQ_FILE_IMPLODE)
                 Decompress_pklib((char *)buffer, &outLength, (char *)inputBuffer, (int)blockSize);
 
             // Is it a file compressed by Blizzard's multiple compression ?
             // Note that Storm.dll v 1.0.9 distributed with Warcraft III
             // passes the full path name of the opened archive as the new last parameter
-            if(hf->pBlock->dwFlags & MPQ_FILE_COMPRESS_MULTI)
-                SCompDecompress((char *)buffer, &outLength, (char *)inputBuffer, (int)blockSize);
+            if(hf->pBlock->dwFlags & MPQ_FILE_COMPRESS)
+            {
+                if(!SCompDecompress((char *)buffer, &outLength, (char *)inputBuffer, (int)blockSize))
+                {
+                    dwBytesRead = 0;
+                    break;
+                }
+            }
+
             dwBytesRead += outLength;
             buffer    += outLength;
         }
@@ -242,17 +253,10 @@ static DWORD WINAPI ReadMPQBlocks(TMPQFile * hf, DWORD dwBlockPos, BYTE * buffer
 
 // When this function is called, it is already ensured that the parameters are valid
 // (e.g. the "dwToRead + dwFilePos" is not greater than the file size)
-// TODO: Test for archives > 4GB
 static DWORD WINAPI ReadMPQFileSingleUnit(TMPQFile * hf, DWORD dwFilePos, BYTE * pbBuffer, DWORD dwToRead)
 {
     TMPQArchive * ha = hf->ha; 
     DWORD dwBytesRead = 0;
-
-    if(ha->FilePointer.QuadPart != hf->MpqFilePos.QuadPart)
-    {
-        SetFilePointer(ha->hFile, hf->MpqFilePos.LowPart, &hf->MpqFilePos.HighPart, FILE_BEGIN);
-        ha->FilePointer = hf->MpqFilePos;
-    }
 
     // If the file is really compressed, decompress it.
     // Otherwise, read the data as-is to the caller.
@@ -264,51 +268,70 @@ static DWORD WINAPI ReadMPQFileSingleUnit(TMPQFile * hf, DWORD dwFilePos, BYTE *
             int outputBufferSize = (int)hf->pBlock->dwFSize;
             int inputBufferSize = (int)hf->pBlock->dwCSize;
 
+            // Allocate buffer in the hf
             hf->pbFileBuffer = ALLOCMEM(BYTE, outputBufferSize);
+            if(hf->pbFileBuffer == NULL)
+                return (DWORD)-1;
+
+            // Allocate temporary buffer for reading the file
             inputBuffer = ALLOCMEM(BYTE, inputBufferSize);
-            if(inputBuffer != NULL && hf->pbFileBuffer != NULL)
+            if(inputBuffer != NULL)
             {
+                // Move file pointer to the begin of the file, move to inner, modified by PeakGao,2008.10.28
+                SetFilePointer(ha->hFile, hf->RawFilePos.LowPart, &hf->RawFilePos.HighPart, FILE_BEGIN);
+
                 // Read the compressed file data
                 ReadFile(ha->hFile, inputBuffer, inputBufferSize, &dwBytesRead, NULL);
 
                 // Is the file compressed with PKWARE Data Compression Library ?
-                if(hf->pBlock->dwFlags & MPQ_FILE_COMPRESS_PKWARE)
+                if(hf->pBlock->dwFlags & MPQ_FILE_IMPLODE)
                     Decompress_pklib((char *)hf->pbFileBuffer, &outputBufferSize, (char *)inputBuffer, (int)inputBufferSize);
 
                 // Is it a file compressed by Blizzard's multiple compression ?
                 // Note that Storm.dll v 1.0.9 distributed with Warcraft III
                 // passes the full path name of the opened archive as the new last parameter
-                if(hf->pBlock->dwFlags & MPQ_FILE_COMPRESS_MULTI)
+                if(hf->pBlock->dwFlags & MPQ_FILE_COMPRESS)
                     SCompDecompress((char *)hf->pbFileBuffer, &outputBufferSize, (char *)inputBuffer, (int)inputBufferSize);
-            }
 
-            // Free the temporary buffer
-            if(inputBuffer != NULL)
+                // Free the temporary input buffer
                 FREEMEM(inputBuffer);
+
+                // If the decompression failed, don't continue
+                if(outputBufferSize == 0)
+                {
+                    FREEMEM(hf->pbFileBuffer);
+                    hf->pbFileBuffer = NULL;
+                    return (DWORD)-1;
+                }
+            }
         }
 
         // Copy the file data, if any there
         if(hf->pbFileBuffer != NULL)
         {
             memcpy(pbBuffer, hf->pbFileBuffer + dwFilePos, dwToRead);
-            dwBytesRead += dwToRead;
+            dwBytesRead = dwToRead;
         }
     }
     else
     {
+        LARGE_INTEGER RawFilePos = hf->RawFilePos;
+
+        // Move file pointer to the dwFilePos of the file, added by PeakGao, 2008.10.28
+        RawFilePos.QuadPart += dwFilePos;
+        SetFilePointer(ha->hFile, RawFilePos.LowPart, &RawFilePos.HighPart, FILE_BEGIN);
+ 
         // Read the uncompressed file data
         ReadFile(ha->hFile, pbBuffer, dwToRead, &dwBytesRead, NULL);
-        dwBytesRead = (int)dwBytesRead;
     }
 
-    return (DWORD)dwBytesRead;
+    return dwBytesRead;
 }
 
 
 //-----------------------------------------------------------------------------
 // ReadMPQFile
 
-// TODO: Test for archives > 4GB
 static DWORD WINAPI ReadMPQFile(TMPQFile * hf, DWORD dwFilePos, BYTE * pbBuffer, DWORD dwToRead)
 {
     TMPQArchive * ha = hf->ha; 
@@ -427,7 +450,6 @@ static DWORD WINAPI ReadMPQFile(TMPQFile * hf, DWORD dwFilePos, BYTE * pbBuffer,
 //-----------------------------------------------------------------------------
 // SFileReadFile
 
-// TODO: Test for archives > 4GB
 BOOL WINAPI SFileReadFile(HANDLE hFile, VOID * lpBuffer, DWORD dwToRead, DWORD * pdwRead, LPOVERLAPPED lpOverlapped)
 {
     TMPQFile * hf = (TMPQFile *)hFile;
@@ -494,7 +516,6 @@ BOOL WINAPI SFileReadFile(HANDLE hFile, VOID * lpBuffer, DWORD dwToRead, DWORD *
 //
 // Returns position of archive file in the archive (relative to begin of file)
 
-// TODO: Test for archives > 4GB
 DWORD WINAPI SFileGetFilePos(HANDLE hFile, DWORD * pdwFilePosHigh)
 {
     TMPQFile * hf = (TMPQFile *)hFile;
@@ -514,14 +535,13 @@ DWORD WINAPI SFileGetFilePos(HANDLE hFile, DWORD * pdwFilePosHigh)
 
     // If opened from archive, return file size
     if(pdwFilePosHigh != NULL)
-        *pdwFilePosHigh = hf->MpqFilePos.HighPart;
-    return hf->MpqFilePos.LowPart;
+        *pdwFilePosHigh = hf->RawFilePos.HighPart;
+    return hf->RawFilePos.LowPart;
 }
 
 //-----------------------------------------------------------------------------
 // SFileGetFileSize
 
-// TODO: Test for archives > 4GB
 DWORD WINAPI SFileGetFileSize(HANDLE hFile, DWORD * pdwFileSizeHigh)
 {
     TMPQFile * hf = (TMPQFile *)hFile;
@@ -543,7 +563,6 @@ DWORD WINAPI SFileGetFileSize(HANDLE hFile, DWORD * pdwFileSizeHigh)
     return hf->pBlock->dwFSize;
 }
 
-// TODO: Test for archives > 4GB
 DWORD WINAPI SFileSetFilePointer(HANDLE hFile, LONG lFilePos, LONG * pdwFilePosHigh, DWORD dwMethod)
 {
     TMPQArchive * ha;
@@ -623,14 +642,14 @@ static TID2Ext id2ext[] =
     {0x3032444D, "m2"},                 // WoW ??? .m2
     {0x43424457, "dbc"},                // ??? .dbc
     {0x47585053, "bls"},                // WoW pixel shaders
+    {0xE0FFD8FF, "jpg"},                // JPEG image
     {0, NULL}                           // Terminator 
 };
 
-// TODO: Test for archives > 4GB
 BOOL WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
 {
     TMPQFile * hf = (TMPQFile *)hFile;  // MPQ File handle
-    const char * szExt = "xxx";               // Default extension
+    char * szExt = "xxx";               // Default extension
     DWORD dwFirstBytes[2];              // The first 4 bytes of the file
     DWORD dwFilePos;                    // Saved file position
     int nError = ERROR_SUCCESS;
@@ -657,7 +676,7 @@ BOOL WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
 
     if(nError == ERROR_SUCCESS)
     {
-        if(hf->dwFileIndex == (DWORD)-1)
+        if(hf->dwBlockIndex == (DWORD)-1)
             nError = ERROR_CAN_NOT_COMPLETE;
     }
 
@@ -666,8 +685,7 @@ BOOL WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
     {
         dwFirstBytes[0] = dwFirstBytes[1] = 0;
         dwFilePos = SFileSetFilePointer(hf, 0, NULL, FILE_CURRENT);   
-        if(!SFileReadFile(hFile, &dwFirstBytes, sizeof(dwFirstBytes), NULL))
-            nError = GetLastError();
+        SFileReadFile(hFile, &dwFirstBytes, sizeof(dwFirstBytes), NULL);
         BSWAP_ARRAY32_UNSIGNED(dwFirstBytes, sizeof(dwFirstBytes) / sizeof(DWORD));
         SFileSetFilePointer(hf, dwFilePos, NULL, FILE_BEGIN);
     }
@@ -691,7 +709,7 @@ BOOL WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
         }
 
         // Create the file name
-        sprintf(hf->szFileName, "File%08lu.%s", hf->dwFileIndex, szExt);
+        sprintf(hf->szFileName, "File%08lu.%s", hf->dwBlockIndex, szExt);
         if(szFileName != hf->szFileName)
             strcpy(szFileName, hf->szFileName);
     }
@@ -704,7 +722,6 @@ BOOL WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
 //  hMpqOrFile - Handle to an MPQ archive or to a file
 //  dwInfoType - Information to obtain
 
-// TODO: Test for archives > 4GB
 DWORD_PTR WINAPI SFileGetFileInfo(HANDLE hMpqOrFile, DWORD dwInfoType)
 {
     TMPQArchive * ha = (TMPQArchive *)hMpqOrFile;
@@ -781,7 +798,7 @@ DWORD_PTR WINAPI SFileGetFileInfo(HANDLE hMpqOrFile, DWORD dwInfoType)
 
         case SFILE_INFO_BLOCKINDEX:
             if(IsValidFileHandle(hf))
-                return hf->dwFileIndex;
+                return hf->dwBlockIndex;
             break;
 
         case SFILE_INFO_FILE_SIZE:
@@ -814,7 +831,7 @@ DWORD_PTR WINAPI SFileGetFileInfo(HANDLE hMpqOrFile, DWORD dwInfoType)
             {
                 dwSeed = hf->dwSeed1;
                 if(hf->pBlock->dwFlags & MPQ_FILE_FIXSEED)
-                    dwSeed = (dwSeed ^ hf->pBlock->dwFSize) - (DWORD)(hf->MpqFilePos.QuadPart - hf->ha->MpqPos.QuadPart);
+                    dwSeed = (dwSeed ^ hf->pBlock->dwFSize) - hf->MpqFilePos.LowPart;
                 return dwSeed;
             }
             break;

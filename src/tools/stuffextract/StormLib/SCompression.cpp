@@ -228,11 +228,9 @@ int Decompress_huff(char * pbOutBuffer, int * pdwOutLength, char * pbInBuffer, i
     TInputStream  is;
 
     // Initialize input stream
-//  is.pbInBuffer  = (unsigned char *)pbInBuffer;
-    is.dwBitBuff   = BSWAP_INT32_UNSIGNED(*(unsigned long *)pbInBuffer);
-    pbInBuffer    += sizeof(unsigned long);
-    is.pbInBuffer  = (unsigned char *)pbInBuffer;
-    is.nBits       = 32;
+    is.pbInBuffer = (unsigned char *)pbInBuffer;
+    is.BitBuffer  = 0;
+    is.BitCount   = 0;
 
     // Initialize the Huffmann tree for compression
     ht.InitTree(false);
@@ -363,7 +361,7 @@ int Decompress_pklib(char * pbOutBuffer, int * pdwOutLength, char * pbInBuffer, 
     // Fix: If PKLIB is unable to decompress the data, they are uncompressed
     if(Info.nOutPos == 0)
     {
-        Info.nOutPos = min(*pdwOutLength, dwInLength);
+        Info.nOutPos = STORMLIB_MIN(*pdwOutLength, dwInLength);
         memcpy(pbOutBuffer, pbInBuffer, Info.nOutPos);
     }
 
@@ -422,11 +420,12 @@ int Compress_bzip2(char * pbOutBuffer, int * pdwOutLength, char * pbInBuffer, in
 int Decompress_bzip2(char * pbOutBuffer, int * pdwOutLength, char * pbInBuffer, int dwInLength)
 {
     bz_stream strm;
+    int nResult = BZ_OK;
 
     // Initialize the BZLIB decompression
     strm.bzalloc = NULL;
     strm.bzfree  = NULL;
-    if(BZ2_bzDecompressInit(&strm, 0, 0) == 0)
+    if(BZ2_bzDecompressInit(&strm, 0, 0) == BZ_OK)
     {
         strm.next_in   = pbInBuffer;
         strm.avail_in  = dwInLength;
@@ -434,18 +433,28 @@ int Decompress_bzip2(char * pbOutBuffer, int * pdwOutLength, char * pbInBuffer, 
         strm.avail_out = *pdwOutLength;
 
         // Perform the decompression
-        while(BZ2_bzDecompress(&strm) != BZ_STREAM_END);
+        while(nResult != BZ_STREAM_END)
+        {
+            nResult = BZ2_bzDecompress(&strm);
+            
+            // If any error there, break the loop 
+            if(nResult < BZ_OK)
+                break;
+        }
 
         // Put the stream into idle state
         BZ2_bzDecompressEnd(&strm);
-        *pdwOutLength = strm.total_out_lo32;
-    }
-    else
-    {
-        // Set zero output length
-        *pdwOutLength = 0;
+
+        // If all succeeded, set the number of output bytes
+        if(nResult >= BZ_OK)
+        {
+            *pdwOutLength = strm.total_out_lo32;
+            return 1;
+        }
     }
 
+    // Something failed, so set number of output bytes to zero
+    *pdwOutLength = 0;
     return 0;
 }
 

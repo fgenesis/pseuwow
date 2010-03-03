@@ -43,6 +43,18 @@
 /* 15.05.06  5.02  Lad  Fixed issue with WoW 1.10+                           */
 /* 07.09.06  5.10  Lad  Fixed processing files longer than 2GB               */
 /* 22.11.06  6.00  Lad  Support for MPQ archives V2                          */
+/* 12.06.07  6.10  Lad  Support for extended file attributes                 */
+/* 10.09.07  6.12  Lad  Support for MPQs protected by corrupting hash table  */
+/* 03.12.07  6.13  Lad  Support for MPQs with hash tbl size > block tbl size */
+/* 07.04.08  6.20  Lad  Added SFileFlushArchive                              */
+/* 09.04.08        Lad  Removed FilePointer variable from TMPQArchive, as    */
+/*                      it caused more problems than benefits                */
+/* 12.05.08  6.22  Lad  Support for w3xMaster map protector                  */
+/* 05.10.08  6.23  Lad  Support for protectors who set negative values in    */
+/*                      the table of file blocks                             */
+/* 26.05.09  6.24  Lad  Fixed search for multiple lang files with deleted    */
+/*                      entries                                              */
+/* 03.09.09  6.25  Lad  Fixed decompression bug in huffmann decompression    */
 /*****************************************************************************/
 
 #ifndef __STORMLIB_H_
@@ -60,8 +72,6 @@
 //  Y - A for ANSI version, U for Unicode version (Unicode version does not exist yet)
 //  Z - S for static C library, D for multithreaded DLL C-library
 //
-
-#define __STORMLIB_SELF__
 
 #if defined(_MSC_VER) && !defined (__STORMLIB_SELF__)
   #ifdef _DEBUG                                 // DEBUG VERSIONS
@@ -88,7 +98,7 @@
 #define ERROR_AVI_FILE         10000        // No MPQ file, but AVI file.
 
 // Values for SFileCreateArchiveEx
-#define HASH_TABLE_SIZE_MIN    0x00002
+#define HASH_TABLE_SIZE_MIN    0x00004
 #define HASH_TABLE_SIZE_MAX    0x40000
 
 #define HASH_ENTRY_DELETED       0xFFFFFFFE // Block index for deleted hash entry
@@ -108,8 +118,10 @@
 #define MPQ_FLAG_PROTECTED       0x00000002 // Set on protected MPQs (like W3M maps)
 
 // Flags for SFileAddFile
-#define MPQ_FILE_COMPRESS_PKWARE 0x00000100 // Compression made by PKWARE Data Compression Library
-#define MPQ_FILE_COMPRESS_MULTI  0x00000200 // Multiple compressions
+// Note: MPQ_FILE_COMPRESS_PKWARE has been replaced by MPQ_FILE_IMPLODE
+// Note: MPQ_FILE_COMPRESS_MULTI has been replaced by MPQ_FILE_COMPRESS
+#define MPQ_FILE_IMPLODE         0x00000100 // Implode method (By PKWARE Data Compression Library)
+#define MPQ_FILE_COMPRESS        0x00000200 // Compress methods (My various methods)
 #define MPQ_FILE_COMPRESSED      0x0000FF00 // File is compressed
 #define MPQ_FILE_ENCRYPTED       0x00010000 // Indicates whether file is encrypted 
 #define MPQ_FILE_FIXSEED         0x00020000 // File decrypt seed has to be fixed
@@ -120,13 +132,13 @@
 #define MPQ_FILE_EXISTS          0x80000000 // Set if file exists, reset when the file was deleted
 #define MPQ_FILE_REPLACEEXISTING 0x80000000 // Replace when the file exist (SFileAddFile)
 
-#define MPQ_FILE_VALID_FLAGS     (MPQ_FILE_COMPRESS_PKWARE |  \
-                                  MPQ_FILE_COMPRESS_MULTI |   \
-                                  MPQ_FILE_ENCRYPTED |        \
-                                  MPQ_FILE_FIXSEED |          \
-                                  MPQ_FILE_SINGLE_UNIT |      \
-                                  MPQ_FILE_DUMMY_FILE |         \
-                                  MPQ_FILE_HAS_EXTRA |        \
+#define MPQ_FILE_VALID_FLAGS     (MPQ_FILE_IMPLODE     |  \
+                                  MPQ_FILE_COMPRESS    |  \
+                                  MPQ_FILE_ENCRYPTED   |  \
+                                  MPQ_FILE_FIXSEED     |  \
+                                  MPQ_FILE_SINGLE_UNIT |  \
+                                  MPQ_FILE_DUMMY_FILE  |  \
+                                  MPQ_FILE_HAS_EXTRA   |  \
                                   MPQ_FILE_EXISTS)
 
 // Compression types for multilpe compressions
@@ -175,18 +187,29 @@
 #define SIGNATURE_NAME   "(signature)"      // Name of internal signature
 #define ATTRIBUTES_NAME "(attributes)"      // Name of internal attributes file
 
-#define STORMLIB_VERSION      (0x0600)      // Current version of StormLib
+#define STORMLIB_VERSION      (0x0619)      // Current version of StormLib
 
 #define MPQ_FORMAT_VERSION_1        0       // Up to The Burning Crusade
-#define MPQ_FORMAT_VERSION_2        1       // The Burning Crusade and newer,
+#define MPQ_FORMAT_VERSION_2        1       // The Burning Crusade and newer 
 
 // Flags for SFileOpenArchiveEx
 #define MPQ_OPEN_NO_LISTFILE    0x00000001  // Don't add the internal listfile
+#define MPQ_OPEN_NO_ATTRIBUTES  0x00000002  // Don't open the attributes
+#define MPQ_OPEN_FORCE_MPQ_V1   0x00000004  // Always open the archive as MPQ v 1.00, ignore the "wFormatVersion" variable in the header
 
-// supports archives with size > 4 GB
+// Flags for MPQ attributes
+#define MPQ_ATTRIBUTE_CRC32     0x00000001  // The "(attributes)" contain array of CRC32s
+#define MPQ_ATTRIBUTE_FILETIME  0x00000002  // The "(attributes)" contain array of FILETIMEs
+#define MPQ_ATTRIBUTE_MD5       0x00000004  // The "(attributes)" contain array of MD5s
+
+// Supports archives with size > 4 GB
 // Additional flags for SFileCreateArchiveEx
 #define MPQ_CREATE_ARCHIVE_V1   0x00000000  // Creates archive with size up to 4GB
 #define MPQ_CREATE_ARCHIVE_V2   0x00010000  // Creates archive larger than 4 GB
+#define MPQ_CREATE_ATTRIBUTES   0x00100000  // Also add the (attributes) file
+
+// Formats of (attributes) file
+#define MPQ_ATTRIBUTES_V1       100         // FOrmat version 1.00
 
 //-----------------------------------------------------------------------------
 // Structures
@@ -194,7 +217,7 @@
 #if (defined(WIN32) || defined(WIN64))
 #include <pshpack1.h>
 #else
-#pragma pack(1)
+#pragma pack(push,1)
 #endif
 
 struct TMPQFile;
@@ -273,7 +296,7 @@ struct TMPQHash
     // The hash of the file path, using method B.
     DWORD dwName2;
 
-#ifdef PLATFORM_LITTLE_ENDIAN
+#if PLATFORM_LITTLE_ENDIAN
 
     // The language of the file. This is a Windows LANGID data type, and uses the same values.
     // 0 indicates the default language (American English), or that the file is language-neutral.
@@ -342,13 +365,47 @@ struct TFileNode
     char  szFileName[1];                // File name, variable length
 };
 
+
+// CRC32 present in the (attributes) file
+struct TMPQCRC32
+{
+    DWORD dwValue;                      // Value of CRC32 for each block
+};
+
+
+// FILETIME present in the (attributes) file
+struct TMPQFileTime
+{
+    DWORD dwFileTimeLow;                // Low DWORD of the FILETIME
+    DWORD dwFileTimeHigh;               // High DWORD of the FILETIME
+};
+
+
+// MD5 presetn in the (attributes) file
+struct TMPQMD5
+{
+    BYTE Value[0x10];                   // 16 bytes of MD5
+};
+
+
+// Data from (attributes) file
+struct TMPQAttr
+{
+    DWORD dwVersion;                    // Version of the (attributes) file. Must be 100 (0x64)
+    DWORD dwFlags;                      // See MPQ_ATTRIBUTE_XXXX
+    TMPQCRC32    * pCrc32;              // Array of CRC32 (NULL if none)
+    TMPQFileTime * pFileTime;           // Array of FILETIME (NULL if not present)
+    TMPQMD5      * pMd5;                // Array of MD5 (NULL if none)
+};
+
+
 #if (defined(WIN32) || defined(WIN64))
 #include <poppack.h>
 #else
-#pragma options align=reset
+#pragma pack(pop)
 #endif
 
-// Archive handle structure. Note that it does not agree with Storm.dll's structure.
+// Archive handle structure
 struct TMPQArchive
 {
 //  TMPQArchive * pNext;                // Next archive (used by Storm.dll only)
@@ -356,13 +413,12 @@ struct TMPQArchive
     char          szFileName[MAX_PATH]; // Opened archive file name
     HANDLE        hFile;                // File handle
     DWORD         dwPriority;           // Priority of the archive
-    LARGE_INTEGER ShuntPos;             // Position of MPQShunt (only valid if a shunt is present)
-    LARGE_INTEGER MpqPos;               // MPQ position in the file, relative to the begin of the file
+    LARGE_INTEGER ShuntPos;             // MPQShunt offset (only valid if a shunt is present)
+    LARGE_INTEGER MpqPos;               // File header offset (relative to the begin of the file)
+    LARGE_INTEGER HashTablePos;         // Hash table offset (relative to the begin of the file)
+    LARGE_INTEGER BlockTablePos;        // Block table offset (relative to the begin of the file)
+    LARGE_INTEGER ExtBlockTablePos;     // Ext. block table offset (relative to the begin of the file)
     LARGE_INTEGER MpqSize;              // Size of MPQ archive
-    LARGE_INTEGER HashTablePos;         // Offset of the hast table in the MPQ, relative to the begin of the file
-    LARGE_INTEGER BlockTablePos;        // Offset of the hast table in the MPQ, relative to the begin
-    LARGE_INTEGER ExtBlockTablePos;     // Offset of the extended block table, relative to the begin
-    LARGE_INTEGER FilePointer;          // Current position in the file (relative to begin of the file)
 
     TMPQFile    * pLastFile;            // Recently read file
     DWORD         dwBlockPos;           // Position of loaded block in the file
@@ -378,44 +434,44 @@ struct TMPQArchive
     TMPQShunt     Shunt;                // MPQ shunt. Valid only when ID_MPQ_SHUNT has been found
     TMPQHeader2   Header;               // MPQ header
 
-    // Non-Storm.dll members
+    TMPQAttr    * pAttributes;          // MPQ attributes from "(attributes)" file (NULL if none)
     TFileNode  ** pListFile;            // File name array
-//  HANDLE        hListFile;            // Handle to temporary listfile (when open with write access)
     DWORD         dwFlags;              // See MPQ_FLAG_XXXXX
-//  BOOL          bChanged;             // TRUE if the archive was changed since open.
-//  BOOL          bProtected;           // TRUE if the archive is protected by somehow
 };
 
 
-// File handle structure. Note that it does not agree with Storm.dll structures
+// File handle structure
 struct TMPQFile
 {
-    HANDLE        hFile;                // File handle
-    TMPQArchive * ha;                   // Archive handle
-    TMPQHash    * pHash;                // Hash table entry
-    TMPQBlockEx * pBlockEx;             // Pointer to extended file block entry
-    TMPQBlock   * pBlock;               // File block pointer
-    DWORD         dwSeed1;              // Seed used for file decrypt
-    DWORD         dwFilePos;            // Current file position
-    LARGE_INTEGER MpqFilePos;           // Position of the file data in MPQ archive
-                                        // (relative to file begin)
+    HANDLE         hFile;               // File handle
+    TMPQArchive  * ha;                  // Archive handle
+    TMPQHash     * pHash;               // Hash table entry
+    TMPQBlockEx  * pBlockEx;            // Pointer to extended file block entry
+    TMPQBlock    * pBlock;              // File block pointer
+    DWORD          dwSeed1;             // Seed used for file decrypt
+    DWORD          dwFilePos;           // Current file position
+    LARGE_INTEGER  RawFilePos;          // Offset in MPQ archive (relative to file begin)
+    LARGE_INTEGER  MpqFilePos;          // Offset in MPQ archive (relative to MPQ header)
 
-    DWORD       * pdwBlockPos;          // Position of each file block (only for compressed files)
-    DWORD         nBlocks;              // Number of blocks in the file (incl. the last noncomplete one)
-    BOOL          bBlockPosLoaded;      // TRUE if block positions loaded
-    BYTE        * pbFileBuffer;         // Decompressed file (for single unit files, size is the uncompressed file size)
+    DWORD        * pdwBlockPos;         // Position of each file block (only for compressed files)
+    DWORD          nBlocks;             // Number of blocks in the file (incl. the last incomplete one)
+    BOOL           bBlockPosLoaded;     // TRUE if block positions loaded
+    BYTE         * pbFileBuffer;        // Decompressed file (for single unit files, size is the uncompressed file size)
 
-    DWORD         dwHashIndex;          // Index to Hash table
-    DWORD         dwFileIndex;          // Index to Block table
-    char          szFileName[1];        // File name (variable length)
+    TMPQCRC32    * pCrc32;              // Pointer to CRC32 (NULL if none)
+    TMPQFileTime * pFileTime;           // Pointer to file's FILETIME (NULL if none)
+    TMPQMD5      * pMd5;                // Pointer to file's MD5 (NULL if none)
+
+    DWORD          dwHashIndex;         // Index to Hash table
+    DWORD          dwBlockIndex;        // Index to Block table
+    char           szFileName[1];       // File name (variable length)
 };
-
 
 // Used by searching in MPQ archives
 struct TMPQSearch
 {
     TMPQArchive * ha;                   // Handle to MPQ, where the search runs
-    DWORD  dwNextIndex;                 // The next searched hash index
+    DWORD  dwNextIndex;                 // Next hash index to be checked
     DWORD  dwName1;                     // Lastly found Name1
     DWORD  dwName2;                     // Lastly found Name2
     char   szSearchMask[1];             // Search mask (variable length)
@@ -457,7 +513,7 @@ __inline void * DebugMalloc(char * szFile, int nLine, int nSize)
     if(plain == NULL)
         plain = szFile;
 
-#if _MSC_VER > 0x1300
+#if _MSC_VER > 1300
     sprintf_s((char *)ptr, nSize+100, "%s(%u)", plain, nLine);
 #else
     sprintf((char *)ptr, "%s(%u)", plain, nLine);
@@ -497,11 +553,12 @@ typedef BOOL  (WINAPI * SFILEREADFILE)(HANDLE, VOID *, DWORD, DWORD *, LPOVERLAP
 // Archive opening/closing
 LCID  WINAPI SFileSetLocale(LCID lcNewLocale);
 LCID  WINAPI SFileGetLocale();
-BOOL  WINAPI SFileOpenArchive(const char * szMpqName, DWORD dwPriority, DWORD dwFlags, HANDLE * phMPQ);
-BOOL  WINAPI SFileCloseArchive(HANDLE hMPQ);
+BOOL  WINAPI SFileOpenArchive(const char * szMpqName, DWORD dwPriority, DWORD dwFlags, HANDLE * phMpq);
+BOOL  WINAPI SFileFlushArchive(HANDLE hMpq);
+BOOL  WINAPI SFileCloseArchive(HANDLE hMpq);
 
 // File opening/closing
-BOOL  WINAPI SFileOpenFileEx(HANDLE hMPQ, const char * szFileName, DWORD dwSearchScope, HANDLE * phFile);
+BOOL  WINAPI SFileOpenFileEx(HANDLE hMpq, const char * szFileName, DWORD dwSearchScope, HANDLE * phFile);
 BOOL  WINAPI SFileCloseFile(HANDLE hFile);
 
 // File I/O
@@ -509,8 +566,6 @@ DWORD WINAPI SFileGetFilePos(HANDLE hFile, DWORD * pdwFilePosHigh = NULL);
 DWORD WINAPI SFileGetFileSize(HANDLE hFile, DWORD * pdwFileSizeHigh = NULL);
 DWORD WINAPI SFileSetFilePointer(HANDLE hFile, LONG lFilePos, LONG * pdwFilePosHigh, DWORD dwMethod);
 BOOL  WINAPI SFileReadFile(HANDLE hFile, VOID * lpBuffer, DWORD dwToRead, DWORD * pdwRead = NULL, LPOVERLAPPED lpOverlapped = NULL);
-
-BOOL  WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char * szExtracted);
 
 // Adds another listfile into MPQ. The currently added listfile(s) remain,
 // so you can use this API to combining more listfiles.
@@ -521,21 +576,21 @@ int   WINAPI SFileAddListFile(HANDLE hMpq, const char * szListFile);
 // Functions in StormLib - not implemented in Storm.dll
 
 // Archive creating and editing
-BOOL  WINAPI SFileCreateArchiveEx(const char * szMpqName, DWORD dwCreationDisposition, DWORD dwHashTableSize, HANDLE * phMPQ);
-BOOL  WINAPI SFileAddFile(HANDLE hMPQ, const char * szFileName, const char * szArchivedName, DWORD dwFlags); 
-BOOL  WINAPI SFileAddWave(HANDLE hMPQ, const char * szFileName, const char * szArchivedName, DWORD dwFlags, DWORD dwQuality); 
-BOOL  WINAPI SFileRemoveFile(HANDLE hMPQ, const char * szFileName, DWORD dwSearchScope = SFILE_OPEN_BY_INDEX);
-BOOL  WINAPI SFileRenameFile(HANDLE hMPQ, const char * szOldFileName, const char * szNewFileName);
+BOOL  WINAPI SFileCreateArchiveEx(const char * szMpqName, DWORD dwCreationDisposition, DWORD dwHashTableSize, HANDLE * phMpq);
+BOOL  WINAPI SFileAddFile(HANDLE hMpq, const char * szFileName, const char * szArchivedName, DWORD dwFlags); 
+BOOL  WINAPI SFileAddWave(HANDLE hMpq, const char * szFileName, const char * szArchivedName, DWORD dwFlags, DWORD dwQuality); 
+BOOL  WINAPI SFileRemoveFile(HANDLE hMpq, const char * szFileName, DWORD dwSearchScope = SFILE_OPEN_BY_INDEX);
+BOOL  WINAPI SFileRenameFile(HANDLE hMpq, const char * szOldFileName, const char * szNewFileName);
 BOOL  WINAPI SFileSetFileLocale(HANDLE hFile, LCID lcNewLocale);
 
 // Retrieving info about the file
-BOOL  WINAPI SFileHasFile(HANDLE hMPQ, const char * szFileName);
+BOOL  WINAPI SFileHasFile(HANDLE hMpq, const char * szFileName);
 BOOL  WINAPI SFileGetFileName(HANDLE hFile, char * szFileName);
 DWORD_PTR WINAPI SFileGetFileInfo(HANDLE hMpqOrFile, DWORD dwInfoType);
 
 // File search
 // Note that the SFileFindFirstFileEx has been removed. Use SListFileFindFirst/Next
-HANDLE WINAPI SFileFindFirstFile(HANDLE hMPQ, const char * szMask, SFILE_FIND_DATA * lpFindFileData, const char * szListFile);
+HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DATA * lpFindFileData, const char * szListFile);
 BOOL   WINAPI SFileFindNextFile(HANDLE hFind, SFILE_FIND_DATA * lpFindFileData);
 BOOL   WINAPI SFileFindClose(HANDLE hFind);
 
@@ -546,11 +601,11 @@ BOOL   SListFileFindClose(HANDLE hFind);
 
 // Archive compacting
 typedef void  (WINAPI * COMPACTCB)(void * lpUserData, DWORD dwWorkType, DWORD dwParam1, DWORD dwParam2);
-BOOL  WINAPI SFileSetCompactCallback(HANDLE hMPQ, COMPACTCB CompactCB, void * lpData);
-BOOL  WINAPI SFileCompactArchive(HANDLE hMPQ, const char * szListFile = NULL, BOOL bReserved = 0);
+BOOL  WINAPI SFileSetCompactCallback(HANDLE hMpq, COMPACTCB CompactCB, void * lpData);
+BOOL  WINAPI SFileCompactArchive(HANDLE hMpq, const char * szListFile = NULL, BOOL bReserved = 0);
 
 // Locale support
-int   WINAPI SFileEnumLocales(HANDLE hMPQ, const char * szFileName, LCID * plcLocales, DWORD * pdwMaxLocales, DWORD dwSearchScope = SFILE_OPEN_BY_INDEX);
+int   WINAPI SFileEnumLocales(HANDLE hMpq, const char * szFileName, LCID * plcLocales, DWORD * pdwMaxLocales, DWORD dwSearchScope);
 
 // (De)compression
 int WINAPI SCompCompress   (char * pbOutBuffer, int * pdwOutLength, char * pbInBuffer, int dwInLength, int uCompressions, int nCmpType, int nCmpLevel);
@@ -558,7 +613,15 @@ int WINAPI SCompDecompress (char * pbOutBuffer, int * pdwOutLength, char * pbInB
 
 // Sets the default data compression for files added to MPQ,
 // if MPQ_FILE_COMPRESS_MULTI has been specified in call to SFileAddFile
+// Use one of the MPQ_COMPRESSION_XXX values
 int WINAPI SCompSetDataCompression(int nDataCompression);
+
+// Verifies file against its extended attributes (depending on dwFlags).
+// For dwFlags, use one or more of MPQ_ATTRIBUTE_MD5
+BOOL  WINAPI SFileVerifyFile(HANDLE hMpq, const char * szFileName, DWORD dwFlags);
+
+// High-level extract function
+BOOL  WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char * szExtracted);
 
 //-----------------------------------------------------------------------------
 // Functions from Storm.dll. They use slightly different names for keeping

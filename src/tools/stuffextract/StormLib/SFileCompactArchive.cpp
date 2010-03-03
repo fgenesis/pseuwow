@@ -39,7 +39,6 @@ static TMPQHash * CopyHashTable(TMPQArchive * ha)
     return pHashTableCopy;
 }
 
-// TODO: Test for archives > 4GB
 static int CheckIfAllFilesKnown(TMPQArchive * ha, const char * szListFile, DWORD * pFileSeeds)
 {
     TMPQHash * pHashTableCopy = NULL;   // Copy of the hash table
@@ -129,13 +128,13 @@ static int CheckIfAllFilesKnown(TMPQArchive * ha, const char * szListFile, DWORD
         {
             // If there is an unresolved entry, try to detect its seed. If it fails,
             // we cannot complete the work
-            if(pHash->dwName1 != (DWORD)-1 && pHash->dwName2 != (DWORD)-1)
+            if(pHash->dwBlockIndex < ha->pHeader->dwBlockTableSize)
             {
                 HANDLE hFile  = NULL;
                 DWORD dwFlags = 0;
                 DWORD dwSeed  = 0;
 
-                if(SFileOpenFileEx((HANDLE)ha, (char *)(DWORD_PTR)pHash->dwBlockIndex, 0, &hFile))
+                if(SFileOpenFileEx((HANDLE)ha, (char *)(DWORD_PTR)pHash->dwBlockIndex, SFILE_OPEN_BY_INDEX, &hFile))
                 {
                     TMPQFile * hf = (TMPQFile *)hFile;
                     dwFlags = hf->pBlock->dwFlags;
@@ -168,7 +167,6 @@ static int CheckIfAllFilesKnown(TMPQArchive * ha, const char * szListFile, DWORD
 }
 
 // Copies all file blocks into another archive.
-// TODO: Test for archives > 4GB
 static int CopyMpqFileBlocks(
     HANDLE hFile,
     TMPQArchive * ha,
@@ -290,7 +288,7 @@ static int CopyMpqFileBlocks(
         }
     }
 
-    // Now we have to copy all file block. We will do it without
+    // Now we have to copy all file blocks. We will do it without
     // recompression, because re-compression is not necessary in this case
     if(nError == ERROR_SUCCESS)
     {
@@ -424,7 +422,6 @@ static int CopyNonMpqData(
     return ERROR_SUCCESS;
 }
 
-// TODO: Test for archives > 4GB
 static int CopyMpqFiles(HANDLE hFile, TMPQArchive * ha, DWORD * pFileSeeds)
 {
     TMPQBlockEx * pBlockEx;
@@ -443,9 +440,6 @@ static int CopyMpqFiles(HANDLE hFile, TMPQArchive * ha, DWORD * pFileSeeds)
         // Notify the caller about work
         if(CompactCB != NULL)
             CompactCB(lpUserData, CCB_COMPACTING_FILES, dwIndex, ha->pHeader->dwBlockTableSize);
-
-//      if(dwIndex == 0x1B9)
-//          DebugBreak();
 
         // Copy all the file blocks
         // Debug: Break at (dwIndex == 5973)
@@ -476,7 +470,6 @@ BOOL WINAPI SFileSetCompactCallback(HANDLE /* hMPQ */, COMPACTCB aCompactCB, voi
 //-----------------------------------------------------------------------------
 // Archive compacting (incomplete)
 
-// TODO: Test for archives > 4GB
 BOOL WINAPI SFileCompactArchive(HANDLE hMPQ, const char * szListFile, BOOL /* bReserved */)
 {
     TMPQArchive * ha = (TMPQArchive *)hMPQ;
@@ -564,6 +557,10 @@ BOOL WINAPI SFileCompactArchive(HANDLE hMPQ, const char * szListFile, BOOL /* bR
 
     // Write the data between the header and between the first file
     // For this, we have to determine where the first file begins
+    // Ladik: While this seems to be useful at first sight,
+    // it makes SFileCompactArchive useless, when there's just one file
+    // in a MPQ that has been rewritten.
+/*
     if(nError == ERROR_SUCCESS)
     {
         LARGE_INTEGER FirstFilePos;
@@ -596,7 +593,7 @@ BOOL WINAPI SFileCompactArchive(HANDLE hMPQ, const char * szListFile, BOOL /* bR
         FirstFilePos.QuadPart -= ha->pHeader->dwHeaderSize;
         nError = CopyNonMpqData(ha->hFile, hFile, FirstFilePos);
     }
-
+*/
     // Now write all file blocks.
     if(nError == ERROR_SUCCESS)
         nError = CopyMpqFiles(hFile, ha, pFileSeeds);
@@ -643,7 +640,6 @@ BOOL WINAPI SFileCompactArchive(HANDLE hMPQ, const char * szListFile, BOOL /* bR
     if(nError == ERROR_SUCCESS)
     {
         CloseHandle(ha->hFile);
-        ha->FilePointer.QuadPart = 0;
         ha->hFile = hFile;
         hFile = INVALID_HANDLE_VALUE;
         nError = SaveMPQTables(ha);
@@ -672,7 +668,6 @@ BOOL WINAPI SFileCompactArchive(HANDLE hMPQ, const char * szListFile, BOOL /* bR
     // Invalidate the positions of the archive
     if(nError == ERROR_SUCCESS)
     {
-        ha->FilePointer.QuadPart = 0;
         ha->pLastFile  = NULL;
         ha->dwBlockPos = 0;
         ha->dwBuffPos  = 0;

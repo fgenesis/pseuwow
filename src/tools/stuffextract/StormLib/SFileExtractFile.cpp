@@ -12,12 +12,22 @@
 #include "StormLib.h"
 #include "SCommon.h"
 
-// TODO: Test for archives > 4GB
 BOOL WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char * szExtracted)
 {
     HANDLE hLocalFile = INVALID_HANDLE_VALUE;
     HANDLE hMpqFile = NULL;
+    DWORD dwSearchScope = 0;
     int nError = ERROR_SUCCESS;
+
+
+    // Open the MPQ file
+    if(nError == ERROR_SUCCESS)
+    {
+        if((DWORD_PTR)szToExtract <= 0x10000)
+            dwSearchScope = SFILE_OPEN_BY_INDEX;
+        if(!SFileOpenFileEx(hMpq, szToExtract, dwSearchScope, &hMpqFile))
+            nError = GetLastError();
+    }
 
     // Create the local file
     if(nError == ERROR_SUCCESS)
@@ -27,28 +37,27 @@ BOOL WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char *
             nError = GetLastError();
     }
 
-    // Open the MPQ file
-    if(nError == ERROR_SUCCESS)
-    {
-        if(!SFileOpenFileEx(hMpq, szToExtract, 0, &hMpqFile))
-            nError = GetLastError();
-    }
-
     // Copy the file's content
     if(nError == ERROR_SUCCESS)
     {
         char  szBuffer[0x1000];
-        DWORD dwTransferred = 1;
+        DWORD dwTransferred;
 
-        while(dwTransferred > 0)
+        for(;;)
         {
-            SFileReadFile(hMpqFile, szBuffer, sizeof(szBuffer), &dwTransferred, NULL);
+            // dwTransferred is only set to nonzero if something has been read.
+            // nError can be ERROR_SUCCESS or ERROR_HANDLE_EOF
+            if(!SFileReadFile(hMpqFile, szBuffer, sizeof(szBuffer), &dwTransferred, NULL))
+                nError = GetLastError();
+            if(nError == ERROR_HANDLE_EOF)
+                nError = ERROR_SUCCESS;
             if(dwTransferred == 0)
                 break;
 
+            // If something has been actually read, write it
             WriteFile(hLocalFile, szBuffer, dwTransferred, &dwTransferred, NULL);
             if(dwTransferred == 0)
-                break;
+                nError = ERROR_DISK_FULL;
         }
     }
 
