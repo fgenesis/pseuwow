@@ -30,7 +30,6 @@ static BOOL IsAviFile(TMPQHeader * pHeader)
 }
 
 // This function gets the right positions of the hash table and the block table.
-// TODO: Test for archives > 4GB
 static int RelocateMpqTablePositions(TMPQArchive * ha)
 {
     TMPQHeader2 * pHeader = ha->pHeader;
@@ -194,15 +193,19 @@ BOOL SFileOpenArchiveEx(
             // If there is the MPQ shunt signature, process it
             if(dwHeaderID == ID_MPQ_SHUNT && ha->pShunt == NULL)
             {
-                // Fill the shunt header
-                ha->ShuntPos = MpqPos;
-                ha->pShunt = &ha->Shunt;
-                memcpy(ha->pShunt, ha->pHeader, sizeof(TMPQShunt));
-                BSWAP_TMPQSHUNT(ha->pShunt);
+                // Ignore the MPQ shunt completely if the caller wants to open the MPQ as V1.0
+                if((dwFlags & MPQ_OPEN_FORCE_MPQ_V1) == 0)
+                {
+                    // Fill the shunt header
+                    ha->ShuntPos = MpqPos;
+                    ha->pShunt = &ha->Shunt;
+                    memcpy(ha->pShunt, ha->pHeader, sizeof(TMPQShunt));
+                    BSWAP_TMPQSHUNT(ha->pShunt);
 
-                // Set the MPQ pos and repeat the search
-                MpqPos.QuadPart = SearchPos.QuadPart + ha->pShunt->dwHeaderPos;
-                continue;
+                    // Set the MPQ pos and repeat the search
+                    MpqPos.QuadPart = SearchPos.QuadPart + ha->pShunt->dwHeaderPos;
+                    continue;
+                }
             }
 
             // There must be MPQ header signature
@@ -218,35 +221,32 @@ BOOL SFileOpenArchiveEx(
                 {
                     // W3M Map Protectors set some garbage value into the "dwHeaderSize"
                     // field of MPQ header. This value is apparently ignored by Storm.dll
-                    if(ha->pHeader->dwHeaderSize != sizeof(TMPQHeader) &&
-                       ha->pHeader->dwHeaderSize != sizeof(TMPQHeader2))
+                    if(ha->pHeader->dwHeaderSize != sizeof(TMPQHeader))
                     {
                         ha->dwFlags |= MPQ_FLAG_PROTECTED;
                         ha->pHeader->dwHeaderSize = sizeof(TMPQHeader);
                     }
-
-                    if(ha->pHeader->dwHashTablePos < ha->pHeader->dwArchiveSize &&
-                       ha->pHeader->dwBlockTablePos < ha->pHeader->dwArchiveSize)
-                    {
-                        break;
-                    }
+					break;
                 }
 
                 if(ha->pHeader->wFormatVersion == MPQ_FORMAT_VERSION_2)
                 {
-                    break;
+                    // W3M Map Protectors set some garbage value into the "dwHeaderSize"
+                    // field of MPQ header. This value is apparently ignored by Storm.dll
+                    if(ha->pHeader->dwHeaderSize != sizeof(TMPQHeader2))
+                    {
+                        ha->dwFlags |= MPQ_FLAG_PROTECTED;
+                        ha->pHeader->dwHeaderSize = sizeof(TMPQHeader2);
+                    }
+					break;
                 }
 
+				//
+				// Note: the "dwArchiveSize" member in the MPQ header is ignored by Storm.dll
+				// and can contain garbage value ("w3xmaster" protector)
+				// 
+                
                 nError = ERROR_NOT_SUPPORTED;
-                break;
-            }
-
-            // If a MPQ shunt already has been found, 
-            // and no MPQ header was at potision pointed by the shunt,
-            // then the archive is corrupt
-            if(ha->pShunt != NULL)
-            {
-                nError = ERROR_BAD_FORMAT;
                 break;
             }
 
@@ -259,6 +259,17 @@ BOOL SFileOpenArchiveEx(
     // Relocate tables position
     if(nError == ERROR_SUCCESS)
     {
+        // W3x Map Protectors use the fact that War3's StormLib ignores the file shunt,
+        // and probably ignores the MPQ format version as well. The trick is to
+        // fake MPQ format 2, with an improper hi-word position of hash table and block table
+        // We can overcome such protectors by forcing opening the archive as MPQ v 1.0
+        if(dwFlags & MPQ_OPEN_FORCE_MPQ_V1)
+        {
+            ha->pHeader->wFormatVersion = MPQ_FORMAT_VERSION_1;
+            ha->pHeader->dwHeaderSize = sizeof(TMPQHeader);
+            ha->pShunt = NULL;
+        }
+
         // Clear the fields not supported in older formats
         if(ha->pHeader->wFormatVersion < MPQ_FORMAT_VERSION_2)
         {
@@ -281,7 +292,10 @@ BOOL SFileOpenArchiveEx(
         // I have found a MPQ which has the block table larger than
         // the hash table. We should avoid buffer overruns caused by that.
         //
-        dwBlockTableSize = max(ha->pHeader->dwHashTableSize, ha->pHeader->dwBlockTableSize);
+        
+        if(ha->pHeader->dwBlockTableSize > ha->pHeader->dwHashTableSize)
+            ha->pHeader->dwBlockTableSize = ha->pHeader->dwHashTableSize;
+        dwBlockTableSize   = ha->pHeader->dwHashTableSize;
 
         ha->pHashTable     = ALLOCMEM(TMPQHash, ha->pHeader->dwHashTableSize);
         ha->pBlockTable    = ALLOCMEM(TMPQBlock, dwBlockTableSize);
@@ -306,33 +320,20 @@ BOOL SFileOpenArchiveEx(
     // Decrypt hash table and check if it is correctly decrypted
     if(nError == ERROR_SUCCESS)
     {
-        TMPQHash * pHashEnd = ha->pHashTable + ha->pHeader->dwHashTableSize;
-        TMPQHash * pHash;
+//      TMPQHash * pHashEnd = ha->pHashTable + ha->pHeader->dwHashTableSize;
+//      TMPQHash * pHash;
 
         // We have to convert the hash table from LittleEndian
         BSWAP_ARRAY32_UNSIGNED((DWORD *)ha->pHashTable, (dwBytes / sizeof(DWORD)));
         DecryptHashTable((DWORD *)ha->pHashTable, (BYTE *)"(hash table)", (ha->pHeader->dwHashTableSize * 4));
 
+        //
         // Check hash table if is correctly decrypted
-        for(pHash = ha->pHashTable; pHash < pHashEnd; pHash++)
-        {
-            // Note: Some MPQs from World of Warcraft have wPlatform set to 0x0100.
-
-            // If not free or deleted hash entry, check for valid values
-            if(pHash->dwBlockIndex < HASH_ENTRY_DELETED)
-            {
-                // The block index should not be larger than size of the block table
-                if(pHash->dwBlockIndex > ha->pHeader->dwBlockTableSize)
-                {
-                    nError = ERROR_BAD_FORMAT;
-                    break;
-                }
-            
-                // Remember the highest block table entry
-                if(pHash->dwBlockIndex > dwMaxBlockIndex)
-                    dwMaxBlockIndex = pHash->dwBlockIndex;
-            }
-        }
+        // 
+        // Ladik: Some MPQ protectors corrupt the hash table by rewriting part of it.
+        // To be able to open these, we will not check the entire hash table,
+        // but will check it at the moment of file opening.
+        // 
     }
 
     // Now, read the block table
@@ -340,23 +341,30 @@ BOOL SFileOpenArchiveEx(
     {
         memset(ha->pBlockTable, 0, dwBlockTableSize * sizeof(TMPQBlock));
 
+        // Carefully check the block table size
         dwBytes = ha->pHeader->dwBlockTableSize * sizeof(TMPQBlock);
         SetFilePointer(ha->hFile, ha->BlockTablePos.LowPart, &ha->BlockTablePos.HighPart, FILE_BEGIN);
         ReadFile(ha->hFile, ha->pBlockTable, dwBytes, &dwTransferred, NULL);
 
-        // We have to convert every DWORD in ha->block from LittleEndian
+        // I have found a MPQ which claimed 0x200 entries in the block table,
+        // but the file was cut and there was only 0x1A0 entries.
+        // We will handle this case properly, even if that means 
+        // omiting another integrity check of the MPQ
+        if(dwTransferred < dwBytes)
+            dwBytes = dwTransferred;
         BSWAP_ARRAY32_UNSIGNED((DWORD *)ha->pBlockTable, dwBytes / sizeof(DWORD));
 
-        if(dwTransferred != dwBytes)
+        // If nothing was read, we assume the file is corrupt.
+        if(dwTransferred == 0)
             nError = ERROR_FILE_CORRUPT;
     }
 
     // Decrypt block table.
-    // Some MPQs don't have Decrypted block table, e.g. cracked Diablo version
+    // Some MPQs don't have the block table decrypted, e.g. cracked Diablo version
     // We have to check if block table is really encrypted
     if(nError == ERROR_SUCCESS)
     {
-        TMPQBlock * pBlockEnd = ha->pBlockTable + ha->pHeader->dwBlockTableSize;
+        TMPQBlock * pBlockEnd = ha->pBlockTable + (dwBytes / sizeof(TMPQBlock));
         TMPQBlock * pBlock = ha->pBlockTable;
         BOOL bBlockTableEncrypted = FALSE;
 
@@ -380,14 +388,13 @@ BOOL SFileOpenArchiveEx(
         {
             DecryptBlockTable((DWORD *)ha->pBlockTable,
                                (BYTE *)"(block table)",
-                                       (ha->pHeader->dwBlockTableSize * 4));
+                                       (dwBytes / sizeof(DWORD)));
         }
     }
 
     // Now, read the extended block table.
     // For V1 archives, we still will maintain the extended block table
     // (it will be filled with zeros)
-    // TODO: Test with >4GB
     if(nError == ERROR_SUCCESS)
     {
         memset(ha->pExtBlockTable, 0, dwBlockTableSize * sizeof(TMPQBlockEx));
@@ -410,7 +417,7 @@ BOOL SFileOpenArchiveEx(
         }
     }
 
-    // Verify the both block tables (If the MPQ file is not protected)
+    // Verify both block tables (If the MPQ file is not protected)
     if(nError == ERROR_SUCCESS && (ha->dwFlags & MPQ_FLAG_PROTECTED) == 0)
     {
         TMPQBlockEx * pBlockEx = ha->pExtBlockTable;
@@ -437,16 +444,28 @@ BOOL SFileOpenArchiveEx(
         }
     }
 
-    // If the user didn't specified otherwise, 
+    // If the caller didn't specified otherwise, 
     // include the internal listfile to the TMPQArchive structure
-    if((dwFlags & MPQ_OPEN_NO_LISTFILE) == 0)
+    if(nError == ERROR_SUCCESS)
     {
-        if(nError == ERROR_SUCCESS)
-            SListFileCreateListFile(ha);
+        if((dwFlags & MPQ_OPEN_NO_LISTFILE) == 0)
+        {
+            if(nError == ERROR_SUCCESS)
+                SListFileCreateListFile(ha);
 
-        // Add the internal listfile
-        if(nError == ERROR_SUCCESS)
-            SFileAddListFile((HANDLE)ha, NULL);
+            // Add the internal listfile
+            if(nError == ERROR_SUCCESS)
+                SFileAddListFile((HANDLE)ha, NULL);
+        }
+    }
+
+    // If the caller didn't specified otherwise, 
+    // load the "(attributes)" file
+    if(nError == ERROR_SUCCESS && (dwFlags & MPQ_OPEN_NO_ATTRIBUTES) == 0)
+    {
+        // Ignore the result here. Attrobutes are not necessary,
+        // if they are not there, we will just ignore them
+        SAttrFileLoad(ha);
     }
 
     // Cleanup and exit
@@ -456,6 +475,7 @@ BOOL SFileOpenArchiveEx(
         if(hFile != INVALID_HANDLE_VALUE)
             CloseHandle(hFile);
         SetLastError(nError);
+        ha = NULL;
     }
     else
     {
@@ -472,25 +492,51 @@ BOOL WINAPI SFileOpenArchive(const char * szMpqName, DWORD dwPriority, DWORD dwF
 }
 
 //-----------------------------------------------------------------------------
-// BOOL SFileCloseArchive(HANDLE hMPQ);
+// BOOL SFileFlushArchive(HANDLE hMpq)
+//
+// Saves all dirty data into MPQ archive.
+// Has similar effect like SFileCLoseArchive, but the archive is not closed.
+// Use on clients who keep MPQ archive open even for write operations,
+// and terminating without calling SFileCloseArchive might corrupt the archive.
 //
 
-// TODO: Test for archives > 4GB
-BOOL WINAPI SFileCloseArchive(HANDLE hMPQ)
+BOOL WINAPI SFileFlushArchive(HANDLE hMpq)
 {
-    TMPQArchive * ha = (TMPQArchive *)hMPQ;
+    TMPQArchive * ha = (TMPQArchive *)hMpq;
     
+    // Do nothing if 'hMpq' is bad parameter
     if(!IsValidMpqHandle(ha))
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
 
+    // If the archive has been changed, update the changes
+    // on the disk drive.
     if(ha->dwFlags & MPQ_FLAG_CHANGED)
     {
         SListFileSaveToMpq(ha);
+        SAttrFileSaveToMpq(ha);
         SaveMPQTables(ha);
+        ha->dwFlags &= ~MPQ_FLAG_CHANGED;
     }
+
+    return TRUE;
+}
+
+//-----------------------------------------------------------------------------
+// BOOL SFileCloseArchive(HANDLE hMPQ);
+//
+
+BOOL WINAPI SFileCloseArchive(HANDLE hMPQ)
+{
+    TMPQArchive * ha = (TMPQArchive *)hMPQ;
+    
+    // Flush all unsaved data to the storage
+    if(!SFileFlushArchive(hMPQ))
+        return FALSE;
+
+    // Free all memory used by MPQ archive
     FreeMPQArchive(ha);
     return TRUE;
 }

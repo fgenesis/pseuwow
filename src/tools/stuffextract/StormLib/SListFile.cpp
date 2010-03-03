@@ -20,10 +20,6 @@
 #define NO_MORE_CHARACTERS 256
 #define HASH_TABLE_SIZE    31           // Initial hash table size (should be a prime number)
 
-// TODO: Check on x64 !!!
-#define LISTFILE_ENTRY_DELETED   (DWORD_PTR)(-2)
-#define LISTFILE_ENTRY_FREE      (DWORD_PTR)(-1)
-
 struct TListFileCache
 {
     HANDLE  hFile;                      // Stormlib file handle
@@ -133,9 +129,10 @@ int SListFileCreateListFile(TMPQArchive * ha)
     return ERROR_SUCCESS;
 }
 
-// Adds a filename into the listfile. If the file name is already there,
-// does nothing.
-int SListFileAddNode(TMPQArchive * ha, const char * szFileName)
+// Adds a name into the list of all names. For each locale in the MPQ,
+// one entry will be created
+// If the file name is already there, does nothing.
+int SListFileCreateNodeForAllLocales(TMPQArchive * ha, const char * szFileName)
 {
     TFileNode * pNode   = NULL;
     TMPQHash * pHashEnd = ha->pHashTable + ha->pHeader->dwHashTableSize;
@@ -150,33 +147,96 @@ int SListFileAddNode(TMPQArchive * ha, const char * szFileName)
     if(pHash == NULL)
         return ERROR_SUCCESS;
 
-    // If the listfile entry already exists, do nothing
-    dwHashIndex = (DWORD)(pHash - ha->pHashTable);
-    dwName1     = pHash->dwName1;
-    dwName2     = pHash->dwName2;
-    if((DWORD_PTR)ha->pListFile[dwHashIndex] <= LISTFILE_ENTRY_DELETED)
-        return ERROR_SUCCESS;
-    
-    // Create the listfile node and insert it into the listfile table
-    nLength = strlen(szFileName);
-    pNode = (TFileNode *)ALLOCMEM(char, sizeof(TFileNode) + nLength);
-    pNode->dwRefCount = 0;
-    pNode->nLength    = nLength;
-    strcpy(pNode->szFileName, szFileName);
+    // Remember the name
+    dwName1 = pHash->dwName1;
+    dwName2 = pHash->dwName2;
 
-    // Fill the nodes for all language versions
-    while(pHash->dwBlockIndex < LISTFILE_ENTRY_DELETED)
+    // Pass all entries in the hash table
+    while(pHash->dwBlockIndex != HASH_ENTRY_FREE)
     {
-        if(pHash->dwName1 == dwName1 && pHash->dwName2 == dwName2)
+        // There may be an entry deleted amongst various language versions
+        if(pHash->dwBlockIndex != HASH_ENTRY_DELETED)
         {
-            pNode->dwRefCount++;
-            ha->pListFile[pHash - ha->pHashTable] = pNode;
+            if(pHash->dwName1 == dwName1 && pHash->dwName2 == dwName2)
+            {
+                // Compute the hash index
+                dwHashIndex = (DWORD)(pHash - ha->pHashTable);
+
+                // Create the lang version, if none
+                if((DWORD_PTR)ha->pListFile[dwHashIndex] >= LISTFILE_ENTRY_DELETED)
+                {
+                    // Create the listfile node, if doesn't exist yet
+                    if(pNode == NULL)
+                    {
+                        nLength = strlen(szFileName);
+                        pNode = (TFileNode *)ALLOCMEM(char, sizeof(TFileNode) + nLength);
+                        pNode->dwRefCount = 0;
+                        pNode->nLength = nLength;
+                        strcpy(pNode->szFileName, szFileName);
+                    }
+
+                    // Insert the node to the listfile table
+                    ha->pListFile[dwHashIndex] = pNode;
+                    pNode->dwRefCount++;
+                }
+            }
+        }
+        else
+        {
+            dwHashIndex = (DWORD)(pHash - ha->pHashTable);
+            ha->pListFile[dwHashIndex] = (TFileNode *)LISTFILE_ENTRY_DELETED;
         }
 
+        // Move to the next hash entry
         if(++pHash >= pHashEnd)
             pHash = ha->pHashTable;
         if(pHash == pHash0)
             break;
+    }
+    return ERROR_SUCCESS;
+}
+
+// Adds a filename into the listfile. If the file name is already there,
+// does nothing.
+int SListFileCreateNode(TMPQArchive * ha, const char * szFileName, LCID lcLocale)
+{
+    TFileNode * pNode = NULL;
+    TMPQHash * pHash0 = GetHashEntry(ha, szFileName);
+    TMPQHash * pHash1 = GetHashEntryEx(ha, szFileName, lcLocale);
+    DWORD dwHashIndex0 = 0;
+    DWORD dwHashIndex1 = 0;
+    size_t nLength;                     // File name lentgth
+
+    // If the file does not exist within the MPQ, do nothing
+    if(pHash1 == NULL || pHash1->dwBlockIndex >= HASH_ENTRY_DELETED)
+        return ERROR_SUCCESS;
+
+    // If the locale-cpecific listfile entry already exists, do nothing
+    dwHashIndex0 = (DWORD)(pHash0 - ha->pHashTable);
+    dwHashIndex1 = (DWORD)(pHash1 - ha->pHashTable);
+    if((DWORD_PTR)ha->pListFile[dwHashIndex1] < LISTFILE_ENTRY_DELETED)
+        return ERROR_SUCCESS;
+
+    // Does the neutral table entry exist ?
+    if((DWORD_PTR)ha->pListFile[dwHashIndex0] < LISTFILE_ENTRY_DELETED)
+        pNode = ha->pListFile[dwHashIndex0];
+
+    // If no node yet, we have to create new one
+    if(pNode == NULL)
+    {
+        nLength = strlen(szFileName);
+        pNode = (TFileNode *)ALLOCMEM(char, sizeof(TFileNode) + nLength);
+        pNode->dwRefCount = 1;
+        pNode->nLength = nLength;
+        strcpy(pNode->szFileName, szFileName);
+        ha->pListFile[dwHashIndex0] = pNode;
+    }
+
+    // Also insert the node in the locale-specific entry
+    if(dwHashIndex1 != dwHashIndex0)
+    {
+        pNode->dwRefCount++;
+        ha->pListFile[dwHashIndex1] = pNode;
     }
 
     return ERROR_SUCCESS;
@@ -184,10 +244,10 @@ int SListFileAddNode(TMPQArchive * ha, const char * szFileName)
 
 // Removes a filename from the listfile.
 // If the name is not there, does nothing
-int SListFileRemoveNode(TMPQArchive * ha, const char * szFileName)
+int SListFileRemoveNode(TMPQArchive * ha, const char * szFileName, LCID lcLocale)
 {
     TFileNode * pNode = NULL;
-    TMPQHash * pHash = GetHashEntry(ha, szFileName);
+    TMPQHash * pHash = GetHashEntryEx(ha, szFileName, lcLocale);
     size_t nHashIndex = 0;
 
     if(pHash != NULL)
@@ -196,25 +256,15 @@ int SListFileRemoveNode(TMPQArchive * ha, const char * szFileName)
         pNode = ha->pListFile[nHashIndex];
         ha->pListFile[nHashIndex] = (TFileNode *)LISTFILE_ENTRY_DELETED;
 
-        // If the reference count has reached zero, do nothing
-        if(--pNode->dwRefCount == 0)
+        // Free the node
+        pNode->dwRefCount--;
+        if(pNode->dwRefCount == 0)
             FREEMEM(pNode);
     }
     return ERROR_SUCCESS;
 }
 
-
-// Renames a node. We will not deal with the renaming, we'll simply
-// remove the old node and insert the new one.
-// TODO: Test for archives > 4GB
-int SListFileRenameNode(TMPQArchive * ha, const char * szOldFileName, const char * szNewFileName)
-{
-    SListFileRemoveNode(ha, szOldFileName);
-    return SListFileAddNode(ha, szNewFileName);
-}
-
-// TODO: Test for archives > 4GB
-int SListFileFreeListFile(TMPQArchive * ha)
+void SListFileFreeListFile(TMPQArchive * ha)
 {
     if(ha->pListFile != NULL)
     {
@@ -222,25 +272,22 @@ int SListFileFreeListFile(TMPQArchive * ha)
         {
             TFileNode * pNode = ha->pListFile[i];
 
-            if((DWORD_PTR)pNode < LISTFILE_ENTRY_FREE)
+            if((DWORD_PTR)pNode < LISTFILE_ENTRY_DELETED)
             {
-                if(--pNode->dwRefCount == 0)
-                {
+                ha->pListFile[i] = (TFileNode *)LISTFILE_ENTRY_FREE;
+                pNode->dwRefCount--;
+
+                if(pNode->dwRefCount == 0)
                     FREEMEM(pNode);
-                    ha->pListFile[i] = (TFileNode *)LISTFILE_ENTRY_FREE;
-                }
             }
         }
 
         FREEMEM(ha->pListFile);
         ha->pListFile = NULL;
     }
-
-    return ERROR_SUCCESS;
 }
 
 // Saves the whole listfile into the MPQ.
-// TODO: Test for archives > 4GB
 int SListFileSaveToMpq(TMPQArchive * ha)
 {
     TFileNode * pNode = NULL;
@@ -265,7 +312,7 @@ int SListFileSaveToMpq(TMPQArchive * ha)
     if(nError == ERROR_SUCCESS)
     {
         GetListFileName(ha, szListFile);
-        hFile = CreateFile(szListFile, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_DELETE_ON_CLOSE, NULL);
+        hFile = CreateFile(szListFile, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
         if(hFile == INVALID_HANDLE_VALUE)
             nError = GetLastError();
     }
@@ -281,7 +328,7 @@ int SListFileSaveToMpq(TMPQArchive * ha)
     {
         for(;;)
         {
-            if(pHash->dwName1 != dwName1 && pHash->dwName2 != dwName2 && pHash->dwBlockIndex < LISTFILE_ENTRY_DELETED)
+            if(pHash->dwName1 != dwName1 && pHash->dwName2 != dwName2 && pHash->dwBlockIndex < HASH_ENTRY_DELETED)
             {
                 dwName1 = pHash->dwName1;
                 dwName2 = pHash->dwName2;
@@ -314,14 +361,22 @@ int SListFileSaveToMpq(TMPQArchive * ha)
         
         // Add the listfile into the archive.
         SFileSetLocale(LANG_NEUTRAL);
-        nError = AddFileToArchive(ha, hFile, LISTFILE_NAME, MPQ_FILE_COMPRESS_PKWARE | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, 0, SFILE_TYPE_DATA, NULL);
+        nError = AddFileToArchive(ha,
+                                  hFile,
+                                  LISTFILE_NAME,
+                                  MPQ_FILE_ENCRYPTED | MPQ_FILE_COMPRESS | MPQ_FILE_REPLACEEXISTING,
+                                  0,
+                                  SFILE_TYPE_DATA,
+                                  NULL);
+        lcLocale = lcSave;
     }
 
-    // Close the temporary file. This will delete it too.
+    // Close the temporary file and delete it.
+    // There is no FILE_FLAG_DELETE_ON_CLOSE on LINUX.
     if(hFile != INVALID_HANDLE_VALUE)
         CloseHandle(hFile);
+    DeleteFile(szListFile);
 
-    lcLocale = lcSave;
     return nError;
 }
 
@@ -330,7 +385,6 @@ int SListFileSaveToMpq(TMPQArchive * ha)
 
 // Adds a listfile into the MPQ archive.
 // Note that the function does not remove the 
-// TODO: Test for archives > 4GB
 int WINAPI SFileAddListFile(HANDLE hMpq, const char * szListFile)
 {
     TListFileCache * pCache = NULL;
@@ -392,15 +446,15 @@ int WINAPI SFileAddListFile(HANDLE hMpq, const char * szListFile)
         pCache->pPos = &pCache->Buffer[0];
         pCache->pEnd = pCache->pBegin + pCache->dwBuffSize;
 
-        // Load the node tree
+        // Load the node list. Add the node for every locale in the archive
         while((nLength = ReadLine(pCache, szFileName, sizeof(szFileName) - 1)) > 0)
-            SListFileAddNode(ha, szFileName);
+            SListFileCreateNodeForAllLocales(ha, szFileName);
 
-        // Add well-known names
-        // Sometimes, they are not in listfile, but they exist in the archive
-        SListFileAddNode(ha, LISTFILE_NAME);
-        SListFileAddNode(ha, SIGNATURE_NAME);
-        SListFileAddNode(ha, ATTRIBUTES_NAME);
+        // Also, add three special files to the listfile:
+        // (listfile) itself, (attributes) and (signature)
+        SListFileCreateNodeForAllLocales(ha, LISTFILE_NAME);
+        SListFileCreateNodeForAllLocales(ha, SIGNATURE_NAME);
+        SListFileCreateNodeForAllLocales(ha, ATTRIBUTES_NAME);
     }
 
     // Cleanup & exit
@@ -412,7 +466,6 @@ int WINAPI SFileAddListFile(HANDLE hMpq, const char * szListFile)
 //-----------------------------------------------------------------------------
 // Passing through the listfile
 
-// TODO: Test for archives > 4GB
 HANDLE SListFileFindFirstFile(HANDLE hMpq, const char * szListFile, const char * szMask, SFILE_FIND_DATA * lpFindFileData)
 {
     TListFileCache * pCache = NULL;
@@ -509,7 +562,6 @@ HANDLE SListFileFindFirstFile(HANDLE hMpq, const char * szListFile, const char *
     return (HANDLE)pCache;
 }
 
-// TODO: Test for archives > 4GB
 BOOL SListFileFindNextFile(HANDLE hFind, SFILE_FIND_DATA * lpFindFileData)
 {
     TListFileCache * pCache = (TListFileCache *)hFind;
@@ -540,7 +592,6 @@ BOOL SListFileFindNextFile(HANDLE hFind, SFILE_FIND_DATA * lpFindFileData)
     return bResult;
 }
 
-// TODO: Test for archives > 4GB
 BOOL SListFileFindClose(HANDLE hFind)
 {
     TListFileCache * pCache = (TListFileCache *)hFind;

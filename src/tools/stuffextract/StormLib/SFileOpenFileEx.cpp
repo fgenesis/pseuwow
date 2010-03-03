@@ -16,11 +16,10 @@
 /* Local functions                                                           */
 /*****************************************************************************/
 
-// TODO: Test for archives > 4GB
 static BOOL OpenLocalFile(const char * szFileName, HANDLE * phFile)
 {
     TMPQFile * hf = NULL;
-    HANDLE hFile = CreateFile(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+    HANDLE hFile = CreateFile(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 
     if(hFile != INVALID_HANDLE_VALUE)
     {
@@ -41,8 +40,7 @@ static BOOL OpenLocalFile(const char * szFileName, HANDLE * phFile)
     return FALSE;
 }
 
-// TODO: Test for archives > 4GB
-static void FreeMPQFile(TMPQFile *& hf)
+void FreeMPQFile(TMPQFile *& hf)
 {
     if(hf != NULL)
     {
@@ -67,7 +65,6 @@ static void FreeMPQFile(TMPQFile *& hf)
 // pointed by plcLocales. There must be enough entries to copy the localed,
 // otherwise the function returns ERROR_INSUFFICIENT_BUFFER.
 
-// TODO: Test for archives > 4GB
 int WINAPI SFileEnumLocales(
     HANDLE hMPQ,
     const char * szFileName,
@@ -109,11 +106,8 @@ int WINAPI SFileEnumLocales(
         }
         else
             pHash = GetHashEntry(ha, szFileName);
-    }
 
-    // If the file was not found, sorry
-    if(nError == ERROR_SUCCESS)
-    {
+        // If the file was not found, sorry
         if(pHash == NULL)
             nError = ERROR_FILE_NOT_FOUND;
     }
@@ -121,22 +115,40 @@ int WINAPI SFileEnumLocales(
     // Count the entries which correspond to the same file name
     if(nError == ERROR_SUCCESS)
     {
+        TMPQHash * pStartHash = pHash;
         TMPQHash * pSaveHash = pHash;
         DWORD dwName1 = pHash->dwName1;
         DWORD dwName2 = pHash->dwName2;
+        LCID PrevLocale = 0xFFFFFFFF;
 
-        // For nameless access, return 1 locale always
-        if(dwSearchScope == SFILE_OPEN_BY_INDEX)
-            dwLocales++;
-        else
+        if(dwSearchScope != SFILE_OPEN_BY_INDEX)
         {
-            while(pHash < pHashEnd && pHash->dwName1 == dwName1 && pHash->dwName2 == dwName2)
+            while(pHash->dwBlockIndex != HASH_ENTRY_FREE)
             {
-                dwLocales++;
-                pHash++;
+                if(pHash->dwName1 == dwName1 && pHash->dwName2 == dwName2 && pHash->dwBlockIndex != HASH_ENTRY_DELETED)
+                {
+                    // If the locale is different from previous one, count it.
+                    if(pHash->lcLocale != PrevLocale)
+                    {
+                        PrevLocale = pHash->lcLocale;
+                        dwLocales++;
+                    }
+                }
+
+                // Move to the next hash
+                if(++pHash >= pHashEnd)
+                    pHash = ha->pHashTable;
+                if(pHash == pStartHash)
+                    break;
             }
         }
+        else
+        {
+            // For nameless access, return 1 locale always
+            dwLocales++;
+        }
 
+        // Restore the has pointer
         pHash = pSaveHash;
     }
 
@@ -150,11 +162,40 @@ int WINAPI SFileEnumLocales(
             nError = ERROR_INSUFFICIENT_BUFFER;
     }
 
-    // Fill all the locales
+    // Fill all present locales
     if(nError == ERROR_SUCCESS)
     {
-        for(DWORD i = 0; i < dwLocales; i++, pHash++)
+        TMPQHash * pStartHash = pHash;
+        DWORD dwName1 = pHash->dwName1;
+        DWORD dwName2 = pHash->dwName2;
+        LCID PrevLocale = 0xFFFFFFFF;
+
+        if(dwSearchScope != SFILE_OPEN_BY_INDEX)
+        {
+            while(pHash->dwBlockIndex != HASH_ENTRY_FREE)
+            {
+                if(pHash->dwName1 == dwName1 && pHash->dwName2 == dwName2 && pHash->dwBlockIndex != HASH_ENTRY_DELETED)
+                {
+                    // If the locale is different from previous one, count it.
+                    if(pHash->lcLocale != PrevLocale)
+                    {
+                        *plcLocales++ = (LCID)pHash->lcLocale;
+                        PrevLocale = pHash->lcLocale;
+                    }
+                }
+
+                // Move to the next hash
+                if(++pHash >= pHashEnd)
+                    pHash = ha->pHashTable;
+                if(pHash == pStartHash)
+                    break;
+            }
+        }
+        else
+        {
+            // For nameless access, return 1 locale always
             *plcLocales++ = (LCID)pHash->lcLocale;
+        }
     }
     return nError;
 }
@@ -165,7 +206,6 @@ int WINAPI SFileEnumLocales(
 //   hMPQ          - Handle of opened MPQ archive
 //   szFileName    - Name of file to look for
 
-// TODO: Test for archives > 4GB
 BOOL WINAPI SFileHasFile(HANDLE hMPQ, const char * szFileName)
 {
     TMPQArchive * ha = (TMPQArchive *)hMPQ;
@@ -206,7 +246,6 @@ BOOL WINAPI SFileHasFile(HANDLE hMPQ, const char * szFileName)
 //   dwSearchScope - Where to search
 //   phFile        - Pointer to store opened file handle
 
-// TODO: Test for archives > 4GB
 BOOL WINAPI SFileOpenFileEx(HANDLE hMPQ, const char * szFileName, DWORD dwSearchScope, HANDLE * phFile)
 {
     LARGE_INTEGER FilePos;
@@ -282,7 +321,8 @@ BOOL WINAPI SFileOpenFileEx(HANDLE hMPQ, const char * szFileName, DWORD dwSearch
     if(nError == ERROR_SUCCESS)
     {
         // If index was not found, or is greater than number of files, exit.
-        if(dwBlockIndex == (DWORD)-1 || dwBlockIndex > ha->pHeader->dwBlockTableSize)
+        // This also covers the deleted files and free entries
+        if(dwBlockIndex > ha->pHeader->dwBlockTableSize)
             nError = ERROR_FILE_NOT_FOUND;
     }
 
@@ -323,11 +363,11 @@ BOOL WINAPI SFileOpenFileEx(HANDLE hMPQ, const char * szFileName, DWORD dwSearch
         hf->pHash    = pHash;
         
         hf->MpqFilePos.HighPart = pBlockEx->wFilePosHigh;
-        hf->MpqFilePos.LowPart = pBlock->dwFilePos;
-        hf->MpqFilePos.QuadPart += ha->MpqPos.QuadPart;
+        hf->MpqFilePos.LowPart  = pBlock->dwFilePos;
+        hf->RawFilePos.QuadPart = hf->MpqFilePos.QuadPart + ha->MpqPos.QuadPart;
 
-        hf->dwHashIndex = dwHashIndex;
-        hf->dwFileIndex = dwBlockIndex; 
+        hf->dwHashIndex  = dwHashIndex;
+        hf->dwBlockIndex = dwBlockIndex; 
 
         // Allocate buffers for decompression.
         if(hf->pBlock->dwFlags & MPQ_FILE_COMPRESSED)
@@ -352,8 +392,8 @@ BOOL WINAPI SFileOpenFileEx(HANDLE hMPQ, const char * szFileName, DWORD dwSearch
                 strcpy(hf->szFileName, szFileName);
                 if(szTemp != NULL)
                     szFileName = szTemp + 1;
-                hf->dwSeed1 = DecryptFileSeed((char *)szFileName);
 
+                hf->dwSeed1 = DecryptFileSeed((char *)szFileName);
                 if(hf->pBlock->dwFlags & MPQ_FILE_FIXSEED)
                 {
                     hf->dwSeed1 = (hf->dwSeed1 + hf->pBlock->dwFilePos) ^ hf->pBlock->dwFSize;
@@ -368,6 +408,17 @@ BOOL WINAPI SFileOpenFileEx(HANDLE hMPQ, const char * szFileName, DWORD dwSearch
         }
     }
 
+    // Resolve pointers to file's attributes
+    if(nError == ERROR_SUCCESS && ha->pAttributes != NULL)
+    {
+        if(ha->pAttributes->pCrc32 != NULL)
+            hf->pCrc32 = ha->pAttributes->pCrc32 + dwBlockIndex;
+        if(ha->pAttributes->pFileTime != NULL)
+            hf->pFileTime = ha->pAttributes->pFileTime + dwBlockIndex;
+        if(ha->pAttributes->pMd5 != NULL)
+            hf->pMd5 = ha->pAttributes->pMd5 + dwBlockIndex;
+    }
+
     // Cleanup
     if(nError != ERROR_SUCCESS)
     {
@@ -380,9 +431,8 @@ BOOL WINAPI SFileOpenFileEx(HANDLE hMPQ, const char * szFileName, DWORD dwSearch
 }
 
 //-----------------------------------------------------------------------------
-// BOOL SFileCloseFile(HANDLE hFile);
+// BOOL WINAPI SFileCloseFile(HANDLE hFile);
 
-// TODO: Test for archives > 4GB
 BOOL WINAPI SFileCloseFile(HANDLE hFile)
 {
     TMPQFile * hf = (TMPQFile *)hFile;

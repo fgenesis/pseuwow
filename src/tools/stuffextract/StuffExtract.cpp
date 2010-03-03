@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
 	if(GetLocale() && FileExists(std::string("Data/")+GetLocale()+"/locale-"+GetLocale()+".MPQ"))
 	{
 		printf("Locale \"%s\" seems valid, starting conversion...\n",GetLocale());
-        CreateDir("stuffextract");
-        CreateDir("stuffextract/data");
+        CreateDir("extractedstuff");
+        CreateDir("extractedstuff/data");
 		ConvertDBC();
         if(doMaps) ExtractMaps();
         if(doTextures || doModels || doWmos || doWmogroups) ExtractMapDependencies();
@@ -610,7 +610,7 @@ bool ConvertDBC(void)
     printf("DONE!\n");
     //...
 
-    CreateDir("stuffextract/data/scp");
+    CreateDir("extractedstuff/data/scp");
 
     printf("Writing SCP files:\n");
     printf("emote.."); OutSCP(SCPDIR "/emote.scp",EmoteDataStorage, "emote");
@@ -641,7 +641,7 @@ void ExtractMaps(void)
     uint32 extr,extrtotal=0;
     MPQHelper mpq("terrain");
     MD5FileMap md5map;
-    CreateDir("stuffextract/data/maps");
+    CreateDir("extractedstuff/data/maps");
     for(std::map<uint32,std::string>::iterator it = mapNames.begin(); it != mapNames.end(); it++)
     {
         // extract the WDT file that stores tile information
@@ -726,7 +726,7 @@ void ExtractMapDependencies(void)
     MPQHelper mpqmodel("model");
     MPQHelper mpqtex("texture");
     MPQHelper mpqwmo("wmo");
-    std::string path = "stuffextract/data";
+    std::string path = "extractedstuff/data";
     std::string pathtex = path + "/texture";
     std::string pathmodel = path + "/model";
     std::string pathwmo = path + "/wmo";

@@ -55,14 +55,6 @@
 
   // Macintosh using Carbon
   #include <Carbon/Carbon.h> // Mac OS X
-  #define _stricmp strcasecmp  // Case insensitive strcmp has a different name on this platform.
-  #define _strnicmp strncasecmp
-  
-  typedef void          * LPCSTR;
-  typedef unsigned long * LPDWORD;
-  typedef long          * PLONG;
-  typedef void          * LPVOID;
-  typedef unsigned int  UINT;
   
   #define    PKEXPORT
   #define    __SYS_ZLIB
@@ -74,6 +66,13 @@
   #else
     #define PLATFORM_LITTLE_ENDIAN  1       // Apple is now making Macs with Intel CPUs
   #endif
+  
+  #ifdef __LP64__
+    #define PLATFORM_64BIT
+  #else
+    #define PLATFORM_32BIT
+  #endif
+  
   #define PLATFORM_DEFINED                  // The platform is known now
 
 #endif
@@ -105,14 +104,15 @@
 
   // Typedefs for ANSI C
   typedef unsigned char  BYTE;
-  typedef short          SHORT;
-  typedef unsigned short WORD;
-  typedef unsigned short USHORT;
-  typedef long           LONG;
-  typedef unsigned long  DWORD;
-  typedef unsigned long  DWORD_PTR;
-  typedef long           LONG_PTR;
-  typedef long long      LONGLONG;
+  typedef int16_t        SHORT;
+  typedef uint16_t       WORD;
+  typedef uint16_t       USHORT;
+  typedef int32_t        LONG;
+  typedef uint32_t       DWORD;
+  typedef intptr_t       DWORD_PTR;
+  typedef intptr_t       LONG_PTR;
+  typedef intptr_t       INT_PTR;
+  typedef int64_t        LONGLONG;
 #ifndef __OBJC__
 #ifdef __cplusplus
   #define BOOL           bool
@@ -121,15 +121,13 @@
 #endif
 #endif
   typedef void         * HANDLE;
-  typedef void         * LPOVERLAPPED; // Unsupported on Linux
+  typedef void         * LPOVERLAPPED; // Unsupported on Linux and Mac
   typedef char           TCHAR;
-  typedef unsigned long  LCID;
-  
-  typedef void          * LPCSTR;
-  typedef unsigned long * LPDWORD;
-  typedef long          * PLONG;
-  typedef void          * LPVOID;
-  typedef unsigned int  UINT;
+  typedef uint32_t       LCID;
+  typedef unsigned int   UINT;
+  typedef LONG         * PLONG;
+  typedef DWORD        * LPDWORD;
+  typedef BYTE         * LPBYTE;
   
   typedef struct _FILETIME
   { 
@@ -186,9 +184,6 @@
   #define GENERIC_WRITE   0x40000000
   #define GENERIC_READ    0x80000000
   
-  #define FILE_FLAG_DELETE_ON_CLOSE         1   // Sam: Added these two defines so it would compile.
-  #define FILE_FLAG_SEQUENTIAL_SCAN         2
-  
   #define ERROR_SUCCESS                     0
   #define ERROR_INVALID_FUNCTION            1
   #define ERROR_FILE_NOT_FOUND              2
@@ -196,6 +191,7 @@
   #define ERROR_NOT_ENOUGH_MEMORY           8
   #define ERROR_BAD_FORMAT                 11
   #define ERROR_NO_MORE_FILES              18
+  #define ERROR_WRITE_FAULT                29
   #define ERROR_GEN_FAILURE                31
   #define ERROR_HANDLE_EOF                 38
   #define ERROR_HANDLE_DISK_FULL           39
@@ -211,14 +207,6 @@
   
   #define INVALID_HANDLE_VALUE ((HANDLE) -1)
   
-  #ifndef min
-  #define min(a, b) ((a < b) ? a : b)
-  #endif
-  
-  #ifndef max
-  #define max(a, b) ((a > b) ? a : b)
-  #endif
-  
   #define _stricmp strcasecmp
   #define _strnicmp strncasecmp
   
@@ -226,7 +214,7 @@
   
   void  SetLastError(int err);
   int   GetLastError();
-  const char *ErrString(int err);
+  char *ErrString(int err);
 
   // Emulation of functions for file I/O available in Win32
   HANDLE CreateFile(const char * lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, void * lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
@@ -261,12 +249,12 @@
     #define    BSWAP_TMPQSHUNT(a)               {}
     #define    BSWAP_TMPQHEADER(a)              {}
 #else
-    extern unsigned short SwapUShort(unsigned short);
-    extern unsigned long SwapULong(unsigned long);
-    extern short SwapShort(unsigned short);
-    extern long SwapLong(unsigned long);
-    extern void ConvertUnsignedLongBuffer(unsigned long *buffer, unsigned long nbLongs);
-    extern void ConvertUnsignedShortBuffer(unsigned short *buffer, unsigned long nbShorts);
+    extern uint16_t SwapUShort(uint16_t);
+    extern uint32_t SwapULong(uint32_t);
+    extern int16_t SwapShort(uint16_t);
+    extern int32_t SwapLong(uint32_t);
+    extern void ConvertUnsignedLongBuffer(uint32_t *buffer, uint32_t nbLongs);
+    extern void ConvertUnsignedShortBuffer(uint16_t *buffer, uint32_t nbShorts);
     extern void ConvertTMPQShunt(void *shunt);
     extern void ConvertTMPQHeader(void *header);
     #define    BSWAP_INT16_UNSIGNED(a)          SwapUShort((a))

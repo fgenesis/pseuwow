@@ -5,7 +5,20 @@ AM_CFLAGS = -fPIC
 noinst_LIBRARIES = libstormlib.a
 libstormlib_a_SOURCES =huffman/huff.cpp\
 					wave/wave.cpp\
-					StormPortLinux.cpp\
-					SFileReadFile.cpp SCommon.cpp SCompression.cpp SFileCompactArchive.cpp SFileCreateArchiveEx.cpp SFileExtractFile.cpp SFileFindFile.cpp SFileOpenArchive.cpp\
-					SFileOpenFileEx.cpp SListFile.cpp\
-pklib/crc32_pk.c  pklib/explode.c  pklib/implode.c
+					SAttrFile.cpp\
+                    SCommon.cpp\
+                    SCompression.cpp\
+                    SFileCompactArchive.cpp\
+                    SFileCreateArchiveEx.cpp\
+                    SFileExtractFile.cpp\
+                    SFileFindFile.cpp\
+                    SFileOpenArchive.cpp\
+                    SFileOpenFileEx.cpp\
+					SFileReadFile.cpp\
+                    SListFile.cpp\
+                    StormPortLinux.cpp\
+                    pklib/crc32_pk.c\
+                    pklib/explode.c\
+                    pklib/implode.c\
+                    misc/crc32.cpp\
+                    misc/md5.cpp

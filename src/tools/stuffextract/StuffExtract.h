@@ -6,7 +6,7 @@
 
 #define SE_VERSION 2
 #define MAPS_VERSION ((uint32)0)
-#define OUTDIR "stuffextract"
+#define OUTDIR "extractedstuff"
 #define SCPDIR OUTDIR "/data/scp"
 #define MAPSDIR OUTDIR "/data/maps"
 #define SOUNDDIR OUTDIR "/data/sound"

@@ -19,6 +19,14 @@
 #define SFILE_TYPE_DATA  0              // Process the file as data file
 #define SFILE_TYPE_WAVE  1              // Process the file as WAVe file
 
+#define LISTFILE_ENTRY_DELETED   (DWORD_PTR)(-2)
+#define LISTFILE_ENTRY_FREE      (DWORD_PTR)(-1)
+
+// Prevent problems with CRT "min" and "max" functions,
+// as they are not defined on all platforms
+#define STORMLIB_MIN(a, b) ((a < b) ? a : b)
+#define STORMLIB_MAX(a, b) ((a > b) ? a : b)
+
 //-----------------------------------------------------------------------------
 // External variables
 
@@ -66,21 +74,30 @@ BOOL IsValidFileHandle(TMPQFile * hf);
 // Other functions
 
 BOOL SFileOpenArchiveEx(const char * szMpqName, DWORD dwPriority, DWORD dwFlags, HANDLE * phMPQ, DWORD dwAccessMode = GENERIC_READ);
+int  AddInternalFile(TMPQArchive * ha, const char * szFileName);
 int  AddFileToArchive(TMPQArchive * ha, HANDLE hFile, const char * szArchivedName, DWORD dwFlags, DWORD dwQuality, int nFileType, BOOL * pbReplaced);
 int  SetDataCompression(int nDataCompression);
 int  SaveMPQTables(TMPQArchive * ha);
 void FreeMPQArchive(TMPQArchive *& ha);
+void FreeMPQFile(TMPQFile *& hf);
 
 BOOL CheckWildCard(const char * szString, const char * szWildCard);
+
+//-----------------------------------------------------------------------------
+// Attributes support
+
+int  SAttrFileCreate(TMPQArchive * ha);
+int  SAttrFileLoad(TMPQArchive * ha);
+int  SAttrFileSaveToMpq(TMPQArchive * ha);
+void FreeMPQAttributes(TMPQAttr * pAttr);
 
 //-----------------------------------------------------------------------------
 // Listfile functions
 
 int  SListFileCreateListFile(TMPQArchive * ha);
-int  SListFileAddNode(TMPQArchive * ha, const char * szAddedFile);
-int  SListFileRemoveNode(TMPQArchive * ha, const char * szFileName);
-int  SListFileRenameNode(TMPQArchive * ha, const char * szOldFileName, const char * szNewFileName);
-int  SListFileFreeListFile(TMPQArchive * ha);
+int  SListFileCreateNode(TMPQArchive * ha, const char * szFileName, LCID lcLocale);
+int  SListFileRemoveNode(TMPQArchive * ha, const char * szFileName, LCID lcLocale);
+void SListFileFreeListFile(TMPQArchive * ha);
 
 int  SListFileSaveToMpq(TMPQArchive * ha);
 
