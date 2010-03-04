@@ -126,9 +126,9 @@ sharedlib_osx: $(LINKOBJ)
 
 # Installs Irrlicht if it was created as shared lib
 install:
-	cp $(LIB_PATH)/$(SHARED_LIB).$(VERSION) $(INSTALL_DIR)
-	cd $(INSTALL_DIR) && ln -s libIrrlicht.so.$(VERSION) $(SHARED_LIB)
-	ldconfig -n $(INSTALL_DIR)
+# 	cp $(LIB_PATH)/$(SHARED_LIB).$(VERSION) $(INSTALL_DIR)
+# 	cd $(INSTALL_DIR) && ln -s libIrrlicht.so.$(VERSION) $(SHARED_LIB)
+# 	ldconfig -n $(INSTALL_DIR)
 
 install_osx:
 	cp $(LIB_PATH)/$(SHARED_LIB).$(VERSION) $(INSTALL_DIR)

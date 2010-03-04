@@ -32,9 +32,10 @@ void MovementMgr::SetInstance(PseuInstance *inst)
 
 void MovementMgr::_BuildPacket(uint16 opcode)
 {
-    WorldPacket *wp = new WorldPacket(opcode,4+1+4+12); // it can be larger, if we are jumping, on transport or swimming
+    WorldPacket *wp = new WorldPacket(opcode,4+2+4+16); // it can be larger, if we are jumping, on transport or swimming
+    wp->appendPackGUID(_mychar->GetGUID());
     *wp << _moveFlags;
-    *wp << (uint16)0; // unk
+    *wp << (uint16)0; // flags2 , safe to set 0 for now (shlainn)
     *wp << getMSTime();
     *wp << _mychar->GetPosition();
     // TODO: transport not yet handled/done
@@ -50,7 +51,7 @@ void MovementMgr::_BuildPacket(uint16 opcode)
         *wp << (float)0; // angle; 1.55=looking up, -1.55=looking down, 0=looking forward
     }
     *wp << (uint32)0; // last fall time (also used when jumping)
-    if(_moveFlags & MOVEMENTFLAG_JUMPING)
+    if(_moveFlags & MOVEMENTFLAG_PENDINGSTOP)
     {
         *wp << (float)0; //unk value, or as mangos calls it: j_unk ^^
         *wp << sin(_mychar->GetO()+ (M_PI/2));
@@ -165,7 +166,7 @@ void MovementMgr::MoveStop(void)
 {
     if(!(_moveFlags & (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD)))
         return;
-    _moveFlags &= ~(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_WALK);
+    _moveFlags &= ~(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_WALK_MODE);
     Update(true);
     _BuildPacket(MSG_MOVE_STOP);
 }
@@ -184,7 +185,7 @@ void MovementMgr::MoveStartBackward(void)
 {
     if(_moveFlags & MOVEMENTFLAG_BACKWARD)
         return;
-    _moveFlags |= (MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_WALK); // backward walk is always slow; flag must be set, otherwise causing weird movement in other client
+    _moveFlags |= (MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_WALK_MODE); // backward walk is always slow; flag must be set, otherwise causing weird movement in other client
     _moveFlags &= ~MOVEMENTFLAG_FORWARD;
     Update(true);
     _BuildPacket(MSG_MOVE_START_BACKWARD);
@@ -222,29 +223,29 @@ void MovementMgr::MoveStopStrafe(void)
 
 void MovementMgr::MoveStartTurnLeft(void)
 {
-    if(_moveFlags & MOVEMENTFLAG_LEFT)
+    if(_moveFlags & MOVEMENTFLAG_TURN_LEFT)
         return;
-    _moveFlags |= MOVEMENTFLAG_LEFT;
-    _moveFlags &= ~MOVEMENTFLAG_RIGHT;
+    _moveFlags |= MOVEMENTFLAG_TURN_LEFT;
+    _moveFlags &= ~MOVEMENTFLAG_TURN_RIGHT;
     Update(true);
     _BuildPacket(MSG_MOVE_START_TURN_LEFT);
 }
 
 void MovementMgr::MoveStartTurnRight(void)
 {
-    if(_moveFlags & MOVEMENTFLAG_RIGHT)
+    if(_moveFlags & MOVEMENTFLAG_TURN_RIGHT)
         return;
-    _moveFlags |= MOVEMENTFLAG_RIGHT;
-    _moveFlags &= ~MOVEMENTFLAG_LEFT;
+    _moveFlags |= MOVEMENTFLAG_TURN_RIGHT;
+    _moveFlags &= ~MOVEMENTFLAG_TURN_LEFT;
     Update(true);
     _BuildPacket(MSG_MOVE_START_TURN_RIGHT);
 }
 
 void MovementMgr::MoveStopTurn(void)
 {
-    if(!(_moveFlags & (MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT)))
+    if(!(_moveFlags & (MOVEMENTFLAG_TURN_LEFT | MOVEMENTFLAG_TURN_RIGHT)))
         return;
-    _moveFlags &= ~(MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT);
+    _moveFlags &= ~(MOVEMENTFLAG_TURN_LEFT | MOVEMENTFLAG_TURN_RIGHT);
     Update(true);
     _BuildPacket(MSG_MOVE_STOP_TURN);
 }
@@ -257,9 +258,9 @@ void MovementMgr::MoveSetFacing(void)
 
 void MovementMgr::MoveJump(void)
 {
-    if(!(_moveFlags & (MOVEMENTFLAG_JUMPING | MOVEMENTFLAG_FALLING)))
+    if(!(_moveFlags & (MOVEMENTFLAG_FALLING | MOVEMENTFLAG_PENDINGSTOP)))
         return;
-    _moveFlags |= MOVEMENTFLAG_JUMPING;
+    _moveFlags |= MOVEMENTFLAG_FALLING;
     Update(true);
     _BuildPacket(MSG_MOVE_JUMP);
 }
@@ -271,7 +272,7 @@ bool MovementMgr::IsMoving(void)
 
 bool MovementMgr::IsTurning(void)
 {
-    return _moveFlags & (MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT);
+    return _moveFlags & (MOVEMENTFLAG_TURN_LEFT | MOVEMENTFLAG_TURN_RIGHT);
 }
 
 bool MovementMgr::IsWalking(void)
