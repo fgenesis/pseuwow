@@ -1220,12 +1220,15 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, x, y, z, o, guid);
 
     WorldPacket wp(MSG_MOVE_TELEPORT_ACK,8+4+4);
-    wp << guid << (uint32)0 << (uint32)getMSTime();
+    //GUID must be packed!
+    wp.appendPackGUID(guid);
+    wp << (uint32)0 << (uint32)getMSTime();
     SendWorldPacket(wp);
 
     // TODO: put this into a capsule class later, that autodetects movement flags etc.
     WorldPacket response(MSG_MOVE_FALL_LAND,4+2+4+4+4+4+4+4);
-    response << uint32(0) << (uint16)0 << (uint32)getMSTime(); // no flags; unk
+    response.appendPackGUID(guid);
+    response << uint32(0) << (uint16)0 << (uint32)getMSTime(); //flags and flags2
     response << x << y << z << o << uint32(100); // simulate 100 msec fall time
     SendWorldPacket(response);
 
