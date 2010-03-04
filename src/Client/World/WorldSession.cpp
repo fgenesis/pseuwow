@@ -183,7 +183,6 @@ void WorldSession::HandleWorldPacket(WorldPacket *packet)
 
     bool known = false;
     uint16 hpos;
-    logdebug("Handling packet with opcode %u",packet->GetOpcode());
     for (hpos = 0; table[hpos].handler != NULL; hpos++)
     {
         if (table[hpos].opcode == packet->GetOpcode())
@@ -1068,9 +1067,9 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     uint32 flags, time, unk32;
     float x, y, z, o;
     uint64 guid;
-    uint16 unk16;
+    uint16 flags2;
     guid = recvPacket.GetPackedGuid();
-    recvPacket >> flags >> unk16 >> time >> x >> y >> z >> o >> unk32;
+    recvPacket >> flags >> flags2 >> time >> x >> y >> z >> o >> unk32;
     DEBUG(logdebug("MOVE: "I64FMT" -> time=%u flags=0x%X x=%.4f y=%.4f z=%.4f o=%.4f",guid,time,flags,x,y,z,o));
     Object *obj = objmgr.GetObj(guid);
     if(obj && obj->IsWorldObject())

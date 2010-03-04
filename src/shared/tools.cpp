@@ -240,7 +240,7 @@ void _FixFileName(std::string& str)
 // extracts the file name from a given path
 std::string _PathToFileName(std::string str)
 {
-    uint32 pathend = str.find_last_of("/\\");
+    size_t pathend = str.find_last_of("/\\");
     if(pathend != std::string::npos)
     {
         return str.substr(pathend+1);
@@ -250,7 +250,7 @@ std::string _PathToFileName(std::string str)
 
 std::string NormalizeFilename(std::string s)
 {
-    uint32 p;
+    size_t p;
     while( (p = s.find('\\')) != std::string::npos)//Replace \ by /
     {
         s.replace(p,1,"/");

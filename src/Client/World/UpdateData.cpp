@@ -277,22 +277,22 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
             logdev("TRANSPORT @ mi.flags: guid="I64FMT" x=%f y=%f z=%f o=%f", mi.t_guid, mi.t_x, mi.t_y, mi.t_z, mi.t_o);
         }
 
-        if((mi.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5)) || (mi.unkFlags & 0x20))
+        if((mi.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (mi.unkFlags & 0x20)) //The last one is MOVEFLAG2_ALLOW_PITCHING in MaNGOS
         {
             recvPacket >>  mi.s_angle;
-            logdev("MovementUpdate: MOVEMENTFLAG_SWIMMING is set, angle = %f!", mi.s_angle);
+            logdev("MovementUpdate: MOVEMENTFLAG_SWIMMING or FLYING is set, angle = %f!", mi.s_angle);
         }
 
         recvPacket >> mi.fallTime;
         logdev("MovementUpdate: FallTime = %u", mi.fallTime);
 
-        if(mi.flags & MOVEMENTFLAG_JUMPING)
+        if(mi.flags & MOVEMENTFLAG_FALLING)
         {
             recvPacket >> mi.j_unk >> mi.j_sinAngle >> mi.j_cosAngle >> mi.j_xyspeed;
-            logdev("MovementUpdate: MOVEMENTFLAG_JUMPING is set, unk=%f sinA=%f cosA=%f xyspeed=%f = %u", mi.j_unk, mi.j_sinAngle, mi.j_cosAngle, mi.j_xyspeed);
+            logdev("MovementUpdate: MOVEMENTFLAG_FALLING is set, unk=%f sinA=%f cosA=%f xyspeed=%f = %u", mi.j_unk, mi.j_sinAngle, mi.j_cosAngle, mi.j_xyspeed);
         }
 
-        if(mi.flags & MOVEMENTFLAG_SPLINE)
+        if(mi.flags & MOVEMENTFLAG_SPLINE_ELEVATION)
         {
             recvPacket >> mi.u_unk1;
             logdev("MovementUpdate: MOVEMENTFLAG_SPLINE is set, got %u", mi.u_unk1);
@@ -317,7 +317,7 @@ void WorldSession::_MovementUpdate(uint8 objtypeid, uint64 uguid, WorldPacket& r
         }
 
         // TODO: correct this one as soon as its meaning is known OR if it appears often and needs to be fixed
-        if(mi.flags & MOVEMENTFLAG_SPLINE2)
+        if(mi.flags & MOVEMENTFLAG_SPLINE_ENABLED)
         {
             logerror("MovementUpdate: MOVEMENTFLAG_SPLINE2 is set, if you see this message please report it!");
             return;
