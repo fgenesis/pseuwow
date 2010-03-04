@@ -6,7 +6,7 @@
 
 void MakeMapFilename(char *fn, uint32 m, uint32 x, uint32 y)
 {
-    sprintf(fn,"./data/maps/%lu_%lu_%lu.adt",m,x,y);
+    sprintf(fn,"./data/maps/%u_%u_%u.adt",(uint16)m,(uint16)x,(uint16)y);
 }
 
 bool TileExistsInFile(uint32 m, uint32 x, uint32 y)
@@ -75,6 +75,7 @@ void MapMgr::_LoadNearTiles(uint32 gx, uint32 gy, uint32 m)
     {
         for(uint32 h = gx-1; h <= gx+1; h++)
         {
+            logdebug("MAPMGR: Loading tile x %u y %u on map %u",h,v,m);
             _LoadTile(h,v,m);
         }
     }
