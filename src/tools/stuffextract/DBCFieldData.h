@@ -133,13 +133,13 @@ enum ChrRacesEnum
     CHRRACES_MODELM, // model for male player
     CHRRACES_MODELF, // model for female player
     CHRRACES_NAME_SHORT, // 2 chars name abbrev (Hu,Or,Tr, etc)
-    CHRRACES_UNK_4,
-    CHRRACES_FACTION, // 1=Alliance, 7=Horde
-    CHRRACES_UNK_5, // always 7?
+    CHRRACES_FACTION, // 7=Alliance, 1=Horde
+    CHRRACES_UNK_5, // always 7 = Humanoid
     CHRRACES_UNK_6, // SpellID? was always 836 in 1.12.x, since 2.0.x its 15007
     CHRRACES_UNK_7,
     CHRRACES_NAME_GENERAL, // always the english(?) name (without spaces). used in texture names etc.
     CHRRACES_UNK_9,
+    CHRRACES_UNK_10,
 	// the following 8 fields contain either 0 or the race name, depending on the locale. 
     CHRRACES_NAME1, // english
     CHRRACES_NAME2, // <need info here>
@@ -149,15 +149,14 @@ enum ChrRacesEnum
     CHRRACES_NAME6, // <need info here>
     CHRRACES_NAME7, // <need info here>
     CHRRACES_NAME8, // <need info here>
-    CHRRACES_UNK_10,
     CHRRACES_UNK_11,
     CHRRACES_UNK_19,
     CHRRACES_UNK_20,
     CHRRACES_UNK_21,
     CHARRACES_END
 };
-
-static const char *ChrRacesFormat = "ixxxiisxixxxsxssssssssxxxxx";
+                                     
+static const char *ChrRacesFormat = "ixxxiisixxxsxxssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxi";
 
 static const char *ChrRacesFieldNames[] =
 {
@@ -168,7 +167,6 @@ static const char *ChrRacesFieldNames[] =
     "model_m",
     "model_f",
     "name_short",
-    "",
     "faction",
     "",
     "",
