@@ -535,8 +535,9 @@ bool ConvertDBC(void)
                     // TODO: add check for wmo model files ?
                     if(doModels && stricmp(value.c_str()+value.length()-4,".wmo"))
                         modelNames.insert(NameAndAlt(value)); // we need to extract model later, store it
-                    else
+                    else if (doWmos && !stricmp(value.c_str()+value.length()-4,".wmo"))
                         wmoNames.insert(NameAndAlt(value)); //this is a WMO
+
                     //Interestingly, some of the files referenced here have MDL extension - WTF?
                     std::string fn = _PathToFileName(value);
                     if(!stricmp(fn.c_str()+fn.length()-3, "mdx") || !stricmp(fn.c_str()+fn.length()-3, "mdl"))
@@ -739,7 +740,8 @@ void ExtractMapDependencies(void)
 
     if(doWmos)
     {
-        printf("Extracting WMOS...\n");
+        printf("Extracting %u WMOS...\n",wmoNames.size());
+
         bar = new barGoLink(wmoNames.size(),true);
         for(std::set<NameAndAlt>::iterator i = wmoNames.begin(); i != wmoNames.end(); i++)
         {
@@ -750,7 +752,7 @@ void ExtractMapDependencies(void)
                 altfn = mpqfn;
             if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
                 continue;
-            realfn = pathwmo + "/" + _PathToFileName(altfn);
+            realfn = pathwmo + "/" + NormalizeFilename(_PathToFileName(altfn));
             std::fstream fh;
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
@@ -793,7 +795,7 @@ void ExtractMapDependencies(void)
                 altfn = mpqfn;
             if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
                 continue;
-            realfn = pathwmo + "/" + _PathToFileName(altfn);
+            realfn = pathwmo + "/" + NormalizeFilename(_PathToFileName(altfn));
             std::fstream fh;
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
@@ -851,7 +853,7 @@ void ExtractMapDependencies(void)
             altfn = i->alt;
             if(altfn.empty())
                 altfn = mpqfn;
-            realfn = pathmodel + "/" + _PathToFileName(altfn);
+            realfn = pathmodel + "/" + NormalizeFilename(_PathToFileName(altfn));
             std::fstream fh;
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
@@ -880,7 +882,7 @@ void ExtractMapDependencies(void)
                         FetchTexturesFromModel(bb);
 
                     std::string skin = mpqfn.substr(0,mpqfn.length()-3) + "00.skin";
-                    std::string skinrealfn = pathmodel + "/" + _PathToFileName(skin);
+                    std::string skinrealfn = pathmodel + "/" + NormalizeFilename(_PathToFileName(skin));
                     if (mpqmodel.FileExists((char*)skin.c_str()))
                     {
                         std::fstream fhs;
@@ -989,7 +991,7 @@ void ExtractSoundFiles(void)
         }
         altfn = i->alt.empty() ? _PathToFileName(i->name) : i->alt;
 
-        outfn = std::string(SOUNDDIR) + "/" + altfn;
+        outfn = std::string(SOUNDDIR) + "/" + NormalizeFilename(altfn);
         std::fstream fh;
         fh.open(outfn.c_str(), std::ios_base::out | std::ios_base::binary);
         if(fh.is_open())
