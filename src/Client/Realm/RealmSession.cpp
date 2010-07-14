@@ -545,11 +545,17 @@ void RealmSession::_HandleLogonProof(ByteBuffer& pkt)
     // handle error codes
     switch(error)
     {
+        case REALM_AUTH_WRONG_BUILD_NUMBER:
+            log("Wrong or invalid build version.");
+            if(gui)
+                gui->SetSceneData(ISCENE_LOGIN_CONN_STATUS,DSCENE_LOGIN_WRONG_VERSION);
+            DieOrReconnect(true);
+            return;
+
         case REALM_AUTH_UPDATE_CLIENT:
             log("The realm server requested client update.");
             if(gui)
                 gui->SetSceneData(ISCENE_LOGIN_CONN_STATUS,DSCENE_LOGIN_WRONG_VERSION);
-            DieOrReconnect(true);
             return;
 
         case REALM_AUTH_NO_MATCH:
@@ -685,7 +691,7 @@ void RealmSession::_HandleTransferData(ByteBuffer& pkt)
         {
             std::fstream fh;
             char namebuf[100];
-            sprintf(namebuf,"%u_%s.mpq",GetInstance()->GetConf()->clientbuild,GetInstance()->GetConf()->clientlang.c_str());
+            sprintf(namebuf,"%u%s.mpq",GetInstance()->GetConf()->clientbuild,GetInstance()->GetConf()->clientlang.c_str());
             fh.open(namebuf,std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
