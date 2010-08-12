@@ -68,7 +68,6 @@ AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 src/dep/Makefile
          src/dep/src/Makefile
-         src/dep/src/irrKlang/Makefile
 		 src/dep/src/zlib/Makefile
 		 src/dep/src/zthread/Makefile
          src/tools/Makefile
