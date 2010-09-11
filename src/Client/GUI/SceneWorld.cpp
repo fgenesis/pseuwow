@@ -96,6 +96,8 @@ SceneWorld::SceneWorld(PseuGUI *g) : Scene(g)
     driver->setFog(envBasicColor, true, fognear, fogfar, 0.02f);
 
     // setup cursor
+    // shlainn: The cursor contrpller is a horrible hack.
+    // TODO: Replace cursor controller as soon as Irrlicht 1.8 comes out
     cursor->setOSCursorVisible(false);
     cursor->addMouseCursorTexture("data/misc/cursor.png", true);
     cursor->setVisible(true);
@@ -460,7 +462,7 @@ void SceneWorld::OnUpdate(s32 timediff)
 
     str += driver->getFPS();
     str += L" FPS";
-
+    
     debugText->setText(str.c_str());
 
 
