@@ -672,9 +672,9 @@ int main(int argc, char* argv[])
     // register external loaders for not supported filetypes
     video::CImageLoaderBLP* BLPloader = new video::CImageLoaderBLP();
     driver->addExternalImageLoader(BLPloader);
-    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(Device, "../../../bin/data/texture");
+    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(Device);
     smgr->addExternalMeshLoader(m2loader);
-    scene::CWMOMeshFileLoader* wmoloader = new scene::CWMOMeshFileLoader(Device, "../../../bin/data/texture");
+    scene::CWMOMeshFileLoader* wmoloader = new scene::CWMOMeshFileLoader(Device);
     smgr->addExternalMeshLoader(wmoloader);
 	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, true);
 

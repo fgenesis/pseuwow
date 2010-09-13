@@ -8,7 +8,7 @@ char my_locale[5];
 const char *cconf = "WTF/config.wtf";
 const char *cconfentry = "SET locale \"";
 
-void SetLocale(char *loc)
+void SetLocale(const char *loc)
 {
     my_locale[4] = 0;
     if(loc && strlen(loc))

@@ -195,7 +195,7 @@ class CM2MeshFileLoader : public IMeshLoader
 public:
 
 	//! Constructor
-	CM2MeshFileLoader(IrrlichtDevice* device, c8* texdir);
+	CM2MeshFileLoader(IrrlichtDevice* device);
 
 	//! destructor
 	virtual ~CM2MeshFileLoader();

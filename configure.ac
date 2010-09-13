@@ -91,10 +91,10 @@ AC_CONFIG_FILES([Makefile
 		 src/dep/src/zlib/Makefile
 		 src/dep/src/zthread/Makefile
          src/dep/src/irrKlang/Makefile
+         src/dep/src/StormLib/Makefile
          src/tools/Makefile
          src/tools/viewer/Makefile
 		 src/tools/stuffextract/Makefile
-		 src/tools/stuffextract/StormLib/Makefile
 		 src/shared/Makefile
 		 src/shared/Auth/Makefile
 		 src/shared/Network/Makefile

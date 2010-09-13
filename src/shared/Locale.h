@@ -2,6 +2,6 @@
 #define STUFFEXTRACT_LOCALE_H
 
 char *GetLocale(void);
-void SetLocale(char*);
+void SetLocale(const char*);
 
 #endif

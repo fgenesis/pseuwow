@@ -15,6 +15,7 @@
 #include "MovementMgr.h"
 #include "DrawObject.h"
 #include "irrKlangSceneNode.h"
+#include "MemoryInterface.h"
 
 // TODO: replace this by conf value
 #define MAX_CAM_DISTANCE 70
@@ -626,7 +627,23 @@ void SceneWorld::UpdateTerrain(void)
                     Doodad *d = maptile->GetDoodad(i);
                     if(_doodads.find(d->uniqueid) == _doodads.end()) // only add doodads that dont exist yet
                     {
-                        scene::IAnimatedMesh *mesh = smgr->getMesh(d->model.c_str());
+                        std::string filename;
+                        if(instance->GetConf()->useMPQ)
+                        {
+                            filename= d->MPQpath.c_str();
+                        }
+                        else
+                        {
+                            filename= d->model.c_str();
+                        }
+//                         logdebug("loading Doodad %s",filename.c_str());
+                        io::IReadFile* modelfile = io::IrrCreateIReadFileBasic(device, filename.c_str());
+                        if (!modelfile)
+                            {
+                                logerror("Error! modelfile not found: %s", d->MPQpath.c_str());
+                                continue;
+                            }    
+                        scene::IAnimatedMesh *mesh = smgr->getMesh(modelfile);
                         if(mesh)
                         {
                             scene::IAnimatedMeshSceneNode *doodad = smgr->addAnimatedMeshSceneNode(mesh);
@@ -669,7 +686,23 @@ void SceneWorld::UpdateTerrain(void)
                     WorldMapObject *wmo = maptile->GetWMO(i);
                     if(_wmos.find(wmo->uniqueid) == _wmos.end()) // only add wmos that dont exist yet
                     {
-                        scene::IAnimatedMesh *mesh = smgr->getMesh(wmo->model.c_str());
+                        std::string filename;
+                        if(instance->GetConf()->useMPQ)
+                        {
+                            filename= wmo->MPQpath.c_str();
+                        }
+                        else
+                        {
+                            filename= wmo->model.c_str();
+                        }
+//                         logdebug("loading WMO %s",filename.c_str());
+                        io::IReadFile* modelfile = io::IrrCreateIReadFileBasic(device, filename.c_str());
+                        if (!modelfile)
+                            {
+                                logerror("Error! WMO file not found: %s", wmo->MPQpath.c_str());
+                                continue;
+                            }   
+                        scene::IAnimatedMesh *mesh = smgr->getMesh(modelfile);
                         if(mesh)
                         {
                             scene::IAnimatedMeshSceneNode *wmo_node = smgr->addAnimatedMeshSceneNode(mesh);

@@ -8,8 +8,9 @@ class MPQFile;
 class MPQHelper
 {
 public:
-    MPQHelper(const char*);
+    MPQHelper();
     ~MPQHelper();
+    void Init();
     ByteBuffer ExtractFile(const char*);
     bool FileExists(const char*);
 private:

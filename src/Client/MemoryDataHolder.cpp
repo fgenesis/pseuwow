@@ -4,6 +4,9 @@
 #include "zthread/Condition.h"
 #include "zthread/Task.h"
 #include "zthread/PoolExecutor.h"
+#include "MPQHelper.h"
+#include "Locale.h"
+#include "tools.h"
 
 namespace MemoryDataHolder
 {
@@ -15,7 +18,11 @@ namespace MemoryDataHolder
     TypeStorage<DataLoaderRunnable> loaders;
     TypeStorage<uint32> refs;
     bool alwaysSingleThreaded = false;
+    
+    bool loadFromMPQ = false;
+    MPQHelper mpq;
 
+    
     void Init(void)
     {
         if(!executor)
@@ -47,6 +54,59 @@ namespace MemoryDataHolder
             executor->size(t);
         }
     }
+     
+    void SetUseMPQ(std::string loc)
+    {
+        loadFromMPQ=true;
+        SetLocale(loc.c_str());
+        mpq.Init();
+    }
+    
+    void MakeMapFilename(char* fn, uint32 mid, std::string mname, uint32 x, uint32 y)
+    {
+        if(loadFromMPQ)
+            sprintf(fn,"World\\Maps\\%s\\%s_%u_%u.adt",mname.c_str(),mname.c_str(),(uint16)x,(uint16)y);
+        else
+            sprintf(fn,"./data/maps/%u_%u_%u.adt",(uint16)mid,(uint16)x,(uint16)y);
+    }
+    void MakeWDTFilename(char* fn, uint32 mid, std::string mname)
+    {
+        if(loadFromMPQ)
+            sprintf(fn,"World\\Maps\\%s\\%s.wdt",mname.c_str(),mname.c_str());
+        else
+            sprintf(fn,"./data/maps/%u.wdt",(uint16)mid);
+    }
+    void MakeTextureFilename(char* fn, std::string fname)
+    {
+        if(loadFromMPQ)
+            sprintf(fn,"%s",fname.c_str());
+        else
+        {
+            NormalizeFilename(fname);
+            sprintf(fn,"./data/textures/%s",fname.c_str());
+        }
+    }    
+    void MakeModelFilename(char* fn, std::string fname)
+    {
+        if(loadFromMPQ)
+            sprintf(fn,"%s",fname.c_str());
+        else
+        {
+            NormalizeFilename(_PathToFileName(fname));
+            sprintf(fn,"./data/model/%s",fname.c_str());
+        }
+    }  
+
+    bool FileExists(std::string fname)
+    {
+        logdebug("%s",fname.c_str());
+        if(loadFromMPQ)
+            return mpq.FileExists(fname.c_str());
+        else
+            return GetFileSize(fname.c_str());
+      
+    }
+    
     
     class DataLoaderRunnable : public ZThread::Runnable
     {
@@ -68,43 +128,83 @@ namespace MemoryDataHolder
         void run()
         { 
             memblock *mb = new memblock();
+            if(loadFromMPQ)
+            {
+                if(!mpq.FileExists(_name.c_str()))
+                {
+                    ZThread::Guard<ZThread::FastMutex> g(_mut);
+                    logerror("DataLoaderRunnable: Error opening file in MPQ: '%s'", _name.c_str());
+                    _loaders->Unlink(_name);
+                    DoCallbacks(_name, MDH_FILE_ERROR); // call callback func, 'false' to indicate file couldnt be loaded
+                    delete mb;
+                    return;
+                }
+                logdev("DataLoaderRunnable: Reading From MPQ'%s'... (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
+                const ByteBuffer& bb = mpq.ExtractFile(_name.c_str());
+//                 fh.read((char*)mb->ptr, mb->size);
+                if(!bb.size())
+                {
+                    ZThread::Guard<ZThread::FastMutex> g(_mut);
+                    logerror("DataLoaderRunnable: Error opening file in MPQ: '%s'", _name.c_str());
+                    _loaders->Unlink(_name);
+                    DoCallbacks(_name, MDH_FILE_ERROR); // call callback func, 'false' to indicate file couldnt be loaded
+                    delete mb;
+                    return;
+                }
 
-            mb->size = GetFileSize(_name.c_str());
-            // couldnt open file if size is 0
-            if(!mb->size)
-            {
-                ZThread::Guard<ZThread::FastMutex> g(_mut);
-                logerror("DataLoaderRunnable: Error opening file: '%s'", _name.c_str());
-                _loaders->Unlink(_name);
-                DoCallbacks(_name, MDH_FILE_ERROR); // call callback func, 'false' to indicate file couldnt be loaded
-                delete mb;
-                return;
+                mb->size=bb.size(); 
+                mb->alloc(mb->size);
+                
+                memcpy((char*)mb->ptr,(char*)bb.contents(),bb.size());
+                {
+                    ZThread::Guard<ZThread::FastMutex> g(_mut);
+                    _storage->Assign(_name, mb);
+                    _loaders->Unlink(_name); // must be unlinked after the file is fully loaded, but before the callbacks are processed!
+                }
+                logdev("DataLoaderRunnable: Done with '%s' (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
+                DoCallbacks(_name, MDH_FILE_OK | MDH_FILE_JUST_LOADED);              
             }
-            mb->alloc(mb->size);
-            std::ifstream fh;
-            fh.open(_name.c_str(), std::ios_base::in | std::ios_base::binary);
-            if(!fh.is_open())
+            else
             {
+                _FixFileName(_name);
+
+                mb->size = GetFileSize(_name.c_str());
+                // couldnt open file if size is 0
+                if(!mb->size)
                 {
                     ZThread::Guard<ZThread::FastMutex> g(_mut);
                     logerror("DataLoaderRunnable: Error opening file: '%s'", _name.c_str());
                     _loaders->Unlink(_name);
+                    DoCallbacks(_name, MDH_FILE_ERROR); // call callback func, 'false' to indicate file couldnt be loaded
+                    delete mb;
+                    return;
                 }
-                mb->free();
-                delete mb;
-                DoCallbacks(_name, MDH_FILE_ERROR);
-                return;
+                mb->alloc(mb->size);
+                std::ifstream fh;
+                fh.open(_name.c_str(), std::ios_base::in | std::ios_base::binary);
+                if(!fh.is_open())
+                {
+                    {
+                        ZThread::Guard<ZThread::FastMutex> g(_mut);
+                        logerror("DataLoaderRunnable: Error opening file: '%s'", _name.c_str());
+                        _loaders->Unlink(_name);
+                    }
+                    mb->free();
+                    delete mb;
+                    DoCallbacks(_name, MDH_FILE_ERROR);
+                    return;
+                }
+                logdev("DataLoaderRunnable: Reading '%s'... (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
+                fh.read((char*)mb->ptr, mb->size);
+                fh.close();
+                {
+                    ZThread::Guard<ZThread::FastMutex> g(_mut);
+                    _storage->Assign(_name, mb);
+                    _loaders->Unlink(_name); // must be unlinked after the file is fully loaded, but before the callbacks are processed!
+                }
+                logdev("DataLoaderRunnable: Done with '%s' (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
+                DoCallbacks(_name, MDH_FILE_OK | MDH_FILE_JUST_LOADED);
             }
-            logdev("DataLoaderRunnable: Reading '%s'... (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
-            fh.read((char*)mb->ptr, mb->size);
-            fh.close();
-            {
-                ZThread::Guard<ZThread::FastMutex> g(_mut);
-                _storage->Assign(_name, mb);
-                _loaders->Unlink(_name); // must be unlinked after the file is fully loaded, but before the callbacks are processed!
-            }
-            logdev("DataLoaderRunnable: Done with '%s' (%s)", _name.c_str(), FilesizeFormat(mb->size).c_str());
-            DoCallbacks(_name, MDH_FILE_OK | MDH_FILE_JUST_LOADED);
         }
 
         inline void AddCallback(callback_func func, void *ptr = NULL, ZThread::Condition *cond = NULL)
@@ -137,10 +237,15 @@ namespace MemoryDataHolder
         {
             _name = n;
         }
+        inline void SetMPQName(std::string n)
+        {
+            _MPQname = n;
+        }
 
        CallbackStore _callbacks;
        bool _threaded;
        std::string _name;
+       std::string _MPQname;
        ZThread::FastMutex _mut;
        TypeStorage<memblock> *_storage;
        TypeStorage<DataLoaderRunnable> *_loaders;

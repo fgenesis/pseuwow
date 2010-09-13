@@ -758,7 +758,7 @@ void WorldSession::PreloadDataBeforeEnterWorld(PlayerEnum& pl)
 
         // preload additional map data only when the GUI is enabled
         // TODO: at some later point we will need the geometry for correct collision calculation, etc...
-        if(GetInstance()->GetConf()->enablegui)
+/*        if(GetInstance()->GetConf()->enablegui)
         {
             for(uint32 tiley = 0; tiley < 3; tiley++)
             {
@@ -776,15 +776,15 @@ void WorldSession::PreloadDataBeforeEnterWorld(PlayerEnum& pl)
 
                             // but we need to preload the .skin files, since they are not held in the MeshCache
                             // TODO: load *all* necessary skin files, also fix stuffextract for this!
-                            std::string skinfile = doo->model.substr(0, doo->model.length()-3) + "00.skin";
-                            skinfile = GetAbsolutePath(skinfile.c_str());
-                            _FixFileName(skinfile);
-                            MemoryDataHolder::BackgroundLoadFile(skinfile);
+//                             std::string skinfile = doo->MPQpath.substr(0, doo->model.length()-3) + "00.skin";
+//                             skinfile = GetAbsolutePath(skinfile.c_str());
+//                             _FixFileName(skinfile);
+//                             MemoryDataHolder::BackgroundLoadFile(skinfile);
                         }
                     }
                 }
             }
-        }
+        }*/
     }
 }
 

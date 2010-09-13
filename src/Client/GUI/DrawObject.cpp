@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "GameObject.h"
 #include "WorldSession.h"
+#include "MemoryInterface.h"
+#include "MemoryDataHolder.h"
 
 using namespace irr;
 
@@ -24,16 +26,16 @@ DrawObject::DrawObject(irr::IrrlichtDevice *device, Object *obj, PseuInstance *i
 DrawObject::~DrawObject()
 {
     DEBUG( logdebug("~DrawObject() this=0x%X obj=0x%X smgr=%X",this,_obj,_smgr) );
-    if(cube)
+    if(node)
     {
         text->remove();
-        cube->remove();
+        node->remove();
     }
 }
 
 void DrawObject::Unlink(void)
 {
-    cube = NULL;
+    node = NULL;
     text = NULL;
 }
 
@@ -46,9 +48,9 @@ void DrawObject::_Init(void)
             p->GetRace(),p->GetGender(),p->GetFaceId(),p->GetSkinId(),p->GetFaceTraitsId(),p->GetHairStyleId(),p->GetHairColorId()));
     }
 
-    if(!cube && _obj->IsWorldObject()) // only world objects have coords and can be drawn
+    if(!node && _obj->IsWorldObject()) // only world objects have coords and can be drawn
     {
-        std::string modelfile, texture = "";
+        std::string modelfilename, texturename = "";
         uint32 opacity = 255;
         if (_obj->IsUnit())
         {
@@ -56,9 +58,14 @@ void DrawObject::_Init(void)
             SCPDatabase *cdi = _instance->dbmgr.GetDB("creaturedisplayinfo");
             SCPDatabase *cmd = _instance->dbmgr.GetDB("creaturemodeldata");
             uint32 modelid = cdi && displayid ? cdi->GetUint32(displayid,"model") : 0;
-            modelfile = std::string("data/model/") + (cmd ? cmd->GetString(modelid,"file") : "");
-            if (cdi && strcmp(cdi->GetString(displayid,"name1"), "") != 0) 
-                texture = std::string("data/texture/") + cdi->GetString(displayid,"name1");
+            logdebug("modelid = %u, displayid = %u",modelid,displayid);
+//             modelfilename = std::string("data/model/") + (cmd ? cmd->GetString(modelid,"file") : "");
+            char buf[1000];
+            MemoryDataHolder::MakeModelFilename(buf,(cmd ? cmd->GetString(modelid,"mpqfilename") : ""));
+            modelfilename = buf;
+            logdebug("Unit %s",cmd->GetString(modelid,"mpqfilename"));
+//             if (cdi && strcmp(cdi->GetString(displayid,"name1"), "") != 0) 
+//                 texturename = std::string("data/texture/") + cdi->GetString(displayid,"name1");
             opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
         } 
         else if (_obj->IsCorpse())
@@ -74,7 +81,13 @@ void DrawObject::_Init(void)
             if (scpgender)
                 gendername = scpgender->GetString(gender, "name");
 
-            modelfile = std::string("data/model/") + racename + gendername + "DeathSkeleton.m2";
+            modelfilename = std::string("World\\Generic\\PassiveDoodads\\DeathSkeletons\\") + racename + gendername + "DeathSkeleton.m2";
+            char buf[1000];
+            MemoryDataHolder::MakeModelFilename(buf,modelfilename);
+            modelfilename = buf;
+            logdebug("Corpse %s",buf);
+
+        
         }
         else if (_obj->IsGameObject())
         {
@@ -97,10 +110,17 @@ void DrawObject::_Init(void)
                 SCPDatabase *gdi = _instance->dbmgr.GetDB("gameobjectdisplayinfo");
                 if (gdi && displayid)
                 {
-                    modelfile = std::string("data/model/") + gdi->GetString(displayid,"model");
-                    std::string texturef = gdi->GetString(displayid,"path");
+                    char buf[1000];
+                    MemoryDataHolder::MakeModelFilename(buf,gdi->GetString(displayid,"mpqfilename"));
+                    modelfilename = buf;
+                    logdebug("Gameobject %s",buf);
+
                     if (strcmp(gdi->GetString(displayid,"texture"), "") != 0)
-                        texture = std::string("data/texture/") + gdi->GetString(displayid,"texture");
+                    {
+                        char buf[1000];
+                        MemoryDataHolder::MakeTextureFilename(buf,gdi->GetString(displayid,"texture"));
+                        texturename = buf;
+                    }
                 }
                 
                 DEBUG(logdebug("GAMEOBJECT: %u - %u", _obj->GetEntry(), displayid));
@@ -108,31 +128,45 @@ void DrawObject::_Init(void)
                 DEBUG(logdebug("GAMEOBJECT UNKNOWN: %u", _obj->GetEntry()));
             }
         }
-        scene::IAnimatedMesh *mesh = _smgr->getMesh(modelfile.c_str());
+
+        io::IReadFile* modelfile = io::IrrCreateIReadFileBasic(_device, modelfilename.c_str());
+        if (!modelfile)
+            {
+                logerror("DrawObject: model file not found: %s", modelfilename.c_str());
+            }
+        scene::IAnimatedMesh *mesh = _smgr->getMesh(modelfile);
 
 
         if(mesh)
         {
-            cube = _smgr->addAnimatedMeshSceneNode(mesh);
+            node = _smgr->addAnimatedMeshSceneNode(mesh);
             //video::ITexture *tex = _device->getVideoDriver()->getTexture("data/misc/square.jpg");
-            //cube->setMaterialTexture(0, tex);
+            //node->setMaterialTexture(0, tex);
         }
         else
         {
-            cube = _smgr->addCubeSceneNode(1);
+            node = _smgr->addCubeSceneNode(1);
         }
-        if (!texture.empty())
-            cube->setMaterialTexture(0, _device->getVideoDriver()->getTexture(texture.c_str()));
-
-        //cube->getMaterial(0).DiffuseColor.setAlpha(opacity);
-        cube->setName("OBJECT");
-        if (cube->getMaterialCount())
+        if (!texturename.empty())
         {
-            cube->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
-            cube->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
+            logdebug("%s",texturename.c_str());
+            io::IReadFile* texturefile = io::IrrCreateIReadFileBasic(_device, texturename.c_str());
+            if (!texturefile)
+                {
+                    logerror("DrawObject: texture file not found: %s", texturename.c_str());
+                }   
+
+            node->setMaterialTexture(0, _device->getVideoDriver()->getTexture(texturefile));
+        }
+        //node->getMaterial(0).DiffuseColor.setAlpha(opacity);
+        node->setName("OBJECT");
+        if (node->getMaterialCount())
+        {
+            node->getMaterial(0).setFlag(video::EMF_LIGHTING, true);
+            node->getMaterial(0).setFlag(video::EMF_FOG_ENABLE, true);
         }
 
-        text=_smgr->addTextSceneNode(_guienv->getBuiltInFont(), L"TestText" , irr::video::SColor(255,255,255,255),cube, irr::core::vector3df(0,5,0));
+        text=_smgr->addTextSceneNode(_guienv->getBuiltInFont(), L"TestText" , irr::video::SColor(255,255,255,255),node, irr::core::vector3df(0,5,0));
         if(_obj->IsPlayer())
         {
             text->setTextColor(irr::video::SColor(255,255,0,0));
@@ -143,7 +177,7 @@ void DrawObject::_Init(void)
         }
 
     }
-    DEBUG(logdebug("initialize DrawObject 0x%X obj: 0x%X "I64FMT,this,_obj,_obj->GetGUID()))
+    logdebug("initialize DrawObject 0x%X obj: 0x%X "I64FMT,this,_obj,_obj->GetGUID());
 
     _initialized = true;
 }
@@ -154,19 +188,19 @@ void DrawObject::Draw(void)
         _Init();
 
     //printf("DRAW() for pObj 0x%X name '%s' guid "I64FMT"\n", _obj, _obj->GetName().c_str(), _obj->GetGUID());
-    if(cube)
+    if(node)
     {
         WorldPosition pos = ((WorldObject*)_obj)->GetPosition();
-        cube->setPosition(WPToIrr(pos));
+        node->setPosition(WPToIrr(pos));
         rotation.Y = O_TO_IRR(pos.o);
 
         float s = _obj->GetFloatValue(OBJECT_FIELD_SCALE_X);
         if(s <= 0)
             s = 1;
-        cube->setScale(irr::core::vector3df(s,s,s));
-        cube->setRotation(rotation);
+        node->setScale(irr::core::vector3df(s,s,s));
+        node->setRotation(rotation);
 
-        //cube->setRotation(irr::core::vector3df(0,RAD_TO_DEG(((WorldObject*)_obj)->GetO()),0));
+        //node->setRotation(irr::core::vector3df(0,RAD_TO_DEG(((WorldObject*)_obj)->GetO()),0));
         irr::core::stringw tmp = L"";
         if(_obj->GetName().empty() && !_obj->IsCorpse())
         {

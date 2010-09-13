@@ -14,7 +14,7 @@ public:
     ~DrawObject();
     void Draw(void); // call only in threadsafe environment!! (ensure the obj ptr is still valid!)
     void Unlink(void);
-    inline irr::scene::ISceneNode *GetSceneNode(void) { return cube; }
+    inline irr::scene::ISceneNode *GetSceneNode(void) { return node; }
     // additionally, we dont use a GetObject() func - that would fuck things up if the object was already deleted.
 
 private:
@@ -24,7 +24,7 @@ private:
     irr::IrrlichtDevice *_device;
     irr::scene::ISceneManager *_smgr;
     irr::gui::IGUIEnvironment* _guienv;
-    irr::scene::ISceneNode* cube;
+    irr::scene::ISceneNode* node;
     irr::scene::ITextSceneNode *text;
     PseuInstance *_instance;
     irr::core::vector3df rotation;

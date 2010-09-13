@@ -89,6 +89,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
         d.oz = mddf.a;
         d.flags = mddf.flags;
         d.uniqueid = mddf.uniqueid;
+        d.MPQpath = adt->_models[mddf.id];
         d.model = std::string("./data/model/") + NormalizeFilename(_PathToFileName(adt->_models[mddf.id]));
         // this .mdx -> .m2 transformation is annoying >.< - replace "mdx" and end of string with "m2"
         // d.model = d.model.substr(0, d.model.length() - 3) + "m2";
@@ -113,6 +114,7 @@ void MapTile::ImportFromADT(ADTFile *adt)
         wmo.oz = modf.oz;
         wmo.flags = modf.flags;
         wmo.uniqueid = modf.uniqueid;
+        wmo.MPQpath = adt->_wmos[modf.id];
         wmo.model = std::string("./data/wmo/") + NormalizeFilename(_PathToFileName(adt->_wmos[modf.id]));
         _wmo_data.push_back(wmo);
     }

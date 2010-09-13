@@ -7,7 +7,11 @@
 #define DATADIR "Data"
 
 
-MPQHelper::MPQHelper(const char *archive)
+MPQHelper::MPQHelper()
+{
+}
+
+void MPQHelper::Init()
 {
     // TODO: check which files are needed and which are not + recheck for correct ordering
     std::string dir = "Data/";
@@ -16,7 +20,6 @@ MPQHelper::MPQHelper(const char *archive)
 
     // order goes from last opened to first opened file
     // ok maybe this is a bit too much but should work fine :)
-    _patches.push_front(dir+archive+ext); //
     _patches.push_front(dir+"common"+ext);
 	_patches.push_front(dir+"common-2"+ext);
     _patches.push_front(dir+"expansion"+ext);
@@ -29,11 +32,9 @@ MPQHelper::MPQHelper(const char *archive)
         _patches.push_front(buf);
     }
     _patches.push_front(ldir+"speech-"+GetLocale()+ext);
-    _patches.push_front(ldir+archive+"-"+GetLocale()+ext);
     _patches.push_front(ldir+"locale-"+GetLocale()+ext);
     _patches.push_front(ldir+"expansion-speech-"+GetLocale()+ext);
     _patches.push_front(ldir+"expansion-locale-"+GetLocale()+ext);	
-    _patches.push_front(ldir+"expansion-"+archive+"-"+GetLocale()+ext);
 	_patches.push_front(ldir+"lichking-locale-"+GetLocale()+ext);	
 
     _patches.push_front(ldir+"patch"+"-"+GetLocale()+ext);

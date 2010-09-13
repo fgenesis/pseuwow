@@ -12,7 +12,7 @@ World::World(WorldSession *s)
     _movemgr = NULL;
     if(_session->GetInstance()->GetConf()->useMaps)
     {
-        _mapmgr = new MapMgr();
+        _mapmgr = new MapMgr(_session->GetInstance());
     }
 
 }
