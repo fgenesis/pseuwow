@@ -5,14 +5,6 @@
 #include "MapMgr.h"
 
 
-
-bool TileExistsInFile(uint32 m, uint32 x, uint32 y)
-{
-/*    char buf[50];
-    MakeMapFilename(buf,m,x,y);
-    return GetFileSize(buf);*/
-    return true;
-}
 char* MapMgr::MapID2Name(uint32 mid)
 {
   if(!mapdb)
