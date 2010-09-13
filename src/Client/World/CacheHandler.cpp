@@ -67,7 +67,6 @@ bool PlayerNameCache::SaveToFile(void)
     if(!size)
         return false;
 
-    fh.write((char*)&size,sizeof(uint32));
     ByteBuffer bb;
 
     bb << (uint32)_cache.size();
