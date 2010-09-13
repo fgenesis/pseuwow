@@ -546,6 +546,10 @@ bool IsFloatField(uint8 ty, uint32 f)
         (uint32)UNIT_FIELD_MINRANGEDDAMAGE,
         (uint32)UNIT_FIELD_MAXRANGEDDAMAGE,
         (uint32)UNIT_FIELD_POWER_COST_MULTIPLIER,
+        (uint32)UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER,
+        (uint32)UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER,
+        (uint32)UNIT_FIELD_MAXHEALTHMODIFIER,
+        (uint32)UNIT_FIELD_HOVERHEIGHT,
         (uint32)-1
     };
     static uint32 floats_player[] =
@@ -556,12 +560,11 @@ bool IsFloatField(uint8 ty, uint32 f)
         (uint32)PLAYER_RANGED_CRIT_PERCENTAGE,
         (uint32)PLAYER_OFFHAND_CRIT_PERCENTAGE,
         (uint32)PLAYER_SPELL_CRIT_PERCENTAGE1,
-        (uint32)PLAYER_HOLY_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_FIRE_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_NATURE_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_FROST_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_SHADOW_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_ARCANE_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_CRIT_PERCENTAGE,
+        (uint32)PLAYER_SHIELD_BLOCK_CRIT_PERCENTAGE,
+        (uint32)PLAYER_FIELD_MOD_HEALING_PCT,
+        (uint32)PLAYER_FIELD_MOD_HEALING_DONE_PCT,
+        (uint32)PLAYER_RUNE_REGEN_1,
         (uint32)-1
     };
     static uint32 floats_gameobject[] =
@@ -575,10 +578,6 @@ bool IsFloatField(uint8 ty, uint32 f)
     static uint32 floats_dynobject[] =
     {
         (uint32)DYNAMICOBJECT_RADIUS,
-        (uint32)DYNAMICOBJECT_POS_X,
-        (uint32)DYNAMICOBJECT_POS_Y,
-        (uint32)DYNAMICOBJECT_POS_Z,
-        (uint32)DYNAMICOBJECT_FACING,
         (uint32)-1
     };
     /*
