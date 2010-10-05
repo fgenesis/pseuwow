@@ -552,7 +552,9 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     log_setloglevel(debug);
     log_setlogtime((bool)atoi(v.Get("LOGTIME").c_str()));
     MemoryDataHolder::SetThreadCount(dataLoaderThreads);
-    MemoryDataHolder::SetUseMPQ(clientlang);
+
+    if(atoi(v.Get("USEMPQ").c_str()))
+        MemoryDataHolder::SetUseMPQ(clientlang);
 }
 
 

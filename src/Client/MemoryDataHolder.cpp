@@ -1,3 +1,8 @@
+/*
+ * WARNING: This file contains totally wrong multithread code;
+ * either ignore it, do not use multithreading, or try it and hope for the best
+ */
+
 #include <fstream>
 #include "MemoryDataHolder.h"
 #include "DefScript/TypeStorage.h"
@@ -81,10 +86,7 @@ namespace MemoryDataHolder
         if(loadFromMPQ)
             sprintf(fn,"%s",fname.c_str());
         else
-        {
-            NormalizeFilename(fname);
-            sprintf(fn,"./data/textures/%s",fname.c_str());
-        }
+            sprintf(fn,"./data/textures/%s", NormalizeFilename(fname).c_str());
     }    
     void MakeModelFilename(char* fn, std::string fname)
     {
@@ -209,6 +211,8 @@ namespace MemoryDataHolder
 
         inline void AddCallback(callback_func func, void *ptr = NULL, ZThread::Condition *cond = NULL)
         {
+            if(!func)
+                return;
             callback_struct cbs;
             cbs.func = func;
             cbs.ptr = ptr;

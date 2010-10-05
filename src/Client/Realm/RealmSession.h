@@ -8,13 +8,19 @@ struct SRealmInfo
 {
     uint8	icon;			// icon near realm
     uint8   locked;         // added in 2.0.x
-    uint8	color;			// color of record
+    uint8	flags;			// realm flags (text color etc)
     std::string	name;			// Text zero terminated name of Realm
     std::string	addr_port;		// Text zero terminated address of Realm ("ip:port")
     float	population;		// 1.6 -> population value. lower == lower population and vice versa
     uint8	chars_here;		// number of characters on this server
     uint8	timezone;		// timezone
     uint8	unknown;		//
+
+    // optional, if REALM_FLAG_SPECIFYBUILD (0x04) is set
+    uint8 major_version;
+    uint8 minor_version;
+    uint8 bugfix_version;
+    uint16 version_build;
 };
 
 struct AuthHandler;

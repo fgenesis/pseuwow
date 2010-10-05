@@ -253,13 +253,21 @@ void RealmSession::_HandleRealmList(ByteBuffer& pkt)
     {
         pkt >> _realms[i].icon;
         pkt >> _realms[i].locked;
-        pkt >> _realms[i].color;
+        pkt >> _realms[i].flags;
         pkt >> _realms[i].name;
         pkt >> _realms[i].addr_port;
         pkt >> _realms[i].population;
         pkt >> _realms[i].chars_here;
         pkt >> _realms[i].timezone;
         pkt >> _realms[i].unknown;
+
+        if(_realms[i].flags & 0x04) // REALM_FLAG_SPECIFYBUILD
+        {
+            pkt >> _realms[i].major_version;
+            pkt >> _realms[i].minor_version;
+            pkt >> _realms[i].bugfix_version;
+            pkt >> _realms[i].version_build;
+        }
     }
 
     // the rest of the packet is not interesting

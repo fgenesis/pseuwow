@@ -267,7 +267,7 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
                 entry += L"]";
                 realmlistbox->addItem(entry.c_str(), -1);
                 SColor col;
-                switch(r.color)
+                switch(r.flags)
                 {
                     case 0: col.set(0xFF, 0x00, 0xFF, 0x00); break;
                     case 1: col.set(0xFF, 0xFF, 0x00, 0x00); break;

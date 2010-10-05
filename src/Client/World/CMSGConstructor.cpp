@@ -99,11 +99,6 @@ void WorldSession::SendCastSpell(uint32 spellid, bool nocheck)
     MyCharacter *my = GetMyChar();
     bool known = nocheck ? true : my->HasSpell(spellid);
 
-    //-- TEMP FIX --// TODO: need a list of spells that is excluded from the check and can always be casted.
-    // settable via DefScript?
-    if(spellid==836)
-        known=true;
-
     if( (!known) && (!GetInstance()->GetConf()->disablespellcheck) )
     {
         logerror("Attempt to cast not-known spell %u",spellid);

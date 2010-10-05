@@ -89,7 +89,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
     {
         buf.read(fourcc,4); flipcc(fourcc); 
         buf.read((uint8*)&size,4);
-        DEBUG(printf("ADT: reading '%s' size %u\n",fourcc,size));
+        //DEBUG(printf("ADT: reading '%s' size %u\n",fourcc,size));
 
         if(!strcmp((char*)fourcc,"MVER"))
         {
@@ -226,7 +226,7 @@ bool ADTFile::LoadMem(ByteBuffer& buf)
                 buf.read(mfcc,4); flipcc(mfcc); 
                 buf.read((uint8*)&msize,4);
 
-                DEBUG(printf("ADT:MCNK[%u]: reading '%s' size %u\n",mcnkid,mfcc,msize));
+                //DEBUG(printf("ADT:MCNK[%u]: reading '%s' size %u\n",mcnkid,mfcc,msize));
 
                 // HACKS to make it work properly
                 if(!msize && !strcmp((char*)mfcc,"MCAL"))

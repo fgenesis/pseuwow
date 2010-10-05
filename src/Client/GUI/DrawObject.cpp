@@ -59,11 +59,11 @@ void DrawObject::_Init(void)
             SCPDatabase *cmd = _instance->dbmgr.GetDB("creaturemodeldata");
             uint32 modelid = cdi && displayid ? cdi->GetUint32(displayid,"model") : 0;
             logdebug("modelid = %u, displayid = %u",modelid,displayid);
-//             modelfilename = std::string("data/model/") + (cmd ? cmd->GetString(modelid,"file") : "");
+            modelfilename = (cmd ? cmd->GetString(modelid,"file") : "");
             char buf[1000];
-            MemoryDataHolder::MakeModelFilename(buf,(cmd ? cmd->GetString(modelid,"mpqfilename") : ""));
+            MemoryDataHolder::MakeModelFilename(buf, modelfilename);
             modelfilename = buf;
-            logdebug("Unit %s",cmd->GetString(modelid,"mpqfilename"));
+            logdebug("Unit %s", modelfilename);
 //             if (cdi && strcmp(cdi->GetString(displayid,"name1"), "") != 0) 
 //                 texturename = std::string("data/texture/") + cdi->GetString(displayid,"name1");
             opacity = cdi && displayid ? cdi->GetUint32(displayid,"opacity") : 255;
@@ -81,6 +81,7 @@ void DrawObject::_Init(void)
             if (scpgender)
                 gendername = scpgender->GetString(gender, "name");
 
+            // TODO: fix this for non-MPQ mode
             modelfilename = std::string("World\\Generic\\PassiveDoodads\\DeathSkeletons\\") + racename + gendername + "DeathSkeleton.m2";
             char buf[1000];
             MemoryDataHolder::MakeModelFilename(buf,modelfilename);
@@ -111,7 +112,7 @@ void DrawObject::_Init(void)
                 if (gdi && displayid)
                 {
                     char buf[1000];
-                    MemoryDataHolder::MakeModelFilename(buf,gdi->GetString(displayid,"mpqfilename"));
+                    MemoryDataHolder::MakeModelFilename(buf,gdi->GetString(displayid,"model"));
                     modelfilename = buf;
                     logdebug("Gameobject %s",buf);
 
