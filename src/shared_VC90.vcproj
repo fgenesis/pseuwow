@@ -191,6 +191,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\shared\LocaleDetector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\shared\LocaleDetector.h"
+				>
+			</File>
+			<File
 				RelativePath=".\shared\log.cpp"
 				>
 			</File>
@@ -447,6 +455,42 @@
 				</File>
 				<File
 					RelativePath=".\shared\Auth\Sha1.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MPQ"
+				>
+				<File
+					RelativePath=".\shared\MPQFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\shared\MPQFile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\shared\MPQHelper.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\shared\MPQHelper.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="DBC"
+				>
+				<File
+					RelativePath=".\shared\DBCFieldData.h"
+					>
+				</File>
+				<File
+					RelativePath=".\shared\dbcfile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\shared\dbcfile.h"
 					>
 				</File>
 			</Filter>

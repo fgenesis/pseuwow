@@ -72,7 +72,7 @@
 //  Y - A for ANSI version, U for Unicode version (Unicode version does not exist yet)
 //  Z - S for static C library, D for multithreaded DLL C-library
 //
-
+/* // FG: we don't use this
 #if defined(_MSC_VER) && !defined (__STORMLIB_SELF__)
   #ifdef _DEBUG                                 // DEBUG VERSIONS
     #ifdef _DLL                               
@@ -88,7 +88,7 @@
     #endif
   #endif
 #endif
-
+*/
 //-----------------------------------------------------------------------------
 // Defines
 

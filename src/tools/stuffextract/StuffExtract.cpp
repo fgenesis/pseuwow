@@ -10,7 +10,7 @@
 #include "WDTFile.h"
 #include "StuffExtract.h"
 #include "DBCFieldData.h"
-#include "Locale.h"
+#include "LocaleDetector.h"
 #include "ProgressBar.h"
 #include "../../Client/GUI/CM2MeshFileLoader.h"
 #include "../../Client/GUI/CWMOMeshFileLoader.h"

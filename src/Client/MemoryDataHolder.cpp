@@ -5,7 +5,7 @@
 #include "zthread/Task.h"
 #include "zthread/PoolExecutor.h"
 #include "MPQHelper.h"
-#include "Locale.h"
+#include "LocaleDetector.h"
 #include "tools.h"
 
 namespace MemoryDataHolder

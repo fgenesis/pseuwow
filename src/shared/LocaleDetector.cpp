@@ -1,5 +1,5 @@
 #include "common.h"
-#include "Locale.h"
+#include "LocaleDetector.h"
 #include <fstream>
 #include "ByteBuffer.h"
 

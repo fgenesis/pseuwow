@@ -13,7 +13,7 @@
 #ifndef __HUFFMAN_H__
 #define __HUFFMAN_H__
 
-#include "../StormPort.h"
+#include "StormPort.h"
  
 //-----------------------------------------------------------------------------
 // Defines

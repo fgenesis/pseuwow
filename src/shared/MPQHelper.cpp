@@ -2,7 +2,7 @@
 #include "common.h"
 #include "MPQHelper.h"
 #include "MPQFile.h"
-#include "Locale.h"
+#include "LocaleDetector.h"
 
 #define DATADIR "Data"
 

@@ -16,6 +16,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shared", "src\shared_VC90.v
 	ProjectSection(ProjectDependencies) = postProject
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480} = {262199E8-EEDF-4700-A1D1-E9CC901CF480}
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127} = {75DB41FE-4102-40BA-87F1-0D7B593BE127}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StuffExtract", "src\tools\stuffextract_VC90.vcproj", "{F14CA928-E505-41F1-BE45-CCF6B85547D2}"
@@ -25,6 +26,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StuffExtract", "src\tools\s
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Irrlicht", "src\dep\src\irrlicht\Irrlicht9.0.vcproj", "{E08E042A-6C45-411B-92BE-3CC31331019F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stormlib", "src\stormlib_VC90.vcproj", "{75DB41FE-4102-40BA-87F1-0D7B593BE127}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -160,6 +163,26 @@ Global
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Static lib - Release - Fast FPU|Win32.Build.0 = Static lib - Release - Fast FPU|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Static lib - Release|Win32.ActiveCfg = Static lib - Release|Win32
 		{E08E042A-6C45-411B-92BE-3CC31331019F}.Static lib - Release|Win32.Build.0 = Static lib - Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Debug|Win32.ActiveCfg = Debug|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Debug|Win32.Build.0 = Debug|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Relase - Fast FPU|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Relase - Fast FPU|Win32.Build.0 = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release - Fast FPU DebugInfo|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release - Fast FPU DebugInfo|Win32.Build.0 = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release - Fast FPU|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release - Fast FPU|Win32.Build.0 = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release - No console|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release - No console|Win32.Build.0 = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release noconsole|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release noconsole|Win32.Build.0 = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Release|Win32.Build.0 = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Static lib - Debug|Win32.ActiveCfg = Debug|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Static lib - Debug|Win32.Build.0 = Debug|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Static lib - Release - Fast FPU|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Static lib - Release - Fast FPU|Win32.Build.0 = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Static lib - Release|Win32.ActiveCfg = Release|Win32
+		{75DB41FE-4102-40BA-87F1-0D7B593BE127}.Static lib - Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

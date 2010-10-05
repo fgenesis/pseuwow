@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="StuffExtract"
-	ProjectGUID="{F14CA928-E505-41F1-BE45-CCF6B85547D2}"
-	RootNamespace="StuffExtract"
+	Name="viewer"
+	ProjectGUID="{B7A6F7E1-320A-4873-B69F-512760778E25}"
+	RootNamespace="viewer"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -20,7 +20,6 @@
 			OutputDirectory="$(SolutionDir)/bin"
 			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -48,7 +47,7 @@
 				Optimization="3"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../shared;../dep/include;../dep/include/zlib;StormLib"
+				AdditionalIncludeDirectories="../shared;../dep/include;../dep/include/zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -83,7 +82,7 @@
 				AdditionalLibraryDirectories=""
 				IgnoreAllDefaultLibraries="false"
 				AssemblyDebug="0"
-				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/Release/StuffExtract.pdb"
+				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/Release/viewer.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				SetChecksum="true"
@@ -118,7 +117,6 @@
 			OutputDirectory="$(SolutionDir)/bin"
 			IntermediateDirectory="$(SolutionDir)/temp/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -143,7 +141,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../shared;../dep/include;../dep/include/zlib;StormLib"
+				AdditionalIncludeDirectories="../shared;../dep/include;../dep/include/zlib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -175,7 +173,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/StuffExtract.pdb"
+				ProgramDatabaseFile="$(SolutionDir)/temp/$(ProjectName)/viewer.pdb"
 				SubSystem="1"
 				OptimizeReferences="1"
 				RandomizedBaseAddress="1"
@@ -213,12 +211,40 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\stuffextract\StuffExtract.cpp"
+				RelativePath=".\viewer\CImageLoaderBLP.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\stuffextract\StuffExtract.h"
+				RelativePath=".\viewer\CImageLoaderBLP.h"
 				>
+			</File>
+			<File
+				RelativePath=".\viewer\CM2MeshFileLoader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\viewer\CM2MeshFileLoader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\viewer\CWMOMeshFileLoader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\viewer\CWMOMeshFileLoader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\viewer\main.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ShowIncludes="false"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
