@@ -54,12 +54,12 @@ void CCursorController::render()
    if(isOSCursorVisible())
    {
       irrCursorControl->setVisible(true);
-      irrCursorControl->setPosition(irrCursorControl->getPosition());
+//       irrCursorControl->setPosition(irrCursorControl->getPosition());
    }
    else
    {
       irrCursorControl->setVisible(false);
-      irrCursorControl->setPosition(irrCursorControl->getPosition());
+//       irrCursorControl->setPosition(irrCursorControl->getPosition());
    }
 }
 

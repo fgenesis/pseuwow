@@ -111,6 +111,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                             Item *item = new Item();
                             item->Create(uguid);
                             objmgr.Add(item);
+                            logdebug("Created Item with guid "I64FMT,uguid);
                             break;
                         }
                     case TYPEID_CONTAINER:
@@ -118,6 +119,7 @@ void WorldSession::_HandleUpdateObjectOpcode(WorldPacket& recvPacket)
                             Bag *bag = new Bag();
                             bag->Create(uguid);
                             objmgr.Add(bag);
+                            logdebug("Created Bag with guid "I64FMT,uguid);
                             break;
                         }
                     case TYPEID_UNIT:
@@ -404,11 +406,13 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
     uint8 blockcount,tyid;
     uint32 value, masksize, valuesCount;
     float fvalue;
+    uint64 value64;
 
     if(obj)
     {
         valuesCount = obj->GetValuesCount();
         tyid = obj->GetTypeId();
+        logdebug("Type %u Object, %u Values",tyid, valuesCount);
     }
     else
     {
@@ -443,6 +447,13 @@ void WorldSession::_ValuesUpdate(uint64 uguid, WorldPacket& recvPacket)
                     recvPacket >> fvalue;                    
                     obj->SetFloatValue(i, fvalue);
                     logdev("-> Field[%u] = %f",i,fvalue);
+                }
+                else if(IsUInt64Field(obj->GetTypeMask(),i) && umask.GetBit(i+1))
+                {
+                    recvPacket >> value64;
+                    obj->SetUInt64Value(i, value64);
+                    logdev("-> Field[%u] = "I64FMT,i,value64);
+                    i++;
                 }
                 else
                 {
@@ -546,6 +557,10 @@ bool IsFloatField(uint8 ty, uint32 f)
         (uint32)UNIT_FIELD_MINRANGEDDAMAGE,
         (uint32)UNIT_FIELD_MAXRANGEDDAMAGE,
         (uint32)UNIT_FIELD_POWER_COST_MULTIPLIER,
+        (uint32)UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER,
+        (uint32)UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER,
+        (uint32)UNIT_FIELD_MAXHEALTHMODIFIER,
+        (uint32)UNIT_FIELD_HOVERHEIGHT,
         (uint32)-1
     };
     static uint32 floats_player[] =
@@ -556,12 +571,11 @@ bool IsFloatField(uint8 ty, uint32 f)
         (uint32)PLAYER_RANGED_CRIT_PERCENTAGE,
         (uint32)PLAYER_OFFHAND_CRIT_PERCENTAGE,
         (uint32)PLAYER_SPELL_CRIT_PERCENTAGE1,
-        (uint32)PLAYER_HOLY_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_FIRE_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_NATURE_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_FROST_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_SHADOW_SPELL_CRIT_PERCENTAGE,
-        (uint32)PLAYER_ARCANE_SPELL_CRIT_PERCENTAGE,
+        (uint32)PLAYER_CRIT_PERCENTAGE,
+        (uint32)PLAYER_SHIELD_BLOCK_CRIT_PERCENTAGE,
+        (uint32)PLAYER_FIELD_MOD_HEALING_PCT,
+        (uint32)PLAYER_FIELD_MOD_HEALING_DONE_PCT,
+        (uint32)PLAYER_RUNE_REGEN_1,
         (uint32)-1
     };
     static uint32 floats_gameobject[] =
@@ -575,10 +589,6 @@ bool IsFloatField(uint8 ty, uint32 f)
     static uint32 floats_dynobject[] =
     {
         (uint32)DYNAMICOBJECT_RADIUS,
-        (uint32)DYNAMICOBJECT_POS_X,
-        (uint32)DYNAMICOBJECT_POS_Y,
-        (uint32)DYNAMICOBJECT_POS_Z,
-        (uint32)DYNAMICOBJECT_FACING,
         (uint32)-1
     };
     /*
@@ -624,5 +634,113 @@ bool IsFloatField(uint8 ty, uint32 f)
             if(floats_corpse[i] == f)
                 return true;
     */
+    return false;
+}
+
+bool IsUInt64Field(uint8 ty, uint32 f)
+{
+    static uint32 u64_object[] =
+    {
+        (uint32)OBJECT_FIELD_GUID,
+        (uint32)-1
+    };
+    
+    static uint32 u64_item[] =
+    {
+        (uint32)ITEM_FIELD_OWNER,
+        (uint32)ITEM_FIELD_CONTAINED,
+        (uint32)ITEM_FIELD_CREATOR,
+        (uint32)ITEM_FIELD_GIFTCREATOR,
+        (uint32)-1
+    };
+    static uint32 u64_container[] =
+    {
+        (uint32)CONTAINER_FIELD_SLOT_1,
+        (uint32)-1
+    };
+    
+    static uint32 u64_unit[] =
+    {
+        (uint32)UNIT_FIELD_CHARM,
+        (uint32)UNIT_FIELD_SUMMON,
+        (uint32)UNIT_FIELD_CRITTER,
+        (uint32)UNIT_FIELD_CHARMEDBY,
+        (uint32)UNIT_FIELD_SUMMONEDBY,
+        (uint32)UNIT_FIELD_CREATEDBY,
+        (uint32)UNIT_FIELD_TARGET,
+        (uint32)UNIT_FIELD_CHANNEL_OBJECT,  
+        (uint32)-1
+    };
+    static uint32 u64_player[] =
+    {
+        (uint32)PLAYER_DUEL_ARBITER,
+        (uint32)PLAYER_FIELD_INV_SLOT_HEAD,
+        (uint32)PLAYER_FIELD_PACK_SLOT_1,
+        (uint32)PLAYER_FIELD_BANK_SLOT_1,
+        (uint32)PLAYER_FIELD_BANKBAG_SLOT_1,
+        (uint32)PLAYER_FIELD_VENDORBUYBACK_SLOT_1,
+        (uint32)PLAYER_FIELD_KEYRING_SLOT_1,
+        (uint32)PLAYER_FIELD_CURRENCYTOKEN_SLOT_1,
+        (uint32)PLAYER_FARSIGHT,
+        (uint32)PLAYER__FIELD_KNOWN_TITLES,
+        (uint32)PLAYER__FIELD_KNOWN_TITLES1,
+        (uint32)PLAYER__FIELD_KNOWN_TITLES2,
+        (uint32)PLAYER_FIELD_KNOWN_CURRENCIES,     
+        (uint32)-1
+    };
+    static uint32 u64_gameobject[] =
+    {
+        (uint32)OBJECT_FIELD_CREATED_BY,
+        (uint32)-1
+    };
+    static uint32 u64_dynobject[] =
+    {
+        (uint32)DYNAMICOBJECT_CASTER,
+        (uint32)-1
+    };
+    
+    static uint32 u64_corpse[] =
+    {
+        (uint32)CORPSE_FIELD_OWNER,
+        (uint32)CORPSE_FIELD_PARTY,
+        (uint32)-1
+    };
+    
+    if(ty & TYPE_OBJECT)
+        for(uint32 i = 0; u64_object[i] != (uint32)(-1); i++)
+            if(u64_object[i] == f)
+                return true;
+    
+    if(ty & TYPE_ITEM)
+        for(uint32 i = 0; u64_item[i] != (uint32)(-1); i++)
+            if(u64_item[i] == f)
+                return true;
+    if(ty & TYPE_CONTAINER)
+        for(uint32 i = 0; u64_container[i] != (uint32)(-1); i++)
+            if(u64_container[i] == f)
+                return true;
+    
+    if(ty & TYPE_UNIT)
+        for(uint32 i = 0; u64_unit[i] != (uint32)(-1); i++)
+            if(u64_unit[i] == f)
+                return true;
+    if(ty & TYPE_PLAYER)
+        for(uint32 i = 0; u64_player[i] != (uint32)(-1); i++)
+            if(u64_player[i] == f)
+                return true;
+    if(ty & TYPE_GAMEOBJECT)
+        for(uint32 i = 0; u64_gameobject[i] != (uint32)(-1); i++)
+            if(u64_gameobject[i] == f)
+                return true;
+    if(ty & TYPE_DYNAMICOBJECT)
+        for(uint32 i = 0; u64_dynobject[i] != (uint32)(-1); i++)
+            if(u64_dynobject[i] == f)
+                return true;
+    
+    if(ty & TYPE_CORPSE)
+        for(uint32 i = 0; u64_corpse[i] != (uint32)(-1); i++)
+            if(u64_corpse[i] == f)
+                return true;
+    
     return false;
 }

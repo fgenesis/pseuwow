@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2008 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "irrKlang" library.
 // For conditions of distribution and use, see copyright notice in irrKlang.h
 
@@ -14,27 +14,29 @@ namespace irrklang
 	It also is able to store a debug string for every instance of an object.
 	Most objects of irrKlang are derived from IRefCounted, and so they are reference counted.
 
-	When you create an object in irrKlang, calling a method
-	which starts with 'create', an object is created, and you get a pointer
-	to the new object. If you no longer need the object, you have 
+	When you receive an object in irrKlang (for example an ISound using play2D() or
+	play3D()), and you no longer need the object, you have 
 	to call drop(). This will destroy the object, if grab() was not called
 	in another part of you program, because this part still needs the object.
-	Note, that you only need to call drop() to the object, if you created it,
-	and the method had a 'create' in it. 
+	Note, that you only don't need to call drop() for all objects you receive, it
+	will be explicitely noted in the documentation.
 
 	A simple example:
 
-	If you want to create a texture, you may want to call an imaginable method
-	IDriver::createTexture. You call
-	ITexture* texture = driver->createTexture(128, 128);
-	If you no longer need the texture, call texture->drop().
+	If you want to play a sound, you may want to call the method
+	ISoundEngine::play2D. You call
+	ISound* mysound = engine->play2D("foobar.mp3", false, false true);
+	If you no longer need the sound interface, call mysound->drop(). The 
+	sound may still play on after this because the engine still has a reference
+	to that sound, but you can be sure that it's memory will be released as soon
+	the sound is no longer used.
 
-	If you want to load a texture, you may want to call imaginable method
-	IDriver::loadTexture. You do this like
-	ITexture* texture = driver->loadTexture("example.jpg");
-	You will not have to drop the pointer to the loaded texture, because
-	the name of the method does not start with 'create'. The texture
-	is stored somewhere by the driver.
+	If you want to add a sound source, you may want to call a method
+	ISoundEngine::addSoundSourceFromFile. You do this like
+	ISoundSource* mysource = engine->addSoundSourceFromFile("example.jpg");
+	You will not have to drop the pointer to the source, because
+	sound sources are managed by the engine (it will live as long as the sound engine) and
+	the documentation says so. 
 	*/
 	class IRefCounted
 	{
@@ -59,54 +61,40 @@ namespace irrklang
 		//! with its methods grab() and drop(). Most objects of irrklang
 		//! are derived from IRefCounted, and so they are reference counted.
 		//!
-		//! When you create an object in irrKlang, calling a method
-		//! which starts with 'create', an object is created, and you get a pointer
-		//! to the new object. If you no longer need the object, you have 
+		//! When you receive an object in irrKlang (for example an ISound using play2D() or
+		//! play3D()), and you no longer need the object, you have 
 		//! to call drop(). This will destroy the object, if grab() was not called
 		//! in another part of you program, because this part still needs the object.
-		//! Note, that you only need to call drop() to the object, if you created it,
-		//! and the method had a 'create' in it. 
-		//!
+		//! Note, that you only don't need to call drop() for all objects you receive, it
+		//! will be explicitely noted in the documentation.
+		//! 
 		//! A simple example:
-		//!
-		//! If you want to create a texture, you may want to call an imaginable method
-		//! IDriver::createTexture. You call
-		//! ITexture* texture = driver->createTexture(128, 128);
-		//! If you no longer need the texture, call texture->drop().
-		//! If you want to load a texture, you may want to call imaginable method
-		//! IDriver::loadTexture. You do this like
-		//! ITexture* texture = driver->loadTexture("example.jpg");
-		//! You will not have to drop the pointer to the loaded texture, because
-		//! the name of the method does not start with 'create'. The texture
-		//! is stored somewhere by the driver.
+		//! 
+		//! If you want to play a sound, you may want to call the method
+		//! ISoundEngine::play2D. You call
+		//! ISound* mysound = engine->play2D("foobar.mp3", false, false true);
+		//! If you no longer need the sound interface, call mysound->drop(). The 
+		//! sound may still play on after this because the engine still has a reference
+		//! to that sound, but you can be sure that it's memory will be released as soon
+		//! the sound is no longer used.
 		void grab() { ++ReferenceCounter; }
 
-		//! Drops the object. Decrements the reference counter by one.
-		//! Returns true, if the object was deleted.
-		//! The IRefCounted class provides a basic reference counting mechanism
-		//! with its methods grab() and drop(). Most objects of irrKlang
-		//! Engine are derived from IRefCounted, and so they are reference counted.
-		//!
-		//! When you create an object in irrKlang, calling a method
-		//! which starts with 'create', an object is created, and you get a pointer
-		//! to the new object. If you no longer need the object, you have 
+		//! When you receive an object in irrKlang (for example an ISound using play2D() or
+		//! play3D()), and you no longer need the object, you have 
 		//! to call drop(). This will destroy the object, if grab() was not called
 		//! in another part of you program, because this part still needs the object.
-		//! Note, that you only need to call drop() to the object, if you created it,
-		//! and the method had a 'create' in it. 
-		//!
+		//! Note, that you only don't need to call drop() for all objects you receive, it
+		//! will be explicitely noted in the documentation.
+		//! 
 		//! A simple example:
-		//!
-		//! If you want to create a texture, you may want to call an imaginable method
-		//! IDriver::createTexture. You call
-		//! ITexture* texture = driver->createTexture(128, 128);
-		//! If you no longer need the texture, call texture->drop().
-		//! If you want to load a texture, you may want to call imaginable method
-		//! IDriver::loadTexture. You do this like
-		//! ITexture* texture = driver->loadTexture("example.jpg");
-		//! You will not have to drop the pointer to the loaded texture, because
-		//! the name of the method does not start with 'create'. The texture
-		//! is stored somewhere by the driver.
+		//! 
+		//! If you want to play a sound, you may want to call the method
+		//! ISoundEngine::play2D. You call
+		//! ISound* mysound = engine->play2D("foobar.mp3", false, false true);
+		//! If you no longer need the sound interface, call mysound->drop(). The 
+		//! sound may still play on after this because the engine still has a reference
+		//! to that sound, but you can be sure that it's memory will be released as soon
+		//! the sound is no longer used.
 		bool drop()
 		{
 			--ReferenceCounter;

@@ -46,7 +46,15 @@ namespace MemoryDataHolder
     };
 
     void Init(void);
+    void Shutdown(void);
     void SetThreadCount(uint32);
+    void SetUseMPQ(std::string);
+    //Helper functions to compensate for directory structure differences between Pseu and MPQ
+    void MakeMapFilename(char*,uint32,std::string,uint32,uint32);
+    void MakeWDTFilename(char*,uint32,std::string);
+    void MakeTextureFilename(char*, std::string);
+    void MakeModelFilename(char*, std::string);
+    bool FileExists(std::string);
 
     MemoryDataResult GetFile(std::string s, bool threaded = false, callback_func func = NULL,void *ptr = NULL, ZThread::Condition *cond = NULL, bool ref_counted = true);
     inline MemoryDataResult GetFileBasic(std::string s) { return GetFile(s, false, NULL, NULL, NULL, false); }

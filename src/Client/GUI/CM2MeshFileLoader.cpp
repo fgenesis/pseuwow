@@ -10,7 +10,7 @@ namespace irr
 namespace scene
 {
 
-CM2MeshFileLoader::CM2MeshFileLoader(IrrlichtDevice* device, c8* texdir):Device(device), Texdir(texdir)
+CM2MeshFileLoader::CM2MeshFileLoader(IrrlichtDevice* device):Device(device)
 {
     Mesh = NULL;
 
@@ -100,7 +100,6 @@ DEBUG(logdebug("Read %u/%u Vertices",M2MVertices.size(),header.nVertices));
 
 std::string SkinName = MeshFile->getFileName();
 SkinName = SkinName.substr(0, SkinName.length()-3) + "00.skin"; // FIX ME (and stuffextract) ! as we need more skins
-_FixFileName(SkinName);
 io::IReadFile* SkinFile = io::IrrCreateIReadFileBasic(Device, SkinName.c_str());
 if (!SkinFile)
 {
@@ -226,11 +225,12 @@ std::string tempTexFileName="";
 M2MTextureFiles.reallocate(M2MTextureDef.size());
 for(u32 i=0; i<M2MTextureDef.size(); i++)
 {
-    tempTexFileName.reserve(M2MTextureDef[i].texFileLen + 1);
+    tempTexFileName.resize(M2MTextureDef[i].texFileLen + 1);
     MeshFile->seek(M2MTextureDef[i].texFileOfs);
-    MeshFile->read((void*)tempTexFileName.c_str(),M2MTextureDef[i].texFileLen);
-    M2MTextureFiles.push_back(tempTexFileName.c_str());
-    DEBUG(logdebug("Texture: %u (%s)",M2MTextureFiles.size(),M2MTextureFiles[i].c_str()));
+    MeshFile->read((void*)tempTexFileName.data(),M2MTextureDef[i].texFileLen);
+    M2MTextureFiles.push_back("");
+    M2MTextureFiles[i]=tempTexFileName.c_str();
+    DEBUG(logdebug("Texture: %u %u (%s/%s) @ %u(%u)",i,M2MTextureFiles.size(),M2MTextureFiles[i].c_str(),tempTexFileName.c_str(),M2MTextureDef[i].texFileOfs,M2MTextureDef[i].texFileLen));
 }
 
 ///////////////////////////////////////
@@ -492,13 +492,13 @@ for(u32 i=0; i < currentView.nSub;i++)//
     //MeshBuffer->getMaterial().DiffuseColor.set(255,(M2MSubmeshes[i].meshpartId==0?0:255),(M2MSubmeshes[i].meshpartId==0?255:0),0);
     for(u32 j=0;j<M2MTextureUnit.size();j++)//Loop through texture units
         {
-        if(M2MTextureUnit[j].submeshIndex1==i)//if a texture unit belongs to this submesh
+        if(M2MTextureUnit[j].submeshIndex1==i && !M2MTextureFiles[M2MTextureLookup[M2MTextureUnit[j].textureIndex]].empty())//if a texture unit belongs to this submesh
             {
-            std::string TexName=Texdir.c_str();
-            TexName+="/";
-            if(i<M2MTextureUnit.size())
-				TexName+=M2MTextureFiles[M2MTextureLookup[M2MTextureUnit[j].textureIndex]].c_str();
-            while(TexName.find('\\')<TexName.size())//Replace \ by /
+//             std::string TexName=Texdir.c_str();
+//             TexName+="/";
+//             if(i<M2MTextureUnit.size())
+// 				TexName+=M2MTextureFiles[M2MTextureLookup[M2MTextureUnit[j].textureIndex]].c_str();
+/*            while(TexName.find('\\')<TexName.size())//Replace \ by /
                 {
                 TexName.replace(TexName.find('\\'),1,"/");
                 }
@@ -506,8 +506,18 @@ for(u32 i=0; i < currentView.nSub;i++)//
                 {
                 TexName.replace(TexName.find(' '),1,"_");
                 }
-            std::transform(TexName.begin(), TexName.end(), TexName.begin(), tolower);
-            MeshBuffer->getMaterial().setTexture(M2MTextureUnit[j].TextureUnitNumber,Device->getVideoDriver()->getTexture(TexName.c_str()));
+            std::transform(TexName.begin(), TexName.end(), TexName.begin(), tolower);*/
+            char buf[1000];
+            MemoryDataHolder::MakeTextureFilename(buf,M2MTextureFiles[M2MTextureLookup[M2MTextureUnit[j].textureIndex]].c_str());
+            io::IReadFile* TexFile = io::IrrCreateIReadFileBasic(Device, buf);
+//             logdebug("Texture %s loading",M2MTextureFiles[M2MTextureLookup[M2MTextureUnit[j].textureIndex]].c_str());
+            if (!TexFile)
+            {
+                logerror("CM2MeshFileLoader: Texture file not found: %s", buf);
+                continue;
+            }
+//             logdebug("Texture %s loaded",M2MTextureFiles[M2MTextureLookup[M2MTextureUnit[j].textureIndex]].c_str());
+            MeshBuffer->getMaterial().setTexture(M2MTextureUnit[j].TextureUnitNumber,Device->getVideoDriver()->getTexture(TexFile));
 
             DEBUG(logdebug("Render Flags: %u %u",M2MRenderFlags[M2MTextureUnit[j].renderFlagsIndex].flags,M2MRenderFlags[M2MTextureUnit[j].renderFlagsIndex].blending));
             MeshBuffer->getMaterial().BackfaceCulling=(M2MRenderFlags[M2MTextureUnit[j].renderFlagsIndex].flags & 0x04)?false:true;

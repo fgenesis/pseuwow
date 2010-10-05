@@ -1,0 +1,70 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.a
+*.so
+*.d
+*.so.*
+Makefile
+Makefile.in
+*~
+.deps
+.libs
+
+#
+# Build generated files
+#
+aclocal.m4
+autom4te.cache
+compile
+config.guess
+config.h.in
+config.log
+config.status
+config.sub
+configure
+depcomp
+libtool
+install-sh
+ltmain.sh
+missing
+stamp-h1
+
+Makefile.in
+Makefile
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.conf
+
+# OS generated files #
+######################
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# EXCEPTIONS         #
+######################
+!src/dep/src/irrlicht/Makefile
+

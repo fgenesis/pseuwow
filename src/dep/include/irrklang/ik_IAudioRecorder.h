@@ -29,8 +29,11 @@ namespace irrklang
 		buffer, use startRecordingCustomHandledAudio().
 		\param sampleRate: Sample rate of the recorded audio.
 		\param sampleFormat: Sample format of the recorded audio.
+		\param channelCount: Amount of audio channels.
 		\return Returns true if successfully started recording and false if not.*/
-		virtual bool startRecordingBufferedAudio(ik_s32 sampleRate=22000, ESampleFormat sampleFormat=ESF_S16) = 0;
+		virtual bool startRecordingBufferedAudio(ik_s32 sampleRate=22000, 
+		                                         ESampleFormat sampleFormat=ESF_S16,
+												 ik_s32 channelCount=1) = 0;
 
 		//! Starts recording audio. 
 		/** Clears all possibly previously recorded buffered audio data and starts to record 
@@ -42,9 +45,12 @@ namespace irrklang
 		captured audio data chunk. 
 		\param sampleRate: Sample rate of the recorded audio.
 		\param sampleFormat: Sample format of the recorded audio.
+		\param channelCount: Amount of audio channels.
 		\return Returns true if successfully started recording and false if not. */
 		virtual bool startRecordingCustomHandledAudio(ICapturedAudioDataReceiver* receiver,
-			                                          ik_s32 sampleRate=22000, ESampleFormat sampleFormat=ESF_S16) = 0;
+			                                          ik_s32 sampleRate=22000,
+													  ESampleFormat sampleFormat=ESF_S16,
+													  ik_s32 channelCount=1) = 0;
 
 		//! Stops recording audio.
 		virtual void stopRecordingAudio() = 0;

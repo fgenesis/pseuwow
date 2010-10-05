@@ -24,7 +24,7 @@ std::set<NameAndAlt> modelNames;
 std::set<NameAndAlt> wmoNames;
 std::set<NameAndAlt> wmoGroupNames;
 std::set<NameAndAlt> soundFileSet;
-
+MPQHelper mpq;
 
 // default config; SCPs are done always
 bool doMaps=true, doSounds=false, doTextures=false, doWmos=false, doWmogroups=false, doModels=false, doMd5=true, doAutoclose=false;
@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
 		printf("Locale \"%s\" seems valid, starting conversion...\n",GetLocale());
         CreateDir("extractedstuff");
         CreateDir("extractedstuff/data");
-		ConvertDBC();
+		mpq.Init();
+        ConvertDBC();
         if(doMaps) ExtractMaps();
         if(doTextures || doModels || doWmos || doWmogroups) ExtractMapDependencies();
         if(doSounds) ExtractSoundFiles();
@@ -278,7 +279,7 @@ bool ConvertDBC(void)
     DBCFile EmotesText,EmotesTextData,EmotesTextSound,ChrRaces,SoundEntries,Map,AreaTable,ItemDisplayInfo,
         CreatureModelData,CreatureDisplayInfo,NPCSounds,CharSections,GameObjectDisplayInfo, ChrBaseInfo;
     printf("Opening DBC archive...\n");
-    MPQHelper mpq("dbc");
+
 
     printf("Opening DBC files...\n");
     EmotesText.openmem(mpq.ExtractFile("DBFilesClient\\EmotesText.dbc"));
@@ -476,8 +477,12 @@ bool ConvertDBC(void)
                         modelNames.insert(NameAndAlt(value)); // we need to extract model later, store it
                     std::string fn = _PathToFileName(value);
                     if(stricmp(fn.c_str()+fn.length()-4, "mdx"))
-                        fn = fn.substr(0,fn.length()-3) + "m2";
+                    {
+                        fn = fn.substr(0,fn.length()-2) + "2";
+                        value = value.substr(0,value.length()-2) + "2";
+                    }
                     CreatureModelStorage[id].push_back(std::string(CreatureModelDataFieldNames[field]) + "=" + fn);
+                    CreatureModelStorage[id].push_back("mpqfilename=" + value);
                 }
             }
         }
@@ -541,17 +546,21 @@ bool ConvertDBC(void)
                     //Interestingly, some of the files referenced here have MDL extension - WTF?
                     std::string fn = _PathToFileName(value);
                     if(!stricmp(fn.c_str()+fn.length()-3, "mdx") || !stricmp(fn.c_str()+fn.length()-3, "mdl"))
-                        fn = fn.substr(0,fn.length()-3) + "m2";
+                    {
+                        fn = fn.substr(0,fn.length()-2) + "2";
+                        value = value.substr(0,value.length()-2) + "2";
+                    }
                     else
                         printf("This should be a WMO: %s\n",fn.c_str());
                     GameObjectDisplayInfoStorage[id].push_back(std::string(GameObjectDisplayInfoFieldNames[field]) + "=" + fn);
+                    GameObjectDisplayInfoStorage[id].push_back("mpqfilename=" + value);
 
                     std::string texture = value.substr(0,value.length()-3) + "blp";
                     if (mpq.FileExists((char*)texture.c_str()))
                     {
                         if(doTextures)
                             texNames.insert(NameAndAlt(texture));
-                        GameObjectDisplayInfoStorage[id].push_back("texture=" + NormalizeFilename(texture));
+                        GameObjectDisplayInfoStorage[id].push_back("texture=" + texture);
                     }
                 }
             }
@@ -640,7 +649,6 @@ void ExtractMaps(void)
     char namebuf[200];
     char outbuf[2000];
     uint32 extr,extrtotal=0;
-    MPQHelper mpq("terrain");
     MD5FileMap md5map;
     CreateDir("extractedstuff/data/maps");
     for(std::map<uint32,std::string>::iterator it = mapNames.begin(); it != mapNames.end(); it++)
@@ -724,9 +732,6 @@ void ExtractMapDependencies(void)
     barGoLink *bar;
     printf("\nExtracting map dependencies...\n\n");
     printf("- Preparing to read MPQ arcives...\n");
-    MPQHelper mpqmodel("model");
-    MPQHelper mpqtex("texture");
-    MPQHelper mpqwmo("wmo");
     std::string path = "extractedstuff/data";
     std::string pathtex = path + "/texture";
     std::string pathmodel = path + "/model";
@@ -750,14 +755,14 @@ void ExtractMapDependencies(void)
             altfn = i->alt;
             if(altfn.empty())
                 altfn = mpqfn;
-            if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
+            if(!mpq.FileExists((char*)mpqfn.c_str()))
                 continue;
             realfn = pathwmo + "/" + NormalizeFilename(_PathToFileName(altfn));
             std::fstream fh;
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
-                const ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
+                const ByteBuffer& bb = mpq.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
                 //Extract number of group files, Texture file names and M2s from WMO
                 if(doWmogroups || doTextures || doModels) WMO_Parse_Data(bb,mpqfn.c_str(),doWmogroups,doTextures,doModels);
@@ -793,14 +798,14 @@ void ExtractMapDependencies(void)
             altfn = i->alt;
             if(altfn.empty())
                 altfn = mpqfn;
-            if(!mpqwmo.FileExists((char*)mpqfn.c_str()))
+            if(!mpq.FileExists((char*)mpqfn.c_str()))
                 continue;
             realfn = pathwmo + "/" + NormalizeFilename(_PathToFileName(altfn));
             std::fstream fh;
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
-                const ByteBuffer& bb = mpqwmo.ExtractFile((char*)mpqfn.c_str());
+                const ByteBuffer& bb = mpq.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
                 if(doMd5)
                 {
@@ -837,10 +842,10 @@ void ExtractMapDependencies(void)
             // no idea what bliz intended by this. the ADT files refer to .mdx models,
             // however there are only .m2 files in the MPQ archives.
             // so we just need to check if there is a .m2 file instead of the .mdx file, and load that one.
-            if(!mpqmodel.FileExists((char*)mpqfn.c_str()))
+            if(!mpq.FileExists((char*)mpqfn.c_str()))
             {
-                std::string alt = mpqfn.substr(0,mpqfn.length()-3) + "m2";
-                if(!mpqmodel.FileExists((char*)alt.c_str()))
+                std::string alt = mpqfn.substr(0,mpqfn.length()-2) + "2";
+                if(!mpq.FileExists((char*)alt.c_str()))
                 {
                     printf("Failed to extract model: '%s'\n",alt.c_str());
                     continue;
@@ -858,7 +863,7 @@ void ExtractMapDependencies(void)
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
-                ByteBuffer bb = mpqmodel.ExtractFile((char*)mpqfn.c_str());
+                ByteBuffer bb = mpq.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
 
                 if(doMd5)
@@ -883,13 +888,13 @@ void ExtractMapDependencies(void)
 
                     std::string skin = mpqfn.substr(0,mpqfn.length()-3) + "00.skin";
                     std::string skinrealfn = pathmodel + "/" + NormalizeFilename(_PathToFileName(skin));
-                    if (mpqmodel.FileExists((char*)skin.c_str()))
+                    if (mpq.FileExists((char*)skin.c_str()))
                     {
                         std::fstream fhs;
                         fhs.open(skinrealfn.c_str(),std::ios_base::out | std::ios_base::binary);
                         if(fhs.is_open())
                         {
-                            ByteBuffer bbs = mpqmodel.ExtractFile((char*)skin.c_str());
+                            ByteBuffer bbs = mpq.ExtractFile((char*)skin.c_str());
                             fhs.write((const char*)bbs.contents(),bbs.size());
                         }
                         else
@@ -922,7 +927,7 @@ void ExtractMapDependencies(void)
             altfn = i->alt;
             if(altfn.empty())
                 altfn = mpqfn;
-            if(!mpqtex.FileExists((char*)mpqfn.c_str()))
+            if(!mpq.FileExists((char*)mpqfn.c_str()))
                 continue;
 
             // prepare lowercased and "underlined" path for file
@@ -946,7 +951,7 @@ void ExtractMapDependencies(void)
             fh.open(realfn.c_str(),std::ios_base::out | std::ios_base::binary);
             if(fh.is_open())
             {
-                const ByteBuffer& bb = mpqtex.ExtractFile((char*)mpqfn.c_str());
+                const ByteBuffer& bb = mpq.ExtractFile((char*)mpqfn.c_str());
                 fh.write((const char*)bb.contents(),bb.size());
                 if(doMd5)
                 {
@@ -978,13 +983,12 @@ void ExtractSoundFiles(void)
     uint32 done = 0;
     printf("\nExtracting game audio files, %u found in DBC...\n",soundFileSet.size());
     CreateDir(SOUNDDIR);
-    MPQHelper smpq("sound");
     std::string outfn, altfn;
     barGoLink bar(soundFileSet.size(),true);
     for(std::set<NameAndAlt>::iterator i = soundFileSet.begin(); i != soundFileSet.end(); i++)
     {
         bar.step();
-        if(!smpq.FileExists((char*)i->name.c_str()))
+        if(!mpq.FileExists((char*)i->name.c_str()))
         {
             DEBUG( printf("MPQ: File not found: '%s'\n",i->name.c_str()) );
             continue;
@@ -996,7 +1000,7 @@ void ExtractSoundFiles(void)
         fh.open(outfn.c_str(), std::ios_base::out | std::ios_base::binary);
         if(fh.is_open())
         {
-            const ByteBuffer& bb = smpq.ExtractFile((char*)i->name.c_str());
+            const ByteBuffer& bb = mpq.ExtractFile((char*)i->name.c_str());
             if(bb.size())
             {
                 fh.write((const char*)bb.contents(),bb.size());

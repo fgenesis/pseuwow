@@ -131,9 +131,9 @@ void PseuGUI::_Init(void)
     // register external loaders for not supported filetypes
     video::CImageLoaderBLP* BLPloader = new video::CImageLoaderBLP();
 	_driver->addExternalImageLoader(BLPloader);
-    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device, "./data/texture");
+    scene::CM2MeshFileLoader* m2loader = new scene::CM2MeshFileLoader(_device);
     _smgr->addExternalMeshLoader(m2loader);
-    scene::CWMOMeshFileLoader* wmoloader = new scene::CWMOMeshFileLoader(_device, "./data/texture");
+    scene::CWMOMeshFileLoader* wmoloader = new scene::CWMOMeshFileLoader(_device);
     _smgr->addExternalMeshLoader(wmoloader);
     _throttle=0;
     _initialized = true;

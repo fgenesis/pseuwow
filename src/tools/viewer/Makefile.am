@@ -7,5 +7,6 @@ viewer_SOURCES =    main.cpp\
 viewer_LDADD =  ../../dep/lib/linux-gcc/libIrrlicht.a\
                 ../../Client/GUI/libgui.a\
                 $(top_builddir)/src/shared/libshared.a\
-                ../../dep/src/zthread/libZThread.a
-viewer_LDFLAGS =-pthread 
+                ../../dep/src/zthread/libZThread.a\
+		../../dep/src/StormLib/libstormlib.a 
+viewer_LDFLAGS =-pthread -lbz2

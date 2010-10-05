@@ -24,9 +24,10 @@ pseuwow_LDADD = ../shared/libshared.a\
 				DefScript/libdefscript.a\
 				World/libworld.a \
 				GUI/libgui.a\
-				$(prefix)/libIrrKlang.so\
+				$(IRRKLANG_LIB)\
 				../dep/lib/linux-gcc/libIrrlicht.a\
 				../dep/src/zlib/libzlib.a\
-				../dep/src/zthread/libZThread.a
-
+				../dep/src/zthread/libZThread.a\
+				../dep/src/StormLib/libstormlib.a \
+				-lbz2
 pseuwow_LDFLAGS =-pthread 

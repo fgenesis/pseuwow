@@ -530,7 +530,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         Sha1Hash digest;
         digest.UpdateData(acc);
         uint32 unk=0;
-        uint64 unk4=0;
+        uint64 unk64=0;
         digest.UpdateData((uint8*)&unk,sizeof(uint32));
         BigNumber clientseed;
         clientseed.SetRand(8*4);
@@ -540,7 +540,7 @@ void WorldSession::_HandleAuthChallengeOpcode(WorldPacket& recvPacket)
         digest.UpdateBigNumbers(GetInstance()->GetSessionKey(),NULL);
         digest.Finalize();
         WorldPacket auth;
-        auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<unk<<clientseed_uint32<<unk4;
+        auth<<(uint32)(GetInstance()->GetConf()->clientbuild)<<unk<<acc<<unk<<clientseed_uint32<<unk<<unk<<unk<<unk64;
         auth.append(digest.GetDigest(),20);
         auth << (uint32)0; // TODO: this is not correct value, expected: 160 bytes of addon_data
 
@@ -758,7 +758,7 @@ void WorldSession::PreloadDataBeforeEnterWorld(PlayerEnum& pl)
 
         // preload additional map data only when the GUI is enabled
         // TODO: at some later point we will need the geometry for correct collision calculation, etc...
-        if(GetInstance()->GetConf()->enablegui)
+/*        if(GetInstance()->GetConf()->enablegui)
         {
             for(uint32 tiley = 0; tiley < 3; tiley++)
             {
@@ -776,15 +776,15 @@ void WorldSession::PreloadDataBeforeEnterWorld(PlayerEnum& pl)
 
                             // but we need to preload the .skin files, since they are not held in the MeshCache
                             // TODO: load *all* necessary skin files, also fix stuffextract for this!
-                            std::string skinfile = doo->model.substr(0, doo->model.length()-3) + "00.skin";
-                            skinfile = GetAbsolutePath(skinfile.c_str());
-                            _FixFileName(skinfile);
-                            MemoryDataHolder::BackgroundLoadFile(skinfile);
+//                             std::string skinfile = doo->MPQpath.substr(0, doo->model.length()-3) + "00.skin";
+//                             skinfile = GetAbsolutePath(skinfile.c_str());
+//                             _FixFileName(skinfile);
+//                             MemoryDataHolder::BackgroundLoadFile(skinfile);
                         }
                     }
                 }
             }
-        }
+        }*/
     }
 }
 

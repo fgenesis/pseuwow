@@ -219,6 +219,7 @@ void SceneCharSelection::OnUpdate(s32 timepassed)
         //newcharwin->addChild(classselect);
         guienv->addStaticText(L"Char Name", CalcRelativeScreenPos(dim,0.1f,0.3f,0.8f,0.05f),false,true,newcharwin);
         charname = guienv->addEditBox(L"", CalcRelativeScreenPos(dim,0.1f,0.35f,0.8f,0.05f),true, newcharwin);
+        charname->setMax(12);
         msgbox = guienv->addStaticText(L"",CalcRelativeScreenPos(dim,0.2f,0.6f,0.6f,0.1f), true, true, newcharwin);
     }
     if(eventrecv->buttons & BUTTON_SELECT_REALM || scenedata[ISCENE_CHARSEL_REALMFIRST])

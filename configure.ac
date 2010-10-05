@@ -19,10 +19,8 @@ AC_PROG_LIBTOOL
 AC_CHECK_LIB([Xxf86vm], [main], [], [echo "ERROR: Xxf86vm library not found." && exit 1])
 AC_CHECK_LIB([GL], [main], [], [echo "ERROR: GL library not found." && exit 1])
 AC_CHECK_LIB([GLU], [main], [], [echo "ERROR: GLU library not found." && exit 1])
-# AC_CHECK_LIB([Irrlicht], [main], [], [echo "ERROR: Irrlicht library not found." && exit 1])
 AC_CHECK_LIB([ssl], [main], [], [echo "ERROR: ssl library not found." && exit 1])
 AC_CHECK_LIB([crypto], [main], [], [echo "ERROR: ssl crypto library not found." && exit 1])
-# AC_CHECK_LIB([ZThread], [main], [], [echo "ERROR: ZThread library not found." && exit 1])
 
 # Checks for header files.
 AC_PATH_X
@@ -59,22 +57,44 @@ AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor ftime ftruncate getcwd gethostbyaddr gethostbyname gethostname gettimeofday memmove memset mkdir pow realpath select socket sqrt strerror strrchr strstr strtol strtoul uname utime])
 
-#AC_CONFIG_FILES([src/dep/src/irrlicht/Makefile
-#                 src/dep/src/zlib/Makefile
-#                 src/dep/src/zthread/Makefile])
-#AC_CONFIG_SUBDIRS([src/dep/src/irrlicht/jpeglib
-#                   src/dep/src/irrlicht/libpng])
+
+# Check if IrrKlang stub needs to be built
+
+AC_ARG_WITH(irrklang,
+[  --with-irrklang            Use IrrKlang stub (needed for x64 (default: no)],
+[case "${withval}" in
+    yes) DO_IRRKLANG=yes ;;
+    no)  DO_IRRKLANG=no ;;
+    maybe) DO_IRRKLANG=maybe ;;
+    *)   AC_MSG_ERROR(Bad value ${withval} for --with-irrklang) ;;
+    esac],
+[DO_IRRKLANG=no])
+AC_MSG_CHECKING(whether to build/link IrrKlang)
+if test "x$DO_IRRKLANG" = "xyes"; then
+  AC_MSG_RESULT($DO_IRRKLANG)
+  IRRKLANG_DIR=irrKlang
+  IRRKLANG_LIB=../dep/src/irrKlang/libIrrKlang.la
+else
+  AC_MSG_RESULT($DO_IRRKLANG)
+  IRRKLANG_DIR=
+  IRRKLANG_LIB=$(prefix)/bin/libIrrKlang.so
+fi
+AC_SUBST([IRRKLANG_DIR])
+AC_SUBST([IRRKLANG_LIB])
+
+
+
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 src/dep/Makefile
          src/dep/src/Makefile
-         src/dep/src/irrKlang/Makefile
 		 src/dep/src/zlib/Makefile
 		 src/dep/src/zthread/Makefile
+         src/dep/src/irrKlang/Makefile
+         src/dep/src/StormLib/Makefile
          src/tools/Makefile
          src/tools/viewer/Makefile
 		 src/tools/stuffextract/Makefile
-		 src/tools/stuffextract/StormLib/Makefile
 		 src/shared/Makefile
 		 src/shared/Auth/Makefile
 		 src/shared/Network/Makefile

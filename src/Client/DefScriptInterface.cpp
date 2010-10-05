@@ -780,7 +780,8 @@ DefReturnResult DefScriptPackage::SCGetItemProtoValue(CmdSet& Set)
         else if(t=="lockid")  r.ret=toString(proto->LockID);
         else if(t=="material")  r.ret=toString(proto->Material);
         else if(t=="sheath")  r.ret=toString(proto->Sheath);
-        else if(t=="extra")  r.ret=toString(proto->Extra);
+        else if(t=="randomprop")  r.ret=toString(proto->RandomProperty);
+        else if(t=="randomsuffix")  r.ret=toString(proto->RandomSuffix);
         else if(t=="block")  r.ret=toString(proto->Block);
         else if(t=="itemset")  r.ret=toString(proto->ItemSet);
         else if(t=="maxdur")  r.ret=toString(proto->MaxDurability);

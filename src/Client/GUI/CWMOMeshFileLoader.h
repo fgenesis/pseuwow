@@ -61,7 +61,7 @@ class CWMOMeshFileLoader : public IMeshLoader
 public:
 
 	//! Constructor
-	CWMOMeshFileLoader(IrrlichtDevice* device, c8* texdir);
+	CWMOMeshFileLoader(IrrlichtDevice* device);
 
 	//! destructor
 	virtual ~CWMOMeshFileLoader();

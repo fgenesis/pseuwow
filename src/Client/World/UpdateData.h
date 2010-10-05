@@ -98,5 +98,6 @@ struct MovementInfo
 };
 
 bool IsFloatField(uint8, uint32);
+bool IsUInt64Field(uint8, uint32);
 
 #endif

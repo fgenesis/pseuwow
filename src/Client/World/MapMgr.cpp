@@ -4,25 +4,27 @@
 #include "MapTile.h"
 #include "MapMgr.h"
 
-void MakeMapFilename(char *fn, uint32 m, uint32 x, uint32 y)
+
+char* MapMgr::MapID2Name(uint32 mid)
 {
-    sprintf(fn,"./data/maps/%u_%u_%u.adt",(uint16)m,(uint16)x,(uint16)y);
+  if(!mapdb)
+  {
+      mapdb=_instance->dbmgr.GetDB("map");
+  }
+  uint32 name_id = mapdb->GetFieldId("name_general");
+  return mapdb->GetString(mid,name_id);
+  
 }
 
-bool TileExistsInFile(uint32 m, uint32 x, uint32 y)
-{
-    char buf[50];
-    MakeMapFilename(buf,m,x,y);
-    return GetFileSize(buf);
-}
 
-
-MapMgr::MapMgr()
+MapMgr::MapMgr(PseuInstance* _inst)
 {
     DEBUG(logdebug("Creating MapMgr with TILESIZE=%.3f CHUNKSIZE=%.3f UNITSIZE=%.3f",TILESIZE,CHUNKSIZE,UNITSIZE));
     _tiles = new MapTileStorage();
     _gridx = _gridy = _mapid = (-1);
     _mapsLoaded = false;
+    _instance = _inst;
+    mapdb=_instance->dbmgr.GetDB("map");
 }
 
 MapMgr::~MapMgr()
@@ -36,15 +38,28 @@ void MapMgr::Update(float x, float y, uint32 m)
     if(m != _mapid)
     {
         Flush(); // we teleported to a new map, drop all loaded maps
-        WDTFile *wdt = new WDTFile();
-        char buf[100];
-        sprintf(buf,"data/maps/%lu.wdt",m);
-        if(!wdt->Load(buf))
+        char buf[255];
+        std::string mapname = MapID2Name(m);
+        MemoryDataHolder::MakeWDTFilename(buf,m,mapname);
+        
+        // Loading WDT
+        MemoryDataHolder::MemoryDataResult mdr = MemoryDataHolder::GetFileBasic(buf);
+        if(mdr.flags & MemoryDataHolder::MDH_FILE_OK && mdr.data.size)
         {
-            logerror("MAPMGR: Could not load WDT file '%s'",buf);
+            ByteBuffer bb(mdr.data.size);
+            bb.append(mdr.data.ptr,mdr.data.size);
+            MemoryDataHolder::Delete(buf);
+            WDTFile *wdt = new WDTFile();
+            wdt->LoadMem(bb);
+            _tiles->ImportTileMap(wdt);
+            delete wdt;
+            logdebug("MAPMGR: Loaded WDT '%s'",buf);
         }
-        _tiles->ImportTileMap(wdt);
-        delete wdt;
+        else
+        {
+            logerror("MAPMGR: Loading WDT '%s' failed!",buf);
+        }
+
         _mapid = m;
         _gridx = _gridy = (-1); // must load tiles now
     }
@@ -83,10 +98,15 @@ void MapMgr::_LoadNearTiles(uint32 gx, uint32 gy, uint32 m)
 
 void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 {
+    
     _mapsLoaded = false;
+    std::string mapname = MapID2Name(m);
+    logdebug("Mapname: %s",mapname.c_str());
+    char buf[255];
+    MemoryDataHolder::MakeMapFilename(buf,m,mapname,gx,gy);
     if(!_tiles->TileExists(gx,gy))
     {
-        if(TileExistsInFile(m,gx,gy))
+        if(MemoryDataHolder::FileExists(buf))
         {
             logerror("MapMgr: Tile (%u, %u) exists not in WDT, but as file?!",gx,gy);
             // continue loading...
@@ -100,9 +120,6 @@ void MapMgr::_LoadTile(uint32 gx, uint32 gy, uint32 m)
 
     if( !_tiles->GetTile(gx,gy) )
     {
-
-        char buf[300];
-        MakeMapFilename(buf,m,gx,gy);
         MemoryDataHolder::MemoryDataResult mdr = MemoryDataHolder::GetFileBasic(buf);
         if(mdr.flags & MemoryDataHolder::MDH_FILE_OK && mdr.data.size)
         {

@@ -36,8 +36,8 @@ set,pguid ${@def}
 set,pname ?{getname,guid ${pguid}}
 
 // between these fields all item guids are stored (check UpdateFields.h)
-set,fstart 0x26E // PLAYER_FIELD_INV_SLOT_HEAD
-set,fend 0x35A // PLAYER_FIELD_KEYRING_SLOT_1 + 64
+set,fstart 0x144 // PLAYER_FIELD_INV_SLOT_HEAD
+set,fend 0x22E // PLAYER_FIELD_KEYRING_SLOT_1 + 64
 
 set,f ${fstart}
 set,slot 0
@@ -64,13 +64,14 @@ endloop
 #script=bagitemdebugger
 set,bagslots ?{getobjectvalue,60 ${@def}} // CONTAINER_FIELD_NUM_SLOTS
 set,j 0
+log This is a bag
 loop
 	set,t ${j}
 	mul,t 2
 	if ?{bigger,${t} ${bagslots}} // max. bag size = 36 slots
 		exitloop
 	endif
-	set,field 62 // CONTAINER_FIELD_SLOT_1 - 36
+	set,field 66 // CONTAINER_FIELD_SLOT_1 - 36
 	add,field ${t}
 	set,itemguid ?{getobjectvalue,${field},i64 ${@def}}
 	itemdebugger,{Bag slot ${j} (field: ${field}) -> } ${itemguid}

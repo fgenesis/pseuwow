@@ -67,7 +67,6 @@ bool PlayerNameCache::SaveToFile(void)
     if(!size)
         return false;
 
-    fh.write((char*)&size,sizeof(uint32));
     ByteBuffer bb;
 
     bb << (uint32)_cache.size();
@@ -180,6 +179,7 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->DisplayInfoID;
         buf >> proto->Quality;
         buf >> proto->Flags;
+        buf >> proto->Faction;
         buf >> proto->BuyPrice;
         buf >> proto->SellPrice;
         buf >> proto->InventoryType;
@@ -240,8 +240,8 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
         buf >> proto->LockID;
         buf >> proto->Material;
         buf >> proto->Sheath;
-        buf >> proto->Extra;
-		buf >> proto->Unk1; // added in 2.0.3
+        buf >> proto->RandomProperty;
+        buf >> proto->RandomSuffix; // added in 2.0.3
         buf >> proto->Block;
         buf >> proto->ItemSet;
         buf >> proto->MaxDurability;
@@ -256,8 +256,6 @@ void ItemProtoCache_InsertDataToSession(WorldSession *session)
 		}
 		buf >> proto->socketBonus;
 		buf >> proto->GemProperties;
-		buf >> proto->ExtendedCost;
-        buf >> proto->RequiredArenaRank;
 		buf >> proto->RequiredDisenchantSkill;
 		buf >> proto->ArmorDamageModifier;
         buf >> proto->Duration;
@@ -315,6 +313,7 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         buf << proto->DisplayInfoID;
         buf << proto->Quality;
         buf << proto->Flags;
+        buf << proto->Faction;
         buf << proto->BuyPrice;
         buf << proto->SellPrice;
         buf << proto->InventoryType;
@@ -375,8 +374,8 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
         buf << proto->LockID;
         buf << proto->Material;
         buf << proto->Sheath;
-		buf << proto->Extra;
-		buf << proto->Unk1; // added in 2.0.3
+        buf << proto->RandomProperty;
+        buf << proto->RandomSuffix; // added in 2.0.3
 		buf << proto->Block;
 		buf << proto->ItemSet;
 		buf << proto->MaxDurability;
@@ -391,8 +390,6 @@ void ItemProtoCache_WriteDataToCache(WorldSession *session)
 		}
 		buf << proto->socketBonus;
 		buf << proto->GemProperties;
-		buf << proto->ExtendedCost;
-        buf << proto->RequiredArenaRank;
 		buf << proto->RequiredDisenchantSkill;
 		buf << proto->ArmorDamageModifier;
         buf << proto->Duration;

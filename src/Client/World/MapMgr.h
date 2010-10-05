@@ -1,6 +1,9 @@
 #ifndef MAPMGR_H
 #define MAPMGR_H
 
+#include "PseuWoW.h"
+#include "SCPDatabase.h"
+
 class MapTileStorage;
 class MapTile;
 
@@ -15,7 +18,7 @@ struct GridCoordPair
 class MapMgr
 {
 public:
-    MapMgr();
+    MapMgr(PseuInstance*);
     ~MapMgr();
     void Update(float,float,uint32);
     void Flush(void);
@@ -25,6 +28,7 @@ public:
     MapTile *GetTile(uint32 xg, uint32 yg, bool forceLoad = false);
     MapTile *GetCurrentTile(void);
     MapTile *GetNearTile(int32, int32);
+    char* MapID2Name(uint32);
     inline bool Loaded(void) { return _mapsLoaded; }
     uint32 GetLoadedMapsCount(void);
     std::string GetLoadedTilesString(void);
@@ -32,6 +36,8 @@ public:
     inline uint32 GetGridY(void) { return _gridy; }
 
 private:
+    PseuInstance *_instance;
+    SCPDatabase* mapdb;
     MapTileStorage *_tiles;
     void _LoadTile(uint32,uint32,uint32);
     void _LoadNearTiles(uint32,uint32,uint32);

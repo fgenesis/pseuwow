@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2008 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "irrKlang" library.
 // For conditions of distribution and use, see copyright notice in irrKlang.h
 
@@ -146,7 +146,7 @@ namespace irrklang
 		//! Returns the threshold size where irrKlang decides to force streaming a file independent of the user specified setting.
 		/**  The value is specified in uncompressed bytes and its default value is 
 		about one Megabyte. See setForcedStreamingThreshold() for details. */
-		virtual ik_s32 getForcedStreamingForceThreshold() = 0;
+		virtual ik_s32 getForcedStreamingThreshold() = 0;
 
 		//! Returns a pointer to the loaded and decoded sample data.
 		/** \return Returns a pointer to the sample data. The data is provided in decoded PCM data. The

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2008 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "irrKlang" library.
 // For conditions of distribution and use, see copyright notice in irrKlang.h
 
@@ -21,22 +21,25 @@ namespace irrklang
 		ESOD_DIRECT_SOUND_8,
 
 		//! DirectSound sound output driver, windows only.
-		/* This uses DirectSound 3 or above, if available. If DX8 sound effects
+		/** This uses DirectSound 3 or above, if available. If DX8 sound effects
 		are needed, use ESOD_DIRECT_SOUND_8 instead. The 
 		ESOD_DIRECT_SOUND driver may be available on more and older windows 
 		versions than ESOD_DIRECT_SOUND_8.*/
 		ESOD_DIRECT_SOUND,
 
 		//! WinMM sound output driver, windows only.
+		/** Supports the ISoundMixedOutputReceiver interface using setMixedDataOutputReceiver. */
 		ESOD_WIN_MM,
 
 		//! ALSA sound output driver, linux only.
-		/* When using ESOD_ALSA in createIrrKlangDevice(), it is possible to set the third parameter,
+		/** When using ESOD_ALSA in createIrrKlangDevice(), it is possible to set the third parameter,
 		'deviceID' to the name of specific ALSA pcm device, to the irrKlang force to use this one.
-		Set it to 'default', or 'plug:hw' or whatever you need it to be.*/
+		Set it to 'default', or 'plug:hw' or whatever you need it to be. 
+		Supports the ISoundMixedOutputReceiver interface using setMixedDataOutputReceiver. */
 		ESOD_ALSA,
 		
 		//! Core Audio sound output driver, mac os only.
+		/** Supports the ISoundMixedOutputReceiver interface using setMixedDataOutputReceiver. */
 		ESOD_CORE_AUDIO,
 
 		//! Null driver, creating no sound output

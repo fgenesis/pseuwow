@@ -7,7 +7,8 @@
 void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 {
     uint32 ItemID;
-	uint32 unk;
+    uint32 unk;
+    uint8 unk8;
     std::string s;
 
     recvPacket >> ItemID;
@@ -19,10 +20,13 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->SubClass;
 		recvPacket >> unk; // dont need that value?
         recvPacket >> proto->Name;
-        recvPacket >> s >> s >> s; // strip name2-4
+        recvPacket >> unk8;
+        recvPacket >> unk8;
+        recvPacket >> unk8; // strip name2-4
         recvPacket >> proto->DisplayInfoID;
         recvPacket >> proto->Quality;
         recvPacket >> proto->Flags;
+        recvPacket >> proto->Faction;                                  // 3.2 faction?
         recvPacket >> proto->BuyPrice;
         recvPacket >> proto->SellPrice;
         recvPacket >> proto->InventoryType;
@@ -54,6 +58,8 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
             recvPacket >> proto->Damage[i].DamageMax;
             recvPacket >> proto->Damage[i].DamageType;
         }
+
+        // resistances (7)
         recvPacket >> proto->Armor;
         recvPacket >> proto->HolyRes;
         recvPacket >> proto->FireRes;
@@ -61,11 +67,12 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->FrostRes;
         recvPacket >> proto->ShadowRes;
         recvPacket >> proto->ArcaneRes;
+
         recvPacket >> proto->Delay;
         recvPacket >> proto->Ammo_type;
-
         recvPacket >> proto->RangedModRange;
-        for(int s = 0; s < 5; s++)
+
+        for(int s = 0; s < MAX_ITEM_PROTO_SPELLS; s++)
         {
             recvPacket >> proto->Spells[s].SpellId;
             recvPacket >> proto->Spells[s].SpellTrigger;
@@ -83,7 +90,8 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
         recvPacket >> proto->LockID;
         recvPacket >> proto->Material;
         recvPacket >> proto->Sheath;
-        recvPacket >> proto->Extra;
+        recvPacket >> proto->RandomProperty;
+        recvPacket >> proto->RandomSuffix;
         recvPacket >> proto->Block;
         recvPacket >> proto->ItemSet;
         recvPacket >> proto->MaxDurability;
@@ -91,14 +99,13 @@ void WorldSession::_HandleItemQuerySingleResponseOpcode(WorldPacket& recvPacket)
 		recvPacket >> proto->Map;
 		recvPacket >> proto->BagFamily;
 		recvPacket >> proto->TotemCategory; // Added in 1.12.x client branch
-		for(uint32 s = 0; s < 3; s++)
+		for(uint32 s = 0; s < MAX_ITEM_PROTO_SOCKETS; s++)
 		{
 			recvPacket >> proto->Socket[s].Color;
 			recvPacket >> proto->Socket[s].Content;
 		}
 		recvPacket >> proto->socketBonus;
 		recvPacket >> proto->GemProperties;
-		recvPacket >> proto->ExtendedCost;
 		recvPacket >> proto->RequiredDisenchantSkill;
 		recvPacket >> proto->ArmorDamageModifier; 
         recvPacket >> proto->Duration;

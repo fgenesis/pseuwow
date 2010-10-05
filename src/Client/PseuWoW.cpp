@@ -516,6 +516,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     dumpPackets=(uint8)atoi(v.Get("DUMPPACKETS").c_str());
     softquit=(bool)atoi(v.Get("SOFTQUIT").c_str());
     dataLoaderThreads=atoi(v.Get("DATALOADERTHREADS").c_str());
+    useMPQ=(bool)atoi(v.Get("USEMPQ").c_str());
 
     // clientversion is a bit more complicated to add
     {
@@ -551,6 +552,7 @@ void PseuInstanceConf::ApplyFromVarSet(VarSet &v)
     log_setloglevel(debug);
     log_setlogtime((bool)atoi(v.Get("LOGTIME").c_str()));
     MemoryDataHolder::SetThreadCount(dataLoaderThreads);
+    MemoryDataHolder::SetUseMPQ(clientlang);
 }
 
 
