@@ -731,9 +731,9 @@ void ExtractMapDependencies(void)
 {
     barGoLink *bar;
     printf("\nExtracting map dependencies...\n\n");
-    printf("- Preparing to read MPQ arcives...\n");
+    printf("- Preparing to read MPQ archives...\n");
     std::string path = "extractedstuff/data";
-    std::string pathtex = path + "/texture";
+    std::string pathtex = path + "/textures";
     std::string pathmodel = path + "/model";
     std::string pathwmo = path + "/wmo";
     std::string mpqfn,realfn,altfn;
